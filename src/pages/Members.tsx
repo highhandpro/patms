@@ -1,0 +1,431 @@
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { calculateMemberStats } from '../utils/stats';
+import { Search, UserPlus, Phone, Mail, Calendar, Eye, Edit2, Trash2, X } from 'lucide-react';
+import type { Member } from '../types';
+
+interface MembersProps {
+  isAddMemberOpen: boolean;
+  setIsAddMemberOpen: (open: boolean) => void;
+}
+
+export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMemberOpen }) => {
+  const { state, addMember, updateMember, deleteMember } = useApp();
+  const [search, setSearch] = useState('');
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [selectedMemberForProfile, setSelectedMemberForProfile] = useState<Member | null>(null);
+
+  // Form states
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [notes, setNotes] = useState('');
+
+  // Phone input formatting
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawVal = e.target.value;
+    const cleanVal = rawVal.replace(/[^\d]/g, '');
+    const len = cleanVal.length;
+    
+    if (len === 0) setPhone('');
+    else if (len <= 3) setPhone(cleanVal);
+    else if (len <= 6) setPhone(`(${cleanVal.slice(0, 3)}) ${cleanVal.slice(3)}`);
+    else setPhone(`(${cleanVal.slice(0, 3)}) ${cleanVal.slice(3, 6)}-${cleanVal.slice(6, 10)}`);
+  };
+
+  const handleOpenAdd = () => {
+    setFirstName('');
+    setLastName('');
+    setPhone('');
+    setEmail('');
+    setNotes('');
+    setIsAddMemberOpen(true);
+  };
+
+  const handleOpenEdit = (m: Member) => {
+    setEditingMember(m);
+    setFirstName(m.firstName);
+    setLastName(m.lastName);
+    setPhone(m.phone);
+    setEmail(m.email);
+    setNotes(m.notes || '');
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstName.trim() || !lastName.trim()) return;
+
+    if (editingMember) {
+      updateMember(editingMember.id, {
+        firstName,
+        lastName,
+        phone,
+        email,
+        notes
+      });
+      setEditingMember(null);
+    } else {
+      addMember(firstName, lastName, phone, email, notes);
+      setIsAddMemberOpen(false);
+    }
+
+    // Reset fields
+    setFirstName('');
+    setLastName('');
+    setPhone('');
+    setEmail('');
+    setNotes('');
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (confirm(`Are you sure you want to retire member ${name}? This will preserve their historical tournament rankings but remove them from active lookups.`)) {
+      deleteMember(id);
+    }
+  };
+
+  // Filter members (only non-deleted ones, searchable by name, phone, email, memberId)
+  const activeMembers = state.members.filter(m => !m.isDeleted);
+  const filteredMembers = activeMembers.filter(m => {
+    const q = search.toLowerCase();
+    return (
+      m.firstName.toLowerCase().includes(q) ||
+      m.lastName.toLowerCase().includes(q) ||
+      m.id.toLowerCase().includes(q) ||
+      m.phone.includes(q) ||
+      m.email.toLowerCase().includes(q)
+    );
+  });
+
+  // Calculate profile statistics if a member is clicked
+  const profileStats = selectedMemberForProfile ? calculateMemberStats(state, selectedMemberForProfile.id) : null;
+
+  return (
+    <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-0.03em' }}>
+            Member Directory
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+            Manage member list, register new players, and view player profile statistics.
+          </p>
+        </div>
+        <button className="btn btn-primary" onClick={handleOpenAdd}>
+          <UserPlus size={18} />
+          <span>Register New Player</span>
+        </button>
+      </div>
+
+      {/* Search and List */}
+      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        
+        {/* Search Input */}
+        <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
+          <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+            <Search size={18} />
+          </span>
+          <input
+            type="text"
+            placeholder="Search by name, phone, or member ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="form-input"
+            style={{ paddingLeft: '48px' }}
+          />
+        </div>
+
+        {/* Directory Table */}
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th style={{ width: '100px' }}>ID</th>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Joined</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredMembers.length > 0 ? (
+                filteredMembers.map((m) => (
+                  <tr key={m.id}>
+                    <td style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{m.id}</td>
+                    <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Phone size={12} style={{ color: 'var(--text-muted)' }} />
+                          {m.phone || 'No phone'}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)' }}>
+                          <Mail size={12} style={{ color: 'var(--text-muted)' }} />
+                          {m.email || 'No email'}
+                        </span>
+                      </div>
+                    </td>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={12} style={{ color: 'var(--text-muted)' }} />
+                        {m.joinedDate}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'inline-flex', gap: '8px' }}>
+                        <button
+                          title="View Profile Stats"
+                          onClick={() => setSelectedMemberForProfile(m)}
+                          className="btn btn-ghost"
+                          style={{ padding: '6px' }}
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          title="Edit Info"
+                          onClick={() => handleOpenEdit(m)}
+                          className="btn btn-ghost"
+                          style={{ padding: '6px' }}
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          title="Retire Player"
+                          onClick={() => handleDelete(m.id, `${m.firstName} ${m.lastName}`)}
+                          className="btn btn-ghost"
+                          style={{ padding: '6px', color: 'var(--color-danger)' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                    {search ? 'No members match your search criteria.' : 'No active members registered.'}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Add / Edit Modal Overlay */}
+      {(isAddMemberOpen || editingMember) && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '500px', backgroundColor: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+                {editingMember ? `Edit Member Info (${editingMember.id})` : 'Register New Player'}
+              </h3>
+              <button 
+                onClick={() => { setIsAddMemberOpen(false); setEditingMember(null); }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="first-name">First Name</label>
+                  <input
+                    id="first-name"
+                    type="text"
+                    required
+                    placeholder="e.g. John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="last-name">Last Name</label>
+                  <input
+                    id="last-name"
+                    type="text"
+                    required
+                    placeholder="e.g. Doe"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label htmlFor="phone">Phone Number</label>
+                <input
+                  id="phone"
+                  type="text"
+                  placeholder="e.g. (555) 555-5555"
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label htmlFor="email">Email Address</label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="e.g. john.doe@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label htmlFor="notes">Admin Notes</label>
+                <textarea
+                  id="notes"
+                  placeholder="Accompanying notes (seating preference, host eligibility, etc.)"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="form-input"
+                  rows={3}
+                  style={{ resize: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => { setIsAddMemberOpen(false); setEditingMember(null); }}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                >
+                  {editingMember ? 'Save Changes' : 'Register Player'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Member Statistics Profile Modal */}
+      {selectedMemberForProfile && profileStats && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>MEMBER CARD ({selectedMemberForProfile.id})</span>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>
+                  {selectedMemberForProfile.firstName} {selectedMemberForProfile.lastName}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setSelectedMemberForProfile(null)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Stats grid */}
+            <div className="grid-cols-3" style={{ gap: '16px', marginBottom: '24px' }}>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Games Played</span>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: '4px' }}>{profileStats.played}</h2>
+              </div>
+              <div style={{ backgroundColor: 'rgba(16,185,129,0.03)', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(16,185,129,0.1)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-emerald)' }}>Wins</span>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: '4px', color: 'var(--text-emerald)' }}>{profileStats.wins}</h2>
+              </div>
+              <div style={{ backgroundColor: 'rgba(251,191,36,0.03)', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(251,191,36,0.1)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-gold)' }}>Top 3 Finishes</span>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: '4px', color: 'var(--text-gold)' }}>{profileStats.top3}</h2>
+              </div>
+            </div>
+
+            {/* Finance and averages */}
+            <div className="grid-cols-2" style={{ gap: '16px', marginBottom: '24px' }}>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-subtle)' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total Cash Earnings</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-emerald)' }}>${profileStats.earnings}</span>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-subtle)' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Average Finish Position</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>#{profileStats.avgFinish || 'N/A'}</span>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-subtle)' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Bounties Collected</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-gold)' }}>{profileStats.bounties}</span>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-subtle)' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total Season Points</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-gold)' }}>{profileStats.points} pts</span>
+              </div>
+            </div>
+
+            {/* Profile Info */}
+            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contact Details</h4>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                <strong>Phone:</strong> {selectedMemberForProfile.phone || 'No phone recorded'}
+              </p>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                <strong>Email:</strong> {selectedMemberForProfile.email || 'No email recorded'}
+              </p>
+              {selectedMemberForProfile.notes && (
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                  <strong>Notes:</strong> {selectedMemberForProfile.notes}
+                </p>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+              <button 
+                onClick={() => setSelectedMemberForProfile(null)}
+                className="btn btn-primary"
+              >
+                Close Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
