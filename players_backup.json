@@ -768,7 +768,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 1,
-          "payoutEarned": 522.0,
+          "payoutEarned": 522,
           "bountiesCollected": 12,
           "pointsEarned": 139.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -790,7 +790,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 3,
-          "payoutEarned": 203.00000000000003,
+          "payoutEarned": 203,
           "bountiesCollected": 2,
           "pointsEarned": 74.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -801,7 +801,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 4,
-          "payoutEarned": 145.0,
+          "payoutEarned": 145,
           "bountiesCollected": 4,
           "pointsEarned": 78.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -812,7 +812,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 5,
-          "payoutEarned": 116.0,
+          "payoutEarned": 116,
           "bountiesCollected": 3,
           "pointsEarned": 73.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -834,7 +834,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 7,
-          "payoutEarned": 58.0,
+          "payoutEarned": 58,
           "bountiesCollected": 2,
           "pointsEarned": 66.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -845,7 +845,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 8,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 2,
           "pointsEarned": 64.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -856,7 +856,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 9,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 1,
           "pointsEarned": 59.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -867,7 +867,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 10,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 54.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -878,7 +878,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 11,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 31.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -889,7 +889,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 12,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 30.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -900,7 +900,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 13,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 29.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -911,7 +911,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 14,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 28.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -922,7 +922,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 15,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 1,
           "pointsEarned": 30.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -933,7 +933,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 16,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 26.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -944,7 +944,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 17,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 25.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -955,7 +955,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 18,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 24.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -966,7 +966,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 19,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 23.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -977,7 +977,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 20,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 22.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -988,7 +988,7 @@
           "hasAddon": true,
           "hasDealerAppreciation": true,
           "finishPosition": 21,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 21.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -999,7 +999,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 22,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 10.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1010,7 +1010,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 23,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 19.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1021,7 +1021,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 24,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 8.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1032,7 +1032,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 25,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 17.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1043,7 +1043,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 26,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 16.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1054,7 +1054,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 27,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 15.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1065,7 +1065,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 28,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 14.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1076,7 +1076,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 29,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 13.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1087,7 +1087,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 30,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 12.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
@@ -1098,7 +1098,7 @@
           "hasAddon": false,
           "hasDealerAppreciation": true,
           "finishPosition": 31,
-          "payoutEarned": 0.0,
+          "payoutEarned": 0,
           "bountiesCollected": 0,
           "pointsEarned": 11.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"

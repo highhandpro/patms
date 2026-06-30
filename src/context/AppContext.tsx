@@ -138,7 +138,7 @@ const defaultMockData: DatabaseState = {
       entries: [
         { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 522.0, bountiesCollected: 12, pointsEarned: 139.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-002', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 334, bountiesCollected: 2, pointsEarned: 76.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
-        { memberId: 'PA-003', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 203.00000000000003, bountiesCollected: 2, pointsEarned: 74.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-003', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 203, bountiesCollected: 2, pointsEarned: 74.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 145.0, bountiesCollected: 4, pointsEarned: 78.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 116.0, bountiesCollected: 3, pointsEarned: 73.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 73, bountiesCollected: 0, pointsEarned: 62.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
