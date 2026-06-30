@@ -118,61 +118,55 @@ const defaultMockData: DatabaseState = {
     { id: 'PA-073', firstName: 'Wendy', lastName: 'Bumgardner', phone: '(503) 799-1004', email: 'walking@teleport.com', joinedDate: '2026-01-01', notes: '', isDeleted: false }
   ],
   seasons: [
-    { id: 'season-2026', name: 'Season 2026', startDate: '2026-01-01', endDate: '2026-12-31', isActive: true }
+    { id: 'season-2026', name: 'Season 2026', startDate: '2026-01-01', endDate: '2026-12-31', isActive: false },
+    { id: 'season-4', name: 'Season 4', startDate: '2026-01-01', endDate: '2026-06-30', isActive: true }
   ],
   tournaments: [
     {
-      id: 'tour-1',
-      seasonId: 'season-2026',
-      date: '2026-06-10',
-      name: 'Season Kickoff Warmup',
+      id: 'tour-s4g1',
+      seasonId: 'season-4',
+      date: '2026-01-08',
+      name: 'Season 4, Game 1',
       status: 'completed',
-      buyInAmount: 20,
+      buyInAmount: 40,
       addonAmount: 10,
       bountyAmount: 5,
-      dealerAppreciationAmount: 5,
-      totalPrizePool: 340, // 12 buyins ($240) + 10 addons ($100)
-      totalBountyPool: 60, // 12 bounties
-      totalDealerAppreciation: 60, // 12 dealer apps
+      dealerAppreciationAmount: 9,
+      totalPrizePool: 1450,
+      totalBountyPool: 155,
+      totalDealerAppreciation: 279,
       entries: [
-        { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 170, bountiesCollected: 3, pointsEarned: 55 },
-        { memberId: 'PA-002', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 102, bountiesCollected: 2, pointsEarned: 38 },
-        { memberId: 'PA-003', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 68, bountiesCollected: 1, pointsEarned: 33 },
-        { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 0, bountiesCollected: 2, pointsEarned: 34 },
-        { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 29 },
-        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 27 },
-        { memberId: 'PA-007', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 7, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 25 },
-        { memberId: 'PA-008', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 8, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 20 },
-        { memberId: 'PA-009', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 9, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 18 },
-        { memberId: 'PA-010', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 10, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 19 },
-        { memberId: 'PA-011', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 11, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 12 },
-        { memberId: 'PA-012', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 12, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 11 }
-      ]
-    },
-    {
-      id: 'tour-2',
-      seasonId: 'season-2026',
-      date: '2026-06-17',
-      name: 'Weekly Bounty Brawl #2',
-      status: 'completed',
-      buyInAmount: 20,
-      addonAmount: 10,
-      bountyAmount: 5,
-      dealerAppreciationAmount: 5,
-      totalPrizePool: 280, // 10 buyins + 8 addons
-      totalBountyPool: 50,
-      totalDealerAppreciation: 50,
-      entries: [
-        { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 196, bountiesCollected: 4, pointsEarned: 52 },
-        { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 84, bountiesCollected: 2, pointsEarned: 34 },
-        { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 29 },
-        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 27 },
-        { memberId: 'PA-007', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 22 },
-        { memberId: 'PA-008', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 23 },
-        { memberId: 'PA-009', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 7, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 21 },
-        { memberId: 'PA-010', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 8, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 16 },
-        { memberId: 'PA-011', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 9, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 14 },
-        { memberId: 'PA-012', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 10, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 12 }
+        { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 522.0, bountiesCollected: 12, pointsEarned: 139.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-002', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 333.5, bountiesCollected: 2, pointsEarned: 76.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-003', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 203.00000000000003, bountiesCollected: 2, pointsEarned: 74.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 145.0, bountiesCollected: 4, pointsEarned: 78.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 116.0, bountiesCollected: 3, pointsEarned: 73.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 72.5, bountiesCollected: 0, pointsEarned: 62.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-007', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 7, payoutEarned: 58.0, bountiesCollected: 2, pointsEarned: 66.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-008', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 8, payoutEarned: 0.0, bountiesCollected: 2, pointsEarned: 64.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-009', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 9, payoutEarned: 0.0, bountiesCollected: 1, pointsEarned: 59.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-010', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 10, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 54.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-011', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 11, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 31.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-012', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 12, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 30.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-013', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 13, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 29.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-014', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 14, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 28.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-015', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 15, payoutEarned: 0.0, bountiesCollected: 1, pointsEarned: 30.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-016', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 16, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 26.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-017', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 17, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 25.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-018', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 18, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 24.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-019', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 19, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 23.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-020', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 20, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 22.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-021', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 21, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 21.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-022', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 22, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 10.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-023', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 23, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 19.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-024', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 24, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 8.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-025', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 25, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 17.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-026', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 26, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 16.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-027', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 27, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 15.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-028', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 28, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 14.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-029', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 29, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 13.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-030', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 30, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 12.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-031', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 31, payoutEarned: 0.0, bountiesCollected: 0, pointsEarned: 11.0, eliminatedAt: '2026-01-08T22:00:00.000Z' }
       ]
     }
   ],
