@@ -137,11 +137,11 @@ const defaultMockData: DatabaseState = {
       totalDealerAppreciation: 279,
       entries: [
         { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 522.0, bountiesCollected: 12, pointsEarned: 139.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
-        { memberId: 'PA-002', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 333.5, bountiesCollected: 2, pointsEarned: 76.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-002', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 334, bountiesCollected: 2, pointsEarned: 76.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-003', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 203.00000000000003, bountiesCollected: 2, pointsEarned: 74.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 145.0, bountiesCollected: 4, pointsEarned: 78.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 116.0, bountiesCollected: 3, pointsEarned: 73.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
-        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 72.5, bountiesCollected: 0, pointsEarned: 62.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
+        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 73, bountiesCollected: 0, pointsEarned: 62.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-007', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 7, payoutEarned: 58.0, bountiesCollected: 2, pointsEarned: 66.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-008', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 8, payoutEarned: 0.0, bountiesCollected: 2, pointsEarned: 64.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
         { memberId: 'PA-009', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 9, payoutEarned: 0.0, bountiesCollected: 1, pointsEarned: 59.0, eliminatedAt: '2026-01-08T22:00:00.000Z' },
@@ -512,23 +512,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           } else if (entriesCount <= 10) {
             // 1st: 70%, 2nd: 30%
             payouts = [
-              Math.round(totalPrizePool * 0.70),
-              Math.round(totalPrizePool * 0.30)
+              Math.ceil(totalPrizePool * 0.70),
+              Math.ceil(totalPrizePool * 0.30)
             ];
           } else if (entriesCount <= 20) {
             // 1st: 50%, 2nd: 30%, 3rd: 20%
             payouts = [
-              Math.round(totalPrizePool * 0.50),
-              Math.round(totalPrizePool * 0.30),
-              Math.round(totalPrizePool * 0.20)
+              Math.ceil(totalPrizePool * 0.50),
+              Math.ceil(totalPrizePool * 0.30),
+              Math.ceil(totalPrizePool * 0.20)
             ];
           } else {
             // 21+ players: 1st: 45%, 2nd: 25%, 3rd: 18%, 4th: 12%
             payouts = [
-              Math.round(totalPrizePool * 0.45),
-              Math.round(totalPrizePool * 0.25),
-              Math.round(totalPrizePool * 0.18),
-              Math.round(totalPrizePool * 0.12)
+              Math.ceil(totalPrizePool * 0.45),
+              Math.ceil(totalPrizePool * 0.25),
+              Math.ceil(totalPrizePool * 0.18),
+              Math.ceil(totalPrizePool * 0.12)
             ];
           }
 
