@@ -584,7 +584,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Dealer Appreciation ($)</label>
+                      <label>ToC & High Hand Fee ($)</label>
                       <input
                         type="number"
                         min={0}
@@ -704,7 +704,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             <h3 style={{ fontSize: '1.4rem', color: 'var(--color-gold)', fontWeight: 700 }}>${currentBountyPool}</h3>
           </div>
           <div>
-            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600 }}>Staff Pool</span>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600 }}>ToC & High Hand Pool</span>
             <h3 style={{ fontSize: '1.4rem', color: 'var(--text-secondary)', fontWeight: 700 }}>${currentDealerPool}</h3>
           </div>
         </div>
@@ -884,7 +884,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       <th>ID</th>
                       <th style={{ textAlign: 'center' }}>Buy-in (${activeTournament.buyInAmount})</th>
                       <th style={{ textAlign: 'center' }}>Add-on (${activeTournament.addonAmount})</th>
-                      <th style={{ textAlign: 'center' }}>Dealer App. (${activeTournament.dealerAppreciationAmount})</th>
+                      <th style={{ textAlign: 'center' }}>ToC & High Hand (${activeTournament.dealerAppreciationAmount})</th>
                       {activeTournament.status === 'draft' && <th style={{ textAlign: 'right' }}>Action</th>}
                     </tr>
                   </thead>
@@ -1300,7 +1300,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <th>Player Name</th>
                     <th style={{ textAlign: 'center' }}>Buy-in</th>
                     <th style={{ textAlign: 'center' }}>Add-on</th>
-                    <th style={{ textAlign: 'center' }}>Staff Appr.</th>
+                    <th style={{ textAlign: 'center' }}>ToC & High Hand</th>
                     <th style={{ textAlign: 'center' }}>Bounties</th>
                     <th style={{ textAlign: 'right' }}>Cash Payout</th>
                     <th style={{ textAlign: 'right', color: 'var(--color-gold)' }}>Standings Points</th>

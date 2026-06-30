@@ -173,7 +173,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Coins size={24} />
           </div>
           <div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Dealer Staff Pool</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>ToC & High Hand Pool</span>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: '2px', color: 'var(--color-gold)' }}>
               ${totalDealerStaffApprec}
             </h2>

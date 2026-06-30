@@ -147,7 +147,7 @@ export const Settings: React.FC = () => {
                 />
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Default Dealer Appreciation ($)</label>
+                <label>Default ToC & High Hand Fee ($)</label>
                 <input
                   type="number"
                   min={0}

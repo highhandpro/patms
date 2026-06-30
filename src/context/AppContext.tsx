@@ -32,29 +32,90 @@ const AppContext = createContext<AppContextProps | undefined>(undefined);
 
 // Initial default settings
 const defaultSettings: Settings = {
-  defaultBuyIn: 20,
+  defaultBuyIn: 40,
   defaultAddon: 10,
   defaultBounty: 5,
-  defaultDealerAppreciation: 5,
-  pointsBaseAttendance: 2,
+  defaultDealerAppreciation: 9,
+  pointsBaseAttendance: 10,
   maxPlayersPerTable: 8
 };
 
 // Initial default mock database to make the app look stunning right away
 const defaultMockData: DatabaseState = {
   members: [
-    { id: 'PA-001', firstName: 'John', lastName: 'Doe', phone: '(555) 010-0001', email: 'john.doe@poker.com', joinedDate: '2026-01-10', notes: 'Regular player, prefers table 1', isDeleted: false },
-    { id: 'PA-002', firstName: 'Jane', lastName: 'Smith', phone: '(555) 010-0002', email: 'jane.smith@poker.com', joinedDate: '2026-01-12', notes: 'Dealer volunteer', isDeleted: false },
-    { id: 'PA-003', firstName: 'Bob', lastName: 'Johnson', phone: '(555) 010-0003', email: 'bob.j@poker.com', joinedDate: '2026-01-15', notes: '', isDeleted: false },
-    { id: 'PA-004', firstName: 'Alice', lastName: 'Williams', phone: '(555) 010-0004', email: 'alice.w@poker.com', joinedDate: '2026-01-20', notes: 'Aggressive player', isDeleted: false },
-    { id: 'PA-005', firstName: 'Charlie', lastName: 'Brown', phone: '(555) 010-0005', email: 'charlie.b@poker.com', joinedDate: '2026-02-01', notes: 'Good sport', isDeleted: false },
-    { id: 'PA-006', firstName: 'David', lastName: 'Miller', phone: '(555) 010-0006', email: 'david.m@poker.com', joinedDate: '2026-02-05', notes: '', isDeleted: false },
-    { id: 'PA-007', firstName: 'Eva', lastName: 'Davis', phone: '(555) 010-0007', email: 'eva.d@poker.com', joinedDate: '2026-02-12', notes: '', isDeleted: false },
-    { id: 'PA-008', firstName: 'Frank', lastName: 'Wilson', phone: '(555) 010-0008', email: 'frank.w@poker.com', joinedDate: '2026-02-18', notes: 'Likes to blind-out early', isDeleted: false },
-    { id: 'PA-009', firstName: 'Grace', lastName: 'Moore', phone: '(555) 010-0009', email: 'grace.m@poker.com', joinedDate: '2026-02-22', notes: '', isDeleted: false },
-    { id: 'PA-010', firstName: 'Henry', lastName: 'Taylor', phone: '(555) 010-0010', email: 'henry.t@poker.com', joinedDate: '2026-03-01', notes: '', isDeleted: false },
-    { id: 'PA-011', firstName: 'Ivy', lastName: 'Thomas', phone: '(555) 010-0011', email: 'ivy.t@poker.com', joinedDate: '2026-03-10', notes: '', isDeleted: false },
-    { id: 'PA-012', firstName: 'Jack', lastName: 'Anderson', phone: '(555) 010-0012', email: 'jack.a@poker.com', joinedDate: '2026-03-15', notes: 'Always buys the dealer appreciation', isDeleted: false }
+    { id: 'PA-001', firstName: 'Tim', lastName: 'Hufler', phone: '(360) 869-2538', email: 'thufler@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-002', firstName: 'Brian', lastName: 'Pennebaker', phone: '(425) 286-4544', email: 'pennebd@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-003', firstName: 'Derek', lastName: 'Allen', phone: '(360) 772-9768', email: 'steerbully777@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-004', firstName: 'Gabe', lastName: 'Elliott', phone: '(503) 516-1643', email: 'gabelliott@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-005', firstName: 'Tony', lastName: 'Slaven', phone: '(360) 607-8596', email: 'arskaven@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-006', firstName: 'Lynn', lastName: 'Villemyer', phone: '(360) 713-3806', email: 'lvillemyer@gmail.coml', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-007', firstName: 'Chad', lastName: 'Larsen', phone: '(503) 804-2066', email: 'chadelarsen@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-008', firstName: 'Kerri', lastName: 'Lind', phone: '(360) 433-5524', email: 'kerrilind70@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-009', firstName: 'Cristina', lastName: 'Miller', phone: '(480) 688-2757', email: 'cristinammiller@icloud.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-010', firstName: 'Jason', lastName: 'Hofbauer', phone: '(360) 521-7129', email: 'zagsfan78@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-011', firstName: 'Doug', lastName: 'Berg', phone: '(360) 910-6884', email: 'dmberg2@comcast.net', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-012', firstName: 'Christopher', lastName: 'Woody', phone: '(503) 757-1693', email: 'chriswoody1968@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-013', firstName: 'Guy', lastName: 'Vider', phone: '(408) 550-6489', email: 'guy@guyvider.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-014', firstName: 'Dave', lastName: 'Morales', phone: '(360) 609-6724', email: 'd.morales23@yahoo.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-015', firstName: 'Rachelle', lastName: 'Allen', phone: '(360) 980-3548', email: 'raeallenbooks@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-016', firstName: 'Ron', lastName: 'Hawkins', phone: '(360) 910-1831', email: 'hawkster101@hotmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-017', firstName: 'Brian', lastName: 'Syfrett', phone: '(360) 989-5638', email: 'briansyfrett@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-018', firstName: 'Terri', lastName: 'Angell', phone: '(360) 901-5768', email: 'terter59@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-019', firstName: 'Thomas', lastName: 'Scharf', phone: '(360) 989-7370', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-020', firstName: 'Christopher', lastName: 'Hirsh', phone: '(917) 573-4785', email: 'christopher.hirsh@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-021', firstName: 'Chris', lastName: 'Imai', phone: '(360) 910-3462', email: 'chugluglug@yahoo.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-022', firstName: 'Bill', lastName: 'Yentsch', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-023', firstName: 'Bruce', lastName: 'Knutson', phone: '(858) 761-8830', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-024', firstName: 'Dan', lastName: 'Grimani', phone: '(777) 777-7777', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-025', firstName: 'James', lastName: 'Marcy', phone: '', email: 'cjmary@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-026', firstName: 'Evan', lastName: 'Elliott', phone: '(360) 726-8122', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-027', firstName: 'Abbi', lastName: 'Sweet', phone: '(360) 947-0933', email: 'abbigaler@yahoo.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-028', firstName: 'Zac', lastName: 'Hawkins', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-029', firstName: 'Dennis', lastName: 'Mccord', phone: '(360) 921-2486', email: 'dennislmccord@duck.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-030', firstName: 'David', lastName: 'Philossof', phone: '(360) 991-4837', email: 'dpcountry46@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-031', firstName: 'Paul', lastName: 'Hollomon', phone: '(575) 644-1408', email: 'phhollo@aol.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-032', firstName: 'Albert', lastName: 'Jamito', phone: '(360) 719-8906', email: 'albertjh2k@msn.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-033', firstName: 'Angela', lastName: 'Koontz', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-034', firstName: 'Berta', lastName: 'Allen', phone: '(360) 450-1438', email: 'bertadog@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-035', firstName: 'Bill', lastName: 'Baker', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-036', firstName: 'Bill', lastName: 'Foley', phone: '', email: 'tomthumb69@yahoo.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-037', firstName: 'Carlie', lastName: 'Sharling', phone: '(975) 863-5214', email: 'bkpatroncu@protonmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-038', firstName: 'Chris', lastName: 'Robbins', phone: '(850) 554-9720', email: 'ctrobbins70@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-039', firstName: 'Christopher', lastName: 'Miles', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-040', firstName: 'Cody', lastName: 'Dempsey', phone: '(360) 921-1627', email: 'codydempsey81@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-041', firstName: 'Cody', lastName: 'Glaess', phone: '(541) 921-3011', email: 'codebeng@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-042', firstName: 'Dan', lastName: 'Pietila', phone: '(503) 791-9625', email: 'dan_pietila@yahoo.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-043', firstName: 'Denny', lastName: 'Wade', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-044', firstName: 'James', lastName: 'Patterson', phone: '', email: 'jmpaterson9@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-045', firstName: 'Jermaine', lastName: 'Spino', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-046', firstName: 'Johnathan', lastName: 'Viloria', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-047', firstName: 'Juanito', lastName: 'Cunanan', phone: '', email: 'juanito.cunanan48@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-048', firstName: 'Kacy', lastName: 'Schlosser Buffum', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-049', firstName: 'Katrina', lastName: 'Hambleton', phone: '', email: 'katrinahambleton@yahoo.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-050', firstName: 'Luke', lastName: 'Hewlett', phone: '(520) 903-8228', email: 'ljhewlett@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-051', firstName: 'Mark', lastName: 'Browning', phone: '(360) 839-7734', email: 'markbco@yahoo.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-052', firstName: 'Mark', lastName: 'Tanner', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-053', firstName: 'Mary', lastName: 'Lind Handy', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-054', firstName: 'Michelle', lastName: 'Boyle', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-055', firstName: 'Michelle', lastName: 'Hanning', phone: '(360) 624-7343', email: 'mfrogger30@myctl.net', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-056', firstName: 'Mihail', lastName: 'Gizea', phone: '(703) 940-2931', email: 'gizea.v13@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-057', firstName: 'Nichlas', lastName: 'Priest', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-058', firstName: 'Nick', lastName: 'Stoltz', phone: '(702) 493-5485', email: 'dstoltz@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-059', firstName: 'Rita', lastName: 'Turney', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-060', firstName: 'Ryan', lastName: 'Buell', phone: '(360) 989-4050', email: 'ryanbuell15@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-061', firstName: 'Sean', lastName: 'Manley', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-062', firstName: 'Sebastian', lastName: 'Osorio', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-063', firstName: 'Shawn', lastName: 'Cagle', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-064', firstName: 'Steve', lastName: 'Hambleton', phone: '', email: 'steve@wheelkraftnw.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-065', firstName: 'Steve', lastName: 'Hanning', phone: '(360) 624-8739', email: 'smhanning@myctl.net', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-066', firstName: 'Test', lastName: 'Sample', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-067', firstName: 'Tiffany', lastName: 'Field', phone: '(702) 665-3555', email: 'fieldtjean@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-068', firstName: 'Tom', lastName: 'Colemon', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-069', firstName: 'Tom', lastName: 'Scharf', phone: '(360) 989-7370', email: 't.e.scharf@gmail.com', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-070', firstName: 'Tory', lastName: 'Thom', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-071', firstName: 'Travis', lastName: 'Baker', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-072', firstName: 'Trent', lastName: 'Sundvick', phone: '', email: '', joinedDate: '2026-01-01', notes: '', isDeleted: false },
+    { id: 'PA-073', firstName: 'Wendy', lastName: 'Bumgardner', phone: '(503) 799-1004', email: 'walking@teleport.com', joinedDate: '2026-01-01', notes: '', isDeleted: false }
   ],
   seasons: [
     { id: 'season-2026', name: 'Season 2026', startDate: '2026-01-01', endDate: '2026-12-31', isActive: true }
@@ -74,18 +135,18 @@ const defaultMockData: DatabaseState = {
       totalBountyPool: 60, // 12 bounties
       totalDealerAppreciation: 60, // 12 dealer apps
       entries: [
-        { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 170, bountiesCollected: 3, pointsEarned: 39.6 },
-        { memberId: 'PA-002', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 102, bountiesCollected: 2, pointsEarned: 28.5 },
-        { memberId: 'PA-003', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 68, bountiesCollected: 1, pointsEarned: 23.0 },
-        { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 0, bountiesCollected: 2, pointsEarned: 21.3 },
-        { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 18.5 },
-        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 17.1 },
-        { memberId: 'PA-007', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 7, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 16.1 },
-        { memberId: 'PA-008', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 8, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 14.2 },
-        { memberId: 'PA-009', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 9, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 13.5 },
-        { memberId: 'PA-010', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 10, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 13.9 },
-        { memberId: 'PA-011', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 11, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 12.4 },
-        { memberId: 'PA-012', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 12, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 12.0 }
+        { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 170, bountiesCollected: 3, pointsEarned: 55 },
+        { memberId: 'PA-002', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 102, bountiesCollected: 2, pointsEarned: 38 },
+        { memberId: 'PA-003', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 68, bountiesCollected: 1, pointsEarned: 33 },
+        { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 0, bountiesCollected: 2, pointsEarned: 34 },
+        { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 29 },
+        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 27 },
+        { memberId: 'PA-007', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 7, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 25 },
+        { memberId: 'PA-008', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 8, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 20 },
+        { memberId: 'PA-009', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 9, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 18 },
+        { memberId: 'PA-010', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 10, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 19 },
+        { memberId: 'PA-011', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 11, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 12 },
+        { memberId: 'PA-012', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 12, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 11 }
       ]
     },
     {
@@ -102,16 +163,16 @@ const defaultMockData: DatabaseState = {
       totalBountyPool: 50,
       totalDealerAppreciation: 50,
       entries: [
-        { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 196, bountiesCollected: 4, pointsEarned: 37.6 },
-        { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 84, bountiesCollected: 2, pointsEarned: 26.4 },
-        { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 21.3 },
-        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 18.8 },
-        { memberId: 'PA-007', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 16.5 },
-        { memberId: 'PA-008', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 15.9 },
-        { memberId: 'PA-009', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 7, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 14.8 },
-        { memberId: 'PA-010', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 8, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 13.5 },
-        { memberId: 'PA-011', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 9, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 12.3 },
-        { memberId: 'PA-012', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 10, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 12.0 }
+        { memberId: 'PA-004', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 1, payoutEarned: 196, bountiesCollected: 4, pointsEarned: 52 },
+        { memberId: 'PA-005', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 2, payoutEarned: 84, bountiesCollected: 2, pointsEarned: 34 },
+        { memberId: 'PA-001', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 3, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 29 },
+        { memberId: 'PA-006', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 4, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 27 },
+        { memberId: 'PA-007', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 5, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 22 },
+        { memberId: 'PA-008', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 6, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 23 },
+        { memberId: 'PA-009', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 7, payoutEarned: 0, bountiesCollected: 1, pointsEarned: 21 },
+        { memberId: 'PA-010', hasBuyIn: true, hasAddon: true, hasDealerAppreciation: true, finishPosition: 8, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 16 },
+        { memberId: 'PA-011', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 9, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 14 },
+        { memberId: 'PA-012', hasBuyIn: true, hasAddon: false, hasDealerAppreciation: true, finishPosition: 10, payoutEarned: 0, bountiesCollected: 0, pointsEarned: 12 }
       ]
     }
   ],
@@ -487,10 +548,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             // Payout
             const payoutEarned = payouts[pos - 1] || 0;
 
-            // Points Formula: 10 * (sqrt(N) / sqrt(P)) + attendance + bounties
-            // (Round to 1 decimal place)
-            const pointsFormulaValue = 10 * (Math.sqrt(N) / Math.sqrt(pos));
-            const pointsEarned = Number((pointsFormulaValue + attendancePoints + e.bountiesCollected).toFixed(1));
+            // Points Formula: (Base Position Points * Multiplier) + (Bounties * 3) + 10
+            // where Base Position Points = Field Size - Finish Position + 1
+            // Multipliers: 1st place gets 3x, 2nd to 10th (Final Table) gets 2x, 11th+ gets 1x.
+            const basePositionPoints = N - pos + 1;
+            let multiplier = 1;
+            if (pos === 1) {
+              multiplier = 3;
+            } else if (pos >= 2 && pos <= 10) {
+              multiplier = 2;
+            }
+            const pointsEarned = (basePositionPoints * multiplier) + (e.bountiesCollected * 3) + attendancePoints;
 
             return {
               ...e,
