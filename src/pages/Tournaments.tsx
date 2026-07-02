@@ -2238,7 +2238,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         );
                       }).filter(Boolean);
 
-                      return previewRows.length > 0 ? previewRows : <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No places paid. Check payout structure configuration.</p>;
+                      return (
+                        <>
+                          {previewRows.length > 0 ? previewRows : <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>No places paid. Check payout structure configuration.</p>}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)', borderTop: '1px dashed var(--border-subtle)', paddingTop: '8px', marginTop: '4px' }}>
+                            <span>High Hand Payout:</span>
+                            <strong style={{ color: 'var(--color-gold)' }}>${activeTournament.highHandAmount || 0}</strong>
+                          </div>
+                        </>
+                      );
                     })()}
                   </div>
                 </div>
@@ -2439,6 +2447,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         <span style={{ color: 'var(--color-emerald)' }}>${calculatedPrizePool}</span>
                       </div>
                       {previewRows.length > 0 ? previewRows : <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>No payouts. Configure percentages above.</p>}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)', borderTop: '1px dashed var(--border-subtle)', paddingTop: '6px', marginTop: '4px' }}>
+                        <span>High Hand Payout:</span>
+                        <strong style={{ color: 'var(--color-gold)' }}>${activeTournament.highHandAmount || 0}</strong>
+                      </div>
                     </div>
                   );
                 })()}
