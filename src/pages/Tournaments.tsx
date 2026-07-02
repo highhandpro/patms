@@ -583,6 +583,63 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     }
   };
 
+  const renderFastPlayerLookup = (title: string) => (
+    <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{title}</h4>
+
+      <div style={{ position: 'relative', width: '100%' }}>
+        <input
+          type="text"
+          placeholder="Type name, phone number, or Member ID..."
+          value={searchQuery}
+          onChange={(e) => { setSearchQuery(e.target.value); setShowDropdown(true); }}
+          onFocus={() => setShowDropdown(true)}
+          className="form-input"
+        />
+
+        {showDropdown && searchQuery.trim() !== '' && (
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            backgroundColor: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: '0 0 10px 10px',
+            maxHeight: '200px',
+            overflowY: 'auto',
+            zIndex: 10,
+            boxShadow: 'var(--shadow-md)'
+          }}>
+            {matchedMembers.length > 0 ? (
+              matchedMembers.map(m => (
+                <div
+                  key={m.id}
+                  onClick={() => handlePlayerSelect(m)}
+                  style={{
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid var(--border-subtle)'
+                  }}
+                  className="interactive"
+                >
+                  <span style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{m.id} • {m.phone || 'No phone'}</span>
+                </div>
+              ))
+            ) : (
+              <div style={{ padding: '12px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                No unregistered members match.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   // Elimination submit
   const submitElimination = () => {
     if (activeTournament && eliminatingPlayerId) {
@@ -1442,63 +1499,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {/* Check-in Tab */}
       {subTab === 'checkin' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
-          {activeTournament.status === 'draft' && (
+          {activeTournament.status === 'draft' ? (
             <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px' }}>
-              {/* Fast Player Lookup */}
-              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Fast Player Lookup</h4>
-
-                <div style={{ position: 'relative', width: '100%' }}>
-                  <input
-                    type="text"
-                    placeholder="Type name, phone number, or Member ID..."
-                    value={searchQuery}
-                    onChange={(e) => { setSearchQuery(e.target.value); setShowDropdown(true); }}
-                    onFocus={() => setShowDropdown(true)}
-                    className="form-input"
-                  />
-
-                  {showDropdown && searchQuery.trim() !== '' && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      backgroundColor: 'var(--bg-surface)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: '0 0 10px 10px',
-                      maxHeight: '200px',
-                      overflowY: 'auto',
-                      zIndex: 10,
-                      boxShadow: 'var(--shadow-md)'
-                    }}>
-                      {matchedMembers.length > 0 ? (
-                        matchedMembers.map(m => (
-                          <div
-                            key={m.id}
-                            onClick={() => handlePlayerSelect(m)}
-                            style={{
-                              padding: '12px 16px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              borderBottom: '1px solid var(--border-subtle)'
-                            }}
-                            className="interactive"
-                          >
-                            <span style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</span>
-                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{m.id} • {m.phone || 'No phone'}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <div style={{ padding: '12px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                          No unregistered members match.
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+              {renderFastPlayerLookup("Fast Player Lookup")}
 
               {/* Configure Game Pricing */}
               <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1549,6 +1552,32 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     />
                   </div>
                 </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Flyer / PDF URL (Google Drive)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://drive.google.com/..."
+                      value={activeTournament.flyerUrl || ''}
+                      onChange={(e) => updateTournament(activeTournament.id, { flyerUrl: e.target.value })}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Flyer Type</label>
+                    <select
+                      value={activeTournament.flyerType || ''}
+                      onChange={(e) => updateTournament(activeTournament.id, { flyerType: (e.target.value as any) || null })}
+                      className="form-input"
+                      style={{ padding: '8px 12px', cursor: 'pointer' }}
+                    >
+                      <option value="">None</option>
+                      <option value="pdf">PDF</option>
+                      <option value="image">Image</option>
+                    </select>
+                  </div>
+                </div>
                 <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
                   <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Payout Structure (% per place paid)</label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
@@ -1581,8 +1610,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </div>
               </div>
             </div>
+          ) : (
+            renderFastPlayerLookup("Fast Player Lookup (Late Entry / Registration)")
           )}
-
+          
           {/* Checked-in list */}
           <div className="glass-card">
             <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>Checked-in Registrations</h4>
@@ -1593,6 +1624,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <tr>
                       <th>Player Name</th>
                       <th>ID</th>
+                      <th style={{ textAlign: 'center' }}>Dealer?</th>
                       <th style={{ textAlign: 'center' }}>Buy-in (${activeTournament.buyInAmount})</th>
                       <th style={{ textAlign: 'center' }}>ToC (${activeTournament.dealerAppreciationAmount})</th>
                       {activeTournament.status === 'draft' && <th style={{ textAlign: 'right' }}>Action</th>}
@@ -1619,6 +1651,27 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             {m.firstName} {m.lastName}
                           </td>
                           <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
+                          <td style={{ textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => toggleCheckedInDealer(entry.memberId)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '1.25rem',
+                                opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
+                                filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
+                                transition: 'all 0.15s ease',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Toggle Player Dealer status"
+                            >
+                              👑
+                            </button>
+                          </td>
                           <td style={{ textAlign: 'center' }}>
                             <input
                               type="checkbox"
