@@ -56,7 +56,15 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
   // Calculate live prize pool statistics
   const buyInCount = activeTournament ? activeTournament.entries.filter((e: any) => e.hasBuyIn).length : 0;
   const addonsNum = activeTournament ? (activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter((e: any) => e.hasAddon).length) : 0;
-  const calculatedPrizePool = activeTournament ? (buyInCount * activeTournament.buyInAmount) + (addonsNum * activeTournament.addonAmount) : 0;
+  
+  const netBuyIn = activeTournament ? activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount : 0;
+  const rawCalculatedPrizePool = activeTournament ? (buyInCount * netBuyIn) + (addonsNum * activeTournament.addonAmount) : 0;
+  const calculatedPrizePool = activeTournament 
+    ? (activeTournament.status === 'completed' 
+        ? activeTournament.totalPrizePool 
+        : Math.max(0, rawCalculatedPrizePool - (activeTournament.highHandAmount || 0)))
+    : 0;
+
   const remainingCount = activeTournament ? activeTournament.entries.filter((e: any) => !e.eliminatedAt).length : 0;
 
   const payoutRows = activeTournament 
@@ -130,6 +138,12 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
             ))}
             {payoutRows.length === 0 && (
               <span style={{ fontSize: '0.85rem', color: '#a0aec0', fontStyle: 'italic' }}>No payouts configured</span>
+            )}
+            {activeTournament && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', padding: '8px 0 6px 0', borderTop: '1px dashed rgba(255,255,255,0.1)', marginTop: '4px' }}>
+                <span style={{ color: '#a0aec0' }}>High Hand:</span>
+                <strong style={{ color: 'var(--color-gold)' }}>${activeTournament.highHandAmount || 0}</strong>
+              </div>
             )}
           </div>
         </div>
