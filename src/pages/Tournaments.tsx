@@ -869,39 +869,40 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   <button onClick={() => setIsCreateTourOpen(false)} className="btn btn-secondary">Ok</button>
                 </div>
               ) : (
-                <form onSubmit={handleCreateTournament} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <form onSubmit={handleCreateTournament} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
                   
                   {/* Left Column: Metadata & Settings */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Tournament Name / Number</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Weekly Standings #15"
-                        value={tourName}
-                        onChange={(e) => setTourName(e.target.value)}
-                        className="form-input"
-                        style={{ padding: '8px 12px' }}
-                      />
-                    </div>
-
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Tournament Date</label>
-                      <input
-                        type="date"
-                        required
-                        value={tourDate}
-                        onChange={(e) => setTourDate(e.target.value)}
-                        onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
-                        className="form-input"
-                        style={{ padding: '8px 12px' }}
-                      />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '10px' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Tournament Name / Number</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Season 4, Game 2"
+                          value={tourName}
+                          onChange={(e) => setTourName(e.target.value)}
+                          className="form-input"
+                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Date</label>
+                        <input
+                          type="date"
+                          required
+                          value={tourDate}
+                          onChange={(e) => setTourDate(e.target.value)}
+                          onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
+                          className="form-input"
+                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
+                        />
+                      </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label>Buy-in ($)</label>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Buy-in ($)</label>
                         <input
                           type="number"
                           min={0}
@@ -909,11 +910,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           value={buyIn}
                           onChange={(e) => setBuyIn(Number(e.target.value))}
                           className="form-input"
-                          style={{ padding: '8px 12px' }}
+                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
                         />
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label>Add-on ($)</label>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Add-on ($)</label>
                         <input
                           type="number"
                           min={0}
@@ -921,14 +922,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           value={addon}
                           onChange={(e) => setAddon(Number(e.target.value))}
                           className="form-input"
-                          style={{ padding: '8px 12px' }}
+                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
                         />
                       </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label>Bounty ($)</label>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bounty ($)</label>
                         <input
                           type="number"
                           min={0}
@@ -936,11 +937,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           value={bounty}
                           onChange={(e) => setBounty(Number(e.target.value))}
                           className="form-input"
-                          style={{ padding: '8px 12px' }}
+                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
                         />
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label>ToC Fee ($)</label>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>ToC Fee ($)</label>
                         <input
                           type="number"
                           min={0}
@@ -948,45 +949,46 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           value={dealerApp}
                           onChange={(e) => setDealerApp(Number(e.target.value))}
                           className="form-input"
-                          style={{ padding: '8px 12px' }}
+                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
                         />
                       </div>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Flyer / PDF URL (Google Drive Link)</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. https://drive.google.com/..."
-                        value={tourFlyerUrl}
-                        onChange={(e) => setTourFlyerUrl(e.target.value)}
-                        className="form-input"
-                        style={{ padding: '8px 12px' }}
-                      />
-                    </div>
-
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Flyer Type</label>
-                      <select
-                        value={tourFlyerType || ''}
-                        onChange={(e) => setTourFlyerType((e.target.value as any) || null)}
-                        className="form-input"
-                        style={{ padding: '8px 12px', cursor: 'pointer' }}
-                      >
-                        <option value="">None (No flyer)</option>
-                        <option value="pdf">PDF Document</option>
-                        <option value="image">Image (PNG, JPG)</option>
-                      </select>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '10px' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Flyer / PDF URL (Google Drive Link)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. https://drive.google.com/..."
+                          value={tourFlyerUrl}
+                          onChange={(e) => setTourFlyerUrl(e.target.value)}
+                          className="form-input"
+                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Flyer Type</label>
+                        <select
+                          value={tourFlyerType || ''}
+                          onChange={(e) => setTourFlyerType((e.target.value as any) || null)}
+                          className="form-input"
+                          style={{ padding: '6px 10px', fontSize: '0.85rem', cursor: 'pointer' }}
+                        >
+                          <option value="">None</option>
+                          <option value="pdf">PDF</option>
+                          <option value="image">Image</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
 
                   {/* Right Column: Payout Structure & Actions */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <label style={{ fontWeight: 600, display: 'block', fontSize: '0.85rem' }}>Payout Structure (% per place paid)</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '8px', backgroundColor: 'rgba(0,0,0,0.1)' }}>
+                    <label style={{ fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>Payout Structure (% per place paid)</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', maxHeight: '110px', overflowY: 'auto', paddingRight: '4px', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '6px', backgroundColor: 'rgba(0,0,0,0.1)' }}>
                       {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => (
                         <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ fontSize: '0.75rem', width: '32px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                          <span style={{ fontSize: '0.75rem', width: '28px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
                           <input
                             type="number"
                             min={0}
@@ -1012,19 +1014,19 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       </strong> (should be 100%)
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '10px' }}>
                       <button
                         type="button"
                         onClick={() => setIsCreateTourOpen(false)}
                         className="btn btn-secondary"
-                        style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                        style={{ padding: '6px 14px', fontSize: '0.85rem' }}
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         className="btn btn-primary"
-                        style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                        style={{ padding: '6px 14px', fontSize: '0.85rem' }}
                       >
                         Initialize Draft
                       </button>
