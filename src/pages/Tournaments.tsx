@@ -49,7 +49,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results'>('checkin');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp'>('rsvp');
 
   // Player search in checkin
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,7 +136,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   useEffect(() => {
     if (activeTournament) {
       // Default sub-tab based on status
-      if (activeTournament.status === 'draft') setSubTab('checkin');
+      if (activeTournament.status === 'draft') setSubTab('rsvp');
       else if (activeTournament.status === 'active') setSubTab('players');
       else if (activeTournament.status === 'completed') setSubTab('results');
 
@@ -1407,8 +1407,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
       {/* Navigation tabs inside tournament */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', gap: '12px' }}>
-        {activeTournament.status === 'draft' && (
+        {activeTournament.status === 'draft' ? (
           <>
+            <button 
+              className={`btn btn-ghost ${subTab === 'rsvp' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('rsvp')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'rsvp' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'rsvp' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'rsvp' ? 600 : 400
+              }}
+            >
+              RSVP
+            </button>
             <button 
               className={`btn btn-ghost ${subTab === 'checkin' ? 'active-subtab' : ''}`}
               onClick={() => setSubTab('checkin')}
@@ -1434,11 +1446,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               Seating Preview
             </button>
           </>
-        )}
-
-        {activeTournament.status !== 'completed' && (
+        ) : activeTournament.status === 'active' ? (
           <>
-
+            <button 
+              className={`btn btn-ghost ${subTab === 'rsvp' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('rsvp')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'rsvp' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'rsvp' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'rsvp' ? 600 : 400
+              }}
+            >
+              RSVP
+            </button>
             <button 
               className={`btn btn-ghost ${subTab === 'players' ? 'active-subtab' : ''}`}
               onClick={() => setSubTab('players')}
@@ -1476,9 +1497,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               Edit Check-ins
             </button>
           </>
-        )}
-
-        {activeTournament.status === 'completed' && (
+        ) : (
           <button 
             className={`btn btn-ghost active-subtab`}
             onClick={() => setSubTab('results')}
@@ -1495,6 +1514,85 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       </div>
 
       {/* Sub-tab contents */}
+
+      {/* RSVP Tab */}
+      {subTab === 'rsvp' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
+          <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px', alignItems: 'start' }}>
+            {renderFastPlayerLookup("Fast RSVP Player Lookup")}
+
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>RSVP Summary</h4>
+              <div style={{ fontSize: '1.5rem', color: 'var(--color-emerald)', fontWeight: 700 }}>
+                {activeTournament.entries.filter(e => !e.hasBuyIn).length} Players
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
+                These players have registered to attend. Click **Check In** to confirm their attendance and buy-in investment.
+              </p>
+            </div>
+          </div>
+
+          <div className="glass-card">
+            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>Registered RSVPs (Unconfirmed Check-ins)</h4>
+            {activeTournament.entries.filter(e => !e.hasBuyIn).length > 0 ? (
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Player Name</th>
+                      <th>ID</th>
+                      <th style={{ textAlign: 'center' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeTournament.entries.filter(e => !e.hasBuyIn).map((entry) => {
+                      const m = state.members.find(member => member.id === entry.memberId);
+                      if (!m) return null;
+
+                      return (
+                        <tr key={entry.memberId}>
+                          <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
+                          <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
+                          <td style={{ textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', gap: '8px' }}>
+                              <button
+                                onClick={async () => {
+                                  await updateTournament(activeTournament.id, {
+                                    entries: activeTournament.entries.map(e => 
+                                      e.memberId === entry.memberId 
+                                        ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                        : e
+                                    )
+                                  });
+                                }}
+                                className="btn btn-primary"
+                                style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                              >
+                                Check In
+                              </button>
+                              <button
+                                onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
+                                className="btn btn-secondary"
+                                style={{ padding: '6px 12px', fontSize: '0.85rem', color: 'var(--color-danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                No unconfirmed RSVPs. All registered players are checked in!
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Check-in Tab */}
       {subTab === 'checkin' && (
@@ -1617,7 +1715,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           {/* Checked-in list */}
           <div className="glass-card">
             <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>Checked-in Registrations</h4>
-            {activeTournament.entries.length > 0 ? (
+            {activeTournament.entries.filter(e => e.hasBuyIn).length > 0 ? (
               <div className="table-container">
                 <table className="data-table">
                   <thead>
@@ -1631,7 +1729,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {activeTournament.entries.map((entry) => {
+                    {activeTournament.entries.filter(e => e.hasBuyIn).map((entry) => {
                       const m = state.members.find(member => member.id === entry.memberId);
                       if (!m) return null;
 
