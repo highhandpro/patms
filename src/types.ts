@@ -1,5 +1,5 @@
 export interface Member {
-  id: string;          // E.g., "PA-001"
+  id: string;          // E.g., "101"
   firstName: string;
   lastName: string;
   phone: string;
@@ -7,6 +7,7 @@ export interface Member {
   joinedDate: string;  // ISO Date string
   notes?: string;
   isDeleted: boolean;
+  nickname?: string;
 }
 
 export interface TournamentEntry {
@@ -20,6 +21,8 @@ export interface TournamentEntry {
   payoutEarned: number;
   bountiesCollected: number;
   pointsEarned: number;
+  rebuys?: number;
+  createdAt?: string;       // ISO timestamp for waitlist sorting
 }
 
 export interface Tournament {
@@ -41,6 +44,19 @@ export interface Tournament {
   totalPrizePool: number;
   totalBountyPool: number;
   totalDealerAppreciation: number;
+  payoutPercentages?: number[]; // Percentages for 1st to 10th place
+  overridePrizePool?: number;    // Manual prize pool input at the end
+  totalAddons?: number;          // Centralized total addons count
+  time?: string;
+  location?: string;
+  startingStack?: string;
+  roundLength?: number;
+  rebuys?: string;
+  lateEntry?: string;
+  addonChips?: number;
+  maxPlayers: number;
+  flyerUrl?: string;
+  flyerType?: 'pdf' | 'image' | null;
 }
 
 export interface Season {
@@ -58,6 +74,18 @@ export interface Settings {
   defaultDealerAppreciation: number;
   pointsBaseAttendance: number;
   maxPlayersPerTable: number;
+  adminPassword?: string;
+}
+
+export interface PendingApproval {
+  id: string;
+  type: 'update' | 'guest';
+  memberId: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  email?: string;
+  timestamp: string;
 }
 
 export interface DatabaseState {
@@ -65,4 +93,5 @@ export interface DatabaseState {
   tournaments: Tournament[];
   seasons: Season[];
   settings: Settings;
+  pendingApprovals: PendingApproval[];
 }

@@ -122,20 +122,6 @@ export const Settings: React.FC = () => {
                 />
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Default Add-on ($)</label>
-                <input
-                  type="number"
-                  min={0}
-                  required
-                  value={addon}
-                  onChange={(e) => setAddon(Number(e.target.value))}
-                  className="form-input"
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>Default Bounty ($)</label>
                 <input
                   type="number"
@@ -143,17 +129,6 @@ export const Settings: React.FC = () => {
                   required
                   value={bounty}
                   onChange={(e) => setBounty(Number(e.target.value))}
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Default ToC & High Hand Fee ($)</label>
-                <input
-                  type="number"
-                  min={0}
-                  required
-                  value={dealerApp}
-                  onChange={(e) => setDealerApp(Number(e.target.value))}
                   className="form-input"
                 />
               </div>

@@ -5,10 +5,13 @@ import { useApp } from '../context/AppContext';
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onSwitchPortal?: () => void;
+  onLogoutAdmin?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
-  const { activeSeason } = useApp();
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin }) => {
+  const { activeSeason, state } = useApp();
+  const pendingApprovalsCount = state.pendingApprovals?.length || 0;
 
   const navItems = [
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
@@ -65,23 +68,81 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
                 fontWeight: isActive ? 600 : 400,
                 border: isActive ? '1px solid rgba(16, 185, 129, 0.15)' : '1px solid transparent',
                 borderRadius: '8px',
-                padding: '12px 16px'
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
               }}
             >
               <Icon size={20} />
-              <span>{item.name}</span>
+              <span style={{ flexGrow: 1, textAlign: 'left' }}>{item.name}</span>
+              {item.id === 'members' && pendingApprovalsCount > 0 && (
+                <span 
+                  style={{
+                    backgroundColor: 'var(--text-gold)',
+                    color: '#000',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    borderRadius: '10px',
+                    padding: '2px 8px',
+                    lineHeight: 1
+                  }}
+                >
+                  {pendingApprovalsCount}
+                </span>
+              )}
             </button>
           );
         })}
       </nav>
 
-      <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', marginTop: 'auto' }}>
-        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-          Penny Ante Poker Club
-        </p>
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '2px' }}>
-          v1.0 (Local-First)
-        </p>
+      <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <button 
+          onClick={onSwitchPortal}
+          className="btn btn-ghost"
+          style={{
+            width: '100%',
+            justifyContent: 'center',
+            fontSize: '0.85rem',
+            color: 'var(--color-gold)',
+            borderColor: 'rgba(251, 191, 36, 0.25)',
+            borderStyle: 'solid',
+            borderWidth: '1px',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            backgroundColor: 'rgba(251, 191, 36, 0.04)'
+          }}
+        >
+          Switch to Player Portal
+        </button>
+        {onLogoutAdmin && (
+          <button 
+            onClick={onLogoutAdmin}
+            className="btn btn-ghost"
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              fontSize: '0.85rem',
+              color: 'var(--color-danger)',
+              borderColor: 'rgba(239, 68, 68, 0.2)',
+              borderStyle: 'solid',
+              borderWidth: '1px',
+              borderRadius: '8px',
+              padding: '8px 12px',
+              backgroundColor: 'rgba(239, 68, 68, 0.02)'
+            }}
+          >
+            Log Out Admin
+          </button>
+        )}
+        <div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+            Penny Ante Poker Club
+          </p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '2px' }}>
+            v1.0 (Local-First)
+          </p>
+        </div>
       </div>
     </aside>
   );

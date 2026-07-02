@@ -6,7 +6,7 @@ export interface PlayerStanding {
   points: number;
   played: number;
   wins: number;
-  top3: number;
+  top10: number;
   earnings: number;
   bounties: number;
 }
@@ -28,7 +28,7 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
       points: 0,
       played: 0,
       wins: 0,
-      top3: 0,
+      top10: 0,
       earnings: 0,
       bounties: 0
     };
@@ -46,7 +46,7 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
           points: 0,
           played: 0,
           wins: 0,
-          top3: 0,
+          top10: 0,
           earnings: 0,
           bounties: 0
         };
@@ -56,8 +56,8 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
       standing.points = Number((standing.points + entry.pointsEarned).toFixed(1));
       standing.played += 1;
       if (entry.finishPosition === 1) standing.wins += 1;
-      if (entry.finishPosition && entry.finishPosition <= 3) standing.top3 += 1;
-      standing.earnings += entry.payoutEarned;
+      if (entry.finishPosition && entry.finishPosition <= 10) standing.top10 += 1;
+      standing.earnings += entry.payoutEarned + (entry.bountiesCollected * t.bountyAmount);
       standing.bounties += entry.bountiesCollected;
     });
   });
@@ -72,7 +72,7 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
 export interface MemberStats {
   played: number;
   wins: number;
-  top3: number;
+  top10: number;
   earnings: number;
   bounties: number;
   points: number;
@@ -85,7 +85,7 @@ export const calculateMemberStats = (state: DatabaseState, memberId: string): Me
   
   let played = 0;
   let wins = 0;
-  let top3 = 0;
+  let top10 = 0;
   let earnings = 0;
   let bounties = 0;
   let points = 0;
@@ -103,8 +103,8 @@ export const calculateMemberStats = (state: DatabaseState, memberId: string): Me
     if (entry) {
       played += 1;
       if (entry.finishPosition === 1) wins += 1;
-      if (entry.finishPosition && entry.finishPosition <= 3) top3 += 1;
-      earnings += entry.payoutEarned;
+      if (entry.finishPosition && entry.finishPosition <= 10) top10 += 1;
+      earnings += entry.payoutEarned + (entry.bountiesCollected * t.bountyAmount);
       bounties += entry.bountiesCollected;
       points = Number((points + entry.pointsEarned).toFixed(1));
       if (entry.finishPosition) {
@@ -120,11 +120,21 @@ export const calculateMemberStats = (state: DatabaseState, memberId: string): Me
   return {
     played,
     wins,
-    top3,
+    top10,
     earnings,
     bounties,
     points,
     avgFinish,
     recentFinishes: recentFinishes.slice(-5).reverse() // last 5, newest first
   };
+};
+
+export const formatDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  const cleanDate = dateStr.split('T')[0];
+  const parts = cleanDate.split('-');
+  if (parts.length === 3) {
+    return `${parts[1]}/${parts[2]}/${parts[0]}`;
+  }
+  return dateStr;
 };

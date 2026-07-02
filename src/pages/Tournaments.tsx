@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import type { Member } from '../types';
+import { formatDate } from '../utils/stats';
+import { SeatingDisplayModal } from '../components/SeatingDisplayModal';
 import { 
-  Trophy, Play, Pause, RotateCcw, SkipForward, SkipBack, Plus, Trash2, 
-  UserMinus, ChevronLeft, Volume2, Unlock, Calendar, ShieldAlert, Award
+  Trophy, Play, RotateCcw, Plus, Trash2, 
+  UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award
 } from 'lucide-react';
 
 interface TournamentsProps {
@@ -12,27 +14,6 @@ interface TournamentsProps {
   isCreateTourOpen: boolean;
   setIsCreateTourOpen: (open: boolean) => void;
 }
-
-// Blind structures
-interface BlindLevel {
-  level: number;
-  smallBlind: number;
-  bigBlind: number;
-  durationSeconds: number;
-  isBreak: boolean;
-}
-
-const defaultBlindStructure: BlindLevel[] = [
-  { level: 1, smallBlind: 25, bigBlind: 50, durationSeconds: 900, isBreak: false }, // 15 mins
-  { level: 2, smallBlind: 50, bigBlind: 100, durationSeconds: 900, isBreak: false },
-  { level: 3, smallBlind: 100, bigBlind: 200, durationSeconds: 900, isBreak: false },
-  { level: 4, smallBlind: 150, bigBlind: 300, durationSeconds: 900, isBreak: false },
-  { level: 0, smallBlind: 0, bigBlind: 0, durationSeconds: 300, isBreak: true }, // 5 min Break
-  { level: 5, smallBlind: 200, bigBlind: 400, durationSeconds: 900, isBreak: false },
-  { level: 6, smallBlind: 300, bigBlind: 600, durationSeconds: 900, isBreak: false },
-  { level: 7, smallBlind: 400, bigBlind: 800, durationSeconds: 900, isBreak: false },
-  { level: 8, smallBlind: 500, bigBlind: 1000, durationSeconds: 900, isBreak: false }
-];
 
 export const Tournaments: React.FC<TournamentsProps> = ({
   selectedTournamentId,
@@ -48,7 +29,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     deleteTournament,
     registerPlayer,
     unregisterPlayer,
-    toggleEntryAddon,
+    toggleEntryBuyIn,
     toggleEntryDealerApp,
     eliminatePlayer,
     undoElimination,
@@ -66,9 +47,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   // Active Sub-tab inside Selected Tournament
   // draft: 'checkin' | 'seating'
-  // active: 'clock' | 'seating' | 'players'
+  // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'clock' | 'players' | 'results'>('checkin');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results'>('checkin');
 
   // Player search in checkin
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,25 +57,43 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   // Seating State (stored in localStorage keyed by tournament ID)
   const [seating, setSeating] = useState<Record<string, string[]>>({});
+  const [dealers, setDealers] = useState<Record<string, string>>({});
+  const [preassignedDealers, setPreassignedDealers] = useState<string[]>([]);
+  const [isDisplayModeOpen, setIsDisplayModeOpen] = useState(false);
 
-  // Clock States
-  const [currentLevelIdx, setCurrentLevelIdx] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(defaultBlindStructure[0].durationSeconds);
-  const [isClockRunning, setIsClockRunning] = useState(false);
-  const timerRef = useRef<any>(null);
+  // Late Entry state variables
+  const [isLateEntryOpen, setIsLateEntryOpen] = useState(false);
+  const [selectedLateMemberId, setSelectedLateMemberId] = useState('');
+  const [selectedLateTable, setSelectedLateTable] = useState('');
+  const [lateSearchQuery, setLateSearchQuery] = useState('');
+  const [showLateDropdown, setShowLateDropdown] = useState(false);
 
   // Elimination selector modal state
   const [eliminatingPlayerId, setEliminatingPlayerId] = useState<string | null>(null);
-  const [eliminatorId, setEliminatorId] = useState<string>('none'); // memberId of collector
+  const [bountiesWon, setBountiesWon] = useState<number>(0);
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+  const [payoutPcts, setPayoutPcts] = useState<number[]>([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+
+  // Payout and Add-ons configuration states
+  const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
+  const [modalAddons, setModalAddons] = useState(0);
+  const [modalPayoutPcts, setModalPayoutPcts] = useState<number[]>([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
 
   // Load tournament specific states when ID changes
   const activeTournament = state.tournaments.find(t => t.id === selectedTournamentId) || null;
 
   useEffect(() => {
     if (activeTournament) {
+      setModalAddons(activeTournament.totalAddons || 0);
+      setModalPayoutPcts(activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+    }
+  }, [activeTournament, isPayoutModalOpen]);
+
+  useEffect(() => {
+    if (activeTournament) {
       // Default sub-tab based on status
       if (activeTournament.status === 'draft') setSubTab('checkin');
-      else if (activeTournament.status === 'active') setSubTab('clock');
+      else if (activeTournament.status === 'active') setSubTab('players');
       else if (activeTournament.status === 'completed') setSubTab('results');
 
       // Load seating
@@ -105,174 +104,295 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         setSeating({});
       }
 
-      // Load clock status (if active and saved)
-      const savedClock = localStorage.getItem(`patms_clock_${activeTournament.id}`);
-      if (savedClock) {
-        const { idx, seconds } = JSON.parse(savedClock);
-        setCurrentLevelIdx(idx);
-        setTimeLeft(seconds);
+      // Load dealers
+      const savedDealers = localStorage.getItem(`patms_dealers_${activeTournament.id}`);
+      if (savedDealers) {
+        setDealers(JSON.parse(savedDealers));
       } else {
-        setCurrentLevelIdx(0);
-        setTimeLeft(defaultBlindStructure[0].durationSeconds);
+        setDealers({});
       }
-      setIsClockRunning(false);
+
+      // Load preassigned dealers
+      const savedPreassigned = localStorage.getItem(`patms_preassigned_dealers_${activeTournament.id}`);
+      if (savedPreassigned) {
+        setPreassignedDealers(JSON.parse(savedPreassigned));
+      } else {
+        setPreassignedDealers([]);
+      }
     }
   }, [selectedTournamentId, activeTournament?.status]);
 
-  // Save clock tick
-  useEffect(() => {
-    if (activeTournament && activeTournament.status === 'active') {
-      localStorage.setItem(
-        `patms_clock_${activeTournament.id}`,
-        JSON.stringify({ idx: currentLevelIdx, seconds: timeLeft })
-      );
+  // Seating Algorithm based on seatingChart.xlsx rules
+  const getTableConfigurations = (n: number) => {
+    let numTables = 1;
+    let tableNames = ['red table'];
+    
+    if (n > 10 && n <= 20) {
+      numTables = 2;
+      tableNames = ['red table', 'blue table'];
+    } else if (n > 20 && n <= 30) {
+      numTables = 3;
+      tableNames = ['red table', 'blue table', 'gold table'];
+    } else if (n > 30 && n <= 37) {
+      numTables = 4;
+      tableNames = ['red table', 'blue table', 'gold table', 'gray table'];
+    } else if (n > 37) {
+      numTables = 5;
+      tableNames = ['red table', 'blue table', 'gold table', 'gray table', 'purple table'];
     }
-  }, [currentLevelIdx, timeLeft, activeTournament]);
-
-  // Audio Beep generator
-  const triggerAlarm = () => {
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      
-      // Ring multiple times
-      for (let i = 0; i < 3; i++) {
-        const timeOffset = i * 0.4;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, ctx.currentTime + timeOffset); // A5 note
-        gain.gain.setValueAtTime(0, ctx.currentTime + timeOffset);
-        gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + timeOffset + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + timeOffset + 0.3);
-        
-        osc.start(ctx.currentTime + timeOffset);
-        osc.stop(ctx.currentTime + timeOffset + 0.35);
-      }
-    } catch (e) {
-      console.error('AudioContext alarm error', e);
-    }
+    
+    const baseSize = Math.floor(n / numTables);
+    const remainder = n % numTables;
+    
+    const configs: Record<string, number> = {};
+    tableNames.forEach((name, idx) => {
+      configs[name] = baseSize + (idx < remainder ? 1 : 0);
+    });
+    
+    return configs;
   };
 
-  // Clock Logic
-  useEffect(() => {
-    if (isClockRunning) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            triggerAlarm();
-            // Advance to next level
-            setCurrentLevelIdx(curr => {
-              const next = curr + 1;
-              if (next < defaultBlindStructure.length) {
-                setTimeLeft(defaultBlindStructure[next].durationSeconds);
-                return next;
-              } else {
-                setIsClockRunning(false);
-                return curr; // stay at last
-              }
-            });
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+  const toggleDealerStatus = (playerId: string, tableName: string) => {
+    if (!activeTournament) return;
+    const currentDealerId = dealers[tableName];
+    const newDealers = { ...dealers };
+    const newSeating = { ...seating };
+    let updatedPreassigned = [...preassignedDealers];
+
+    if (currentDealerId === playerId) {
+      delete newDealers[tableName];
+      updatedPreassigned = updatedPreassigned.filter(id => id !== playerId);
     } else {
-      if (timerRef.current) clearInterval(timerRef.current);
+      newDealers[tableName] = playerId;
+
+      // Move player to Seat 1 (index 0) of this table by swapping positions
+      const players = [...(newSeating[tableName] || Array(10).fill(""))];
+      const targetIdx = players.indexOf(playerId);
+      if (targetIdx !== -1) {
+        const prevSeat1 = players[0];
+        players[0] = playerId;
+        players[targetIdx] = prevSeat1;
+        newSeating[tableName] = players;
+      }
+
+      if (currentDealerId) {
+        updatedPreassigned = updatedPreassigned.filter(id => id !== currentDealerId);
+      }
+      if (!updatedPreassigned.includes(playerId)) {
+        updatedPreassigned.push(playerId);
+      }
     }
 
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isClockRunning]);
-
-  const toggleClock = () => {
-    setIsClockRunning(!isClockRunning);
+    setDealers(newDealers);
+    localStorage.setItem(`patms_dealers_${activeTournament.id}`, JSON.stringify(newDealers));
+    setSeating(newSeating);
+    localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(newSeating));
+    setPreassignedDealers(updatedPreassigned);
+    localStorage.setItem(`patms_preassigned_dealers_${activeTournament.id}`, JSON.stringify(updatedPreassigned));
   };
 
-  const resetClock = () => {
-    setIsClockRunning(false);
-    setTimeLeft(defaultBlindStructure[currentLevelIdx].durationSeconds);
-  };
+  const toggleCheckedInDealer = (playerId: string) => {
+    if (!activeTournament) return;
 
-  const skipLevel = () => {
-    if (currentLevelIdx < defaultBlindStructure.length - 1) {
-      const nextIdx = currentLevelIdx + 1;
-      setCurrentLevelIdx(nextIdx);
-      setTimeLeft(defaultBlindStructure[nextIdx].durationSeconds);
+    const hasSeating = Object.keys(seating).length > 0;
+
+    if (hasSeating) {
+      let tableFound = '';
+      for (const [tableName, players] of Object.entries(seating)) {
+        if (players.includes(playerId)) {
+          tableFound = tableName;
+          break;
+        }
+      }
+      if (tableFound) {
+        toggleDealerStatus(playerId, tableFound);
+      }
+    } else {
+      let updated;
+      if (preassignedDealers.includes(playerId)) {
+        updated = preassignedDealers.filter(id => id !== playerId);
+      } else {
+        updated = [...preassignedDealers, playerId];
+      }
+      setPreassignedDealers(updated);
+      localStorage.setItem(`patms_preassigned_dealers_${activeTournament.id}`, JSON.stringify(updated));
     }
   };
 
-  const prevLevel = () => {
-    if (currentLevelIdx > 0) {
-      const prevIdx = currentLevelIdx - 1;
-      setCurrentLevelIdx(prevIdx);
-      setTimeLeft(defaultBlindStructure[prevIdx].durationSeconds);
-    }
-  };
-
-  const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  };
-
-  // Seating Algorithm
   const generateSeating = () => {
     if (!activeTournament) return;
-    const players = activeTournament.entries.map(e => e.memberId);
+    const players = activeTournament.entries.filter(e => e.hasBuyIn).map(e => e.memberId);
     if (players.length === 0) return;
 
-    // Shuffle players
-    const shuffled = [...players].sort(() => Math.random() - 0.5);
-    const maxPerTable = state.settings.maxPlayersPerTable;
-    
-    // Balance players
-    const numTables = Math.ceil(shuffled.length / maxPerTable);
-    const newSeating: Record<string, string[]> = {};
-    
-    for (let i = 0; i < numTables; i++) {
-      newSeating[`Table ${i + 1}`] = [];
-    }
+    const checkedInDealers = players.filter(id => preassignedDealers.includes(id));
+    const checkedInNonDealers = players.filter(id => !preassignedDealers.includes(id));
 
-    shuffled.forEach((playerId, index) => {
-      const tableNum = (index % numTables) + 1;
-      newSeating[`Table ${tableNum}`].push(playerId);
+    const shuffledDealers = [...checkedInDealers].sort(() => Math.random() - 0.5);
+    const shuffledNonDealers = [...checkedInNonDealers].sort(() => Math.random() - 0.5);
+
+    const tableConfigs = getTableConfigurations(players.length);
+    const newSeating: Record<string, string[]> = {};
+    const newDealers: Record<string, string> = {};
+
+    let dealerIdx = 0;
+    let nonDealerIdx = 0;
+
+    Object.entries(tableConfigs).forEach(([tableName, size]) => {
+      const tablePlayers: string[] = [];
+      
+      let dealerId = "";
+      if (dealerIdx < shuffledDealers.length) {
+        dealerId = shuffledDealers[dealerIdx++];
+        tablePlayers.push(dealerId);
+        newDealers[tableName] = dealerId;
+      }
+      
+      const remainingTablePlayers: string[] = [];
+      while (tablePlayers.length + remainingTablePlayers.length < size) {
+        if (nonDealerIdx < shuffledNonDealers.length) {
+          remainingTablePlayers.push(shuffledNonDealers[nonDealerIdx++]);
+        } else if (dealerIdx < shuffledDealers.length) {
+          remainingTablePlayers.push(shuffledDealers[dealerIdx++]);
+        } else {
+          break;
+        }
+      }
+
+      const seats = Array(10).fill("");
+      if (dealerId) {
+        seats[0] = dealerId;
+        const availableIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+        remainingTablePlayers.forEach((pId, i) => {
+          seats[availableIndices[i]] = pId;
+        });
+      } else {
+        const availableIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+        remainingTablePlayers.forEach((pId, i) => {
+          seats[availableIndices[i]] = pId;
+        });
+      }
+
+      newSeating[tableName] = seats;
     });
 
     setSeating(newSeating);
     localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(newSeating));
+    
+    setDealers(newDealers);
+    localStorage.setItem(`patms_dealers_${activeTournament.id}`, JSON.stringify(newDealers));
   };
 
-  // Manual player movement
   const movePlayerTable = (playerId: string, sourceTable: string, targetTable: string) => {
     const updated = { ...seating };
     
-    // Remove from source
-    updated[sourceTable] = updated[sourceTable].filter(id => id !== playerId);
-    
-    // Add to target
-    if (!updated[targetTable]) {
-      updated[targetTable] = [];
+    if (updated[sourceTable]) {
+      updated[sourceTable] = updated[sourceTable].map(id => id === playerId ? "" : id);
     }
-    updated[targetTable].push(playerId);
+    
+    const targetPlayers = [...(updated[targetTable] || Array(10).fill(""))];
+    const firstEmptyIdx = targetPlayers.indexOf("");
+    if (firstEmptyIdx !== -1) {
+      targetPlayers[firstEmptyIdx] = playerId;
+    } else {
+      targetPlayers.push(playerId);
+    }
+    updated[targetTable] = targetPlayers;
 
-    // Clean up empty tables
-    if (updated[sourceTable].length === 0) {
+    const hasAnyPlayers = updated[sourceTable]?.some(id => id !== "") ?? false;
+    if (!hasAnyPlayers && updated[sourceTable]) {
       delete updated[sourceTable];
     }
 
     setSeating(updated);
     localStorage.setItem(`patms_seating_${activeTournament!.id}`, JSON.stringify(updated));
+
+    const updatedDealers = { ...dealers };
+    if (updatedDealers[sourceTable] === playerId) {
+      delete updatedDealers[sourceTable];
+      setDealers(updatedDealers);
+      localStorage.setItem(`patms_dealers_${activeTournament!.id}`, JSON.stringify(updatedDealers));
+    }
+  };
+
+  const exportTournamentResultsCSV = (tournament: any) => {
+    const headers = ["Rank", "Player Name", "Player ID", "Buy-in", "Add-on", "ToC Appreciation", "Bounties Collected", "Cash Payout", "Points Earned"];
+    const rows = [...tournament.entries]
+      .sort((a, b) => (a.finishPosition || 99) - (b.finishPosition || 99))
+      .map(entry => {
+        const name = getMemberName(entry.memberId);
+        return [
+          entry.finishPosition || "",
+          name,
+          entry.memberId,
+          "Yes",
+          entry.hasAddon ? "Yes" : "No",
+          entry.hasDealerAppreciation ? "Yes" : "No",
+          entry.bountiesCollected,
+          entry.payoutEarned,
+          entry.pointsEarned
+        ];
+      });
+
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${val}"`).join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `tournament_${tournament.name.replace(/\s+/g, '_')}_results.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const submitLateEntry = () => {
+    if (!activeTournament || !selectedLateMemberId || !selectedLateTable) {
+      alert("Please select a player and a destination table.");
+      return;
+    }
+
+    if (activeTournament.maxPlayers && activeTournament.entries.length >= activeTournament.maxPlayers) {
+      const confirm = window.confirm(`Warning: The tournament limit of ${activeTournament.maxPlayers} players has been reached. Do you want to override this limit?`);
+      if (!confirm) return;
+    }
+
+    const newEntry = {
+      memberId: selectedLateMemberId,
+      hasBuyIn: true,
+      hasAddon: false,
+      hasDealerAppreciation: true,
+      payoutEarned: 0,
+      bountiesCollected: 0,
+      pointsEarned: 0,
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedEntries = [...activeTournament.entries, newEntry];
+    updateTournament(activeTournament.id, { entries: updatedEntries });
+
+    const updatedSeating = { ...seating };
+    const targetPlayers = [...(updatedSeating[selectedLateTable] || Array(10).fill(""))];
+    const firstEmptyIdx = targetPlayers.indexOf("");
+    if (firstEmptyIdx !== -1) {
+      targetPlayers[firstEmptyIdx] = selectedLateMemberId;
+    } else {
+      targetPlayers.push(selectedLateMemberId);
+    }
+    updatedSeating[selectedLateTable] = targetPlayers;
+
+    setSeating(updatedSeating);
+    localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updatedSeating));
+
+    setIsLateEntryOpen(false);
+    setSelectedLateMemberId('');
+    setSelectedLateTable('');
+    setLateSearchQuery('');
   };
 
   const handleCreateTournament = (e: React.FormEvent) => {
     e.preventDefault();
     if (!tourName.trim()) return;
 
-    const newId = createTournament(tourName, tourDate, buyIn, addon, bounty, dealerApp);
+    const newId = createTournament(tourName, tourDate, buyIn, addon, bounty, dealerApp, 24, payoutPcts);
     setIsCreateTourOpen(false);
     setSelectedTournamentId(newId);
     
@@ -282,6 +402,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setAddon(state.settings.defaultAddon);
     setBounty(state.settings.defaultBounty);
     setDealerApp(state.settings.defaultDealerAppreciation);
+    setPayoutPcts([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
   };
 
   const handleDeleteTour = (id: string, name: string) => {
@@ -304,7 +425,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     }
 
     updateTournament(activeTournament.id, { status: 'active' });
-    setSubTab('clock');
+    setSubTab('players');
   };
 
   const handleFinalize = () => {
@@ -316,17 +437,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       return;
     }
 
-    if (confirm('Finalize tournament results? This will locks payouts, register standings points, and save results to club history.')) {
-      finalizeTournament(activeTournament.id);
-      setSubTab('results');
-    }
+    setShowFinalizeModal(true);
   };
 
   const handleReopen = () => {
     if (!activeTournament) return;
     if (confirm('Reopen this tournament? Season standings points and payouts will be cleared until re-finalized.')) {
       reopenTournament(activeTournament.id);
-      setSubTab('clock');
+      setSubTab('players');
     }
   };
 
@@ -359,10 +477,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // Elimination submit
   const submitElimination = () => {
     if (activeTournament && eliminatingPlayerId) {
-      const killerId = eliminatorId === 'none' ? undefined : eliminatorId;
-      eliminatePlayer(activeTournament.id, eliminatingPlayerId, killerId);
+      eliminatePlayer(activeTournament.id, eliminatingPlayerId, bountiesWon);
       setEliminatingPlayerId(null);
-      setEliminatorId('none');
+      setBountiesWon(0);
     }
   };
 
@@ -426,10 +543,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       const seasonName = state.seasons.find(s => s.id === t.seasonId)?.name || 'Unassigned';
                       
                       // Calculate dynamic values for drafts
+                      const addonsNum = t.totalAddons !== undefined ? t.totalAddons : t.entries.filter(e => e.hasAddon).length;
                       const prizePool = t.status === 'completed' 
                         ? t.totalPrizePool 
                         : (t.entries.filter(e => e.hasBuyIn).length * t.buyInAmount) + 
-                          (t.entries.filter(e => e.hasAddon).length * t.addonAmount);
+                          (addonsNum * t.addonAmount);
 
                       return (
                         <tr key={t.id}>
@@ -437,7 +555,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           <td>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
-                              {t.date}
+                              {formatDate(t.date)}
                             </span>
                           </td>
                           <td style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{seasonName}</td>
@@ -498,9 +616,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             backdropFilter: 'blur(4px)',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'flex-start',
+            overflowY: 'auto',
             zIndex: 1000,
-            padding: '20px'
+            padding: '40px 20px'
           }}>
             <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '500px', backgroundColor: 'var(--bg-surface)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -542,6 +661,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       required
                       value={tourDate}
                       onChange={(e) => setTourDate(e.target.value)}
+                      onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
                       className="form-input"
                     />
                   </div>
@@ -584,7 +704,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>ToC & High Hand Fee ($)</label>
+                      <label>ToC Fee ($)</label>
                       <input
                         type="number"
                         min={0}
@@ -593,6 +713,38 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         onChange={(e) => setDealerApp(Number(e.target.value))}
                         className="form-input"
                       />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '8px' }}>
+                    <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Payout Structure (% per place paid)</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(place => (
+                        <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.85rem', width: '45px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            required
+                            value={payoutPcts[place - 1]}
+                            onChange={(e) => {
+                              const next = [...payoutPcts];
+                              next[place - 1] = Number(e.target.value);
+                              setPayoutPcts(next);
+                            }}
+                            className="form-input"
+                            style={{ padding: '6px 10px', flex: 1 }}
+                            placeholder="0"
+                          />
+                          <span style={{ fontSize: '0.85rem' }}>%</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '6px', textAlign: 'right' }}>
+                      Total Percent: <strong style={{ color: payoutPcts.reduce((a,b)=>a+b, 0) === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
+                        {payoutPcts.reduce((a,b)=>a+b, 0)}%
+                      </strong> (should be 100%)
                     </div>
                   </div>
 
@@ -624,7 +776,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // Render Section 2: Manage View for a Selected Tournament
   // Calculate dynamic financials
   const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
-  const addonCount = activeTournament.entries.filter(e => e.hasAddon).length;
+  const addonCount = activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length;
   const bountyCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
   const dealerCount = activeTournament.entries.filter(e => e.hasDealerAppreciation).length;
 
@@ -688,9 +840,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               {activeTournament.status}
             </span>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
-            Date: <strong>{activeTournament.date}</strong> | Total checked in: <strong>{activeTournament.entries.length} players</strong>
-          </p>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            Date: <strong>{formatDate(activeTournament.date)}</strong> | Total checked in: <strong>{activeTournament.entries.length} players</strong>
+          </span>
         </div>
 
         {/* Finance Box */}
@@ -704,11 +856,49 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             <h3 style={{ fontSize: '1.4rem', color: 'var(--color-gold)', fontWeight: 700 }}>${currentBountyPool}</h3>
           </div>
           <div>
-            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600 }}>ToC & High Hand Pool</span>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600 }}>ToC Pool</span>
             <h3 style={{ fontSize: '1.4rem', color: 'var(--text-secondary)', fontWeight: 700 }}>${currentDealerPool}</h3>
           </div>
         </div>
       </div>
+
+      {activeTournament.status === 'active' && (
+        <div className="glass-card" style={{
+          background: 'linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%)',
+          borderLeft: '4px solid var(--color-gold)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
+          padding: '16px 20px',
+          marginTop: '-8px'
+        }}>
+          <div>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-gold)', margin: 0 }}>
+              Payouts & Add-ons Configuration
+            </h4>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '6px', marginBottom: 0 }}>
+              {activeTournament.totalAddons !== undefined ? (
+                <>
+                  Add-ons entered: <strong>{activeTournament.totalAddons}</strong> | Payout Structure configured (Total: <strong>{activeTournament.payoutPercentages?.reduce((a,b)=>a+b,0)}%</strong>)
+                </>
+              ) : (
+                <>
+                  Add-ons and payout structure have not been configured for this active game yet.
+                </>
+              )}
+            </p>
+          </div>
+          <button 
+            className="btn btn-secondary"
+            onClick={() => setIsPayoutModalOpen(true)}
+            style={{ fontSize: '0.85rem', padding: '8px 16px', borderColor: 'rgba(251, 191, 36, 0.3)', color: 'var(--color-gold)' }}
+          >
+            {activeTournament.totalAddons !== undefined ? 'Edit Payouts & Add-ons' : 'Enter Add-ons & Payouts'}
+          </button>
+        </div>
+      )}
 
       {/* Navigation tabs inside tournament */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', gap: '12px' }}>
@@ -743,18 +933,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
         {activeTournament.status === 'active' && (
           <>
-            <button 
-              className={`btn btn-ghost ${subTab === 'clock' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('clock')}
-              style={{
-                borderRadius: '8px 8px 0 0',
-                borderBottom: subTab === 'clock' ? '3px solid var(--color-emerald)' : 'none',
-                color: subTab === 'clock' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'clock' ? 600 : 400
-              }}
-            >
-              Live Clock / Timer
-            </button>
+
             <button 
               className={`btn btn-ghost ${subTab === 'players' ? 'active-subtab' : ''}`}
               onClick={() => setSubTab('players')}
@@ -816,58 +995,142 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {subTab === 'checkin' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
           {activeTournament.status === 'draft' && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Fast Player Lookup</h4>
-              
-              <div style={{ position: 'relative', width: '100%' }}>
-                <input
-                  type="text"
-                  placeholder="Type name, phone number, or Member ID..."
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setShowDropdown(true); }}
-                  onFocus={() => setShowDropdown(true)}
-                  className="form-input"
-                />
+            <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px' }}>
+              {/* Fast Player Lookup */}
+              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Fast Player Lookup</h4>
 
-                {showDropdown && searchQuery.trim() !== '' && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    backgroundColor: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: '0 0 10px 10px',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    zIndex: 200,
-                    boxShadow: 'var(--shadow-lg)'
-                  }}>
-                    {matchedMembers.length > 0 ? (
-                      matchedMembers.map(m => (
-                        <div
-                          key={m.id}
-                          onClick={() => handlePlayerSelect(m)}
-                          style={{
-                            padding: '12px 16px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid var(--border-subtle)'
-                          }}
-                          className="interactive"
-                        >
-                          <span style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</span>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{m.id} • {m.phone || 'No phone'}</span>
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <input
+                    type="text"
+                    placeholder="Type name, phone number, or Member ID..."
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setShowDropdown(true); }}
+                    onFocus={() => setShowDropdown(true)}
+                    className="form-input"
+                  />
+
+                  {showDropdown && searchQuery.trim() !== '' && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '0 0 10px 10px',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      zIndex: 10,
+                      boxShadow: 'var(--shadow-md)'
+                    }}>
+                      {matchedMembers.length > 0 ? (
+                        matchedMembers.map(m => (
+                          <div
+                            key={m.id}
+                            onClick={() => handlePlayerSelect(m)}
+                            style={{
+                              padding: '12px 16px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              borderBottom: '1px solid var(--border-subtle)'
+                            }}
+                            className="interactive"
+                          >
+                            <span style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</span>
+                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{m.id} • {m.phone || 'No phone'}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: '12px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                          No unregistered members match.
                         </div>
-                      ))
-                    ) : (
-                      <div style={{ padding: '12px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                        No unregistered members match.
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Configure Game Pricing */}
+              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Configure Game Pricing</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Buy-In ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={activeTournament.buyInAmount}
+                      onChange={(e) => updateTournament(activeTournament.id, { buyInAmount: Number(e.target.value) })}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
                   </div>
-                )}
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Add-On ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={activeTournament.addonAmount}
+                      onChange={(e) => updateTournament(activeTournament.id, { addonAmount: Number(e.target.value) })}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Bounty ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={activeTournament.bountyAmount}
+                      onChange={(e) => updateTournament(activeTournament.id, { bountyAmount: Number(e.target.value) })}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ToC ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={activeTournament.dealerAppreciationAmount}
+                      onChange={(e) => updateTournament(activeTournament.id, { dealerAppreciationAmount: Number(e.target.value) })}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+                </div>
+                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
+                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Payout Structure (% per place paid)</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(place => {
+                      const currentPctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+                      return (
+                        <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.8rem', width: '35px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={currentPctList[place - 1]}
+                            onChange={(e) => {
+                              const next = [...currentPctList];
+                              next[place - 1] = Number(e.target.value);
+                              updateTournament(activeTournament.id, { payoutPercentages: next });
+                            }}
+                            className="form-input"
+                            style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
+                          />
+                          <span style={{ fontSize: '0.8rem' }}>%</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '6px', textAlign: 'right' }}>
+                    Total: <strong>{(activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0]).reduce((a,b)=>a+b, 0)}%</strong>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -883,8 +1146,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       <th>Player Name</th>
                       <th>ID</th>
                       <th style={{ textAlign: 'center' }}>Buy-in (${activeTournament.buyInAmount})</th>
-                      <th style={{ textAlign: 'center' }}>Add-on (${activeTournament.addonAmount})</th>
-                      <th style={{ textAlign: 'center' }}>ToC & High Hand (${activeTournament.dealerAppreciationAmount})</th>
+                      <th style={{ textAlign: 'center' }}>ToC (${activeTournament.dealerAppreciationAmount})</th>
                       {activeTournament.status === 'draft' && <th style={{ textAlign: 'right' }}>Action</th>}
                     </tr>
                   </thead>
@@ -895,20 +1157,30 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                       return (
                         <tr key={entry.memberId}>
-                          <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
-                          <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
-                          <td style={{ textAlign: 'center' }}>
-                            <span style={{ color: 'var(--color-emerald)' }}>✓ Paid</span>
+                          <td 
+                            style={{ 
+                              fontWeight: 600, 
+                              cursor: 'pointer', 
+                              userSelect: 'none',
+                              color: preassignedDealers.includes(entry.memberId) ? 'var(--color-gold)' : 'inherit' 
+                            }}
+                            onDoubleClick={() => toggleCheckedInDealer(entry.memberId)}
+                            title="Double-click to toggle Dealer status"
+                          >
+                            {preassignedDealers.includes(entry.memberId) ? '👑 ' : ''}
+                            {m.firstName} {m.lastName}
                           </td>
+                          <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
                           <td style={{ textAlign: 'center' }}>
                             <input
                               type="checkbox"
-                              checked={entry.hasAddon}
-                              onChange={() => toggleEntryAddon(activeTournament.id, entry.memberId)}
+                              checked={entry.hasBuyIn}
+                              onChange={() => toggleEntryBuyIn(activeTournament.id, entry.memberId)}
                               style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-emerald)' }}
                               disabled={activeTournament.status !== 'draft' && activeTournament.status !== 'active'}
                             />
                           </td>
+
                           <td style={{ textAlign: 'center' }}>
                             <input
                               type="checkbox"
@@ -950,69 +1222,113 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Seating Assignments</h3>
-            <button className="btn btn-secondary" onClick={generateSeating}>
-              <RotateCcw size={16} />
-              <span>Reshuffle & Balance Seating</span>
-            </button>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button className="btn btn-secondary" onClick={() => setIsDisplayModeOpen(true)}>
+                <Play size={16} />
+                <span>Display Mode</span>
+              </button>
+              <button className="btn btn-secondary" onClick={generateSeating}>
+                <RotateCcw size={16} />
+                <span>Reshuffle & Balance Seating</span>
+              </button>
+            </div>
           </div>
 
           {Object.keys(seating).length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
-              {Object.entries(seating).map(([tableName, players]) => (
-                <div key={tableName} className="glass-card accent-emerald" style={{ padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>
-                    <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{tableName}</h4>
-                    <span className="badge badge-emerald">{players.length} Players</span>
-                  </div>
+              {Object.entries(seating).map(([tableName, players]) => {
+                const seatedCount = players.filter(id => id !== "").length;
+                return (
+                  <div key={tableName} className="glass-card accent-emerald" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>{tableName}</h4>
+                      <span className="badge badge-emerald">{seatedCount}/10 Seated</span>
+                    </div>
 
-                  <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {players.map((playerId, idx) => {
-                      const entry = activeTournament.entries.find(e => e.memberId === playerId);
-                      const isEliminated = entry ? !!entry.eliminatedAt : false;
-                      
-                      return (
-                        <li 
-                          key={playerId} 
-                          style={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            alignItems: 'center',
-                            fontSize: '0.9rem',
-                            opacity: isEliminated ? 0.4 : 1,
-                            textDecoration: isEliminated ? 'line-through' : 'none'
-                          }}
-                        >
-                          <span style={{ fontWeight: 500 }}>
-                            <span style={{ color: 'var(--text-muted)', marginRight: '8px' }}>Seat {idx + 1}:</span>
-                            {getMemberName(playerId)}
-                          </span>
-
-                          {/* Seating manual movement */}
-                          {!isEliminated && Object.keys(seating).length > 1 && (
-                            <select
-                              value={tableName}
-                              onChange={(e) => movePlayerTable(playerId, tableName, e.target.value)}
-                              style={{
-                                backgroundColor: 'rgba(0,0,0,0.3)',
-                                color: 'var(--text-secondary)',
-                                border: '1px solid var(--border-subtle)',
-                                borderRadius: '4px',
-                                fontSize: '0.75rem',
-                                padding: '2px 4px',
-                                cursor: 'pointer'
+                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {players.map((playerId, idx) => {
+                        if (!playerId) {
+                          return (
+                            <li 
+                              key={`empty-${idx}`} 
+                              style={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center',
+                                fontSize: '0.9rem',
+                                color: 'var(--text-muted)',
+                                borderBottom: '1px dashed rgba(255,255,255,0.05)',
+                                paddingBottom: '4px'
                               }}
                             >
-                              {Object.keys(seating).map(tName => (
-                                <option key={tName} value={tName}>{tName}</option>
-                              ))}
-                            </select>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))}
+                              <span style={{ fontWeight: 400 }}>
+                                <span style={{ color: 'var(--text-muted)', marginRight: '8px' }}>Seat {idx + 1}:</span>
+                                [Empty Seat]
+                              </span>
+                            </li>
+                          );
+                        }
+
+                        const entry = activeTournament.entries.find(e => e.memberId === playerId);
+                        const isEliminated = entry ? !!entry.eliminatedAt : false;
+                        const isDealer = dealers[tableName] === playerId;
+                        
+                        return (
+                          <li 
+                            key={playerId} 
+                            style={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center',
+                              fontSize: '0.9rem',
+                              opacity: isEliminated ? 0.4 : 1,
+                              textDecoration: isEliminated ? 'line-through' : 'none',
+                              borderBottom: '1px solid rgba(255,255,255,0.05)',
+                              paddingBottom: '4px'
+                            }}
+                          >
+                            <span 
+                              style={{ 
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                color: isDealer ? 'var(--color-gold)' : 'inherit',
+                                userSelect: 'none'
+                              }}
+                              onDoubleClick={() => toggleDealerStatus(playerId, tableName)}
+                              title="Double-click to toggle Dealer status"
+                            >
+                              <span style={{ color: 'var(--text-muted)', marginRight: '8px' }}>Seat {idx + 1}:</span>
+                              {isDealer ? '👑 ' : ''}
+                              {getMemberName(playerId)}
+                            </span>
+
+                            {/* Seating manual movement */}
+                            {!isEliminated && Object.keys(seating).length > 1 && (
+                              <select
+                                value={tableName}
+                                onChange={(e) => movePlayerTable(playerId, tableName, e.target.value)}
+                                style={{
+                                  backgroundColor: 'rgba(0,0,0,0.3)',
+                                  color: 'var(--text-secondary)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: '4px',
+                                  fontSize: '0.75rem',
+                                  padding: '2px 4px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {Object.keys(seating).map(tName => (
+                                  <option key={tName} value={tName}>{tName}</option>
+                                ))}
+                              </select>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="glass-card" style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
@@ -1022,173 +1338,117 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         </div>
       )}
 
-      {/* Clock Tab (Active Game) */}
-      {subTab === 'clock' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: '32px' }} className="animate-slide-up">
-          
-          {/* Main big timer display */}
-          <div className="glass-card" style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            padding: '48px 24px',
-            background: 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, rgba(0,0,0,0) 100%)',
-            position: 'relative'
-          }}>
-            
-            {/* Blinds banner info */}
-            <span style={{ fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', fontWeight: 600 }}>
-              {defaultBlindStructure[currentLevelIdx].isBreak ? '☕ BREAK TIME' : `LEVEL ${defaultBlindStructure[currentLevelIdx].level}`}
-            </span>
-
-            {/* Huge Clock */}
-            <h1 style={{ 
-              fontSize: '6.5rem', 
-              fontWeight: 800, 
-              margin: '12px 0', 
-              fontFamily: 'var(--font-mono)', 
-              color: defaultBlindStructure[currentLevelIdx].isBreak ? 'var(--color-gold)' : 'var(--text-primary)',
-              textShadow: defaultBlindStructure[currentLevelIdx].isBreak 
-                ? '0 0 30px rgba(251,191,36,0.3)' 
-                : isClockRunning ? '0 0 30px rgba(16,185,129,0.2)' : 'none'
-            }}>
-              {formatTime(timeLeft)}
-            </h1>
-
-            {/* Small Blinds Amount display */}
-            {!defaultBlindStructure[currentLevelIdx].isBreak ? (
-              <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-emerald)', marginBottom: '32px' }}>
-                Blinds: {defaultBlindStructure[currentLevelIdx].smallBlind} / {defaultBlindStructure[currentLevelIdx].bigBlind}
-              </h2>
-            ) : (
-              <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-gold)', marginBottom: '32px' }}>
-                Take a break!
-              </h2>
-            )}
-
-            {/* Timer controls */}
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <button onClick={prevLevel} className="btn btn-secondary" style={{ borderRadius: '50%', width: '50px', height: '50px', padding: 0 }}>
-                <SkipBack size={20} />
-              </button>
-
-              <button 
-                onClick={toggleClock} 
-                className="btn" 
-                style={{ 
-                  borderRadius: '50%', 
-                  width: '72px', 
-                  height: '72px', 
-                  padding: 0,
-                  backgroundColor: isClockRunning ? 'var(--color-danger)' : 'var(--color-emerald)',
-                  color: '#000'
-                }}
-              >
-                {isClockRunning ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" style={{ marginLeft: '4px' }} />}
-              </button>
-
-              <button onClick={resetClock} className="btn btn-secondary" style={{ borderRadius: '50%', width: '50px', height: '50px', padding: 0 }}>
-                <RotateCcw size={20} />
-              </button>
-
-              <button onClick={skipLevel} className="btn btn-secondary" style={{ borderRadius: '50%', width: '50px', height: '50px', padding: 0 }}>
-                <SkipForward size={20} />
-              </button>
-            </div>
-
-            {/* Manual beep alarm testing */}
-            <button 
-              onClick={triggerAlarm}
-              className="btn btn-ghost" 
-              style={{ position: 'absolute', right: '16px', bottom: '16px', padding: '6px' }}
-              title="Test Sound Alarm"
-            >
-              <Volume2 size={16} />
-            </button>
-          </div>
-
-          {/* Right sidebar showing level progress */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Blind Schedule</h4>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '320px', paddingRight: '4px' }}>
-              {defaultBlindStructure.map((level, idx) => {
-                const isCurrent = idx === currentLevelIdx;
-                return (
-                  <div 
-                    key={idx}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      backgroundColor: isCurrent ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.01)',
-                      border: isCurrent ? '1px solid var(--color-emerald)' : '1px solid var(--border-subtle)',
-                      opacity: idx < currentLevelIdx ? 0.4 : 1
-                    }}
-                  >
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      {level.isBreak ? '☕ Break' : `Lvl ${level.level}`}
-                    </span>
-                    <span style={{ fontWeight: 700, color: level.isBreak ? 'var(--color-gold)' : 'var(--text-primary)' }}>
-                      {level.isBreak ? '5:00' : `${level.smallBlind} / ${level.bigBlind}`}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Eliminations Tab (Active Game) */}
-      {subTab === 'players' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }} className="animate-slide-up">
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+      {subTab === 'players' && (() => {
+        const activePlayers = getActivePlayersList();
+        const half = Math.ceil(activePlayers.length / 2);
+        const activeCol1 = activePlayers.slice(0, half);
+        const activeCol2 = activePlayers.slice(half);
+        const eliminatedEntries = activeTournament.entries
+          .filter(e => e.eliminatedAt)
+          .sort((a, b) => (a.finishPosition || 999) - (b.finishPosition || 999));
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
             
-            {/* Active Players List */}
-            <div className="glass-card">
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>Active Standings ({getActivePlayersList().length} remaining)</h4>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {getActivePlayersList().map((p) => (
-                  <div 
-                    key={p.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(255,255,255,0.02)',
-                      border: '1px solid var(--border-subtle)'
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>{p.firstName} {p.lastName}</span>
-                    <button 
-                      onClick={() => setEliminatingPlayerId(p.id)}
-                      className="btn btn-danger"
-                      style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                    >
-                      Eliminate
-                    </button>
-                  </div>
-                ))}
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Tournament Standings & Tracker</h3>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => {
+                  setIsLateEntryOpen(true);
+                  setSelectedLateMemberId('');
+                  setSelectedLateTable('');
+                  setLateSearchQuery('');
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}
+              >
+                <Plus size={16} />
+                <span>Add Late Entry</span>
+              </button>
             </div>
 
-            {/* Eliminated Players List */}
-            <div className="glass-card" style={{ borderColor: 'rgba(248,113,113,0.1)' }}>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px', color: 'var(--color-danger)' }}>Eliminated Players</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', alignItems: 'start' }}>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {activeTournament.entries
-                  .filter(e => e.eliminatedAt)
-                  .sort((a, b) => (a.finishPosition || 0) - (b.finishPosition || 0))
-                  .map((entry) => {
+              {/* Column 1: Active Players */}
+              <div className="glass-card" style={{ padding: '12px 16px', borderColor: 'rgba(16,185,129,0.1)' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '10px', color: 'var(--color-emerald)' }}>
+                  Active Players (Part 1 - {activeCol1.length})
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {activeCol1.map((p) => (
+                    <div 
+                      key={p.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(255,255,255,0.01)',
+                        border: '1px solid var(--border-subtle)'
+                      }}
+                    >
+                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{p.firstName} {p.lastName}</span>
+                      <button 
+                        onClick={() => {
+                          setEliminatingPlayerId(p.id);
+                          setBountiesWon(0);
+                        }}
+                        className="btn btn-danger"
+                        style={{ padding: '4px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '28px' }}
+                      >
+                        Eliminate
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 2: Active Players (continuation) */}
+              <div className="glass-card" style={{ padding: '12px 16px', borderColor: 'rgba(16,185,129,0.1)' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '10px', color: 'var(--color-emerald)' }}>
+                  Active Players (Part 2 - {activeCol2.length})
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {activeCol2.map((p) => (
+                    <div 
+                      key={p.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(255,255,255,0.01)',
+                        border: '1px solid var(--border-subtle)'
+                      }}
+                    >
+                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{p.firstName} {p.lastName}</span>
+                      <button 
+                        onClick={() => {
+                          setEliminatingPlayerId(p.id);
+                          setBountiesWon(0);
+                        }}
+                        className="btn btn-danger"
+                        style={{ padding: '4px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '28px' }}
+                      >
+                        Eliminate
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 3: Eliminated Players */}
+              <div className="glass-card" style={{ padding: '12px 16px', borderColor: 'rgba(248,113,113,0.1)' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '10px', color: 'var(--color-danger)' }}>
+                  Eliminated Players ({eliminatedEntries.length})
+                </h4>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '550px', overflowY: 'auto', paddingRight: '4px' }}>
+                  {eliminatedEntries.map((entry) => {
                     const name = getMemberName(entry.memberId);
                     const killer = entry.eliminatedBy ? getMemberName(entry.eliminatedBy) : 'None';
                     
@@ -1199,35 +1459,40 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '12px 16px',
-                          borderRadius: '10px',
-                          backgroundColor: 'rgba(248,113,113,0.02)',
+                          padding: '6px 10px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(248,113,113,0.01)',
                           border: '1px solid rgba(248,113,113,0.1)'
                         }}
                       >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <span style={{ fontWeight: 600 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
                             {entry.finishPosition ? `#${entry.finishPosition} - ` : ''}
                             {name}
                           </span>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                            Knocked out by: <strong style={{ color: 'var(--text-gold)' }}>{killer}</strong>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                            <span>By: <strong style={{ color: 'var(--text-gold)' }}>{killer}</strong></span>
+                            <span>• Bounties: <strong style={{ color: 'var(--text-gold)' }}>{entry.bountiesCollected}</strong></span>
+                            <span>• Total Won: <strong style={{ color: 'var(--color-emerald)' }}>${entry.payoutEarned + (entry.bountiesCollected * activeTournament.bountyAmount)}</strong></span>
                           </span>
                         </div>
                         <button 
                           onClick={() => undoElimination(activeTournament.id, entry.memberId)}
                           className="btn btn-ghost"
-                          style={{ padding: '6px', fontSize: '0.8rem' }}
+                          style={{ padding: '4px 6px', fontSize: '0.75rem', minHeight: 'auto', height: '28px', color: 'var(--text-secondary)' }}
                         >
                           Undo
                         </button>
                       </div>
                     );
                   })}
+                </div>
               </div>
-            </div>
 
+            </div>
           </div>
+        );
+      })()}
 
           {/* Elimination details prompt modal */}
           {eliminatingPlayerId && (
@@ -1242,8 +1507,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              zIndex: 1000,
-              padding: '20px'
+              padding: '20px',
+              zIndex: 1000001
             }}>
               <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', backgroundColor: 'var(--bg-surface)' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '20px' }}>
@@ -1251,20 +1516,43 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </h3>
 
                 <div className="form-group">
-                  <label>Who knocked them out? (Bounty Winner)</label>
-                  <select
-                    value={eliminatorId}
-                    onChange={(e) => setDiscriminator(e.target.value)}
-                    className="form-input"
-                  >
-                    <option value="none">No Bounty Claimed (Dealer/No Player)</option>
-                    {getActivePlayersList()
-                      .filter(p => p.id !== eliminatingPlayerId)
-                      .map(p => (
-                        <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
-                      ))
-                    }
-                  </select>
+                  <label style={{ display: 'block', marginBottom: '12px', fontWeight: 600 }}>Number of Bounties Won</label>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', margin: '12px 0' }}>
+                    {[0, 1, 2, 3, 4, 5].map(num => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setBountiesWon(num)}
+                        className={`btn ${bountiesWon === num ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{
+                          width: '45px',
+                          height: '45px',
+                          borderRadius: '50%',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          padding: 0,
+                          border: bountiesWon === num ? '2px solid var(--color-emerald)' : '1px solid var(--border-subtle)'
+                        }}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="form-group" style={{ marginTop: '16px', marginBottom: 0 }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>Or enter custom bounties won:</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={bountiesWon}
+                      onChange={(e) => setBountiesWon(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="form-input"
+                      style={{ textAlign: 'center', padding: '8px 12px', fontSize: '1rem', width: '100%' }}
+                      placeholder="Enter bounties won"
+                    />
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
@@ -1279,18 +1567,119 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             </div>
           )}
 
-        </div>
-      )}
+          {/* Finalize Payouts Modal */}
+          {showFinalizeModal && activeTournament && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '20px',
+              zIndex: 1000
+            }}>
+              <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '450px', backgroundColor: 'var(--bg-surface)' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '16px' }}>
+                  Finalize Tournament Payouts
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                  Enter the final prize pool to distribute. Standings points and individual payouts will be calculated based on the configured percentages.
+                </p>
+
+                <div className="form-group" style={{ marginBottom: '20px' }}>
+                  <label style={{ fontWeight: 600 }}>Total Prize Pool Cash ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder={`Calculated: $${(activeTournament.entries.filter(e => e.hasBuyIn).length * activeTournament.buyInAmount) + ((activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length) * activeTournament.addonAmount)}`}
+                    value={activeTournament.overridePrizePool || ''}
+                    onChange={(e) => updateTournament(activeTournament.id, { overridePrizePool: Number(e.target.value) || undefined })}
+                    className="form-input"
+                  />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '8px' }}>Payout Preview</h4>
+                  <div style={{ backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(() => {
+                      const countAddons = activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length;
+                      const calcPrizePool = (activeTournament.entries.filter(e => e.hasBuyIn).length * activeTournament.buyInAmount) + (countAddons * activeTournament.addonAmount);
+                      const finalPool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
+                        ? activeTournament.overridePrizePool
+                        : calcPrizePool;
+                      const pctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+                      
+                      const activeAndElims = [...activeTournament.entries].sort((a,b) => {
+                        const aPos = a.eliminatedAt ? (a.finishPosition || 999) : 1;
+                        const bPos = b.eliminatedAt ? (b.finishPosition || 999) : 1;
+                        return aPos - bPos;
+                      });
+
+                      const previewRows = pctList.map((pct, idx) => {
+                        if (pct <= 0) return null;
+                        const place = idx + 1;
+                        const amt = Math.round(finalPool * (pct / 100));
+                        const entry = activeAndElims[idx];
+                        const playerName = entry ? getMemberName(entry.memberId) : 'TBD';
+                        return (
+                          <div key={place} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                            <span>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`} Place:</span>
+                            <span style={{ fontWeight: 600 }}>
+                              ${amt} <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>({playerName} - {pct}%)</span>
+                            </span>
+                          </div>
+                        );
+                      }).filter(Boolean);
+
+                      return previewRows.length > 0 ? previewRows : <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No places paid. Check payout structure configuration.</p>;
+                    })()}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                  <button onClick={() => setShowFinalizeModal(false)} className="btn btn-secondary">
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      finalizeTournament(activeTournament.id);
+                      setShowFinalizeModal(false);
+                      setSubTab('results');
+                    }}
+                    className="btn btn-primary"
+                    style={{ backgroundColor: 'var(--color-emerald)' }}
+                  >
+                    Confirm & Post Results
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
 
       {/* Results Tab (Completed) */}
       {subTab === 'results' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }} className="animate-slide-up">
           
           <div className="glass-card">
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Trophy size={22} style={{ color: 'var(--color-gold)' }} />
-              Final Tournament Rankings
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Trophy size={22} style={{ color: 'var(--color-gold)' }} />
+                <span>Final Tournament Rankings</span>
+              </h3>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => exportTournamentResultsCSV(activeTournament)}
+                style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+              >
+                Export Results to CSV
+              </button>
+            </div>
 
             <div className="table-container">
               <table className="data-table">
@@ -1300,7 +1689,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <th>Player Name</th>
                     <th style={{ textAlign: 'center' }}>Buy-in</th>
                     <th style={{ textAlign: 'center' }}>Add-on</th>
-                    <th style={{ textAlign: 'center' }}>ToC & High Hand</th>
+                    <th style={{ textAlign: 'center' }}>ToC</th>
                     <th style={{ textAlign: 'center' }}>Bounties</th>
                     <th style={{ textAlign: 'right' }}>Cash Payout</th>
                     <th style={{ textAlign: 'right', color: 'var(--color-gold)' }}>Standings Points</th>
@@ -1314,7 +1703,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       return (
                         <tr key={entry.memberId}>
                           <td style={{ fontWeight: 700 }}>
-                            {entry.finishPosition === 1 ? '👑 1' : entry.finishPosition === 2 ? '🥈 2' : entry.finishPosition === 3 ? '🥉 3' : entry.finishPosition}
+                            {entry.finishPosition}
                           </td>
                           <td style={{ fontWeight: 600 }}>{name}</td>
                           <td style={{ textAlign: 'center' }}>✓</td>
@@ -1338,11 +1727,302 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         </div>
       )}
 
+      {isPayoutModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          overflowY: 'auto',
+          zIndex: 100,
+          padding: '40px 20px'
+        }}>
+          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '550px', backgroundColor: 'var(--bg-surface)', padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Configure Add-ons & Payouts</h3>
+              <button 
+                type="button"
+                onClick={() => setIsPayoutModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.2rem' }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '20px' }}>
+              Enter the total add-ons and percentages from the external software. The prize pool and place payouts will recalculate live.
+            </p>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              updateTournament(activeTournament.id, {
+                totalAddons: modalAddons,
+                payoutPercentages: modalPayoutPcts
+              });
+              setIsPayoutModalOpen(false);
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Total Add-ons Count</label>
+                <input
+                  type="number"
+                  min={0}
+                  required
+                  value={modalAddons}
+                  onChange={(e) => setModalAddons(Number(e.target.value))}
+                  className="form-input"
+                  style={{ padding: '8px 12px' }}
+                />
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
+                <label style={{ fontWeight: 600, display: 'block', marginBottom: '12px', fontSize: '0.9rem' }}>Payout Percentages (1st - 10th Place)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
+                  {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => (
+                    <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '0.8rem', width: '35px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        required
+                        value={modalPayoutPcts[place - 1]}
+                        onChange={(e) => {
+                          const next = [...modalPayoutPcts];
+                          next[place - 1] = Number(e.target.value);
+                          setModalPayoutPcts(next);
+                        }}
+                        className="form-input"
+                        style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
+                      />
+                      <span style={{ fontSize: '0.8rem' }}>%</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'right' }}>
+                  Total: <strong style={{ color: modalPayoutPcts.reduce((a,b)=>a+b,0) === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
+                    {modalPayoutPcts.reduce((a,b)=>a+b,0)}%
+                  </strong> (should be 100%)
+                </div>
+              </div>
+
+              {/* Dynamic Live Payout Preview Table */}
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '8px', padding: '12px' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>Live Payout Breakdown</h4>
+                {(() => {
+                  const calculatedPrizePool = (buyInCount * activeTournament.buyInAmount) + (modalAddons * activeTournament.addonAmount);
+                  const previewRows = modalPayoutPcts.map((pct, idx) => {
+                    if (pct <= 0) return null;
+                    const place = idx + 1;
+                    const amt = Math.round(calculatedPrizePool * (pct / 100));
+                    return (
+                      <div key={place} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        <span>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`} Place:</span>
+                        <strong style={{ color: 'var(--text-primary)' }}>${amt} ({pct}%)</strong>
+                      </div>
+                    );
+                  }).filter(Boolean);
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700, borderBottom: '1px dashed var(--border-subtle)', paddingBottom: '4px', marginBottom: '4px' }}>
+                        <span>Total Prize Pool:</span>
+                        <span style={{ color: 'var(--color-emerald)' }}>${calculatedPrizePool}</span>
+                      </div>
+                      {previewRows.length > 0 ? previewRows : <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>No payouts. Configure percentages above.</p>}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '4px' }}>
+                <button type="button" onClick={() => setIsPayoutModalOpen(false)} className="btn btn-secondary">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ backgroundColor: 'var(--color-gold)', color: '#78350f' }}
+                  disabled={modalPayoutPcts.reduce((a,b)=>a+b,0) !== 100}
+                >
+                  Save Configuration
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Full Screen Seating Assignments Modal */}
+      {activeTournament && (
+        <SeatingDisplayModal
+          isOpen={isDisplayModeOpen}
+          onClose={() => setIsDisplayModeOpen(false)}
+          tournamentName={activeTournament.name}
+          tournamentDate={activeTournament.date}
+          seating={seating}
+          dealers={dealers}
+          members={state.members}
+          activeTournament={activeTournament}
+          onEliminatePlayer={(playerId) => {
+            setEliminatingPlayerId(playerId);
+            setBountiesWon(0);
+          }}
+        />
+      )}
+
+      {/* Late Entry Overlay Modal */}
+      {isLateEntryOpen && activeTournament && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1001,
+          padding: '20px'
+        }}>
+          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '450px', backgroundColor: 'var(--bg-surface)', display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Add Late Entry</h3>
+            
+            {/* Search Input for Member Lookup */}
+            <div className="form-group" style={{ position: 'relative', marginBottom: 0 }}>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px', fontSize: '0.85rem' }}>Search Registry Player</label>
+              <input
+                type="text"
+                placeholder="Type member name or ID..."
+                value={lateSearchQuery}
+                onChange={(e) => {
+                  setLateSearchQuery(e.target.value);
+                  setShowLateDropdown(true);
+                }}
+                onFocus={() => setShowLateDropdown(true)}
+                className="form-input"
+                style={{ padding: '10px 14px' }}
+              />
+
+              {showLateDropdown && lateSearchQuery.trim() !== '' && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '10px',
+                  maxHeight: '180px',
+                  overflowY: 'auto',
+                  zIndex: 20,
+                  boxShadow: 'var(--shadow-md)'
+                }}>
+                  {(() => {
+                    const registeredIds = activeTournament.entries.map(e => e.memberId);
+                    const matched = state.members
+                      .filter(m => !registeredIds.includes(m.id))
+                      .filter(m => `${m.firstName} ${m.lastName}`.toLowerCase().includes(lateSearchQuery.toLowerCase()) || m.id.toLowerCase().includes(lateSearchQuery.toLowerCase()));
+
+                    if (matched.length > 0) {
+                      return matched.map(m => (
+                        <div
+                          key={m.id}
+                          onClick={() => {
+                            setSelectedLateMemberId(m.id);
+                            setLateSearchQuery(`${m.firstName} ${m.lastName}`);
+                            setShowLateDropdown(false);
+                          }}
+                          style={{
+                            padding: '10px 14px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            borderBottom: '1px solid var(--border-subtle)'
+                          }}
+                          className="interactive"
+                        >
+                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{m.firstName} {m.lastName}</span>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.8' + 'rem' }}>{m.id}</span>
+                        </div>
+                      ));
+                    }
+
+                    return (
+                      <div style={{ padding: '12px 16px', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.85rem' }}>
+                        No unregistered members match.
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+
+            {selectedLateMemberId && (
+              <div style={{ fontSize: '0.85rem', padding: '10px 12px', backgroundColor: 'rgba(16, 185, 129, 0.06)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', color: 'var(--color-emerald)' }}>
+                Selected Player: <strong>{getMemberName(selectedLateMemberId)} ({selectedLateMemberId})</strong>
+              </div>
+            )}
+
+            {/* Select Destination Table */}
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px', fontSize: '0.85rem' }}>Assign to Table</label>
+              <select
+                value={selectedLateTable}
+                onChange={(e) => setSelectedLateTable(e.target.value)}
+                className="form-input"
+                style={{ padding: '10px 14px' }}
+              >
+                <option value="" disabled>-- Select a Table --</option>
+                {Object.keys(seating).map(tableName => {
+                  const currentSize = seating[tableName]?.filter(id => id !== "").length ?? 0;
+                  const isFull = currentSize >= 10;
+                  return (
+                    <option key={tableName} value={tableName} disabled={isFull}>
+                      {tableName.toUpperCase()} ({currentSize}/10 seated) {isFull ? ' (FULL)' : ''}
+                    </option>
+                  );
+                })}
+                {Object.keys(seating).length < 5 && (
+                  <option value="create_new">
+                    + Create New Table
+                  </option>
+                )}
+              </select>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setIsLateEntryOpen(false)}
+                className="btn btn-secondary"
+                style={{ padding: '8px 16px' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submitLateEntry}
+                className="btn btn-primary"
+                disabled={!selectedLateMemberId || !selectedLateTable}
+                style={{ padding: '8px 16px' }}
+              >
+                Confirm late entry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
-
-  // Helper workaround
-  function setDiscriminator(val: string) {
-    setEliminatorId(val);
-  }
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { calculateStandings } from '../utils/stats';
+import { calculateStandings, formatDate } from '../utils/stats';
 import { Plus, Award, Calendar, AlertCircle } from 'lucide-react';
 
 export const Standings: React.FC = () => {
@@ -21,6 +21,12 @@ export const Standings: React.FC = () => {
 
   // Calculate standings
   const standings = selectedSeasonId ? calculateStandings(state, selectedSeasonId) : [];
+
+  const seasonToCPool = selectedSeasonId
+    ? state.tournaments
+        .filter(t => t.status === 'completed' && t.seasonId === selectedSeasonId)
+        .reduce((sum, t) => sum + t.totalDealerAppreciation, 0)
+    : 0;
 
   const handleAddSeason = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +96,9 @@ export const Standings: React.FC = () => {
           }}>
             <Calendar size={18} style={{ color: 'var(--text-secondary)' }} />
             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              Duration: <strong>{activeSeason.startDate}</strong> to <strong>{activeSeason.endDate}</strong>
+              Duration: <strong>{formatDate(activeSeason.startDate)}</strong> to <strong>{formatDate(activeSeason.endDate)}</strong>
+              <span style={{ margin: '0 12px', color: 'var(--border-subtle)' }}>|</span>
+              Season ToC Pool: <strong style={{ color: 'var(--color-gold)' }}>${seasonToCPool}</strong>
             </span>
             {activeSeason.isActive ? (
               <span className="badge badge-gold">Active Season</span>
@@ -128,7 +136,7 @@ export const Standings: React.FC = () => {
                   <th>Player Name</th>
                   <th style={{ textAlign: 'center' }}>Tournaments Played</th>
                   <th style={{ textAlign: 'center' }}>Wins (1st)</th>
-                  <th style={{ textAlign: 'center' }}>Top 3s</th>
+                  <th style={{ textAlign: 'center' }}>Top 10s</th>
                   <th style={{ textAlign: 'center' }}>Bounties</th>
                   <th style={{ textAlign: 'right' }}>Total Earnings</th>
                   <th style={{ textAlign: 'right', color: 'var(--color-gold)' }}>Season Points</th>
@@ -138,14 +146,14 @@ export const Standings: React.FC = () => {
                 {standings.map((player, idx) => (
                   <tr key={player.memberId}>
                     <td style={{ fontWeight: 700, fontSize: '1.05rem' }}>
-                      {idx === 0 ? '🏆 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : idx + 1}
+                      {idx + 1}
                     </td>
                     <td style={{ fontWeight: 600 }}>{player.name}</td>
                     <td style={{ textAlign: 'center' }}>{player.played}</td>
                     <td style={{ textAlign: 'center', fontWeight: 600, color: player.wins > 0 ? 'var(--text-gold)' : 'inherit' }}>
                       {player.wins}
                     </td>
-                    <td style={{ textAlign: 'center' }}>{player.top3}</td>
+                    <td style={{ textAlign: 'center' }}>{player.top10}</td>
                     <td style={{ textAlign: 'center' }}>{player.bounties}</td>
                     <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--color-emerald)' }}>
                       ${player.earnings}
@@ -231,6 +239,7 @@ export const Standings: React.FC = () => {
                   required
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
+                  onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
                   className="form-input"
                 />
               </div>
@@ -242,6 +251,7 @@ export const Standings: React.FC = () => {
                   required
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
+                  onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
                   className="form-input"
                 />
               </div>

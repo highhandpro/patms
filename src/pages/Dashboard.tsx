@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { calculateStandings } from '../utils/stats';
-import { Users, Trophy, DollarSign, Coins, Plus, Play, ChevronRight, Calendar, ArrowUpRight } from 'lucide-react';
+import { calculateStandings, formatDate } from '../utils/stats';
+import { Users, Trophy, Coins, Plus, Play, ChevronRight, Calendar, ArrowUpRight } from 'lucide-react';
 import type { Tournament } from '../types';
 
 interface DashboardProps {
@@ -27,15 +27,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
     t => t.status === 'completed' && t.seasonId === activeSeason?.id
   );
 
-  // Financial summary
-  const totalPrizeMoney = completedTournaments.reduce((sum, t) => sum + t.totalPrizePool, 0);
   const totalDealerStaffApprec = completedTournaments.reduce((sum, t) => sum + t.totalDealerAppreciation, 0);
 
   // Active or draft tournaments (running right now)
   const activeTournaments = state.tournaments.filter(t => t.status !== 'completed');
 
-  // Standings leaderboard (top 5)
-  const standings = activeSeason ? calculateStandings(state, activeSeason.id).slice(0, 5) : [];
+  // Standings leaderboard (top 15)
+  const standings = activeSeason ? calculateStandings(state, activeSeason.id).slice(0, 15) : [];
 
   // Recent tournaments (up to 3)
   const recentTournaments = [...completedTournaments]
@@ -102,7 +100,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       )}
 
       {/* Metrics Cards Grid */}
-      <div className="grid-cols-4">
+      <div className="grid-cols-3">
         
         {/* Metric 1 */}
         <div className="glass-card interactive" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
@@ -142,26 +140,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Metric 3 */}
-        <div className="glass-card interactive" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <div style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.05)',
-            borderRadius: '12px',
-            padding: '12px',
-            border: '1px solid rgba(16, 185, 129, 0.1)',
-            color: 'var(--color-emerald)'
-          }}>
-            <DollarSign size={24} />
-          </div>
-          <div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Prize Cash Paid</span>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: '2px', color: 'var(--color-emerald)' }}>
-              ${totalPrizeMoney}
-            </h2>
-          </div>
-        </div>
-
-        {/* Metric 4 */}
+        {/* Metric 3: ToC Pool */}
         <div className="glass-card interactive" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <div style={{
             backgroundColor: 'rgba(251, 191, 36, 0.05)',
@@ -173,7 +152,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Coins size={24} />
           </div>
           <div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>ToC & High Hand Pool</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>ToC Pool</span>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: '2px', color: 'var(--color-gold)' }}>
               ${totalDealerStaffApprec}
             </h2>
@@ -188,7 +167,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Leaderboard Column */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Season Standings (Top 5)</h3>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Season Standings (Top 15)</h3>
             <button 
               onClick={() => setActiveTab('standings')}
               className="btn btn-ghost" 
@@ -207,7 +186,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <th style={{ width: '60px' }}>Rank</th>
                     <th>Player</th>
                     <th style={{ textAlign: 'center' }}>Games</th>
-                    <th style={{ textAlign: 'center' }}>Wins</th>
+                    <th style={{ textAlign: 'center' }}>Top 10s</th>
                     <th style={{ textAlign: 'right' }}>Cash</th>
                     <th style={{ textAlign: 'right', color: 'var(--color-gold)' }}>Points</th>
                   </tr>
@@ -216,11 +195,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {standings.map((player, idx) => (
                     <tr key={player.memberId}>
                       <td style={{ fontWeight: 600 }}>
-                        {idx === 0 ? '👑 1' : idx + 1}
+                        {idx + 1}
                       </td>
                       <td style={{ fontWeight: 500 }}>{player.name}</td>
                       <td style={{ textAlign: 'center' }}>{player.played}</td>
-                      <td style={{ textAlign: 'center' }}>{player.wins}</td>
+                      <td style={{ textAlign: 'center' }}>{player.top10}</td>
                       <td style={{ textAlign: 'right', color: 'var(--color-emerald)' }}>${player.earnings}</td>
                       <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-gold)' }}>{player.points}</td>
                     </tr>
@@ -243,7 +222,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Quick Actions</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button 
-                onClick={() => setIsCreateTourOpen(true)}
+                onClick={() => {
+                  setActiveTab('tournaments');
+                  setIsCreateTourOpen(true);
+                }}
                 className="btn btn-primary" 
                 style={{ width: '100%', justifyContent: 'flex-start', padding: '14px 20px' }}
               >
@@ -251,7 +233,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <span>Create New Tournament</span>
               </button>
               <button 
-                onClick={() => setIsAddMemberOpen(true)}
+                onClick={() => {
+                  setActiveTab('members');
+                  setIsAddMemberOpen(true);
+                }}
                 className="btn btn-secondary" 
                 style={{ width: '100%', justifyContent: 'flex-start', padding: '14px 20px' }}
               >
@@ -287,7 +272,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{t.name}</span>
                       <div style={{ display: 'flex', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.8rem', alignItems: 'center' }}>
                         <Calendar size={12} />
-                        <span>{t.date}</span>
+                        <span>{formatDate(t.date)}</span>
                         <span>•</span>
                         <span>{t.entries.length} players</span>
                       </div>
