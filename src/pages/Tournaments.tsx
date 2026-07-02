@@ -564,6 +564,213 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   };
 
   // Render Section 1: Tournament Selector List
+  if (isCreateTourOpen) {
+    if (!activeSeason) {
+      return (
+        <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center', padding: '40px 0', textAlign: 'center' }}>
+          <ShieldAlert size={48} style={{ color: 'var(--color-danger)' }} />
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>No Active Season</h2>
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '8px 0 16px 0' }}>
+            No active season exists. You must create and activate a Season in the <strong>Standings</strong> page first before starting a tournament.
+          </p>
+          <button onClick={() => setIsCreateTourOpen(false)} className="btn btn-secondary">Ok</button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-0.03em' }}>
+            Initialize Tournament Draft
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
+            Configure basic settings, buy-ins, fees, and payout percentages for the new game.
+          </p>
+        </div>
+
+        <div className="glass-card" style={{ width: '100%', maxWidth: '850px', backgroundColor: 'var(--bg-surface)', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Tournament Settings</h3>
+            <button 
+              onClick={() => setIsCreateTourOpen(false)}
+              className="btn btn-secondary"
+              style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+            >
+              Back to Registry
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateTournament} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
+            
+            {/* Left Column: Metadata & Settings */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Tournament Name / Number</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Season 4, Game 2"
+                    value={tourName}
+                    onChange={(e) => setTourName(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={tourDate}
+                    onChange={(e) => setTourDate(e.target.value)}
+                    onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Buy-in ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={buyIn}
+                    onChange={(e) => setBuyIn(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Add-on ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={addon}
+                    onChange={(e) => setAddon(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Bounty ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={bounty}
+                    onChange={(e) => setBounty(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>ToC Fee ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={dealerApp}
+                    onChange={(e) => setDealerApp(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Flyer / PDF URL (Google Drive Link)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. https://drive.google.com/..."
+                    value={tourFlyerUrl}
+                    onChange={(e) => setTourFlyerUrl(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Flyer Type</label>
+                  <select
+                    value={tourFlyerType || ''}
+                    onChange={(e) => setTourFlyerType((e.target.value as any) || null)}
+                    className="form-input"
+                    style={{ padding: '10px 14px', cursor: 'pointer' }}
+                  >
+                    <option value="">None (No flyer)</option>
+                    <option value="pdf">PDF Document</option>
+                    <option value="image">Image (PNG, JPG)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Payout Structure & Actions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <label style={{ fontWeight: 600, display: 'block' }}>Payout Structure (% per place paid)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '12px', backgroundColor: 'rgba(0,0,0,0.1)' }}>
+                {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => (
+                  <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.85rem', width: '36px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      required
+                      value={payoutPcts[place - 1]}
+                      onChange={(e) => {
+                        const next = [...payoutPcts];
+                        next[place - 1] = Number(e.target.value);
+                        setPayoutPcts(next);
+                      }}
+                      className="form-input"
+                      style={{ padding: '6px 10px', flex: 1 }}
+                      placeholder="0"
+                    />
+                    <span style={{ fontSize: '0.85rem' }}>%</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
+                Total Percent: <strong style={{ color: payoutPcts.reduce((a,b)=>a+b, 0) === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
+                  {payoutPcts.reduce((a,b)=>a+b, 0)}%
+                </strong> (should be 100%)
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '16px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateTourOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ padding: '10px 20px' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ padding: '10px 20px' }}
+                >
+                  Initialize Draft
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Render Section 1: Tournament Selector List
   if (!activeTournament) {
     return (
       <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -832,211 +1039,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           </div>
         )}
 
-        {/* Creation Overlay Modal */}
-        {isCreateTourOpen && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            overflowY: 'auto',
-            zIndex: 1000,
-            padding: '40px 20px'
-          }}>
-            <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '700px', backgroundColor: 'var(--bg-surface)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Initialize Tournament</h3>
-                <button 
-                  onClick={() => setIsCreateTourOpen(false)}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                >
-                  ✕
-                </button>
-              </div>
 
-              {!activeSeason ? (
-                <div style={{ padding: '20px 0', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-                  <ShieldAlert size={40} style={{ color: 'var(--color-danger)' }} />
-                  <p style={{ color: 'var(--text-secondary)' }}>
-                    No active season exists. You must create and activate a Season in the <strong>Standings</strong> page first before starting a tournament.
-                  </p>
-                  <button onClick={() => setIsCreateTourOpen(false)} className="btn btn-secondary">Ok</button>
-                </div>
-              ) : (
-                <form onSubmit={handleCreateTournament} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
-                  
-                  {/* Left Column: Metadata & Settings */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '10px' }}>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Tournament Name / Number</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="e.g. Season 4, Game 2"
-                          value={tourName}
-                          onChange={(e) => setTourName(e.target.value)}
-                          className="form-input"
-                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Date</label>
-                        <input
-                          type="date"
-                          required
-                          value={tourDate}
-                          onChange={(e) => setTourDate(e.target.value)}
-                          onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
-                          className="form-input"
-                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Buy-in ($)</label>
-                        <input
-                          type="number"
-                          min={0}
-                          required
-                          value={buyIn}
-                          onChange={(e) => setBuyIn(Number(e.target.value))}
-                          className="form-input"
-                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Add-on ($)</label>
-                        <input
-                          type="number"
-                          min={0}
-                          required
-                          value={addon}
-                          onChange={(e) => setAddon(Number(e.target.value))}
-                          className="form-input"
-                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bounty ($)</label>
-                        <input
-                          type="number"
-                          min={0}
-                          required
-                          value={bounty}
-                          onChange={(e) => setBounty(Number(e.target.value))}
-                          className="form-input"
-                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>ToC Fee ($)</label>
-                        <input
-                          type="number"
-                          min={0}
-                          required
-                          value={dealerApp}
-                          onChange={(e) => setDealerApp(Number(e.target.value))}
-                          className="form-input"
-                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '10px' }}>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Flyer / PDF URL (Google Drive Link)</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. https://drive.google.com/..."
-                          value={tourFlyerUrl}
-                          onChange={(e) => setTourFlyerUrl(e.target.value)}
-                          className="form-input"
-                          style={{ padding: '6px 10px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Flyer Type</label>
-                        <select
-                          value={tourFlyerType || ''}
-                          onChange={(e) => setTourFlyerType((e.target.value as any) || null)}
-                          className="form-input"
-                          style={{ padding: '6px 10px', fontSize: '0.85rem', cursor: 'pointer' }}
-                        >
-                          <option value="">None</option>
-                          <option value="pdf">PDF</option>
-                          <option value="image">Image</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Payout Structure & Actions */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <label style={{ fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>Payout Structure (% per place paid)</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', maxHeight: '110px', overflowY: 'auto', paddingRight: '4px', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '6px', backgroundColor: 'rgba(0,0,0,0.1)' }}>
-                      {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => (
-                        <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ fontSize: '0.75rem', width: '28px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
-                          <input
-                            type="number"
-                            min={0}
-                            max={100}
-                            required
-                            value={payoutPcts[place - 1]}
-                            onChange={(e) => {
-                              const next = [...payoutPcts];
-                              next[place - 1] = Number(e.target.value);
-                              setPayoutPcts(next);
-                            }}
-                            className="form-input"
-                            style={{ padding: '4px 6px', fontSize: '0.8rem', flex: 1 }}
-                            placeholder="0"
-                          />
-                          <span style={{ fontSize: '0.75rem' }}>%</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
-                      Total Percent: <strong style={{ color: payoutPcts.reduce((a,b)=>a+b, 0) === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
-                        {payoutPcts.reduce((a,b)=>a+b, 0)}%
-                      </strong> (should be 100%)
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '10px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setIsCreateTourOpen(false)}
-                        className="btn btn-secondary"
-                        style={{ padding: '6px 14px', fontSize: '0.85rem' }}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                        style={{ padding: '6px 14px', fontSize: '0.85rem' }}
-                      >
-                        Initialize Draft
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        )}
 
       </div>
     );
