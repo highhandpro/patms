@@ -895,7 +895,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const bountyCount = updatedEntries.filter(e => e.hasBuyIn).length;
     const dealerCount = updatedEntries.filter(e => e.hasDealerAppreciation).length;
 
-    const totalPrizePool = Math.max(0, (buyInCount * t.buyInAmount) + (addonCount * t.addonAmount) - (t.highHandAmount || 0));
+    const netBuyInContribution = t.buyInAmount - t.bountyAmount - t.dealerAppreciationAmount;
+    const totalPrizePool = Math.max(0, (buyInCount * netBuyInContribution) + (addonCount * t.addonAmount) - (t.highHandAmount || 0));
     const totalBountyPool = bountyCount * t.bountyAmount;
     const totalDealerAppreciation = dealerCount * t.dealerAppreciationAmount;
 

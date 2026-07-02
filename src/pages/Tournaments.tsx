@@ -1275,7 +1275,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const bountyCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
   const dealerCount = activeTournament.entries.filter(e => e.hasDealerAppreciation).length;
 
-  const rawPrizePool = (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
+  const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
+  const rawPrizePool = (buyInCount * netBuyIn) + (addonCount * activeTournament.addonAmount);
   const currentPrizePool = activeTournament.status === 'completed' 
     ? activeTournament.totalPrizePool 
     : Math.max(0, rawPrizePool - (activeTournament.highHandAmount || 0));
@@ -2207,7 +2208,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   <div style={{ backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {(() => {
                       const countAddons = activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length;
-                      const rawCalcPrizePool = (activeTournament.entries.filter(e => e.hasBuyIn).length * activeTournament.buyInAmount) + (countAddons * activeTournament.addonAmount);
+                      const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
+              const rawCalcPrizePool = (activeTournament.entries.filter(e => e.hasBuyIn).length * netBuyIn) + (countAddons * activeTournament.addonAmount);
               const calcPrizePool = Math.max(0, rawCalcPrizePool - (activeTournament.highHandAmount || 0));
                       const finalPool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
                         ? activeTournament.overridePrizePool
@@ -2415,7 +2417,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '8px', padding: '12px' }}>
                 <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>Live Payout Breakdown</h4>
                 {(() => {
-                  const rawCalculatedPrizePool = (buyInCount * activeTournament.buyInAmount) + (modalAddons * activeTournament.addonAmount);
+                  const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
+          const rawCalculatedPrizePool = (buyInCount * netBuyIn) + (modalAddons * activeTournament.addonAmount);
           const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - (activeTournament.highHandAmount || 0));
                   const previewRows = modalPayoutPcts.map((pct, idx) => {
                     if (pct <= 0) return null;
