@@ -1030,7 +1030,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               <span>Lock Entries & Start Game</span>
             </button>
           )}
-          {activeTournament.status === 'active' && (
+          {activeTournament.status !== 'completed' && (
             <button className="btn btn-primary" onClick={handleFinalize} style={{ backgroundColor: 'var(--color-gold)', color: '#78350f' }}>
               <Award size={16} />
               <span>Finalize Standings</span>
@@ -1079,7 +1079,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         </div>
       </div>
 
-      {activeTournament.status === 'active' && (
+      {activeTournament.status !== 'completed' && (
         <div className="glass-card" style={{
           background: 'linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%)',
           borderLeft: '4px solid var(--color-gold)',
@@ -1157,7 +1157,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           </>
         )}
 
-        {activeTournament.status === 'active' && (
+        {activeTournament.status !== 'completed' && (
           <>
 
             <button 
