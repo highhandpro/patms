@@ -378,7 +378,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                 ) : (
                   <li><strong>Add-On:</strong> Not available (Freezeout format)</li>
                 )}
-                <li><strong>High Hand Prize:</strong> $100</li>
+                <li><strong>High Hand Prize:</strong> ${tournament.highHandAmount !== undefined ? `$${tournament.highHandAmount}` : '$100'}</li>
                 <li><strong>Maximum Investment:</strong> ${tournament.buyInAmount + tournament.addonAmount + tournament.dealerAppreciationAmount}</li>
               </ul>
               <div style={{ marginTop: '16px', backgroundColor: 'rgba(251, 191, 36, 0.05)', border: '1px solid rgba(251, 191, 36, 0.2)', borderRadius: '8px', padding: '12px 14px', fontSize: '0.85rem', color: 'var(--color-gold)', lineHeight: '1.4' }}>

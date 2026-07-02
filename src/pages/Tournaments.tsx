@@ -95,6 +95,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editLateEntry, setEditLateEntry] = useState('Allowed');
   const [editAddonChips, setEditAddonChips] = useState(10000);
   const [editMaxPlayers, setEditMaxPlayers] = useState(24);
+  const [editHighHand, setEditHighHand] = useState(100);
   const [editFlyerUrl, setEditFlyerUrl] = useState('');
   const [editFlyerType, setEditFlyerType] = useState<'pdf' | 'image' | null>(null);
 
@@ -107,6 +108,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [tourLateEntry, setTourLateEntry] = useState('Allowed');
   const [tourAddonChips, setTourAddonChips] = useState(10000);
   const [tourMaxPlayers, setTourMaxPlayers] = useState(24);
+  const [tourHighHand, setTourHighHand] = useState(100);
 
   useEffect(() => {
     if (state.settings && isCreateTourOpen) {
@@ -451,7 +453,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       tourLateEntry,
       tourAddonChips,
       tourFlyerUrl,
-      tourFlyerType
+      tourFlyerType,
+      tourHighHand
     );
     setIsCreateTourOpen(false);
     setSelectedTournamentId(newId);
@@ -478,6 +481,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditLateEntry(activeTournament.lateEntry || 'Allowed');
     setEditAddonChips(activeTournament.addonChips || 10000);
     setEditMaxPlayers(activeTournament.maxPlayers || 24);
+    setEditHighHand(activeTournament.highHandAmount !== undefined ? activeTournament.highHandAmount : 100);
     setEditFlyerUrl(activeTournament.flyerUrl || '');
     setEditFlyerType(activeTournament.flyerType || null);
     setIsEditTourDetailsOpen(true);
@@ -502,6 +506,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       lateEntry: editLateEntry,
       addonChips: editAddonChips,
       maxPlayers: editMaxPlayers,
+      highHandAmount: editHighHand,
       flyerUrl: editFlyerUrl,
       flyerType: editFlyerType
     });
@@ -749,6 +754,33 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   />
                 </div>
               </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>High Hand Deduction ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={tourHighHand}
+                    onChange={(e) => setTourHighHand(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Max Seats / Players Limit</label>
+                  <input
+                    type="number"
+                    min={2}
+                    required
+                    value={tourMaxPlayers}
+                    onChange={(e) => setTourMaxPlayers(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Column 2: Chips, Rules & Flyer */}
@@ -819,18 +851,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label style={{ fontWeight: 600 }}>Max Seats / Players Limit</label>
-                <input
-                  type="number"
-                  min={2}
-                  required
-                  value={tourMaxPlayers}
-                  onChange={(e) => setTourMaxPlayers(Number(e.target.value))}
-                  className="form-input"
-                  style={{ padding: '10px 14px' }}
-                />
-              </div>
+
 
               <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '12px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
@@ -1197,9 +1218,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const bountyCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
   const dealerCount = activeTournament.entries.filter(e => e.hasDealerAppreciation).length;
 
+  const rawPrizePool = (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
   const currentPrizePool = activeTournament.status === 'completed' 
     ? activeTournament.totalPrizePool 
-    : (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
+    : Math.max(0, rawPrizePool - (activeTournament.highHandAmount || 0));
 
   const currentBountyPool = activeTournament.status === 'completed'
     ? activeTournament.totalBountyPool
@@ -2034,7 +2056,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   <div style={{ backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {(() => {
                       const countAddons = activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length;
-                      const calcPrizePool = (activeTournament.entries.filter(e => e.hasBuyIn).length * activeTournament.buyInAmount) + (countAddons * activeTournament.addonAmount);
+                      const rawCalcPrizePool = (activeTournament.entries.filter(e => e.hasBuyIn).length * activeTournament.buyInAmount) + (countAddons * activeTournament.addonAmount);
+              const calcPrizePool = Math.max(0, rawCalcPrizePool - (activeTournament.highHandAmount || 0));
                       const finalPool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
                         ? activeTournament.overridePrizePool
                         : calcPrizePool;
@@ -2241,7 +2264,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '8px', padding: '12px' }}>
                 <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>Live Payout Breakdown</h4>
                 {(() => {
-                  const calculatedPrizePool = (buyInCount * activeTournament.buyInAmount) + (modalAddons * activeTournament.addonAmount);
+                  const rawCalculatedPrizePool = (buyInCount * activeTournament.buyInAmount) + (modalAddons * activeTournament.addonAmount);
+          const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - (activeTournament.highHandAmount || 0));
                   const previewRows = modalPayoutPcts.map((pct, idx) => {
                     if (pct <= 0) return null;
                     const place = idx + 1;
@@ -2586,6 +2610,33 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     />
                   </div>
                 </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>High Hand Deduction ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      required
+                      value={editHighHand}
+                      onChange={(e) => setEditHighHand(Number(e.target.value))}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Max Seats / Players Limit</label>
+                    <input
+                      type="number"
+                      min={2}
+                      required
+                      value={editMaxPlayers}
+                      onChange={(e) => setEditMaxPlayers(Number(e.target.value))}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Column 2: Chips, Rules & Flyer */}
@@ -2656,18 +2707,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label style={{ fontWeight: 600 }}>Max Seats / Players Limit</label>
-                  <input
-                    type="number"
-                    min={2}
-                    required
-                    value={editMaxPlayers}
-                    onChange={(e) => setEditMaxPlayers(Number(e.target.value))}
-                    className="form-input"
-                    style={{ padding: '10px 14px' }}
-                  />
-                </div>
+
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '12px' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>

@@ -37,7 +37,8 @@ interface AppContextProps {
     lateEntry?: string,
     addonChips?: number,
     flyerUrl?: string,
-    flyerType?: 'pdf' | 'image' | null
+    flyerType?: 'pdf' | 'image' | null,
+    highHandAmount?: number
   ) => string;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
   deleteTournament: (id: string) => void;
@@ -642,7 +643,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     lateEntry?: string,
     addonChips?: number,
     flyerUrl?: string,
-    flyerType?: 'pdf' | 'image' | null
+    flyerType?: 'pdf' | 'image' | null,
+    highHandAmount?: number
   ) => {
     const id = `tour-${Date.now()}`;
     const newTour: Tournament = {
@@ -668,6 +670,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lateEntry: lateEntry || 'Allowed',
       addonChips: addonChips || 10000,
       maxPlayers: maxPlayers || 24,
+      highHandAmount: highHandAmount || 0,
       flyerUrl: flyerUrl || '',
       flyerType: flyerType || null
     };
@@ -892,7 +895,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const bountyCount = updatedEntries.filter(e => e.hasBuyIn).length;
     const dealerCount = updatedEntries.filter(e => e.hasDealerAppreciation).length;
 
-    const totalPrizePool = (buyInCount * t.buyInAmount) + (addonCount * t.addonAmount);
+    const totalPrizePool = Math.max(0, (buyInCount * t.buyInAmount) + (addonCount * t.addonAmount) - (t.highHandAmount || 0));
     const totalBountyPool = bountyCount * t.bountyAmount;
     const totalDealerAppreciation = dealerCount * t.dealerAppreciationAmount;
 

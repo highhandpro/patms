@@ -55,6 +55,7 @@ export interface Tournament {
   lateEntry?: string;
   addonChips?: number;
   maxPlayers: number;
+  highHandAmount?: number;
   flyerUrl?: string;
   flyerType?: 'pdf' | 'image' | null;
 }
