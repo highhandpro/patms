@@ -79,6 +79,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [modalAddons, setModalAddons] = useState(0);
   const [modalPayoutPcts, setModalPayoutPcts] = useState<number[]>([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
 
+  // Edit Tournament Details states
+  const [isEditTourDetailsOpen, setIsEditTourDetailsOpen] = useState(false);
+  const [editTourName, setEditTourName] = useState('');
+  const [editTourDate, setEditTourDate] = useState('');
+  const [editBuyIn, setEditBuyIn] = useState(50);
+  const [editAddon, setEditAddon] = useState(15);
+  const [editBounty, setEditBounty] = useState(20);
+  const [editDealerApp, setEditDealerApp] = useState(5);
+  const [editFlyerUrl, setEditFlyerUrl] = useState('');
+  const [editFlyerType, setEditFlyerType] = useState<'pdf' | 'image' | null>(null);
+
   // Load tournament specific states when ID changes
   const activeTournament = state.tournaments.find(t => t.id === selectedTournamentId) || null;
 
@@ -405,6 +416,37 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setPayoutPcts([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
   };
 
+  const openEditTourDetails = () => {
+    if (!activeTournament) return;
+    setEditTourName(activeTournament.name);
+    setEditTourDate(activeTournament.date);
+    setEditBuyIn(activeTournament.buyInAmount);
+    setEditAddon(activeTournament.addonAmount);
+    setEditBounty(activeTournament.bountyAmount);
+    setEditDealerApp(activeTournament.dealerAppreciationAmount);
+    setEditFlyerUrl(activeTournament.flyerUrl || '');
+    setEditFlyerType(activeTournament.flyerType || null);
+    setIsEditTourDetailsOpen(true);
+  };
+
+  const handleSaveTourDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeTournament) return;
+    
+    await updateTournament(activeTournament.id, {
+      name: editTourName,
+      date: editTourDate,
+      buyInAmount: editBuyIn,
+      addonAmount: editAddon,
+      bountyAmount: editBounty,
+      dealerAppreciationAmount: editDealerApp,
+      flyerUrl: editFlyerUrl,
+      flyerType: editFlyerType
+    });
+    
+    setIsEditTourDetailsOpen(false);
+  };
+
   const handleDeleteTour = (id: string, name: string) => {
     if (confirm(`Are you sure you want to permanently delete tournament "${name}"? This cannot be undone.`)) {
       deleteTournament(id);
@@ -603,6 +645,168 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             </table>
           </div>
         </div>
+
+        {/* Edit Tournament Details Modal */}
+        {isEditTourDetailsOpen && activeTournament && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000001,
+            padding: '20px'
+          }}>
+            <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '700px', backgroundColor: 'var(--bg-surface)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Edit Tournament Details</h3>
+                <button 
+                  onClick={() => setIsEditTourDetailsOpen(false)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveTourDetails} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                
+                {/* Left Column: Metadata & Settings */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>Tournament Name / Number</label>
+                    <input
+                      type="text"
+                      required
+                      value={editTourName}
+                      onChange={(e) => setEditTourName(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>Tournament Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={editTourDate}
+                      onChange={(e) => setEditTourDate(e.target.value)}
+                      onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Buy-in ($)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        required
+                        value={editBuyIn}
+                        onChange={(e) => setEditBuyIn(Number(e.target.value))}
+                        className="form-input"
+                        style={{ padding: '8px 12px' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Add-on ($)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        required
+                        value={editAddon}
+                        onChange={(e) => setEditAddon(Number(e.target.value))}
+                        className="form-input"
+                        style={{ padding: '8px 12px' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Bounty ($)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        required
+                        value={editBounty}
+                        onChange={(e) => setEditBounty(Number(e.target.value))}
+                        className="form-input"
+                        style={{ padding: '8px 12px' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>ToC Fee ($)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        required
+                        value={editDealerApp}
+                        onChange={(e) => setEditDealerApp(Number(e.target.value))}
+                        className="form-input"
+                        style={{ padding: '8px 12px' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Flyer configuration & Actions */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>Flyer / PDF URL</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://example.com/flyer.pdf"
+                      value={editFlyerUrl}
+                      onChange={(e) => setEditFlyerUrl(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>Flyer Type</label>
+                    <select
+                      value={editFlyerType || ''}
+                      onChange={(e) => setEditFlyerType((e.target.value as any) || null)}
+                      className="form-input"
+                      style={{ padding: '8px 12px', cursor: 'pointer' }}
+                    >
+                      <option value="">None (No flyer)</option>
+                      <option value="pdf">PDF Document</option>
+                      <option value="image">Image (PNG, JPG)</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '12px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditTourDetailsOpen(false)}
+                      className="btn btn-secondary"
+                      style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Creation Overlay Modal */}
         {isCreateTourOpen && (
@@ -903,13 +1107,22 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               )}
             </p>
           </div>
-          <button 
-            className="btn btn-secondary"
-            onClick={() => setIsPayoutModalOpen(true)}
-            style={{ fontSize: '0.85rem', padding: '8px 16px', borderColor: 'rgba(251, 191, 36, 0.3)', color: 'var(--color-gold)' }}
-          >
-            {activeTournament.totalAddons !== undefined ? 'Edit Payouts & Add-ons' : 'Enter Add-ons & Payouts'}
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              className="btn btn-secondary"
+              onClick={openEditTourDetails}
+              style={{ fontSize: '0.85rem', padding: '8px 16px' }}
+            >
+              Edit Tournament Details
+            </button>
+            <button 
+              className="btn btn-secondary"
+              onClick={() => setIsPayoutModalOpen(true)}
+              style={{ fontSize: '0.85rem', padding: '8px 16px', borderColor: 'rgba(251, 191, 36, 0.3)', color: 'var(--color-gold)' }}
+            >
+              {activeTournament.totalAddons !== undefined ? 'Edit Payouts & Add-ons' : 'Enter Add-ons & Payouts'}
+            </button>
+          </div>
         </div>
       )}
 
