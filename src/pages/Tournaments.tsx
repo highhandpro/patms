@@ -90,6 +90,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editFlyerUrl, setEditFlyerUrl] = useState('');
   const [editFlyerType, setEditFlyerType] = useState<'pdf' | 'image' | null>(null);
 
+  // Create Tournament Flyer states
+  const [tourFlyerUrl, setTourFlyerUrl] = useState('');
+  const [tourFlyerType, setTourFlyerType] = useState<'pdf' | 'image' | null>(null);
+
   // Load tournament specific states when ID changes
   const activeTournament = state.tournaments.find(t => t.id === selectedTournamentId) || null;
 
@@ -403,7 +407,25 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     e.preventDefault();
     if (!tourName.trim()) return;
 
-    const newId = createTournament(tourName, tourDate, buyIn, addon, bounty, dealerApp, 24, payoutPcts);
+    const newId = createTournament(
+      tourName, 
+      tourDate, 
+      buyIn, 
+      addon, 
+      bounty, 
+      dealerApp, 
+      24, 
+      payoutPcts,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      tourFlyerUrl,
+      tourFlyerType
+    );
     setIsCreateTourOpen(false);
     setSelectedTournamentId(newId);
     
@@ -414,6 +436,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setBounty(state.settings.defaultBounty);
     setDealerApp(state.settings.defaultDealerAppreciation);
     setPayoutPcts([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+    setTourFlyerUrl('');
+    setTourFlyerType(null);
   };
 
   const openEditTourDetails = () => {
@@ -927,6 +951,32 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           style={{ padding: '8px 12px' }}
                         />
                       </div>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Flyer / PDF URL (Google Drive Link)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. https://drive.google.com/..."
+                        value={tourFlyerUrl}
+                        onChange={(e) => setTourFlyerUrl(e.target.value)}
+                        className="form-input"
+                        style={{ padding: '8px 12px' }}
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Flyer Type</label>
+                      <select
+                        value={tourFlyerType || ''}
+                        onChange={(e) => setTourFlyerType((e.target.value as any) || null)}
+                        className="form-input"
+                        style={{ padding: '8px 12px', cursor: 'pointer' }}
+                      >
+                        <option value="">None (No flyer)</option>
+                        <option value="pdf">PDF Document</option>
+                        <option value="image">Image (PNG, JPG)</option>
+                      </select>
                     </div>
                   </div>
 
