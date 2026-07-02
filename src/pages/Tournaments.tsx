@@ -87,8 +87,35 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editAddon, setEditAddon] = useState(15);
   const [editBounty, setEditBounty] = useState(20);
   const [editDealerApp, setEditDealerApp] = useState(5);
+  const [editTime, setEditTime] = useState('7:00 PM');
+  const [editLocation, setEditLocation] = useState('Wasougal Eagles Club');
+  const [editStartingStack, setEditStartingStack] = useState('20,000 Starting Chips');
+  const [editRoundLength, setEditRoundLength] = useState(15);
+  const [editRebuys, setEditRebuys] = useState('None');
+  const [editLateEntry, setEditLateEntry] = useState('Allowed');
+  const [editAddonChips, setEditAddonChips] = useState(10000);
+  const [editMaxPlayers, setEditMaxPlayers] = useState(24);
   const [editFlyerUrl, setEditFlyerUrl] = useState('');
   const [editFlyerType, setEditFlyerType] = useState<'pdf' | 'image' | null>(null);
+
+  // Create Tournament states
+  const [tourTime, setTourTime] = useState('7:00 PM');
+  const [tourLocation, setTourLocation] = useState('Wasougal Eagles Club');
+  const [tourStartingStack, setTourStartingStack] = useState('20,000 Starting Chips');
+  const [tourRoundLength, setTourRoundLength] = useState(15);
+  const [tourRebuys, setTourRebuys] = useState('None');
+  const [tourLateEntry, setTourLateEntry] = useState('Allowed');
+  const [tourAddonChips, setTourAddonChips] = useState(10000);
+  const [tourMaxPlayers, setTourMaxPlayers] = useState(24);
+
+  useEffect(() => {
+    if (state.settings && isCreateTourOpen) {
+      setBuyIn(state.settings.defaultBuyIn || 50);
+      setAddon(state.settings.defaultAddon || 15);
+      setBounty(state.settings.defaultBounty || 20);
+      setDealerApp(state.settings.defaultDealerAppreciation || 5);
+    }
+  }, [state.settings, isCreateTourOpen]);
 
   // Create Tournament Flyer states
   const [tourFlyerUrl, setTourFlyerUrl] = useState('');
@@ -414,15 +441,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       addon, 
       bounty, 
       dealerApp, 
-      24, 
+      tourMaxPlayers, 
       payoutPcts,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+      tourTime,
+      tourLocation,
+      tourStartingStack,
+      tourRoundLength,
+      tourRebuys,
+      tourLateEntry,
+      tourAddonChips,
       tourFlyerUrl,
       tourFlyerType
     );
@@ -431,11 +458,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     
     // Reset inputs
     setTourName('');
-    setBuyIn(state.settings.defaultBuyIn);
-    setAddon(state.settings.defaultAddon);
-    setBounty(state.settings.defaultBounty);
-    setDealerApp(state.settings.defaultDealerAppreciation);
-    setPayoutPcts([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
     setTourFlyerUrl('');
     setTourFlyerType(null);
   };
@@ -448,6 +470,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditAddon(activeTournament.addonAmount);
     setEditBounty(activeTournament.bountyAmount);
     setEditDealerApp(activeTournament.dealerAppreciationAmount);
+    setEditTime(activeTournament.time || '7:00 PM');
+    setEditLocation(activeTournament.location || 'Wasougal Eagles Club');
+    setEditStartingStack(activeTournament.startingStack || '20,000 Starting Chips');
+    setEditRoundLength(activeTournament.roundLength || 15);
+    setEditRebuys(activeTournament.rebuys || 'None');
+    setEditLateEntry(activeTournament.lateEntry || 'Allowed');
+    setEditAddonChips(activeTournament.addonChips || 10000);
+    setEditMaxPlayers(activeTournament.maxPlayers || 24);
     setEditFlyerUrl(activeTournament.flyerUrl || '');
     setEditFlyerType(activeTournament.flyerType || null);
     setIsEditTourDetailsOpen(true);
@@ -464,6 +494,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       addonAmount: editAddon,
       bountyAmount: editBounty,
       dealerAppreciationAmount: editDealerApp,
+      time: editTime,
+      location: editLocation,
+      startingStack: editStartingStack,
+      roundLength: editRoundLength,
+      rebuys: editRebuys,
+      lateEntry: editLateEntry,
+      addonChips: editAddonChips,
+      maxPlayers: editMaxPlayers,
       flyerUrl: editFlyerUrl,
       flyerType: editFlyerType
     });
@@ -589,7 +627,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           </p>
         </div>
 
-        <div className="glass-card" style={{ width: '100%', maxWidth: '850px', backgroundColor: 'var(--bg-surface)', padding: '24px' }}>
+        <div className="glass-card" style={{ width: '100%', maxWidth: '1100px', backgroundColor: 'var(--bg-surface)', padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Tournament Settings</h3>
             <button 
@@ -601,23 +639,26 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             </button>
           </div>
 
-          <form onSubmit={handleCreateTournament} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
+          <form onSubmit={handleCreateTournament} style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.1fr 1fr', gap: '24px' }}>
             
-            {/* Left Column: Metadata & Settings */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '12px' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label style={{ fontWeight: 600 }}>Tournament Name / Number</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Season 4, Game 2"
-                    value={tourName}
-                    onChange={(e) => setTourName(e.target.value)}
-                    className="form-input"
-                    style={{ padding: '10px 14px' }}
-                  />
-                </div>
+            {/* Column 1: General Info & Financials */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-gold)', margin: '0 0 6px 0', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '4px' }}>General & Financials</h4>
+              
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 600 }}>Tournament Name / Number</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Season 4, Game 2"
+                  value={tourName}
+                  onChange={(e) => setTourName(e.target.value)}
+                  className="form-input"
+                  style={{ padding: '10px 14px' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label style={{ fontWeight: 600 }}>Date</label>
                   <input
@@ -630,6 +671,29 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     style={{ padding: '10px 14px' }}
                   />
                 </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Time</label>
+                  <input
+                    type="text"
+                    required
+                    value={tourTime}
+                    onChange={(e) => setTourTime(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 600 }}>Location</label>
+                <input
+                  type="text"
+                  required
+                  value={tourLocation}
+                  onChange={(e) => setTourLocation(e.target.value)}
+                  className="form-input"
+                  style={{ padding: '10px 14px' }}
+                />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -685,10 +749,92 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Column 2: Chips, Rules & Flyer */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-gold)', margin: '0 0 6px 0', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '4px' }}>Chips, Formats & Flyer</h4>
+              
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 600 }}>Starting Stack Description</label>
+                <input
+                  type="text"
+                  required
+                  value={tourStartingStack}
+                  onChange={(e) => setTourStartingStack(e.target.value)}
+                  className="form-input"
+                  style={{ padding: '10px 14px' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Add-on Chips Count</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={tourAddonChips}
+                    onChange={(e) => setTourAddonChips(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Level (mins)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    required
+                    value={tourRoundLength}
+                    onChange={(e) => setTourRoundLength(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Rebuys</label>
+                  <input
+                    type="text"
+                    required
+                    value={tourRebuys}
+                    onChange={(e) => setTourRebuys(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Late Entry</label>
+                  <input
+                    type="text"
+                    required
+                    value={tourLateEntry}
+                    onChange={(e) => setTourLateEntry(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 600 }}>Max Seats / Players Limit</label>
+                <input
+                  type="number"
+                  min={2}
+                  required
+                  value={tourMaxPlayers}
+                  onChange={(e) => setTourMaxPlayers(Number(e.target.value))}
+                  className="form-input"
+                  style={{ padding: '10px 14px' }}
+                />
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '12px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label style={{ fontWeight: 600 }}>Flyer / PDF URL (Google Drive Link)</label>
+                  <label style={{ fontWeight: 600 }}>Flyer / PDF URL (Google Drive)</label>
                   <input
                     type="text"
                     placeholder="e.g. https://drive.google.com/..."
@@ -706,17 +852,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     className="form-input"
                     style={{ padding: '10px 14px', cursor: 'pointer' }}
                   >
-                    <option value="">None (No flyer)</option>
-                    <option value="pdf">PDF Document</option>
-                    <option value="image">Image (PNG, JPG)</option>
+                    <option value="">None</option>
+                    <option value="pdf">PDF</option>
+                    <option value="image">Image</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Payout Structure & Actions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <label style={{ fontWeight: 600, display: 'block' }}>Payout Structure (% per place paid)</label>
+            {/* Column 3: Payout Structure & Actions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-gold)', margin: '0 0 6px 0', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '4px' }}>Payout percentages</h4>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '12px', backgroundColor: 'rgba(0,0,0,0.1)' }}>
                 {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => (
                   <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -769,7 +915,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       </div>
     );
   }
-
   // Render Section 1: Tournament Selector List
   if (!activeTournament) {
     return (
@@ -2304,6 +2449,278 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         </div>
       )}
 
+      {/* Edit Tournament Details Modal */}
+      {isEditTourDetailsOpen && activeTournament && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000001,
+          padding: '20px',
+          overflowY: 'auto'
+        }}>
+          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '1100px', backgroundColor: 'var(--bg-surface)', padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Edit Tournament Details</h3>
+              <button 
+                onClick={() => setIsEditTourDetailsOpen(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveTourDetails} style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.1fr 1fr', gap: '24px' }}>
+              
+              {/* Column 1: General Info & Financials */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-gold)', margin: '0 0 6px 0', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '4px' }}>General & Financials</h4>
+                
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Tournament Name / Number</label>
+                  <input
+                    type="text"
+                    required
+                    value={editTourName}
+                    onChange={(e) => setEditTourName(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={editTourDate}
+                      onChange={(e) => setEditTourDate(e.target.value)}
+                      onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Time</label>
+                    <input
+                      type="text"
+                      required
+                      value={editTime}
+                      onChange={(e) => setEditTime(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Location</label>
+                  <input
+                    type="text"
+                    required
+                    value={editLocation}
+                    onChange={(e) => setEditLocation(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Buy-in ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      required
+                      value={editBuyIn}
+                      onChange={(e) => setEditBuyIn(Number(e.target.value))}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Add-on ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      required
+                      value={editAddon}
+                      onChange={(e) => setEditAddon(Number(e.target.value))}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Bounty ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      required
+                      value={editBounty}
+                      onChange={(e) => setEditBounty(Number(e.target.value))}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>ToC Fee ($)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      required
+                      value={editDealerApp}
+                      onChange={(e) => setEditDealerApp(Number(e.target.value))}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Column 2: Chips, Rules & Flyer */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-gold)', margin: '0 0 6px 0', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '4px' }}>Chips, Formats & Flyer</h4>
+                
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Starting Stack Description</label>
+                  <input
+                    type="text"
+                    required
+                    value={editStartingStack}
+                    onChange={(e) => setEditStartingStack(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Add-on Chips Count</label>
+                    <input
+                      type="number"
+                      min={0}
+                      required
+                      value={editAddonChips}
+                      onChange={(e) => setEditAddonChips(Number(e.target.value))}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Level (mins)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      required
+                      value={editRoundLength}
+                      onChange={(e) => setEditRoundLength(Number(e.target.value))}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Rebuys</label>
+                    <input
+                      type="text"
+                      required
+                      value={editRebuys}
+                      onChange={(e) => setEditRebuys(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Late Entry</label>
+                    <input
+                      type="text"
+                      required
+                      value={editLateEntry}
+                      onChange={(e) => setEditLateEntry(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Max Seats / Players Limit</label>
+                  <input
+                    type="number"
+                    min={2}
+                    required
+                    value={editMaxPlayers}
+                    onChange={(e) => setEditMaxPlayers(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Flyer / PDF URL (Google Drive)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://drive.google.com/..."
+                      value={editFlyerUrl}
+                      onChange={(e) => setEditFlyerUrl(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '10px 14px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontWeight: 600 }}>Flyer Type</label>
+                    <select
+                      value={editFlyerType || ''}
+                      onChange={(e) => setEditFlyerType((e.target.value as any) || null)}
+                      className="form-input"
+                      style={{ padding: '10px 14px', cursor: 'pointer' }}
+                    >
+                      <option value="">None</option>
+                      <option value="pdf">PDF</option>
+                      <option value="image">Image</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Column 3: Actions Only (making layout balanced) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'flex-end', height: '100%' }}>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', width: '100%', paddingBottom: '12px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditTourDetailsOpen(false)}
+                    className="btn btn-secondary"
+                    style={{ padding: '10px 20px' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{ padding: '10px 20px' }}
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
