@@ -621,7 +621,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             zIndex: 1000,
             padding: '40px 20px'
           }}>
-            <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '500px', backgroundColor: 'var(--bg-surface)' }}>
+            <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '700px', backgroundColor: 'var(--bg-surface)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Initialize Tournament</h3>
                 <button 
@@ -641,87 +641,98 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   <button onClick={() => setIsCreateTourOpen(false)} className="btn btn-secondary">Ok</button>
                 </div>
               ) : (
-                <form onSubmit={handleCreateTournament} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>Tournament Name / Number</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Weekly Standings #15"
-                      value={tourName}
-                      onChange={(e) => setTourName(e.target.value)}
-                      className="form-input"
-                    />
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>Tournament Date</label>
-                    <input
-                      type="date"
-                      required
-                      value={tourDate}
-                      onChange={(e) => setTourDate(e.target.value)}
-                      onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
-                      className="form-input"
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <form onSubmit={handleCreateTournament} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  
+                  {/* Left Column: Metadata & Settings */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Buy-in ($)</label>
+                      <label>Tournament Name / Number</label>
                       <input
-                        type="number"
-                        min={0}
+                        type="text"
                         required
-                        value={buyIn}
-                        onChange={(e) => setBuyIn(Number(e.target.value))}
+                        placeholder="e.g. Weekly Standings #15"
+                        value={tourName}
+                        onChange={(e) => setTourName(e.target.value)}
                         className="form-input"
+                        style={{ padding: '8px 12px' }}
                       />
                     </div>
+
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Add-on ($)</label>
+                      <label>Tournament Date</label>
                       <input
-                        type="number"
-                        min={0}
+                        type="date"
                         required
-                        value={addon}
-                        onChange={(e) => setAddon(Number(e.target.value))}
+                        value={tourDate}
+                        onChange={(e) => setTourDate(e.target.value)}
+                        onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
                         className="form-input"
+                        style={{ padding: '8px 12px' }}
                       />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label>Buy-in ($)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          required
+                          value={buyIn}
+                          onChange={(e) => setBuyIn(Number(e.target.value))}
+                          className="form-input"
+                          style={{ padding: '8px 12px' }}
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label>Add-on ($)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          required
+                          value={addon}
+                          onChange={(e) => setAddon(Number(e.target.value))}
+                          className="form-input"
+                          style={{ padding: '8px 12px' }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label>Bounty ($)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          required
+                          value={bounty}
+                          onChange={(e) => setBounty(Number(e.target.value))}
+                          className="form-input"
+                          style={{ padding: '8px 12px' }}
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label>ToC Fee ($)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          required
+                          value={dealerApp}
+                          onChange={(e) => setDealerApp(Number(e.target.value))}
+                          className="form-input"
+                          style={{ padding: '8px 12px' }}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>Bounty ($)</label>
-                      <input
-                        type="number"
-                        min={0}
-                        required
-                        value={bounty}
-                        onChange={(e) => setBounty(Number(e.target.value))}
-                        className="form-input"
-                      />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>ToC Fee ($)</label>
-                      <input
-                        type="number"
-                        min={0}
-                        required
-                        value={dealerApp}
-                        onChange={(e) => setDealerApp(Number(e.target.value))}
-                        className="form-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: '8px' }}>
-                    <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Payout Structure (% per place paid)</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(place => (
-                        <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '0.85rem', width: '45px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                  {/* Right Column: Payout Structure & Actions */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <label style={{ fontWeight: 600, display: 'block', fontSize: '0.85rem' }}>Payout Structure (% per place paid)</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '8px', backgroundColor: 'rgba(0,0,0,0.1)' }}>
+                      {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => (
+                        <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ fontSize: '0.75rem', width: '32px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
                           <input
                             type="number"
                             min={0}
@@ -734,34 +745,36 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               setPayoutPcts(next);
                             }}
                             className="form-input"
-                            style={{ padding: '6px 10px', flex: 1 }}
+                            style={{ padding: '4px 6px', fontSize: '0.8rem', flex: 1 }}
                             placeholder="0"
                           />
-                          <span style={{ fontSize: '0.85rem' }}>%</span>
+                          <span style={{ fontSize: '0.75rem' }}>%</span>
                         </div>
                       ))}
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '6px', textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
                       Total Percent: <strong style={{ color: payoutPcts.reduce((a,b)=>a+b, 0) === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
                         {payoutPcts.reduce((a,b)=>a+b, 0)}%
                       </strong> (should be 100%)
                     </div>
-                  </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setIsCreateTourOpen(false)}
-                      className="btn btn-secondary"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                    >
-                      Initialize Draft
-                    </button>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setIsCreateTourOpen(false)}
+                        className="btn btn-secondary"
+                        style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                      >
+                        Initialize Draft
+                      </button>
+                    </div>
                   </div>
                 </form>
               )}
