@@ -2604,7 +2604,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {subTab === 'summary' && (() => {
         const bustedEntries = activeTournament.entries
           .filter(e => e.eliminatedAt)
-          .sort((a, b) => new Date(a.eliminatedAt!).getTime() - new Date(b.eliminatedAt!).getTime());
+          .sort((a, b) => (a.finishPosition || 0) - (b.finishPosition || 0));
 
         // Calculate total stats for calculations
         const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
@@ -2634,7 +2634,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '2.5px solid var(--border-subtle)' }}>
-                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', width: '120px' }}>Knock-out</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', width: '120px' }}>Position</th>
                     <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)' }}>Player Name</th>
                     <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'center', width: '140px' }}>Points Received</th>
                     <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'center', width: '160px' }}>Bounties Collected</th>
@@ -2642,7 +2642,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {bustedEntries.map((entry, idx) => {
+                  {bustedEntries.map((entry) => {
                     const name = getMemberName(entry.memberId);
                     
                     // Live dynamic calculations
@@ -2665,7 +2665,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(255,255,255,0.005)' }}
                       >
                         <td style={{ padding: '12px 16px', fontWeight: 800, color: 'var(--color-danger)' }}>
-                          #{idx + 1}
+                          #{pos}
                         </td>
                         <td style={{ padding: '12px 16px', fontWeight: 600, color: '#ffffff' }}>
                           {name}
