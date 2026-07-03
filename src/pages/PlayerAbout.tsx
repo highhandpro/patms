@@ -1,6 +1,6 @@
 import React from 'react';
 import { PlayerBanner } from '../components/PlayerBanner';
-import { Info, Coins, Award } from 'lucide-react';
+import { Info, Award } from 'lucide-react';
 
 export const PlayerAbout: React.FC = () => {
   return (
@@ -13,33 +13,17 @@ export const PlayerAbout: React.FC = () => {
         <div className="about-grid">
           
           {/* Card 1: Club Info */}
-          <div className="about-card glass-card">
+          <div className="about-card glass-card" style={{ gridColumn: 'span 2' }}>
             <div className="about-card-header">
               <Info className="about-icon" size={24} />
               <h2>Penny Ante Poker Club</h2>
             </div>
-            <p>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.6' }}>
               Welcome to the Penny Ante Poker Club! We are a local home poker league dedicated to friendly competition, skill building, and camaraderie. We play structured tournaments running on regular schedules with points tracked across the season.
             </p>
-            <p style={{ marginTop: '12px' }}>
+            <p style={{ marginTop: '12px', fontSize: '1.05rem', lineHeight: '1.6' }}>
               Whether you are looking to improve your game, test your tournament strategies, or just meet local poker enthusiasts, our league provides a welcoming and professional structure for players of all experience levels.
             </p>
-          </div>
-
-          {/* Card 2: Tournament Rules */}
-          <div className="about-card glass-card">
-            <div className="about-card-header">
-              <Coins className="about-icon" size={24} />
-              <h2>Tournament Structure</h2>
-            </div>
-            <ul className="about-rules-list">
-              <li><strong>Buy-In:</strong> $50 Buy-In (includes 20,000 Starting Chips, $5 ToC & $20 Bounty).</li>
-              <li><strong>Optional Dealer Appreciation:</strong> $5 for +5,000 Bonus Chips.</li>
-              <li><strong>RSVP & Arrive On Time:</strong> Receive +5,000 Bonus Chips.</li>
-              <li style={{ color: 'var(--color-gold)', fontWeight: 600 }}>
-                Please bring smaller bills instead of $100 bills to help registration go faster! 😄
-              </li>
-            </ul>
           </div>
 
           {/* Card 3: Standings Points Formula */}
