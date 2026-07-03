@@ -1073,9 +1073,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }, { merge: true });
       }
     } else if (approval.type === 'guest') {
-      await setDoc(doc(db, 'members', approval.memberId), {
-        notes: 'Approved Member'
-      }, { merge: true });
+      const newMember: Member = {
+        id: approval.memberId,
+        firstName: approval.firstName,
+        lastName: approval.lastName,
+        phone: approval.phone || '',
+        email: approval.email || '',
+        joinedDate: new Date().toISOString().split('T')[0],
+        isDeleted: false,
+        notes: 'Approved Member',
+        textReminders: approval.textReminders !== undefined ? approval.textReminders : true,
+        emailAnnouncements: approval.emailAnnouncements !== undefined ? approval.emailAnnouncements : true
+      };
+      await setDoc(doc(db, 'members', approval.memberId), newMember);
     }
 
     await deleteDoc(doc(db, 'pendingApprovals', approvalId));
@@ -1085,9 +1095,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const approval = state.pendingApprovals.find(p => p.id === approvalId);
     if (!approval) return;
 
-    if (approval.type === 'guest') {
-      await deleteDoc(doc(db, 'members', approval.memberId));
-    }
+    // No need to delete member from members collection because it hasn't been created yet
+    
 
     await deleteDoc(doc(db, 'pendingApprovals', approvalId));
   };
@@ -1134,18 +1143,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const nextNum = Math.max(100, ...numbers) + 1;
       const guestId = String(nextNum);
 
-      const newMember: Member = {
-        id: guestId,
-        firstName,
-        lastName,
-        phone,
-        email,
-        joinedDate: new Date().toISOString().split('T')[0],
-        isDeleted: false,
-        notes: 'Self-Registered Guest Player',
-        textReminders,
-        emailAnnouncements
-      };
 
       const newApproval: PendingApproval = {
         id: approvalId,
@@ -1160,7 +1157,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         timestamp: new Date().toISOString()
       };
 
-      await setDoc(doc(db, 'members', guestId), newMember);
       await setDoc(doc(db, 'pendingApprovals', approvalId), newApproval);
     }
   };
