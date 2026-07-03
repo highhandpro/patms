@@ -147,7 +147,7 @@ export const PlayerUpdateInfo: React.FC<PlayerUpdateInfoProps> = ({ setActiveTab
         {/* Logo and Header */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
           <img 
-            src="/club-logo.png" 
+            src="/club-logo-skull.png" 
             alt="Penny Ante Poker Club Logo" 
             style={{ width: '80px', height: '80px', objectFit: 'contain' }} 
           />
