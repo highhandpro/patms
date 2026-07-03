@@ -22,6 +22,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [notes, setNotes] = useState('');
+  const [memberIdInput, setMemberIdInput] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Phone input formatting
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +43,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setPhone('');
     setEmail('');
     setNotes('');
+    setMemberIdInput('');
+    setErrorMsg(null);
     setIsAddMemberOpen(true);
   };
 
@@ -51,6 +55,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setPhone(m.phone);
     setEmail(m.email);
     setNotes(m.notes || '');
+    setMemberIdInput(m.id);
+    setErrorMsg(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,7 +73,14 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       });
       setEditingMember(null);
     } else {
-      addMember(firstName, lastName, phone, email, notes);
+      if (memberIdInput.trim()) {
+        const idExists = state.members.some(m => m.id === memberIdInput.trim());
+        if (idExists) {
+          setErrorMsg(`Member ID "${memberIdInput.trim()}" is already assigned. Please use a unique ID.`);
+          return;
+        }
+      }
+      addMember(firstName, lastName, phone, email, notes, memberIdInput.trim());
       setIsAddMemberOpen(false);
     }
 
@@ -77,6 +90,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setPhone('');
     setEmail('');
     setNotes('');
+    setMemberIdInput('');
+    setErrorMsg(null);
   };
 
   const handleDelete = (id: string, name: string) => {
@@ -496,9 +511,45 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 <X size={20} />
               </button>
             </div>
+            {errorMsg && (
+              <div style={{
+                padding: '10px 14px',
+                backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                borderRadius: '8px',
+                color: 'var(--color-danger)',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                marginBottom: '16px'
+              }}>
+                {errorMsg}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label htmlFor="member-id">Member ID</label>
+                <input
+                  id="member-id"
+                  type="text"
+                  disabled={!!editingMember}
+                  placeholder="Auto-generated if left blank"
+                  value={memberIdInput}
+                  onChange={(e) => setMemberIdInput(e.target.value.replace(/\D/g, ''))}
+                  className="form-input"
+                  style={{
+                    opacity: editingMember ? 0.6 : 1,
+                    cursor: editingMember ? 'not-allowed' : 'text'
+                  }}
+                />
+                {editingMember && (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                    Member ID is locked and cannot be changed once assigned.
+                  </span>
+                )}
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label htmlFor="first-name">First Name</label>

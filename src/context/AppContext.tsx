@@ -13,7 +13,7 @@ import {
 interface AppContextProps {
   state: DatabaseState;
   activeSeason: Season | null;
-  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string) => void;
+  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string) => void;
   updateMember: (id: string, updated: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   addSeason: (name: string, startDate: string, endDate: string, isActive: boolean) => void;
@@ -557,13 +557,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeSeason = state.seasons.find(s => s.isActive) || null;
 
   // Member Management
-  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string) => {
-    const numbers = state.members.map(m => {
-      const parsed = parseInt(m.id, 10);
-      return isNaN(parsed) ? 0 : parsed;
-    });
-    const nextNum = Math.max(100, ...numbers) + 1;
-    const id = String(nextNum);
+  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string) => {
+    let id = '';
+    if (customId && customId.trim()) {
+      id = customId.trim();
+    } else {
+      const numbers = state.members.map(m => {
+        const parsed = parseInt(m.id, 10);
+        return isNaN(parsed) ? 0 : parsed;
+      });
+      const nextNum = Math.max(100, ...numbers) + 1;
+      id = String(nextNum);
+    }
 
     const newMember: Member = {
       id,
