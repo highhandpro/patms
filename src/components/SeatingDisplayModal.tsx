@@ -80,7 +80,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: '#0a0a0c',
+        backgroundColor: '#010101',
         backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(212, 163, 89, 0.05) 0%, transparent 50%)',
         color: '#e2e8f0',
         zIndex: 999999,

@@ -110,7 +110,7 @@ export const PlayerUpdateInfo: React.FC<PlayerUpdateInfoProps> = ({ setActiveTab
       minHeight: '100vh',
       width: '100%',
       padding: '40px 20px',
-      backgroundColor: '#090b0f'
+      backgroundColor: '#010101'
     }}>
       {/* Back button link */}
       <button 
