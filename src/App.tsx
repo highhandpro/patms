@@ -19,7 +19,7 @@ import { PlayerLanding } from './pages/PlayerLanding';
 import { PlayerUpdateInfo } from './pages/PlayerUpdateInfo';
 import { useApp } from './context/AppContext';
 import { auth } from './firebase';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 import { ShieldAlert } from 'lucide-react';
 
 function App() {
@@ -320,8 +320,31 @@ function App() {
       setIsAdminPasswordModalOpen(false);
       setPortalMode('admin');
     } catch (err: any) {
-      console.error('Firebase Auth error:', err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      console.error('Firebase Auth error during sign-in:', err);
+      // If user is not found or invalid credentials, attempt auto-registration
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        try {
+          console.log('User not found. Attempting to auto-register new administrator...');
+          await createUserWithEmailAndPassword(auth, adminEmailInput, adminPasswordInput);
+          setIsAdminPasswordModalOpen(false);
+          setPortalMode('admin');
+          return;
+        } catch (createErr: any) {
+          console.error('Firebase Auth error during auto-registration:', createErr);
+          if (createErr.code === 'auth/email-already-in-use') {
+            setAdminPasswordError('Invalid email or password. Please try again.');
+          } else if (createErr.code === 'auth/weak-password') {
+            setAdminPasswordError('Password should be at least 6 characters.');
+          } else if (createErr.code === 'auth/invalid-email') {
+            setAdminPasswordError('Please enter a valid email address.');
+          } else {
+            setAdminPasswordError(createErr.message || 'Authentication failed. Please try again.');
+          }
+          return;
+        }
+      }
+      
+      if (err.code === 'auth/wrong-password') {
         setAdminPasswordError('Invalid email or password. Please try again.');
       } else {
         setAdminPasswordError(err.message || 'Authentication failed. Please try again.');
