@@ -866,6 +866,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     }
   };
 
+  const handleUpdateBounties = async (playerId: string, newCount: number) => {
+    if (!activeTournament) return;
+    const updatedEntries = activeTournament.entries.map(e => {
+      if (e.memberId === playerId) {
+        return {
+          ...e,
+          bountiesCollected: newCount
+        };
+      }
+      return e;
+    });
+    await updateTournament(activeTournament.id, { entries: updatedEntries });
+  };
+
   // Help getters
   const getMemberName = (id: string) => {
     const m = state.members.find(member => member.id === id);
@@ -2397,18 +2411,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {/* Eliminations Tab (Active Game) */}
       {subTab === 'players' && (() => {
         const activePlayers = getActivePlayersList();
-        const half = Math.ceil(activePlayers.length / 2);
-        const activeCol1 = activePlayers.slice(0, half);
-        const activeCol2 = activePlayers.slice(half);
-        const eliminatedEntries = activeTournament.entries
+        const bustedEntries = activeTournament.entries
           .filter(e => e.eliminatedAt)
-          .sort((a, b) => (a.finishPosition || 999) - (b.finishPosition || 999));
+          .sort((a, b) => new Date(a.eliminatedAt!).getTime() - new Date(b.eliminatedAt!).getTime());
 
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }} className="animate-slide-up">
             
             <div style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Tournament Standings & Tracker</h3>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Active Players ({activePlayers.length})</h3>
               <button 
                 className="btn btn-primary" 
                 onClick={() => {
@@ -2424,133 +2435,139 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', alignItems: 'start' }}>
-              
-              {/* Column 1: Active Players */}
-              <div className="glass-card" style={{ padding: '12px 16px', borderColor: 'rgba(16,185,129,0.1)' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '10px', color: 'var(--color-emerald)' }}>
-                  Active Players (Part 1 - {activeCol1.length})
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {activeCol1.map((p, idx) => (
-                    <div 
-                      key={p.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '6px 10px',
-                        borderRadius: '8px',
-                        backgroundColor: 'rgba(255,255,255,0.01)',
-                        border: '1px solid var(--border-subtle)'
-                      }}
-                    >
-                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-                        <span style={{ color: 'var(--color-emerald)', marginRight: '6px', fontWeight: 700 }}>{idx + 1}.</span>
-                        {p.firstName} {p.lastName}
-                      </span>
-                      <button 
-                        onClick={() => {
-                          setEliminatingPlayerId(p.id);
-                          setBountiesWon(0);
-                        }}
-                        className="btn btn-danger"
-                        style={{ padding: '4px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '28px' }}
-                      >
-                        Eliminate
-                      </button>
-                    </div>
-                  ))}
+            {/* 5 Columns Grid of Active Players */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, 1fr)',
+              gap: '12px'
+            }}>
+              {activePlayers.map(p => (
+                <div 
+                  key={p.id}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid var(--border-subtle)',
+                    minHeight: '80px',
+                    gap: '10px'
+                  }}
+                >
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#ffffff', wordBreak: 'break-word' }}>
+                    {p.firstName} {p.lastName}
+                  </span>
+                  <button 
+                    onClick={() => {
+                      setEliminatingPlayerId(p.id);
+                      setBountiesWon(0);
+                    }}
+                    className="btn btn-danger"
+                    style={{ padding: '4px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '28px', width: '100%' }}
+                  >
+                    Bust Out
+                  </button>
                 </div>
-              </div>
-
-              {/* Column 2: Active Players (continuation) */}
-              <div className="glass-card" style={{ padding: '12px 16px', borderColor: 'rgba(16,185,129,0.1)' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '10px', color: 'var(--color-emerald)' }}>
-                  Active Players (Part 2 - {activeCol2.length})
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {activeCol2.map((p, idx) => (
-                    <div 
-                      key={p.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '6px 10px',
-                        borderRadius: '8px',
-                        backgroundColor: 'rgba(255,255,255,0.01)',
-                        border: '1px solid var(--border-subtle)'
-                      }}
-                    >
-                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-                        <span style={{ color: 'var(--color-emerald)', marginRight: '6px', fontWeight: 700 }}>{half + idx + 1}.</span>
-                        {p.firstName} {p.lastName}
-                      </span>
-                      <button 
-                        onClick={() => {
-                          setEliminatingPlayerId(p.id);
-                          setBountiesWon(0);
-                        }}
-                        className="btn btn-danger"
-                        style={{ padding: '4px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '28px' }}
-                      >
-                        Eliminate
-                      </button>
-                    </div>
-                  ))}
+              ))}
+              {activePlayers.length === 0 && (
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                  No active players remaining.
                 </div>
-              </div>
-
-              {/* Column 3: Eliminated Players */}
-              <div className="glass-card" style={{ padding: '12px 16px', borderColor: 'rgba(248,113,113,0.1)' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '10px', color: 'var(--color-danger)' }}>
-                  Eliminated Players ({eliminatedEntries.length})
-                </h4>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '550px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {eliminatedEntries.map((entry) => {
-                    const name = getMemberName(entry.memberId);
-                    const killer = entry.eliminatedBy ? getMemberName(entry.eliminatedBy) : 'None';
-                    
-                    return (
-                      <div 
-                        key={entry.memberId}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '6px 10px',
-                          borderRadius: '8px',
-                          backgroundColor: 'rgba(248,113,113,0.01)',
-                          border: '1px solid rgba(248,113,113,0.1)'
-                        }}
-                      >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-                            {entry.finishPosition ? `#${entry.finishPosition} - ` : ''}
-                            {name}
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
-                            <span>By: <strong style={{ color: 'var(--text-gold)' }}>{killer}</strong></span>
-                            <span>• Bounties: <strong style={{ color: 'var(--text-gold)' }}>{entry.bountiesCollected}</strong></span>
-                            <span>• Total Won: <strong style={{ color: 'var(--color-emerald)' }}>${entry.payoutEarned + (entry.bountiesCollected * activeTournament.bountyAmount)}</strong></span>
-                          </span>
-                        </div>
-                        <button 
-                          onClick={() => undoElimination(activeTournament.id, entry.memberId)}
-                          className="btn btn-ghost"
-                          style={{ padding: '4px 6px', fontSize: '0.75rem', minHeight: 'auto', height: '28px', color: 'var(--text-secondary)' }}
-                        >
-                          Undo
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
+              )}
             </div>
+
+            {/* Bottom Section: Busted Players / Knockout Order */}
+            <div className="glass-card" style={{ padding: '20px', borderColor: 'rgba(248,113,113,0.15)', marginTop: '12px' }}>
+              <h4 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '16px', color: 'var(--color-danger)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>Busted Players / Knockout Order</span>
+                <span style={{ fontSize: '0.85rem', padding: '2px 8px', backgroundColor: 'rgba(248, 113, 113, 0.1)', borderRadius: '12px', fontWeight: 600 }}>
+                  {bustedEntries.length} Busted
+                </span>
+              </h4>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', maxHeight: '450px', overflowY: 'auto', paddingRight: '4px' }}>
+                {bustedEntries.map((entry, idx) => {
+                  const name = getMemberName(entry.memberId);
+                  return (
+                    <div 
+                      key={entry.memberId}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(248,113,113,0.02)',
+                        border: '1px solid rgba(248,113,113,0.08)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                          <span style={{ color: 'var(--color-danger)', marginRight: '6px' }}>{idx + 1}.</span>
+                          {name}
+                        </span>
+                        
+                        {/* Bounty Editor Controls */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Bounties:</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateBounties(entry.memberId, Math.max(0, entry.bountiesCollected - 1))}
+                              className="btn btn-secondary"
+                              style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem' }}
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              min={0}
+                              value={entry.bountiesCollected}
+                              onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
+                              style={{
+                                width: '36px',
+                                height: '22px',
+                                textAlign: 'center',
+                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                border: '1px solid var(--border-subtle)',
+                                color: '#ffffff',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                padding: 0
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateBounties(entry.memberId, entry.bountiesCollected + 1)}
+                              className="btn btn-secondary"
+                              style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem' }}
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={() => undoElimination(activeTournament.id, entry.memberId)}
+                        className="btn btn-ghost"
+                        style={{ padding: '6px 10px', fontSize: '0.8rem', minHeight: 'auto', height: '32px', color: 'var(--text-secondary)' }}
+                      >
+                        Undo
+                      </button>
+                    </div>
+                  );
+                })}
+                {bustedEntries.length === 0 && (
+                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                    No players have busted out yet.
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
         );
       })()}
