@@ -636,13 +636,16 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
 
         {/* Seating Assignments (Public Player View) */}
         {(() => {
-          const savedSeating = localStorage.getItem(`patms_seating_${tournament.id}`);
-          if (!savedSeating) return null;
-          const seatingData = JSON.parse(savedSeating) as Record<string, string[]>;
-          if (Object.keys(seatingData).length === 0) return null;
+          const seatingData = tournament.seating || (() => {
+            const saved = localStorage.getItem(`patms_seating_${tournament.id}`);
+            return saved ? JSON.parse(saved) as Record<string, string[]> : null;
+          })();
+          if (!seatingData || Object.keys(seatingData).length === 0) return null;
 
-          const savedDealers = localStorage.getItem(`patms_dealers_${tournament.id}`);
-          const dealersData = savedDealers ? JSON.parse(savedDealers) as Record<string, string> : {};
+          const dealersData = tournament.dealers || (() => {
+            const saved = localStorage.getItem(`patms_dealers_${tournament.id}`);
+            return saved ? JSON.parse(saved) as Record<string, string> : {};
+          })();
 
           return (
             <div style={{
@@ -820,13 +823,16 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
       {/* Full Screen Seating Assignments Modal */}
       {(() => {
         if (!tournament) return null;
-        const savedSeating = localStorage.getItem(`patms_seating_${tournament.id}`);
-        if (!savedSeating) return null;
-        const seatingData = JSON.parse(savedSeating) as Record<string, string[]>;
-        if (Object.keys(seatingData).length === 0) return null;
+        const seatingData = tournament.seating || (() => {
+          const saved = localStorage.getItem(`patms_seating_${tournament.id}`);
+          return saved ? JSON.parse(saved) as Record<string, string[]> : null;
+        })();
+        if (!seatingData || Object.keys(seatingData).length === 0) return null;
 
-        const savedDealers = localStorage.getItem(`patms_dealers_${tournament.id}`);
-        const dealersData = savedDealers ? JSON.parse(savedDealers) as Record<string, string> : {};
+        const dealersData = tournament.dealers || (() => {
+          const saved = localStorage.getItem(`patms_dealers_${tournament.id}`);
+          return saved ? JSON.parse(saved) as Record<string, string> : {};
+        })();
 
         return (
           <SeatingDisplayModal

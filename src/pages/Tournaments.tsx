@@ -153,30 +153,79 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       else if (activeTournament.status === 'completed') setSubTab('results');
 
       // Load seating
-      const savedSeating = localStorage.getItem(`patms_seating_${activeTournament.id}`);
-      if (savedSeating) {
-        setSeating(JSON.parse(savedSeating));
+      if (activeTournament.seating) {
+        setSeating(activeTournament.seating);
       } else {
-        setSeating({});
+        const savedSeating = localStorage.getItem(`patms_seating_${activeTournament.id}`);
+        if (savedSeating) {
+          try {
+            const parsed = JSON.parse(savedSeating);
+            setSeating(parsed);
+            updateTournament(activeTournament.id, { seating: parsed });
+          } catch (e) {
+            setSeating({});
+          }
+        } else {
+          setSeating({});
+        }
       }
 
       // Load dealers
-      const savedDealers = localStorage.getItem(`patms_dealers_${activeTournament.id}`);
-      if (savedDealers) {
-        setDealers(JSON.parse(savedDealers));
+      if (activeTournament.dealers) {
+        setDealers(activeTournament.dealers);
       } else {
-        setDealers({});
+        const savedDealers = localStorage.getItem(`patms_dealers_${activeTournament.id}`);
+        if (savedDealers) {
+          try {
+            const parsed = JSON.parse(savedDealers);
+            setDealers(parsed);
+            updateTournament(activeTournament.id, { dealers: parsed });
+          } catch (e) {
+            setDealers({});
+          }
+        } else {
+          setDealers({});
+        }
       }
 
       // Load preassigned dealers
-      const savedPreassigned = localStorage.getItem(`patms_preassigned_dealers_${activeTournament.id}`);
-      if (savedPreassigned) {
-        setPreassignedDealers(JSON.parse(savedPreassigned));
+      if (activeTournament.preassignedDealers) {
+        setPreassignedDealers(activeTournament.preassignedDealers);
       } else {
-        setPreassignedDealers([]);
+        const savedPreassigned = localStorage.getItem(`patms_preassigned_dealers_${activeTournament.id}`);
+        if (savedPreassigned) {
+          try {
+            const parsed = JSON.parse(savedPreassigned);
+            setPreassignedDealers(parsed);
+            updateTournament(activeTournament.id, { preassignedDealers: parsed });
+          } catch (e) {
+            setPreassignedDealers([]);
+          }
+        } else {
+          setPreassignedDealers([]);
+        }
       }
     }
   }, [selectedTournamentId, activeTournament?.status]);
+
+  // Keep local states synced in real-time if updated on other clients
+  useEffect(() => {
+    if (activeTournament) {
+      if (activeTournament.seating) {
+        setSeating(activeTournament.seating);
+      }
+      if (activeTournament.dealers) {
+        setDealers(activeTournament.dealers);
+      }
+      if (activeTournament.preassignedDealers) {
+        setPreassignedDealers(activeTournament.preassignedDealers);
+      }
+    }
+  }, [
+    activeTournament?.seating,
+    activeTournament?.dealers,
+    activeTournament?.preassignedDealers
+  ]);
 
   // Seating Algorithm based on seatingChart.xlsx rules
   const getTableConfigurations = (n: number) => {
@@ -245,6 +294,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(newSeating));
     setPreassignedDealers(updatedPreassigned);
     localStorage.setItem(`patms_preassigned_dealers_${activeTournament.id}`, JSON.stringify(updatedPreassigned));
+    updateTournament(activeTournament.id, {
+      dealers: newDealers,
+      seating: newSeating,
+      preassignedDealers: updatedPreassigned
+    });
   };
 
   const toggleCheckedInDealer = (playerId: string) => {
@@ -272,6 +326,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       }
       setPreassignedDealers(updated);
       localStorage.setItem(`patms_preassigned_dealers_${activeTournament.id}`, JSON.stringify(updated));
+      updateTournament(activeTournament.id, { preassignedDealers: updated });
     }
   };
 
@@ -409,6 +464,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     
     setDealers(bestDealers);
     localStorage.setItem(`patms_dealers_${activeTournament.id}`, JSON.stringify(bestDealers));
+
+    updateTournament(activeTournament.id, {
+      seating: bestSeating,
+      dealers: bestDealers
+    });
   };
 
   const movePlayerTable = (playerId: string, sourceTable: string, targetTable: string) => {
@@ -441,6 +501,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       setDealers(updatedDealers);
       localStorage.setItem(`patms_dealers_${activeTournament!.id}`, JSON.stringify(updatedDealers));
     }
+
+    updateTournament(activeTournament!.id, {
+      seating: updated,
+      dealers: updatedDealers
+    });
   };
 
   const exportTournamentResultsCSV = (tournament: any) => {
@@ -501,7 +566,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       };
 
       const updatedEntries = [...activeTournament.entries, newEntry];
-      await updateTournament(activeTournament.id, { entries: updatedEntries });
 
       const updatedSeating = { ...seating };
       const targetPlayers = [...(updatedSeating[selectedLateTable] || Array(10).fill(""))];
@@ -515,6 +579,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
       setSeating(updatedSeating);
       localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updatedSeating));
+      await updateTournament(activeTournament.id, {
+        entries: updatedEntries,
+        seating: updatedSeating
+      });
 
       setIsLateEntryOpen(false);
       setSelectedLateMemberId('');

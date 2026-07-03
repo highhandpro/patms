@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { Settings as SettingsType } from '../types';
 import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircle, AlertTriangle } from 'lucide-react';
+import { calculateStandings } from '../utils/stats';
+import * as XLSX from 'xlsx';
 
 export const Settings: React.FC = () => {
-  const { state, updateSettings, exportDatabase, importDatabase, resetDatabaseToDefault } = useApp();
+  const { state, activeSeason, updateSettings, exportDatabase, importDatabase, resetDatabaseToDefault } = useApp();
 
   // Settings states
   const [buyIn, setBuyIn] = useState(state.settings.defaultBuyIn);
@@ -44,6 +46,67 @@ export const Settings: React.FC = () => {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
+  };
+
+  const handleExcelExport = () => {
+    const activeMembers = state.members.filter(m => !m.isDeleted);
+    const membersData = activeMembers.map(m => ({
+      'Member ID': m.id,
+      'First Name': m.firstName,
+      'Last Name': m.lastName,
+      'Phone': m.phone || '',
+      'Email': m.email || '',
+      'Joined Date': m.joinedDate ? m.joinedDate.split('T')[0] : '',
+      'Nickname': m.nickname || '',
+      'Text Reminders': m.textReminders ? 'Yes' : 'No',
+      'Email Announcements': m.emailAnnouncements ? 'Yes' : 'No',
+      'Notes': m.notes || ''
+    }));
+
+    const standingsData = activeSeason 
+      ? calculateStandings(state, activeSeason.id).map((s, index) => ({
+          'Rank': index + 1,
+          'Player Name': s.name,
+          'Member ID': s.memberId,
+          'Total Points': s.points,
+          'Events Played': s.played,
+          'Wins': s.wins,
+          'Top 10 Finishes': s.top10,
+          'Bounties Collected': s.bounties,
+          'Total Earnings ($)': s.earnings
+        }))
+      : [];
+
+    const wb = XLSX.utils.book_new();
+    
+    const wsMembers = XLSX.utils.json_to_sheet(membersData);
+    XLSX.utils.book_append_sheet(wb, wsMembers, 'Members List');
+
+    if (activeSeason) {
+      const wsStandings = XLSX.utils.json_to_sheet(standingsData);
+      XLSX.utils.book_append_sheet(wb, wsStandings, `Standings - ${activeSeason.name}`);
+    }
+
+    const fitToColumn = (data: any[]) => {
+      if (data.length === 0) return [];
+      const keys = Object.keys(data[0]);
+      return keys.map(key => {
+        const maxLength = data.reduce((max, r) => {
+          const val = r[key] ? r[key].toString() : '';
+          return Math.max(max, val.length);
+        }, key.length);
+        return { wch: maxLength + 3 };
+      });
+    };
+
+    wsMembers['!cols'] = fitToColumn(membersData);
+    if (activeSeason && standingsData.length > 0) {
+      const wsStandings = wb.Sheets[`Standings - ${activeSeason.name}`];
+      wsStandings['!cols'] = fitToColumn(standingsData);
+    }
+
+    const date = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `penny_ante_poker_database_${date}.xlsx`);
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,6 +254,11 @@ export const Settings: React.FC = () => {
               <button onClick={handleExport} className="btn btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }}>
                 <Download size={18} />
                 <span>Export Database (.json)</span>
+              </button>
+
+              <button onClick={handleExcelExport} className="btn btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--color-emerald)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+                <Download size={18} />
+                <span>Export Database to Excel (.xlsx)</span>
               </button>
 
               <div style={{ position: 'relative' }}>

@@ -60,6 +60,9 @@ export interface Tournament {
   highHandAmount?: number;
   flyerUrl?: string;
   flyerType?: 'pdf' | 'image' | null;
+  seating?: Record<string, string[]>;
+  dealers?: Record<string, string>;
+  preassignedDealers?: string[];
 }
 
 export interface Season {
