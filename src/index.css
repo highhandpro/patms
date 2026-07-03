@@ -1746,3 +1746,43 @@ body.display-mode-active .main-content {
   max-width: 100% !important;
   padding: 0 !important;
 }
+
+/* Active Players Column Layout */
+.active-players-columns-grid {
+  column-count: 5;
+  column-gap: 12px;
+  width: 100%;
+}
+
+.player-active-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  gap: 8px;
+  break-inside: avoid;
+  margin-bottom: 8px;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+  .active-players-columns-grid {
+    column-count: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .active-players-columns-grid {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .active-players-columns-grid {
+    column-count: 1;
+  }
+}

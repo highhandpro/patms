@@ -1643,7 +1643,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       )}
 
       {/* Navigation tabs inside tournament */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', gap: '12px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid var(--border-subtle)', gap: '8px' }}>
         {activeTournament.status === 'draft' ? (
           <>
             <button 
@@ -1653,7 +1653,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 borderRadius: '8px 8px 0 0',
                 borderBottom: subTab === 'rsvp' ? '3px solid var(--color-emerald)' : 'none',
                 color: subTab === 'rsvp' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'rsvp' ? 600 : 400
+                fontWeight: subTab === 'rsvp' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
               }}
             >
               RSVP
@@ -1665,7 +1667,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 borderRadius: '8px 8px 0 0',
                 borderBottom: subTab === 'checkin' ? '3px solid var(--color-emerald)' : 'none',
                 color: subTab === 'checkin' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'checkin' ? 600 : 400
+                fontWeight: subTab === 'checkin' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
               }}
             >
               Check-in Registration
@@ -1677,7 +1681,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 borderRadius: '8px 8px 0 0',
                 borderBottom: subTab === 'seating' ? '3px solid var(--color-emerald)' : 'none',
                 color: subTab === 'seating' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'seating' ? 600 : 400
+                fontWeight: subTab === 'seating' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
               }}
             >
               Seating Preview
@@ -1692,7 +1698,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 borderRadius: '8px 8px 0 0',
                 borderBottom: subTab === 'rsvp' ? '3px solid var(--color-emerald)' : 'none',
                 color: subTab === 'rsvp' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'rsvp' ? 600 : 400
+                fontWeight: subTab === 'rsvp' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
               }}
             >
               RSVP
@@ -1704,7 +1712,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 borderRadius: '8px 8px 0 0',
                 borderBottom: subTab === 'checkin' ? '3px solid var(--color-emerald)' : 'none',
                 color: subTab === 'checkin' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'checkin' ? 600 : 400
+                fontWeight: subTab === 'checkin' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
               }}
             >
               Edit Check-ins
@@ -1716,7 +1726,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 borderRadius: '8px 8px 0 0',
                 borderBottom: subTab === 'seating' ? '3px solid var(--color-emerald)' : 'none',
                 color: subTab === 'seating' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'seating' ? 600 : 400
+                fontWeight: subTab === 'seating' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
               }}
             >
               Seating Tables
@@ -1728,10 +1740,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 borderRadius: '8px 8px 0 0',
                 borderBottom: subTab === 'players' ? '3px solid var(--color-emerald)' : 'none',
                 color: subTab === 'players' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'players' ? 600 : 400
+                fontWeight: subTab === 'players' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
               }}
             >
-              Eliminations Tracker ({activeTournament.entries.filter(e => !e.eliminatedAt).length} alive)
+              Players ({activeTournament.entries.filter(e => !e.eliminatedAt).length} alive)
             </button>
           </>
         ) : (
@@ -2435,48 +2449,32 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </button>
             </div>
 
-            {/* 5 Columns Grid of Active Players */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(5, 1fr)',
-              gap: '12px'
-            }}>
-              {activePlayers.map(p => (
-                <div 
-                  key={p.id}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    padding: '12px',
-                    borderRadius: '12px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                    border: '1px solid var(--border-subtle)',
-                    minHeight: '80px',
-                    gap: '10px'
-                  }}
-                >
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#ffffff', wordBreak: 'break-word' }}>
-                    {p.firstName} {p.lastName}
-                  </span>
-                  <button 
-                    onClick={() => {
-                      setEliminatingPlayerId(p.id);
-                      setBountiesWon(0);
-                    }}
-                    className="btn btn-danger"
-                    style={{ padding: '4px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '28px', width: '100%' }}
-                  >
-                    Bust Out
-                  </button>
-                </div>
-              ))}
-              {activePlayers.length === 0 && (
-                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem' }}>
-                  No active players remaining.
-                </div>
-              )}
-            </div>
+            {/* 5 Columns Responsive Grid of Active Players */}
+            {activePlayers.length > 0 ? (
+              <div className="active-players-columns-grid">
+                {activePlayers.map(p => (
+                  <div key={p.id} className="player-active-card">
+                    <span style={{ fontWeight: 600, fontSize: '0.82rem', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, paddingRight: '4px' }}>
+                      {p.firstName} {p.lastName}
+                    </span>
+                    <button 
+                      onClick={() => {
+                        setEliminatingPlayerId(p.id);
+                        setBountiesWon(0);
+                      }}
+                      className="btn btn-danger"
+                      style={{ padding: '2px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '24px', flexShrink: 0 }}
+                    >
+                      Bust Out
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem', width: '100%' }}>
+                No active players remaining.
+              </div>
+            )}
 
             {/* Bottom Section: Busted Players / Knockout Order */}
             <div className="glass-card" style={{ padding: '20px', borderColor: 'rgba(248,113,113,0.15)', marginTop: '12px' }}>
