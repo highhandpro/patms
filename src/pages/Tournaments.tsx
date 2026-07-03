@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import type { Member } from '../types';
 import { formatDate } from '../utils/stats';
@@ -28,6 +29,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     updateTournament, 
     deleteTournament,
     registerPlayer,
+    updateMember,
     unregisterPlayer,
     toggleEntryBuyIn,
     toggleEntryDealerApp,
@@ -83,6 +85,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
   const [modalAddons, setModalAddons] = useState(0);
   const [modalPayoutPcts, setModalPayoutPcts] = useState<number[]>([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+
+  // Check-in phone prompt modal states
+  const [phonePromptMember, setPhonePromptMember] = useState<Member | null>(null);
+  const [phonePromptInput, setPhonePromptInput] = useState('');
+  const [onPhonePromptComplete, setOnPhonePromptComplete] = useState<((phone?: string) => void) | null>(null);
 
   // Edit Tournament Details states
   const [isEditTourDetailsOpen, setIsEditTourDetailsOpen] = useState(false);
@@ -477,37 +484,43 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       if (!confirm) return;
     }
 
-    const newEntry = {
-      memberId: selectedLateMemberId,
-      hasBuyIn: true,
-      hasAddon: false,
-      hasDealerAppreciation: true,
-      payoutEarned: 0,
-      bountiesCollected: 0,
-      pointsEarned: 0,
-      createdAt: new Date().toISOString()
-    };
+    triggerCheckInFlow(selectedLateMemberId, async (phone) => {
+      if (phone) {
+        await updateMember(selectedLateMemberId, { phone });
+      }
 
-    const updatedEntries = [...activeTournament.entries, newEntry];
-    updateTournament(activeTournament.id, { entries: updatedEntries });
+      const newEntry = {
+        memberId: selectedLateMemberId,
+        hasBuyIn: true,
+        hasAddon: false,
+        hasDealerAppreciation: true,
+        payoutEarned: 0,
+        bountiesCollected: 0,
+        pointsEarned: 0,
+        createdAt: new Date().toISOString()
+      };
 
-    const updatedSeating = { ...seating };
-    const targetPlayers = [...(updatedSeating[selectedLateTable] || Array(10).fill(""))];
-    const firstEmptyIdx = targetPlayers.indexOf("");
-    if (firstEmptyIdx !== -1) {
-      targetPlayers[firstEmptyIdx] = selectedLateMemberId;
-    } else {
-      targetPlayers.push(selectedLateMemberId);
-    }
-    updatedSeating[selectedLateTable] = targetPlayers;
+      const updatedEntries = [...activeTournament.entries, newEntry];
+      await updateTournament(activeTournament.id, { entries: updatedEntries });
 
-    setSeating(updatedSeating);
-    localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updatedSeating));
+      const updatedSeating = { ...seating };
+      const targetPlayers = [...(updatedSeating[selectedLateTable] || Array(10).fill(""))];
+      const firstEmptyIdx = targetPlayers.indexOf("");
+      if (firstEmptyIdx !== -1) {
+        targetPlayers[firstEmptyIdx] = selectedLateMemberId;
+      } else {
+        targetPlayers.push(selectedLateMemberId);
+      }
+      updatedSeating[selectedLateTable] = targetPlayers;
 
-    setIsLateEntryOpen(false);
-    setSelectedLateMemberId('');
-    setSelectedLateTable('');
-    setLateSearchQuery('');
+      setSeating(updatedSeating);
+      localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updatedSeating));
+
+      setIsLateEntryOpen(false);
+      setSelectedLateMemberId('');
+      setSelectedLateTable('');
+      setLateSearchQuery('');
+    });
   };
 
   const handleCreateTournament = (e: React.FormEvent) => {
@@ -653,9 +666,51 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         );
       });
 
+  const triggerCheckInFlow = (memberId: string, onConfirm: (phone?: string) => void) => {
+    const member = state.members.find(m => m.id === memberId);
+    if (member && (!member.phone || !member.phone.trim())) {
+      setPhonePromptMember(member);
+      setPhonePromptInput('');
+      setOnPhonePromptComplete(() => onConfirm);
+    } else {
+      onConfirm();
+    }
+  };
+
   const handlePlayerSelect = (m: Member) => {
     if (activeTournament) {
-      registerPlayer(activeTournament.id, m.id);
+      if (subTab === 'checkin') {
+        triggerCheckInFlow(m.id, async (phone) => {
+          if (phone) {
+            await updateMember(m.id, { phone });
+          }
+          const exists = activeTournament.entries.some(e => e.memberId === m.id);
+          let updatedEntries = [];
+          if (exists) {
+            updatedEntries = activeTournament.entries.map(e => 
+              e.memberId === m.id 
+                ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                : e
+            );
+          } else {
+            const newEntry = {
+              memberId: m.id,
+              hasBuyIn: true,
+              hasAddon: false,
+              hasDealerAppreciation: true,
+              bountiesCollected: 0,
+              pointsEarned: 0,
+              payoutEarned: 0,
+              seatingSeatNumber: 0,
+              seatingTableNumber: 0
+            };
+            updatedEntries = [...activeTournament.entries, newEntry];
+          }
+          await updateTournament(activeTournament.id, { entries: updatedEntries });
+        });
+      } else {
+        registerPlayer(activeTournament.id, m.id);
+      }
       setSearchQuery('');
       setShowDropdown(false);
 
@@ -1674,13 +1729,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             <tr key={entry.memberId}>
                               <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
                                 <button
-                                  onClick={async () => {
-                                    await updateTournament(activeTournament.id, {
-                                      entries: activeTournament.entries.map(e => 
-                                        e.memberId === entry.memberId 
-                                          ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
-                                          : e
-                                      )
+                                  onClick={() => {
+                                    triggerCheckInFlow(entry.memberId, async (phone) => {
+                                      if (phone) {
+                                        await updateMember(entry.memberId, { phone });
+                                      }
+                                      await updateTournament(activeTournament.id, {
+                                        entries: activeTournament.entries.map(e => 
+                                          e.memberId === entry.memberId 
+                                            ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                            : e
+                                        )
+                                      });
                                     });
                                   }}
                                   className="btn btn-primary"
@@ -1747,13 +1807,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             <tr key={entry.memberId}>
                               <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
                                 <button
-                                  onClick={async () => {
-                                    await updateTournament(activeTournament.id, {
-                                      entries: activeTournament.entries.map(e => 
-                                        e.memberId === entry.memberId 
-                                          ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
-                                          : e
-                                      )
+                                  onClick={() => {
+                                    triggerCheckInFlow(entry.memberId, async (phone) => {
+                                      if (phone) {
+                                        await updateMember(entry.memberId, { phone });
+                                      }
+                                      await updateTournament(activeTournament.id, {
+                                        entries: activeTournament.entries.map(e => 
+                                          e.memberId === entry.memberId 
+                                            ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                            : e
+                                        )
+                                      });
                                     });
                                   }}
                                   className="btn btn-primary"
@@ -1820,13 +1885,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             <tr key={entry.memberId}>
                               <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
                                 <button
-                                  onClick={async () => {
-                                    await updateTournament(activeTournament.id, {
-                                      entries: activeTournament.entries.map(e => 
-                                        e.memberId === entry.memberId 
-                                          ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
-                                          : e
-                                      )
+                                  onClick={() => {
+                                    triggerCheckInFlow(entry.memberId, async (phone) => {
+                                      if (phone) {
+                                        await updateMember(entry.memberId, { phone });
+                                      }
+                                      await updateTournament(activeTournament.id, {
+                                        entries: activeTournament.entries.map(e => 
+                                          e.memberId === entry.memberId 
+                                            ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                            : e
+                                        )
+                                      });
                                     });
                                   }}
                                   className="btn btn-primary"
@@ -3247,6 +3317,124 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             </form>
           </div>
         </div>
+      )}
+      {/* Missing Phone Number Prompt Modal */}
+      {phonePromptMember && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div className="glass-card animate-scale-up" style={{
+            width: '100%',
+            maxWidth: '450px',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                color: 'var(--color-emerald)',
+                padding: '8px',
+                borderRadius: '8px',
+                display: 'inline-flex'
+              }}>
+                <ShieldAlert size={24} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>Verify Phone Number</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                  Confirming check-in for <strong>{phonePromptMember.firstName} {phonePromptMember.lastName}</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>
+                Phone Number (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="(XXX) XXX-XXXX"
+                value={phonePromptInput}
+                onChange={(e) => {
+                  let val = e.target.value.replace(/\D/g, '');
+                  if (val.length > 10) val = val.substring(0, 10);
+                  let formatted = val;
+                  if (val.length > 6) {
+                    formatted = `(${val.substring(0, 3)}) ${val.substring(3, 6)}-${val.substring(6)}`;
+                  } else if (val.length > 3) {
+                    formatted = `(${val.substring(0, 3)}) ${val.substring(3)}`;
+                  } else if (val.length > 0) {
+                    formatted = `(${val}`;
+                  }
+                  setPhonePromptInput(formatted);
+                }}
+                className="form-input"
+                style={{ fontSize: '1.1rem', letterSpacing: '0.5px' }}
+                autoFocus
+              />
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
+                Providing a phone number helps notify players about seating and event updates.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setPhonePromptMember(null);
+                  setOnPhonePromptComplete(null);
+                }}
+                className="btn btn-secondary"
+                style={{ padding: '8px 16px', fontSize: '0.9rem' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onPhonePromptComplete) {
+                    onPhonePromptComplete("");
+                  }
+                  setPhonePromptMember(null);
+                  setOnPhonePromptComplete(null);
+                }}
+                className="btn btn-ghost"
+                style={{ padding: '8px 16px', fontSize: '0.9rem', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}
+              >
+                Skip & Check In
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onPhonePromptComplete) {
+                    onPhonePromptComplete(phonePromptInput);
+                  }
+                  setPhonePromptMember(null);
+                  setOnPhonePromptComplete(null);
+                }}
+                className="btn btn-primary"
+                style={{ padding: '8px 16px', fontSize: '0.9rem' }}
+              >
+                Save & Check In
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
