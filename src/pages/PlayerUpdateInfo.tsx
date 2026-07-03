@@ -293,50 +293,6 @@ export const PlayerUpdateInfo: React.FC<PlayerUpdateInfoProps> = ({ setActiveTab
             />
           </div>
 
-          {/* Communication Checkboxes */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            backgroundColor: 'rgba(13, 82, 54, 0.05)',
-            border: '1px solid rgba(13, 82, 54, 0.1)',
-            borderRadius: '10px',
-            padding: '14px 16px',
-            fontSize: '0.9rem',
-            fontWeight: 600,
-            color: '#0d5236'
-          }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-              <input 
-                type="checkbox"
-                disabled={isSubmitted}
-                checked={textReminders}
-                onChange={(e) => setTextReminders(e.target.checked)}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  accentColor: '#0d5236',
-                  cursor: 'pointer'
-                }}
-              />
-              Send me tournament registration reminders by text.
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-              <input 
-                type="checkbox"
-                disabled={isSubmitted}
-                checked={emailAnnouncements}
-                onChange={(e) => setEmailAnnouncements(e.target.checked)}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  accentColor: '#0d5236',
-                  cursor: 'pointer'
-                }}
-              />
-              Send me tournament announcements by email.
-            </label>
-          </div>
 
           {/* Submit Button */}
           {!isSubmitted && (
