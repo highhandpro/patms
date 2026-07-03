@@ -39,22 +39,34 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
         className="upcoming-events-banner-container"
         style={{
           width: '100%',
-          overflow: 'hidden',
+          minHeight: '180px',
+          backgroundImage: "url('/upcoming-events-bg.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
           borderRadius: '16px',
           boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
           marginBottom: '32px',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '24px'
         }}
       >
-        <img 
-          src="/upcoming-events-banner.png" 
-          alt="Upcoming Events" 
+        <h1 
           style={{
-            width: '100%',
-            height: 'auto',
-            display: 'block'
+            fontSize: '3rem',
+            fontWeight: 800,
+            color: '#010101',
+            margin: 0,
+            letterSpacing: '-0.02em',
+            textAlign: 'center',
+            textShadow: '0 2px 4px rgba(255, 255, 255, 0.3)'
           }}
-        />
+        >
+          Upcoming Event
+        </h1>
       </div>
 
       <div className="player-page-content">
