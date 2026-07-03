@@ -1715,6 +1715,22 @@ p {
   }
 }
 
+.rsvp-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 1200px) {
+  .rsvp-columns-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media (max-width: 768px) {
+  .rsvp-columns-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Display Mode Overrides to Hide Sidebar & Expand Main Panel */
 body.display-mode-active .sidebar,
 body.display-mode-active .admin-portal-layout > .sidebar {

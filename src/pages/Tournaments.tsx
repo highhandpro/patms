@@ -1522,108 +1522,274 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {/* Sub-tab contents */}
 
       {/* RSVP Tab */}
-      {subTab === 'rsvp' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
-          <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px', alignItems: 'start' }}>
-            {renderFastPlayerLookup("Fast RSVP Player Lookup")}
+      {subTab === 'rsvp' && (() => {
+        const rsvpEntries = activeTournament.entries
+          .filter(e => !e.hasBuyIn)
+          .sort((a, b) => {
+            const mA = state.members.find(m => m.id === a.memberId);
+            const mB = state.members.find(m => m.id === b.memberId);
+            const nameA = mA ? `${mA.firstName} ${mA.lastName}` : '';
+            const nameB = mB ? `${mB.firstName} ${mB.lastName}` : '';
+            return nameA.localeCompare(nameB);
+          });
+        const rsvpSize = Math.ceil(rsvpEntries.length / 3);
+        const rsvpCol1 = rsvpEntries.slice(0, rsvpSize);
+        const rsvpCol2 = rsvpEntries.slice(rsvpSize, rsvpSize * 2);
+        const rsvpCol3 = rsvpEntries.slice(rsvpSize * 2);
 
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>RSVP Summary</h4>
-              <div style={{ fontSize: '1.5rem', color: 'var(--color-emerald)', fontWeight: 700 }}>
-                {activeTournament.entries.filter(e => !e.hasBuyIn).length} Players
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
+            <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px', alignItems: 'start' }}>
+              {renderFastPlayerLookup("Fast RSVP Player Lookup")}
+
+              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>RSVP Summary</h4>
+                <div style={{ fontSize: '1.5rem', color: 'var(--color-emerald)', fontWeight: 700 }}>
+                  {rsvpEntries.length} Players
+                </div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
+                  These players have registered to attend. Click **Check In** to confirm their attendance and buy-in investment.
+                </p>
               </div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
-                These players have registered to attend. Click **Check In** to confirm their attendance and buy-in investment.
-              </p>
+            </div>
+
+            <div className="glass-card">
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>Registered RSVPs (Unconfirmed Check-ins)</h4>
+              {rsvpEntries.length > 0 ? (
+                <div className="rsvp-columns-grid" style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: '20px',
+                  alignItems: 'start'
+                }}>
+                  {/* Column 1 */}
+                  <div className="table-container" style={{ margin: 0 }}>
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '80px' }}></th>
+                          <th>Player Name</th>
+                          <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
+                          <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rsvpCol1.map((entry) => {
+                          const m = state.members.find(member => member.id === entry.memberId);
+                          if (!m) return null;
+
+                          return (
+                            <tr key={entry.memberId}>
+                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
+                                <button
+                                  onClick={async () => {
+                                    await updateTournament(activeTournament.id, {
+                                      entries: activeTournament.entries.map(e => 
+                                        e.memberId === entry.memberId 
+                                          ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                          : e
+                                      )
+                                    });
+                                  }}
+                                  className="btn btn-primary"
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px' }}
+                                >
+                                  Check In
+                                </button>
+                              </td>
+                              <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
+                              <td style={{ textAlign: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleCheckedInDealer(entry.memberId)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1.25rem',
+                                    opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
+                                    filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
+                                    transition: 'all 0.15s ease',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title="Toggle Player Dealer status"
+                                >
+                                  👑
+                                </button>
+                              </td>
+                              <td style={{ textAlign: 'right', paddingRight: '8px' }}>
+                                <button
+                                  onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Column 2 */}
+                  <div className="table-container" style={{ margin: 0 }}>
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '80px' }}></th>
+                          <th>Player Name</th>
+                          <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
+                          <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rsvpCol2.map((entry) => {
+                          const m = state.members.find(member => member.id === entry.memberId);
+                          if (!m) return null;
+
+                          return (
+                            <tr key={entry.memberId}>
+                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
+                                <button
+                                  onClick={async () => {
+                                    await updateTournament(activeTournament.id, {
+                                      entries: activeTournament.entries.map(e => 
+                                        e.memberId === entry.memberId 
+                                          ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                          : e
+                                      )
+                                    });
+                                  }}
+                                  className="btn btn-primary"
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px' }}
+                                >
+                                  Check In
+                                </button>
+                              </td>
+                              <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
+                              <td style={{ textAlign: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleCheckedInDealer(entry.memberId)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1.25rem',
+                                    opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
+                                    filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
+                                    transition: 'all 0.15s ease',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title="Toggle Player Dealer status"
+                                >
+                                  👑
+                                </button>
+                              </td>
+                              <td style={{ textAlign: 'right', paddingRight: '8px' }}>
+                                <button
+                                  onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Column 3 */}
+                  <div className="table-container" style={{ margin: 0 }}>
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '80px' }}></th>
+                          <th>Player Name</th>
+                          <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
+                          <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rsvpCol3.map((entry) => {
+                          const m = state.members.find(member => member.id === entry.memberId);
+                          if (!m) return null;
+
+                          return (
+                            <tr key={entry.memberId}>
+                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
+                                <button
+                                  onClick={async () => {
+                                    await updateTournament(activeTournament.id, {
+                                      entries: activeTournament.entries.map(e => 
+                                        e.memberId === entry.memberId 
+                                          ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                          : e
+                                      )
+                                    });
+                                  }}
+                                  className="btn btn-primary"
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px' }}
+                                >
+                                  Check In
+                                </button>
+                              </td>
+                              <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
+                              <td style={{ textAlign: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleCheckedInDealer(entry.memberId)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1.25rem',
+                                    opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
+                                    filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
+                                    transition: 'all 0.15s ease',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title="Toggle Player Dealer status"
+                                >
+                                  👑
+                                </button>
+                              </td>
+                              <td style={{ textAlign: 'right', paddingRight: '8px' }}>
+                                <button
+                                  onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  No unconfirmed RSVPs. All registered players are checked in!
+                </div>
+              )}
             </div>
           </div>
-
-          <div className="glass-card">
-            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>Registered RSVPs (Unconfirmed Check-ins)</h4>
-            {activeTournament.entries.filter(e => !e.hasBuyIn).length > 0 ? (
-              <div className="table-container">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Player Name</th>
-                      <th>ID</th>
-                      <th style={{ textAlign: 'center' }}>Dealer?</th>
-                      <th style={{ textAlign: 'center' }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeTournament.entries
-                      .filter(e => !e.hasBuyIn)
-                      .sort((a, b) => Number(a.memberId) - Number(b.memberId))
-                      .map((entry) => {
-                        const m = state.members.find(member => member.id === entry.memberId);
-                        if (!m) return null;
-
-                      return (
-                        <tr key={entry.memberId}>
-                          <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
-                          <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
-                          <td style={{ textAlign: 'center' }}>
-                            <button
-                              type="button"
-                              onClick={() => toggleCheckedInDealer(entry.memberId)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                fontSize: '1.25rem',
-                                opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
-                                filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
-                                transition: 'all 0.15s ease',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                              title="Toggle Player Dealer status"
-                            >
-                              👑
-                            </button>
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <div style={{ display: 'inline-flex', gap: '8px' }}>
-                              <button
-                                onClick={async () => {
-                                  await updateTournament(activeTournament.id, {
-                                    entries: activeTournament.entries.map(e => 
-                                      e.memberId === entry.memberId 
-                                        ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
-                                        : e
-                                    )
-                                  });
-                                }}
-                                className="btn btn-primary"
-                                style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                              >
-                                Check In
-                              </button>
-                              <button
-                                onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
-                                className="btn btn-secondary"
-                                style={{ padding: '6px 12px', fontSize: '0.85rem', color: 'var(--color-danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                No unconfirmed RSVPs. All registered players are checked in!
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Check-in Tab */}
       {subTab === 'checkin' && (
