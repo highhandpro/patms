@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import type { Member } from '../types';
 import { formatDate } from '../utils/stats';
@@ -54,6 +54,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // Player search in checkin
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Search input refs for autofocusing
+  const rsvpSearchRef = useRef<HTMLInputElement>(null);
+  const checkinSearchRef = useRef<HTMLInputElement>(null);
+  const lateSearchRef = useRef<HTMLInputElement>(null);
 
   // Seating State (stored in localStorage keyed by tournament ID)
   const [seating, setSeating] = useState<Record<string, string[]>>({});
@@ -653,15 +658,29 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       registerPlayer(activeTournament.id, m.id);
       setSearchQuery('');
       setShowDropdown(false);
+
+      // Auto-focus the active lookup input back
+      setTimeout(() => {
+        if (subTab === 'rsvp') {
+          rsvpSearchRef.current?.focus();
+        } else if (subTab === 'checkin') {
+          if (activeTournament.status === 'draft') {
+            checkinSearchRef.current?.focus();
+          } else {
+            lateSearchRef.current?.focus();
+          }
+        }
+      }, 50);
     }
   };
 
-  const renderFastPlayerLookup = (title: string) => (
+  const renderFastPlayerLookup = (title: string, inputRef: React.RefObject<HTMLInputElement | null>) => (
     <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{title}</h4>
 
       <div style={{ position: 'relative', width: '100%' }}>
         <input
+          ref={inputRef}
           type="text"
           placeholder="Type name, phone number, or Member ID..."
           value={searchQuery}
@@ -1613,7 +1632,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
             <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px', alignItems: 'start' }}>
-              {renderFastPlayerLookup("Fast RSVP Player Lookup")}
+              {renderFastPlayerLookup("Fast RSVP Player Lookup", rsvpSearchRef)}
 
               <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>RSVP Summary</h4>
@@ -1869,7 +1888,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
           {activeTournament.status === 'draft' ? (
             <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px' }}>
-              {renderFastPlayerLookup("Fast Player Lookup")}
+              {renderFastPlayerLookup("Fast Player Lookup", checkinSearchRef)}
 
               {/* Configure Game Pricing */}
               <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1979,7 +1998,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </div>
             </div>
           ) : (
-            renderFastPlayerLookup("Fast Player Lookup (Late Entry / Registration)")
+            renderFastPlayerLookup("Fast Player Lookup (Late Entry / Registration)", lateSearchRef)
           )}
           
           {/* Checked-in list */}
