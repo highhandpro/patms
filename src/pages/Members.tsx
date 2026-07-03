@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { calculateMemberStats } from '../utils/stats';
 import { Search, UserPlus, Phone, Mail, Calendar, Eye, Edit2, Trash2, X } from 'lucide-react';
@@ -468,7 +469,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       </div>
 
       {/* Add / Edit Modal Overlay */}
-      {(isAddMemberOpen || editingMember) && (
+      {(isAddMemberOpen || editingMember) && createPortal(
         <div style={{
           position: 'fixed',
           top: 0,
@@ -480,7 +481,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          zIndex: 1000,
+          zIndex: 999999,
           padding: '20px'
         }}>
           <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '500px', backgroundColor: 'var(--bg-surface)' }}>
@@ -579,11 +580,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Member Statistics Profile Modal */}
-      {selectedMemberForProfile && profileStats && (
+      {selectedMemberForProfile && profileStats && createPortal(
         <div style={{
           position: 'fixed',
           top: 0,
@@ -595,7 +597,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          zIndex: 1000,
+          zIndex: 999999,
           padding: '20px'
         }}>
           <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-surface)' }}>
@@ -717,7 +719,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
