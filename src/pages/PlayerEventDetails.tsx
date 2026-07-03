@@ -105,6 +105,10 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
     return nameA.localeCompare(nameB);
   });
 
+  const registeredHalf = Math.ceil(sortedRegistered.length / 2);
+  const registeredCol1 = sortedRegistered.slice(0, registeredHalf);
+  const registeredCol2 = sortedRegistered.slice(registeredHalf);
+
   // Waitlist sorted chronologically by registration date
   const sortedWaitlist = [...waitlistedEntries].sort((a, b) => {
     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -528,33 +532,61 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                   <p style={{ margin: 0 }}>No players registered yet. Be the first to RSVP!</p>
                 </div>
               ) : (
-                <div style={{
+                <div className="registered-players-grid" style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                  gap: '10px',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '16px',
                   padding: '4px 0'
                 }}>
-                  {sortedRegistered.map((entry, index) => {
-                    const info = getMemberInitials(entry.memberId);
-                    return (
-                      <div key={entry.memberId} style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: '8px',
-                        padding: '8px 10px',
-                        fontSize: '0.85rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }} title={info.full}>
-                        <span style={{ color: 'var(--color-emerald)', fontWeight: 700, fontSize: '0.75rem', width: '16px' }}>{index + 1}</span>
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{info.full}</span>
-                      </div>
-                    );
-                  })}
+                  {/* Column 1 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {registeredCol1.map((entry, index) => {
+                      const info = getMemberInitials(entry.memberId);
+                      return (
+                        <div key={entry.memberId} style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: '8px',
+                          padding: '8px 10px',
+                          fontSize: '0.85rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }} title={info.full}>
+                          <span style={{ color: 'var(--color-emerald)', fontWeight: 700, fontSize: '0.75rem', width: '20px' }}>{index + 1}</span>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{info.full}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Column 2 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {registeredCol2.map((entry, index) => {
+                      const info = getMemberInitials(entry.memberId);
+                      return (
+                        <div key={entry.memberId} style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: '8px',
+                          padding: '8px 10px',
+                          fontSize: '0.85rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }} title={info.full}>
+                          <span style={{ color: 'var(--color-emerald)', fontWeight: 700, fontSize: '0.75rem', width: '20px' }}>{registeredHalf + index + 1}</span>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{info.full}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>

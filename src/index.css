@@ -1704,6 +1704,17 @@ p {
   }
 }
 
+.registered-players-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .registered-players-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Display Mode Overrides to Hide Sidebar & Expand Main Panel */
 body.display-mode-active .sidebar,
 body.display-mode-active .admin-portal-layout > .sidebar {

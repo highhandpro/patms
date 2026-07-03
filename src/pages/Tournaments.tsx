@@ -1999,8 +1999,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {/* Eliminations Tab (Active Game) */}
       {subTab === 'players' && (() => {
         const activePlayers = getActivePlayersList();
-        const activeCol1 = activePlayers.filter((_, idx) => idx % 2 === 0);
-        const activeCol2 = activePlayers.filter((_, idx) => idx % 2 === 1);
+        const half = Math.ceil(activePlayers.length / 2);
+        const activeCol1 = activePlayers.slice(0, half);
+        const activeCol2 = activePlayers.slice(half);
         const eliminatedEntries = activeTournament.entries
           .filter(e => e.eliminatedAt)
           .sort((a, b) => (a.finishPosition || 999) - (b.finishPosition || 999));
@@ -2008,7 +2009,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Tournament Standings & Tracker</h3>
               <button 
                 className="btn btn-primary" 
@@ -2033,7 +2034,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   Active Players (Part 1 - {activeCol1.length})
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {activeCol1.map((p) => (
+                  {activeCol1.map((p, idx) => (
                     <div 
                       key={p.id}
                       style={{
@@ -2046,7 +2047,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         border: '1px solid var(--border-subtle)'
                       }}
                     >
-                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{p.firstName} {p.lastName}</span>
+                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--color-emerald)', marginRight: '6px', fontWeight: 700 }}>{idx + 1}.</span>
+                        {p.firstName} {p.lastName}
+                      </span>
                       <button 
                         onClick={() => {
                           setEliminatingPlayerId(p.id);
@@ -2068,7 +2072,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   Active Players (Part 2 - {activeCol2.length})
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {activeCol2.map((p) => (
+                  {activeCol2.map((p, idx) => (
                     <div 
                       key={p.id}
                       style={{
@@ -2081,7 +2085,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         border: '1px solid var(--border-subtle)'
                       }}
                     >
-                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{p.firstName} {p.lastName}</span>
+                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--color-emerald)', marginRight: '6px', fontWeight: 700 }}>{half + idx + 1}.</span>
+                        {p.firstName} {p.lastName}
+                      </span>
                       <button 
                         onClick={() => {
                           setEliminatingPlayerId(p.id);
