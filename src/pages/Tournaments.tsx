@@ -2428,6 +2428,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const bustedEntries = activeTournament.entries
           .filter(e => e.eliminatedAt)
           .sort((a, b) => new Date(a.eliminatedAt!).getTime() - new Date(b.eliminatedAt!).getTime());
+        const totalBountiesPaid = activeTournament.entries.reduce((sum: number, e: any) => sum + (e.bountiesCollected || 0), 0);
+        const totalBountiesAvailable = activeTournament.entries.filter((e: any) => e.hasBuyIn).length;
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }} className="animate-slide-up">
@@ -2478,10 +2480,25 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
             {/* Bottom Section: Busted Players / Knockout Order */}
             <div className="glass-card" style={{ padding: '20px', borderColor: 'rgba(248,113,113,0.15)', marginTop: '12px' }}>
-              <h4 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '16px', color: 'var(--color-danger)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h4 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '16px', color: 'var(--color-danger)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span>Busted Players / Knockout Order</span>
                 <span style={{ fontSize: '0.85rem', padding: '2px 8px', backgroundColor: 'rgba(248, 113, 113, 0.1)', borderRadius: '12px', fontWeight: 600 }}>
                   {bustedEntries.length} Busted
+                </span>
+                <span style={{ 
+                  fontSize: '0.85rem', 
+                  padding: '2px 8px', 
+                  borderRadius: '12px', 
+                  fontWeight: 600,
+                  backgroundColor: totalBountiesPaid > totalBountiesAvailable ? 'rgba(244, 63, 94, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                  border: totalBountiesPaid > totalBountiesAvailable 
+                    ? '1px solid rgba(244, 63, 94, 0.4)' 
+                    : (totalBountiesPaid === totalBountiesAvailable ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(255, 255, 255, 0.1)'),
+                  color: totalBountiesPaid > totalBountiesAvailable 
+                    ? 'var(--color-danger)' 
+                    : (totalBountiesPaid === totalBountiesAvailable ? 'var(--color-emerald)' : 'var(--text-secondary)')
+                }}>
+                  Bounties Paid: {totalBountiesPaid} of {totalBountiesAvailable}
                 </span>
               </h4>
 
