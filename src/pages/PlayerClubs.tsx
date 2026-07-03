@@ -31,9 +31,6 @@ export const PlayerClubs: React.FC<PlayerClubsProps> = ({
                 📍 1910 Main St,<br />
                 Washougal, WA 98671
               </p>
-              <p style={{ marginTop: '12px' }}>
-                Our main season games are hosted at the Washougal Eagles Club. Equipped with custom poker tables, ergonomic seating, dedicated dealers, and tournament displays.
-              </p>
             </div>
           </div>
 
