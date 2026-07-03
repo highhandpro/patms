@@ -7,9 +7,10 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   onSwitchPortal?: () => void;
   onLogoutAdmin?: () => void;
+  adminEmail?: string | null;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin, adminEmail }) => {
   const { activeSeason, state } = useApp();
   const pendingApprovalsCount = state.pendingApprovals?.length || 0;
 
@@ -18,7 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
     { id: 'members', name: 'Members', icon: Users },
     { id: 'tournaments', name: 'Tournaments', icon: Trophy },
     { id: 'standings', name: 'Standings', icon: Award },
-    { id: 'settings', name: 'Settings', icon: SettingsIcon },
+    ...(adminEmail === 'steerbully777@gmail.com' ? [] : [{ id: 'settings', name: 'Settings', icon: SettingsIcon }]),
   ];
 
   return (

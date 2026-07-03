@@ -20,6 +20,7 @@ import { PlayerUpdateInfo } from './pages/PlayerUpdateInfo';
 import { useApp } from './context/AppContext';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { ShieldAlert } from 'lucide-react';
 
 function App() {
   // Admin tabs: dashboard, members, tournaments, standings, settings
@@ -72,6 +73,9 @@ function App() {
   // Admin Authentication states
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
     return sessionStorage.getItem('patms_admin_auth') === 'true';
+  });
+  const [adminEmail, setAdminEmail] = useState<string | null>(() => {
+    return sessionStorage.getItem('patms_admin_email') || null;
   });
   const [isAdminPasswordModalOpen, setIsAdminPasswordModalOpen] = useState(false);
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
@@ -279,10 +283,14 @@ function App() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         sessionStorage.setItem('patms_admin_auth', 'true');
+        sessionStorage.setItem('patms_admin_email', user.email || '');
         setIsAdminAuthenticated(true);
+        setAdminEmail(user.email || '');
       } else {
         sessionStorage.removeItem('patms_admin_auth');
+        sessionStorage.removeItem('patms_admin_email');
         setIsAdminAuthenticated(false);
+        setAdminEmail(null);
         setPortalMode(prev => prev === 'admin' ? 'player' : prev);
       }
     });
@@ -383,6 +391,20 @@ function App() {
       case 'standings':
         return <Standings />;
       case 'settings':
+        if (adminEmail === 'steerbully777@gmail.com') {
+          return (
+            <div className="glass-card text-center animate-slide-up" style={{ padding: '60px 40px', maxWidth: '600px', margin: '80px auto 0 auto' }}>
+              <ShieldAlert size={64} style={{ color: 'var(--color-danger)', marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }} />
+              <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '12px' }}>Access Denied</h1>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
+                You do not have administrative permissions to view or edit the club settings.
+              </p>
+              <button className="btn btn-primary" style={{ marginLeft: 'auto', marginRight: 'auto' }} onClick={() => setActiveTab('dashboard')}>
+                Return to Dashboard
+              </button>
+            </div>
+          );
+        }
         return <Settings />;
       default:
         return <Dashboard setActiveTab={setActiveTab} setSelectedTournamentId={setSelectedTournamentId} setIsCreateTourOpen={setIsCreateTourOpen} setIsAddMemberOpen={setIsAddMemberOpen} />;
@@ -1023,6 +1045,7 @@ function App() {
         setActiveTab={handleTabChange} 
         onSwitchPortal={() => setPortalMode('player')}
         onLogoutAdmin={handleAdminLogout}
+        adminEmail={adminEmail}
       />
       <main className="main-content">
         {renderAdminContent()}
