@@ -4,6 +4,8 @@ import { useApp } from '../context/AppContext';
 import type { Member } from '../types';
 import { formatDate } from '../utils/stats';
 import { SeatingDisplayModal } from '../components/SeatingDisplayModal';
+import { EliminationModal } from '../components/EliminationModal';
+import { LateEntryModal } from '../components/LateEntryModal';
 import { 
   Trophy, Play, RotateCcw, Plus, Trash2, 
   UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award
@@ -2554,77 +2556,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       })()}
 
           {/* Elimination details prompt modal */}
-          {eliminatingPlayerId && (
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.6)',
-              backdropFilter: 'blur(4px)',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: '20px',
-              zIndex: 1000001
-            }}>
-              <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', backgroundColor: 'var(--bg-surface)' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '20px' }}>
-                  Eliminate {getMemberName(eliminatingPlayerId)}
-                </h3>
-
-                <div className="form-group">
-                  <label style={{ display: 'block', marginBottom: '12px', fontWeight: 600 }}>Number of Bounties Won</label>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', margin: '12px 0' }}>
-                    {[0, 1, 2, 3, 4, 5].map(num => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => setBountiesWon(num)}
-                        className={`btn ${bountiesWon === num ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{
-                          width: '45px',
-                          height: '45px',
-                          borderRadius: '50%',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1.1rem',
-                          fontWeight: 700,
-                          padding: 0,
-                          border: bountiesWon === num ? '2px solid var(--color-emerald)' : '1px solid var(--border-subtle)'
-                        }}
-                      >
-                        {num}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="form-group" style={{ marginTop: '16px', marginBottom: 0 }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>Or enter custom bounties won:</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={bountiesWon}
-                      onChange={(e) => setBountiesWon(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="form-input"
-                      style={{ textAlign: 'center', padding: '8px 12px', fontSize: '1rem', width: '100%' }}
-                      placeholder="Enter bounties won"
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
-                  <button onClick={() => setEliminatingPlayerId(null)} className="btn btn-secondary">
-                    Cancel
-                  </button>
-                  <button onClick={submitElimination} className="btn btn-danger">
-                    Confirm Elimination
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          <EliminationModal
+            isOpen={!!eliminatingPlayerId}
+            playerName={eliminatingPlayerId ? getMemberName(eliminatingPlayerId) : ''}
+            bountiesWon={bountiesWon}
+            setBountiesWon={setBountiesWon}
+            onCancel={() => setEliminatingPlayerId(null)}
+            onConfirm={submitElimination}
+          />
 
           {/* Finalize Payouts Modal */}
           {showFinalizeModal && activeTournament && (
@@ -2953,150 +2892,23 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       )}
 
       {/* Late Entry Overlay Modal */}
-      {isLateEntryOpen && activeTournament && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1001,
-          padding: '20px'
-        }}>
-          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '450px', backgroundColor: 'var(--bg-surface)', display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Add Late Entry</h3>
-            
-            {/* Search Input for Member Lookup */}
-            <div className="form-group" style={{ position: 'relative', marginBottom: 0 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px', fontSize: '0.85rem' }}>Search Registry Player</label>
-              <input
-                type="text"
-                placeholder="Type member name or ID..."
-                value={lateSearchQuery}
-                onChange={(e) => {
-                  setLateSearchQuery(e.target.value);
-                  setShowLateDropdown(true);
-                }}
-                onFocus={() => setShowLateDropdown(true)}
-                className="form-input"
-                style={{ padding: '10px 14px' }}
-              />
-
-              {showLateDropdown && lateSearchQuery.trim() !== '' && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  backgroundColor: 'var(--bg-surface)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '10px',
-                  maxHeight: '180px',
-                  overflowY: 'auto',
-                  zIndex: 20,
-                  boxShadow: 'var(--shadow-md)'
-                }}>
-                  {(() => {
-                    const registeredIds = activeTournament.entries.map(e => e.memberId);
-                    const matched = state.members
-                      .filter(m => !registeredIds.includes(m.id))
-                      .filter(m => `${m.firstName} ${m.lastName}`.toLowerCase().includes(lateSearchQuery.toLowerCase()) || m.id.toLowerCase().includes(lateSearchQuery.toLowerCase()));
-
-                    if (matched.length > 0) {
-                      return matched.map(m => (
-                        <div
-                          key={m.id}
-                          onClick={() => {
-                            setSelectedLateMemberId(m.id);
-                            setLateSearchQuery(`${m.firstName} ${m.lastName}`);
-                            setShowLateDropdown(false);
-                          }}
-                          style={{
-                            padding: '10px 14px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid var(--border-subtle)'
-                          }}
-                          className="interactive"
-                        >
-                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{m.firstName} {m.lastName}</span>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.8' + 'rem' }}>{m.id}</span>
-                        </div>
-                      ));
-                    }
-
-                    return (
-                      <div style={{ padding: '12px 16px', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.85rem' }}>
-                        No unregistered members match.
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-            </div>
-
-            {selectedLateMemberId && (
-              <div style={{ fontSize: '0.85rem', padding: '10px 12px', backgroundColor: 'rgba(16, 185, 129, 0.06)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', color: 'var(--color-emerald)' }}>
-                Selected Player: <strong>{getMemberName(selectedLateMemberId)} ({selectedLateMemberId})</strong>
-              </div>
-            )}
-
-            {/* Select Destination Table */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px', fontSize: '0.85rem' }}>Assign to Table</label>
-              <select
-                value={selectedLateTable}
-                onChange={(e) => setSelectedLateTable(e.target.value)}
-                className="form-input"
-                style={{ padding: '10px 14px' }}
-              >
-                <option value="" disabled>-- Select a Table --</option>
-                {Object.keys(seating).map(tableName => {
-                  const currentSize = seating[tableName]?.filter(id => id !== "").length ?? 0;
-                  const isFull = currentSize >= 10;
-                  return (
-                    <option key={tableName} value={tableName} disabled={isFull}>
-                      {tableName.toUpperCase()} ({currentSize}/10 seated) {isFull ? ' (FULL)' : ''}
-                    </option>
-                  );
-                })}
-                {Object.keys(seating).length < 5 && (
-                  <option value="create_new">
-                    + Create New Table
-                  </option>
-                )}
-              </select>
-            </div>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
-              <button
-                type="button"
-                onClick={() => setIsLateEntryOpen(false)}
-                className="btn btn-secondary"
-                style={{ padding: '8px 16px' }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={submitLateEntry}
-                className="btn btn-primary"
-                disabled={!selectedLateMemberId || !selectedLateTable}
-                style={{ padding: '8px 16px' }}
-              >
-                Confirm late entry
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LateEntryModal
+        isOpen={isLateEntryOpen}
+        activeTournament={activeTournament}
+        members={state.members}
+        seating={seating}
+        selectedLateMemberId={selectedLateMemberId}
+        setSelectedLateMemberId={setSelectedLateMemberId}
+        selectedLateTable={selectedLateTable}
+        setSelectedLateTable={setSelectedLateTable}
+        lateSearchQuery={lateSearchQuery}
+        setLateSearchQuery={setLateSearchQuery}
+        showLateDropdown={showLateDropdown}
+        setShowLateDropdown={setShowLateDropdown}
+        getMemberName={getMemberName}
+        onCancel={() => setIsLateEntryOpen(false)}
+        onSubmit={submitLateEntry}
+      />
 
       {/* Edit Tournament Details Modal */}
       {isEditTourDetailsOpen && activeTournament && (
