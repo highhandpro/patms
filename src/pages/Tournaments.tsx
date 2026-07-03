@@ -1542,6 +1542,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <tr>
                       <th>Player Name</th>
                       <th>ID</th>
+                      <th style={{ textAlign: 'center' }}>Dealer?</th>
                       <th style={{ textAlign: 'center' }}>Action</th>
                     </tr>
                   </thead>
@@ -1554,6 +1555,27 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         <tr key={entry.memberId}>
                           <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
                           <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
+                          <td style={{ textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => toggleCheckedInDealer(entry.memberId)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '1.25rem',
+                                opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
+                                filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
+                                transition: 'all 0.15s ease',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Toggle Player Dealer status"
+                            >
+                              👑
+                            </button>
+                          </td>
                           <td style={{ textAlign: 'center' }}>
                             <div style={{ display: 'inline-flex', gap: '8px' }}>
                               <button
@@ -1889,16 +1911,35 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           >
                             <span 
                               style={{ 
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
                                 fontWeight: 500,
-                                cursor: 'pointer',
                                 color: isDealer ? 'var(--color-gold)' : 'inherit',
                                 userSelect: 'none'
                               }}
-                              onDoubleClick={() => toggleDealerStatus(playerId, tableName)}
-                              title="Double-click to toggle Dealer status"
                             >
-                              <span style={{ color: 'var(--text-muted)', marginRight: '8px' }}>Seat {idx + 1}:</span>
-                              {isDealer ? '👑 ' : ''}
+                              <span style={{ color: 'var(--text-muted)', marginRight: '2px' }}>Seat {idx + 1}:</span>
+                              <button
+                                type="button"
+                                onClick={() => toggleDealerStatus(playerId, tableName)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  fontSize: '1rem',
+                                  opacity: isDealer ? 1 : 0.2,
+                                  filter: isDealer ? 'grayscale(0)' : 'grayscale(100%)',
+                                  transition: 'all 0.15s ease',
+                                  padding: '2px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                title="Toggle Dealer status"
+                              >
+                                👑
+                              </button>
                               {getMemberName(playerId)}
                             </span>
 
