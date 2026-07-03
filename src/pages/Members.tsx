@@ -427,12 +427,6 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                           <Mail size={12} style={{ color: 'var(--text-muted)' }} />
                           {m.email || 'No email'}
                         </span>
-                        {(m.textReminders !== false || m.emailAnnouncements !== false) && (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--color-emerald)', display: 'flex', gap: '8px', marginTop: '2px', fontWeight: 600 }}>
-                            {m.textReminders !== false && <span>📱 SMS</span>}
-                            {m.emailAnnouncements !== false && <span>✉️ Email</span>}
-                          </span>
-                        )}
                       </div>
                     </td>
                     <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
