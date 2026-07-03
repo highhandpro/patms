@@ -660,7 +660,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     return activeTournament.entries
       .filter(e => !e.eliminatedAt)
       .map(e => state.members.find(m => m.id === e.memberId))
-      .filter(Boolean) as Member[];
+      .filter(Boolean)
+      .sort((a, b) => {
+        const nameA = `${a?.firstName} ${a?.lastName}`;
+        const nameB = `${b?.firstName} ${b?.lastName}`;
+        return nameA.localeCompare(nameB);
+      }) as Member[];
   };
 
   // Render Section 1: Tournament Selector List
@@ -1462,16 +1467,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               RSVP
             </button>
             <button 
-              className={`btn btn-ghost ${subTab === 'players' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('players')}
+              className={`btn btn-ghost ${subTab === 'checkin' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('checkin')}
               style={{
                 borderRadius: '8px 8px 0 0',
-                borderBottom: subTab === 'players' ? '3px solid var(--color-emerald)' : 'none',
-                color: subTab === 'players' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'players' ? 600 : 400
+                borderBottom: subTab === 'checkin' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'checkin' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'checkin' ? 600 : 400
               }}
             >
-              Eliminations Tracker ({activeTournament.entries.filter(e => !e.eliminatedAt).length} alive)
+              Edit Check-ins
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'seating' ? 'active-subtab' : ''}`}
@@ -1486,16 +1491,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               Seating Tables
             </button>
             <button 
-              className={`btn btn-ghost ${subTab === 'checkin' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('checkin')}
+              className={`btn btn-ghost ${subTab === 'players' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('players')}
               style={{
                 borderRadius: '8px 8px 0 0',
-                borderBottom: subTab === 'checkin' ? '3px solid var(--color-emerald)' : 'none',
-                color: subTab === 'checkin' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'checkin' ? 600 : 400
+                borderBottom: subTab === 'players' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'players' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'players' ? 600 : 400
               }}
             >
-              Edit Check-ins
+              Eliminations Tracker ({activeTournament.entries.filter(e => !e.eliminatedAt).length} alive)
             </button>
           </>
         ) : (
@@ -1547,9 +1552,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {activeTournament.entries.filter(e => !e.hasBuyIn).map((entry) => {
-                      const m = state.members.find(member => member.id === entry.memberId);
-                      if (!m) return null;
+                    {activeTournament.entries
+                      .filter(e => !e.hasBuyIn)
+                      .sort((a, b) => Number(a.memberId) - Number(b.memberId))
+                      .map((entry) => {
+                        const m = state.members.find(member => member.id === entry.memberId);
+                        if (!m) return null;
 
                       return (
                         <tr key={entry.memberId}>
@@ -1752,9 +1760,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {activeTournament.entries.filter(e => e.hasBuyIn).map((entry) => {
-                      const m = state.members.find(member => member.id === entry.memberId);
-                      if (!m) return null;
+                    {activeTournament.entries
+                      .filter(e => e.hasBuyIn)
+                      .sort((a, b) => Number(a.memberId) - Number(b.memberId))
+                      .map((entry) => {
+                        const m = state.members.find(member => member.id === entry.memberId);
+                        if (!m) return null;
 
                       return (
                         <tr key={entry.memberId}>
@@ -1858,8 +1869,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
           {Object.keys(seating).length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
-              {Object.entries(seating).map(([tableName, players]) => {
-                const seatedCount = players.filter(id => id !== "").length;
+              {Object.entries(seating)
+                .sort((a, b) => {
+                  const tableOrder = ['red table', 'blue table', 'gold table', 'gray table', 'purple table'];
+                  return tableOrder.indexOf(a[0]) - tableOrder.indexOf(b[0]);
+                })
+                .map(([tableName, players]) => {
+                  const seatedCount = players.filter(id => id !== "").length;
                 return (
                   <div key={tableName} className="glass-card accent-emerald" style={{ padding: '20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>
@@ -1983,9 +1999,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {/* Eliminations Tab (Active Game) */}
       {subTab === 'players' && (() => {
         const activePlayers = getActivePlayersList();
-        const half = Math.ceil(activePlayers.length / 2);
-        const activeCol1 = activePlayers.slice(0, half);
-        const activeCol2 = activePlayers.slice(half);
+        const activeCol1 = activePlayers.filter((_, idx) => idx % 2 === 0);
+        const activeCol2 = activePlayers.filter((_, idx) => idx % 2 === 1);
         const eliminatedEntries = activeTournament.entries
           .filter(e => e.eliminatedAt)
           .sort((a, b) => (a.finishPosition || 999) - (b.finishPosition || 999));

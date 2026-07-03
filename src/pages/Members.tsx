@@ -168,16 +168,18 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
   // Filter members (only non-deleted ones, searchable by name, phone, email, memberId)
   const activeMembers = state.members.filter(m => !m.isDeleted);
-  const filteredMembers = activeMembers.filter(m => {
-    const q = search.toLowerCase();
-    return (
-      m.firstName.toLowerCase().includes(q) ||
-      m.lastName.toLowerCase().includes(q) ||
-      m.id.toLowerCase().includes(q) ||
-      m.phone.includes(q) ||
-      m.email.toLowerCase().includes(q)
-    );
-  });
+  const filteredMembers = activeMembers
+    .filter(m => {
+      const q = search.toLowerCase();
+      return (
+        m.firstName.toLowerCase().includes(q) ||
+        m.lastName.toLowerCase().includes(q) ||
+        m.id.toLowerCase().includes(q) ||
+        m.phone.includes(q) ||
+        m.email.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => Number(a.id) - Number(b.id));
 
   // Calculate profile statistics if a member is clicked
   const profileStats = selectedMemberForProfile ? calculateMemberStats(state, selectedMemberForProfile.id) : null;
