@@ -187,7 +187,6 @@ export const PlayerUpdateInfo: React.FC<PlayerUpdateInfoProps> = ({ setActiveTab
               type="tel"
               required
               disabled={isSubmitted}
-              placeholder="e.g. (360) 869-2538"
               value={phone}
               onChange={handlePhoneChange}
               style={{
@@ -233,7 +232,6 @@ export const PlayerUpdateInfo: React.FC<PlayerUpdateInfoProps> = ({ setActiveTab
                 type="text"
                 required
                 disabled={isSubmitted}
-                placeholder="e.g. Timothy"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 style={{
@@ -255,7 +253,6 @@ export const PlayerUpdateInfo: React.FC<PlayerUpdateInfoProps> = ({ setActiveTab
                 type="text"
                 required
                 disabled={isSubmitted}
-                placeholder="e.g. Hufler"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 style={{
@@ -280,7 +277,6 @@ export const PlayerUpdateInfo: React.FC<PlayerUpdateInfoProps> = ({ setActiveTab
               type="email"
               required
               disabled={isSubmitted}
-              placeholder="e.g. acemagnets@gmx.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={{
