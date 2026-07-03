@@ -53,7 +53,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp'>('rsvp');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary'>('rsvp');
 
   // Player search in checkin
   const [searchQuery, setSearchQuery] = useState('');
@@ -1747,6 +1747,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             >
               Players ({activeTournament.entries.filter(e => !e.eliminatedAt).length} alive)
             </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'summary' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('summary')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'summary' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'summary' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'summary' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              Summary ({activeTournament.entries.filter(e => e.eliminatedAt).length} busted)
+            </button>
           </>
         ) : (
           <button 
@@ -2583,6 +2597,106 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </div>
             </div>
 
+          </div>
+        );
+      })()}
+
+      {subTab === 'summary' && (() => {
+        const bustedEntries = activeTournament.entries
+          .filter(e => e.eliminatedAt)
+          .sort((a, b) => new Date(a.eliminatedAt!).getTime() - new Date(b.eliminatedAt!).getTime());
+
+        // Calculate total stats for calculations
+        const N = activeTournament.entries.length;
+        const attendancePoints = state.settings.pointsBaseAttendance;
+        const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
+        const addonCount = activeTournament.totalAddons !== undefined 
+          ? activeTournament.totalAddons 
+          : activeTournament.entries.filter(e => e.hasAddon).length;
+        const netBuyInContribution = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
+        const totalPrizePool = Math.max(0, (buyInCount * netBuyInContribution) + (addonCount * activeTournament.addonAmount) - (activeTournament.highHandAmount || 0));
+        const payoutPrizePool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
+          ? activeTournament.overridePrizePool
+          : totalPrizePool;
+        const pctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+        const payouts = pctList.map(pct => Math.round(payoutPrizePool * (pct / 100)));
+
+        return (
+          <div className="glass-card animate-slide-up" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Tournament Elimination Summary</h3>
+              <span style={{ fontSize: '0.85rem', padding: '4px 10px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', fontWeight: 600 }}>
+                {bustedEntries.length} of {N} Players Busted
+              </span>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2.5px solid var(--border-subtle)' }}>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', width: '120px' }}>Knock-out</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)' }}>Player Name</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'center', width: '140px' }}>Points Received</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'center', width: '160px' }}>Bounties Collected</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'right', width: '140px' }}>Money Received</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bustedEntries.map((entry, idx) => {
+                    const name = getMemberName(entry.memberId);
+                    
+                    // Live dynamic calculations
+                    const pos = entry.finishPosition || N;
+                    const payoutEarned = payouts[pos - 1] || 0;
+                    
+                    const basePositionPoints = N - pos + 1;
+                    let multiplier = 1;
+                    if (pos === 1) {
+                      multiplier = 3;
+                    } else if (pos >= 2 && pos <= 10) {
+                      multiplier = 2;
+                    }
+                    const pointsEarned = (basePositionPoints * multiplier) + (entry.bountiesCollected * 3) + attendancePoints;
+                    const moneyReceived = payoutEarned + (entry.bountiesCollected * activeTournament.bountyAmount);
+
+                    return (
+                      <tr 
+                        key={entry.memberId}
+                        style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(255,255,255,0.005)' }}
+                      >
+                        <td style={{ padding: '12px 16px', fontWeight: 800, color: 'var(--color-danger)' }}>
+                          #{idx + 1}
+                        </td>
+                        <td style={{ padding: '12px 16px', fontWeight: 600, color: '#ffffff' }}>
+                          {name}
+                        </td>
+                        <td style={{ padding: '12px 16px', fontWeight: 700, textAlign: 'center', color: 'var(--color-gold)' }}>
+                          {pointsEarned} pts
+                        </td>
+                        <td style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'center', color: entry.bountiesCollected > 0 ? '#34d399' : 'var(--text-secondary)' }}>
+                          {entry.bountiesCollected > 0 ? `${entry.bountiesCollected} bounty` + (entry.bountiesCollected > 1 ? 's' : '') : '0'}
+                        </td>
+                        <td style={{ padding: '12px 16px', fontWeight: 700, textAlign: 'right', color: 'var(--color-emerald)' }}>
+                          ${moneyReceived}
+                          {payoutEarned > 0 && (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', fontWeight: 400 }}>
+                              (${payoutEarned} place + ${entry.bountiesCollected * activeTournament.bountyAmount} bounty)
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {bustedEntries.length === 0 && (
+                    <tr>
+                      <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                        No players have busted out yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         );
       })()}
