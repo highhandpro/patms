@@ -186,8 +186,8 @@ export const Standings: React.FC = () => {
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             Points are automatically computed at tournament finalization using the club formula: 
             <code style={{ fontSize: '0.8rem', padding: '2px 6px', margin: '0 4px', verticalAlign: 'middle' }}>
-              Points = 10 * (sqrt(Field Size) / sqrt(Place Finish)) + Attendance Points + Bounties Claimed
-            </code>. Attendance defaults to 2 points per game. Soft-retired players are excluded from directory lookup but retain historical season rankings.
+              Points = (Base Position Points × Finish Multiplier) + (Bounties × 3) + Attendance
+            </code>. Base Position Points are calculated as <code style={{ fontSize: '0.8rem', padding: '2px 6px' }}>Field Size - Finish Position + 1</code>. A 3x multiplier is applied to 1st place, and a 2x multiplier is applied to the final table (2nd-10th).
           </p>
         </div>
       </div>
