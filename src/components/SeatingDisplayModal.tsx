@@ -92,10 +92,10 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
       {/* Sidebar: Tournament Stats and Payout Breakdown */}
       <div 
         style={{
-          width: '320px',
+          width: '240px',
           backgroundColor: '#0c0c0e',
           borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-          padding: '24px',
+          padding: '20px 16px',
           display: 'flex',
           flexDirection: 'column',
           gap: '24px',
@@ -103,7 +103,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
         }}
       >
         <div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--color-gold)', margin: 0, letterSpacing: '-0.02em', textTransform: 'uppercase' }}>
+          <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--color-gold)', margin: 0, letterSpacing: '-0.02em', textTransform: 'uppercase' }}>
             {tournamentName}
           </h1>
           <p style={{ fontSize: '0.85rem', color: '#a0aec0', marginTop: '4px', margin: 0 }}>
@@ -153,7 +153,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
       <div 
         style={{
           flex: 1,
-          padding: '24px 30px',
+          padding: '24px 16px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
@@ -199,7 +199,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
           style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(5, 1fr)', 
-            gap: '18px',
+            gap: '10px',
             flex: 1,
             alignItems: 'stretch',
             marginTop: '45px'
@@ -223,7 +223,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                   backgroundColor: hasPlayers ? 'rgba(255, 255, 255, 0.015)' : 'rgba(255, 255, 255, 0.005)',
                   border: `1px solid ${hasPlayers ? t.border : 'rgba(255, 255, 255, 0.03)'}`,
                   borderRadius: '20px',
-                  padding: '16px',
+                  padding: '10px',
                   display: 'flex',
                   flexDirection: 'column',
                   opacity: hasPlayers ? 1 : 0.2,
@@ -237,23 +237,23 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                     background: t.gradient,
                     border: `1px solid ${t.border}`,
                     borderRadius: '12px',
-                    padding: '10px',
+                    padding: '8px 10px',
                     textAlign: 'center',
-                    marginBottom: '12px'
+                    marginBottom: '10px'
                   }}
                 >
-                  <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: t.color, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <h2 style={{ fontSize: '0.95rem', fontWeight: 900, color: t.color, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {t.name}
                   </h2>
                   {hasPlayers && (
-                    <span style={{ fontSize: '0.75rem', color: '#a0aec0', fontWeight: 600 }}>
+                    <span style={{ fontSize: '0.7rem', color: '#a0aec0', fontWeight: 600 }}>
                       {players.filter(p => p !== "").length} Players Seated
                     </span>
                   )}
                 </div>
 
                 {/* Seated Players List (Always exactly 10 slots) */}
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
                   {seatSlots.map((playerId, idx) => {
                     const isDealer = playerId ? tableDealerId === playerId : false;
                     
@@ -264,19 +264,19 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            padding: '8px 12px',
+                            padding: '4px 8px',
                             backgroundColor: 'rgba(255, 255, 255, 0.001)',
                             border: '1px dashed rgba(255, 255, 255, 0.015)',
                             borderRadius: '10px',
                             color: '#3f4b5b',
-                            height: '52px',
+                            height: '44px',
                             boxSizing: 'border-box'
                           }}
                         >
-                          <span style={{ fontWeight: 900, color: '#ffffff', marginRight: '12px', minWidth: '50px', fontSize: '1.6rem', letterSpacing: '-0.02em' }}>
+                          <span style={{ fontWeight: 900, color: '#ffffff', marginRight: '6px', minWidth: '35px', fontSize: '1.15rem', letterSpacing: '-0.02em' }}>
                             #{idx + 1}
                           </span>
-                          <span style={{ fontStyle: 'italic', fontSize: '0.85rem' }}>Empty Seat</span>
+                          <span style={{ fontStyle: 'italic', fontSize: '0.8rem' }}>Empty Seat</span>
                         </li>
                       );
                     }
@@ -296,7 +296,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '6px 12px',
+                          padding: '4px 8px',
                           backgroundColor: isEliminated 
                             ? 'rgba(248, 113, 113, 0.01)'
                             : (isDealer ? 'rgba(212, 163, 89, 0.08)' : 'rgba(255, 255, 255, 0.02)'),
@@ -308,24 +308,24 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                           opacity: isEliminated ? 0.35 : 1,
                           textDecoration: isEliminated ? 'line-through' : 'none',
                           boxShadow: (!isEliminated && isDealer) ? '0 4px 12px rgba(212, 163, 89, 0.1)' : 'none',
-                          height: '52px',
+                          height: '44px',
                           boxSizing: 'border-box',
                           cursor: (!isEliminated && onEliminatePlayer) ? 'pointer' : 'default',
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        <span style={{ fontWeight: 900, color: isEliminated ? 'var(--text-muted)' : '#ffffff', marginRight: '12px', minWidth: '50px', fontSize: '1.6rem', letterSpacing: '-0.02em' }}>
+                        <span style={{ fontWeight: 900, color: isEliminated ? 'var(--text-muted)' : '#ffffff', marginRight: '6px', minWidth: '35px', fontSize: '1.15rem', letterSpacing: '-0.02em' }}>
                           #{idx + 1}
                         </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, overflow: 'hidden' }}>
                           {!isEliminated && isDealer && <Crown size={15} fill="var(--color-gold)" style={{ color: 'var(--color-gold)', flexShrink: 0 }} />}
                           <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', lineHeight: 1.05 }}>
-                            <span style={{ fontWeight: 900, fontSize: '1.6rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', letterSpacing: '-0.015em' }}>
+                            <span style={{ fontWeight: 900, fontSize: '1.15rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', letterSpacing: '-0.015em' }}>
                               {details.firstName}
                             </span>
                             <span style={{ 
                               fontWeight: 600, 
-                              fontSize: '0.75rem', 
+                              fontSize: '0.7rem', 
                               color: isEliminated ? 'var(--text-muted)' : (isDealer ? 'rgba(212, 163, 89, 0.8)' : '#a0aec0'), 
                               textTransform: 'uppercase', 
                               letterSpacing: '0.04em',
