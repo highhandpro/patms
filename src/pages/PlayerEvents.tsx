@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import { PlayerBanner } from '../components/PlayerBanner';
 import { Calendar, Clock, MapPin, DollarSign, Coins, Timer, RefreshCcw, AlarmClock, Zap, Handshake, Plus } from 'lucide-react';
 import { getEmbeddableFlyerUrl } from '../utils/flyer';
 
@@ -35,39 +36,9 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
 
   return (
     <div className="player-page player-events-page animate-fade-in">
-      <div 
-        className="upcoming-events-banner-container"
-        style={{
-          width: '100%',
-          minHeight: '180px',
-          backgroundImage: "url('/upcoming-events-bg.png')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          borderRadius: '16px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-          marginBottom: '32px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '24px'
-        }}
-      >
-        <h1 
-          style={{
-            fontSize: '3rem',
-            fontWeight: 800,
-            color: '#010101',
-            margin: 0,
-            letterSpacing: '-0.02em',
-            textAlign: 'center',
-            textShadow: '0 2px 4px rgba(255, 255, 255, 0.3)'
-          }}
-        >
-          Upcoming Event
-        </h1>
-      </div>
+      <PlayerBanner>
+        <h1 className="banner-title">Upcoming Events</h1>
+      </PlayerBanner>
 
       <div className="player-page-content">
         <div className="events-list-container">
