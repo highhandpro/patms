@@ -25,15 +25,15 @@ export const PlayerClubs: React.FC<PlayerClubsProps> = ({
               <span>Host Club Venues</span>
             </h2>
             <div className="location-card" style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: '20px', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '1.15rem', color: 'var(--text-primary)' }}>The Rec Room</h3>
+              <h3 style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>Washougal Eagles Club</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '2px' }}>Primary Tournament Venue</p>
-              <p style={{ marginTop: '10px' }}>
-                Our main season games are hosted in <strong>The Rec Room</strong>, a premium private club space located at <strong>5545 E Evergreen Blvd</strong>. 
-                Equipped with custom poker tables, ergonomic seating, dedicated dealers, and tournament displays.
+              <p style={{ marginTop: '12px', fontSize: '1rem', fontWeight: 600, color: 'var(--color-emerald)', lineHeight: '1.4' }}>
+                📍 1910 Main St,<br />
+                Washougal, WA 98671
               </p>
-              <div className="parking-directions" style={{ backgroundColor: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.1)', padding: '12px', borderRadius: '8px', marginTop: '12px', fontSize: '0.9rem' }}>
-                <strong style={{ color: 'var(--color-gold)' }}>Parking Notice:</strong> Parking spaces directly in front of the venue are limited. We highly encourage carpooling or parking along the main street in nearby public spaces where permitted. Please be respectful of neighbors.
-              </div>
+              <p style={{ marginTop: '12px' }}>
+                Our main season games are hosted at the Washougal Eagles Club. Equipped with custom poker tables, ergonomic seating, dedicated dealers, and tournament displays.
+              </p>
             </div>
           </div>
 

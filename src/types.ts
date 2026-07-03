@@ -8,6 +8,8 @@ export interface Member {
   notes?: string;
   isDeleted: boolean;
   nickname?: string;
+  textReminders?: boolean;
+  emailAnnouncements?: boolean;
 }
 
 export interface TournamentEntry {
@@ -86,6 +88,8 @@ export interface PendingApproval {
   lastName: string;
   phone?: string;
   email?: string;
+  textReminders?: boolean;
+  emailAnnouncements?: boolean;
   timestamp: string;
 }
 

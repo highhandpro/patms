@@ -16,6 +16,7 @@ import { PlayerAbout } from './pages/PlayerAbout';
 import { PlayerClubs } from './pages/PlayerClubs';
 import { PlayerProfile } from './pages/PlayerProfile';
 import { PlayerLanding } from './pages/PlayerLanding';
+import { PlayerUpdateInfo } from './pages/PlayerUpdateInfo';
 import { useApp } from './context/AppContext';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -38,7 +39,14 @@ function App() {
   });
 
   // Player tabs: events, event-details, results, rankings, about, clubs, profile
-  const [activePlayerTab, setActivePlayerTab] = useState<string>('events');
+  const [activePlayerTab, setActivePlayerTab] = useState<string>(() => {
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+    if (path === '/update-info' || hash === '#/update-info' || hash === '#update-info') {
+      return 'update-info';
+    }
+    return 'events';
+  });
 
   const { state, submitMemberUpdate, registerGuestPlayer } = useApp();
 
@@ -80,6 +88,22 @@ function App() {
           .map(m => m.lastName)
       )).sort()
     : [];
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      if (path === '/update-info' || hash === '#/update-info' || hash === '#update-info') {
+        setActivePlayerTab('update-info');
+      }
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
 
   // Levenshtein helper
   const calculateLevenshtein = (a: string, b: string): number => {
@@ -366,6 +390,10 @@ function App() {
   };
 
   const renderPlayerContent = () => {
+    if (activePlayerTab === 'update-info') {
+      return <PlayerUpdateInfo setActiveTab={setActivePlayerTab} />;
+    }
+
     if (!loggedInMemberId) {
       return (
         <PlayerLanding 

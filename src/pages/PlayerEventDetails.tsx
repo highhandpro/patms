@@ -304,9 +304,9 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                 <MapPin size={20} className="metric-icon" />
                 <div className="metric-info">
                   <span className="metric-label">Location</span>
-                  <span className="metric-value">{tournament.location || 'The Rec Room'}</span>
-                  {(tournament.location === 'The Rec Room' || !tournament.location) && (
-                    <span className="metric-subtext">5545 E Evergreen Blvd</span>
+                  <span className="metric-value">{tournament.location || 'Washougal Eagles Club'}</span>
+                  {(tournament.location === 'Washougal Eagles Club' || !tournament.location) && (
+                    <span className="metric-subtext">1910 Main St, Washougal, WA 98671</span>
                   )}
                 </div>
               </div>
@@ -385,7 +385,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                 <li><strong>High Hand Prize:</strong> ${tournament.highHandAmount !== undefined ? `$${tournament.highHandAmount}` : '$100'}</li>
                 <li><strong>Maximum Investment:</strong> ${tournament.buyInAmount + tournament.addonAmount + tournament.dealerAppreciationAmount}</li>
               </ul>
-              <div style={{ marginTop: '16px', backgroundColor: 'rgba(251, 191, 36, 0.05)', border: '1px solid rgba(251, 191, 36, 0.2)', borderRadius: '8px', padding: '12px 14px', fontSize: '0.85rem', color: 'var(--color-gold)', lineHeight: '1.4' }}>
+              <div style={{ marginTop: '16px', backgroundColor: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', padding: '12px 14px', fontSize: '0.85rem', color: '#10B981', lineHeight: '1.4' }}>
                 <strong>Note:</strong> Please don't all show up with only $100 bills. If you can bring smaller bills, it will help registration go much faster and make things easier for everyone! 😄
               </div>
             </div>

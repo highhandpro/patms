@@ -88,9 +88,9 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
                       <div className="detail-item">
                         <MapPin size={18} className="detail-icon" />
                         <div className="detail-text">
-                          <span className="detail-val">{tournament.location || 'The Rec Room'}</span>
-                          {(tournament.location === 'The Rec Room' || !tournament.location) && (
-                            <span className="detail-sub">5545 E Evergreen Blvd</span>
+                          <span className="detail-val">{tournament.location || 'Washougal Eagles Club'}</span>
+                          {(tournament.location === 'Washougal Eagles Club' || !tournament.location) && (
+                            <span className="detail-sub">1910 Main St, Washougal, WA 98671</span>
                           )}
                         </div>
                       </div>

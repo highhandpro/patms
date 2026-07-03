@@ -61,6 +61,7 @@ interface AppContextProps {
   registerGuestPlayer: (firstName: string, lastName: string, phone: string, email: string) => string;
   approveMemberUpdate: (approvalId: string) => void;
   rejectMemberUpdate: (approvalId: string) => void;
+  submitPlayerInfoForm: (firstName: string, lastName: string, phone: string, email: string, textReminders: boolean, emailAnnouncements: boolean) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -1058,8 +1059,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const member = state.members.find(m => m.id === approval.memberId);
       if (member) {
         await setDoc(doc(db, 'members', approval.memberId), {
+          firstName: approval.firstName !== undefined ? approval.firstName : member.firstName,
+          lastName: approval.lastName !== undefined ? approval.lastName : member.lastName,
           phone: approval.phone !== undefined ? approval.phone : member.phone,
-          email: approval.email !== undefined ? approval.email : member.email
+          email: approval.email !== undefined ? approval.email : member.email,
+          textReminders: approval.textReminders !== undefined ? approval.textReminders : (member.textReminders ?? true),
+          emailAnnouncements: approval.emailAnnouncements !== undefined ? approval.emailAnnouncements : (member.emailAnnouncements ?? true)
         }, { merge: true });
       }
     } else if (approval.type === 'guest') {
@@ -1080,6 +1085,79 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     await deleteDoc(doc(db, 'pendingApprovals', approvalId));
+  };
+
+  const submitPlayerInfoForm = async (
+    firstName: string,
+    lastName: string,
+    phone: string,
+    email: string,
+    textReminders: boolean,
+    emailAnnouncements: boolean
+  ) => {
+    const cleanInputPhone = phone.replace(/\D/g, '');
+    const existingMember = state.members.find(m => !m.isDeleted && m.phone.replace(/\D/g, '') === cleanInputPhone);
+
+    const approvalId = `ap-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    if (existingMember) {
+      const newApproval: PendingApproval = {
+        id: approvalId,
+        type: 'update',
+        memberId: existingMember.id,
+        firstName,
+        lastName,
+        phone,
+        email,
+        textReminders,
+        emailAnnouncements,
+        timestamp: new Date().toISOString()
+      };
+
+      for (const p of state.pendingApprovals) {
+        if (p.memberId === existingMember.id && p.type === 'update') {
+          await deleteDoc(doc(db, 'pendingApprovals', p.id));
+        }
+      }
+
+      await setDoc(doc(db, 'pendingApprovals', approvalId), newApproval);
+    } else {
+      const numbers = state.members.map(m => {
+        const parsed = parseInt(m.id, 10);
+        return isNaN(parsed) ? 0 : parsed;
+      });
+      const nextNum = Math.max(100, ...numbers) + 1;
+      const guestId = String(nextNum);
+
+      const newMember: Member = {
+        id: guestId,
+        firstName,
+        lastName,
+        phone,
+        email,
+        joinedDate: new Date().toISOString().split('T')[0],
+        isDeleted: false,
+        notes: 'Self-Registered Guest Player',
+        textReminders,
+        emailAnnouncements
+      };
+
+      const newApproval: PendingApproval = {
+        id: approvalId,
+        type: 'guest',
+        memberId: guestId,
+        firstName,
+        lastName,
+        phone,
+        email,
+        textReminders,
+        emailAnnouncements,
+        timestamp: new Date().toISOString()
+      };
+
+      await setDoc(doc(db, 'members', guestId), newMember);
+      await setDoc(doc(db, 'pendingApprovals', approvalId), newApproval);
+    }
   };
 
   const resetDatabaseToDefault = async () => {
@@ -1134,7 +1212,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         submitMemberUpdate,
         registerGuestPlayer,
         approveMemberUpdate,
-        rejectMemberUpdate
+        rejectMemberUpdate,
+        submitPlayerInfoForm
       }}
     >
       {children}
