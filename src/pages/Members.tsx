@@ -195,7 +195,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
         m.email.toLowerCase().includes(q)
       );
     })
-    .sort((a, b) => Number(a.id) - Number(b.id));
+    .sort((a, b) => a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName));
 
   // Calculate profile statistics if a member is clicked
   const profileStats = selectedMemberForProfile ? calculateMemberStats(state, selectedMemberForProfile.id) : null;
