@@ -271,59 +271,132 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     const checkedInDealers = players.filter(id => preassignedDealers.includes(id));
     const checkedInNonDealers = players.filter(id => !preassignedDealers.includes(id));
 
-    const shuffledDealers = [...checkedInDealers].sort(() => Math.random() - 0.5);
-    const shuffledNonDealers = [...checkedInNonDealers].sort(() => Math.random() - 0.5);
-
     const tableConfigs = getTableConfigurations(players.length);
-    const newSeating: Record<string, string[]> = {};
-    const newDealers: Record<string, string> = {};
 
-    let dealerIdx = 0;
-    let nonDealerIdx = 0;
+    const getLastName = (memberId: string) => {
+      const m = state.members.find(member => member.id === memberId);
+      return m ? m.lastName.trim().toLowerCase() : "";
+    };
 
-    Object.entries(tableConfigs).forEach(([tableName, size]) => {
-      const tablePlayers: string[] = [];
-      
-      let dealerId = "";
-      if (dealerIdx < shuffledDealers.length) {
-        dealerId = shuffledDealers[dealerIdx++];
-        tablePlayers.push(dealerId);
-        newDealers[tableName] = dealerId;
-      }
-      
-      const remainingTablePlayers: string[] = [];
-      while (tablePlayers.length + remainingTablePlayers.length < size) {
-        if (nonDealerIdx < shuffledNonDealers.length) {
-          remainingTablePlayers.push(shuffledNonDealers[nonDealerIdx++]);
-        } else if (dealerIdx < shuffledDealers.length) {
-          remainingTablePlayers.push(shuffledDealers[dealerIdx++]);
-        } else {
-          break;
+    const evaluateLayout = (layout: Record<string, string[]>) => {
+      let penalty = 0;
+
+      Object.entries(layout).forEach(([_, seats]) => {
+        const seated = seats
+          .map((id, index) => ({ id, index, lastName: id ? getLastName(id) : "" }))
+          .filter(p => p.id !== "");
+
+        const lastNameCounts: Record<string, number> = {};
+        seated.forEach(p => {
+          if (p.lastName) {
+            lastNameCounts[p.lastName] = (lastNameCounts[p.lastName] || 0) + 1;
+          }
+        });
+
+        Object.values(lastNameCounts).forEach(count => {
+          if (count > 1) {
+            penalty += (count - 1) * 10000;
+          }
+        });
+
+        for (let i = 0; i < seated.length; i++) {
+          for (let j = i + 1; j < seated.length; j++) {
+            const pA = seated[i];
+            const pB = seated[j];
+            if (pA.lastName && pA.lastName === pB.lastName) {
+              const diff = Math.abs(pA.index - pB.index);
+              const dist = Math.min(diff, 10 - diff);
+
+              if (dist <= 3) {
+                penalty += (4 - dist) * 1000;
+              }
+              penalty += (5 - dist) * 10;
+            }
+          }
         }
+      });
+
+      return penalty;
+    };
+
+    const generateCandidateLayout = (
+      shuffledDealers: string[],
+      shuffledNonDealers: string[]
+    ) => {
+      const candidateSeating: Record<string, string[]> = {};
+      const candidateDealers: Record<string, string> = {};
+
+      let dealerIdx = 0;
+      let nonDealerIdx = 0;
+
+      Object.entries(tableConfigs).forEach(([tableName, size]) => {
+        const tablePlayers: string[] = [];
+        let dealerId = "";
+
+        if (dealerIdx < shuffledDealers.length) {
+          dealerId = shuffledDealers[dealerIdx++];
+          tablePlayers.push(dealerId);
+          candidateDealers[tableName] = dealerId;
+        }
+
+        const remainingTablePlayers: string[] = [];
+        while (tablePlayers.length + remainingTablePlayers.length < size) {
+          if (nonDealerIdx < shuffledNonDealers.length) {
+            remainingTablePlayers.push(shuffledNonDealers[nonDealerIdx++]);
+          } else if (dealerIdx < shuffledDealers.length) {
+            remainingTablePlayers.push(shuffledDealers[dealerIdx++]);
+          } else {
+            break;
+          }
+        }
+
+        const seats = Array(10).fill("");
+        if (dealerId) {
+          seats[0] = dealerId;
+          const availableIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+          remainingTablePlayers.forEach((pId, i) => {
+            seats[availableIndices[i]] = pId;
+          });
+        } else {
+          const availableIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+          remainingTablePlayers.forEach((pId, i) => {
+            seats[availableIndices[i]] = pId;
+          });
+        }
+
+        candidateSeating[tableName] = seats;
+      });
+
+      return { seating: candidateSeating, dealers: candidateDealers };
+    };
+
+    let bestSeating: Record<string, string[]> = {};
+    let bestDealers: Record<string, string> = {};
+    let minPenalty = Infinity;
+
+    for (let trial = 0; trial < 3000; trial++) {
+      const trialDealers = [...checkedInDealers].sort(() => Math.random() - 0.5);
+      const trialNonDealers = [...checkedInNonDealers].sort(() => Math.random() - 0.5);
+
+      const candidate = generateCandidateLayout(trialDealers, trialNonDealers);
+      const penalty = evaluateLayout(candidate.seating);
+
+      if (penalty < minPenalty) {
+        minPenalty = penalty;
+        bestSeating = candidate.seating;
+        bestDealers = candidate.dealers;
       }
 
-      const seats = Array(10).fill("");
-      if (dealerId) {
-        seats[0] = dealerId;
-        const availableIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
-        remainingTablePlayers.forEach((pId, i) => {
-          seats[availableIndices[i]] = pId;
-        });
-      } else {
-        const availableIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
-        remainingTablePlayers.forEach((pId, i) => {
-          seats[availableIndices[i]] = pId;
-        });
+      if (penalty === 0) {
+        break;
       }
+    }
 
-      newSeating[tableName] = seats;
-    });
-
-    setSeating(newSeating);
-    localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(newSeating));
+    setSeating(bestSeating);
+    localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(bestSeating));
     
-    setDealers(newDealers);
-    localStorage.setItem(`patms_dealers_${activeTournament.id}`, JSON.stringify(newDealers));
+    setDealers(bestDealers);
+    localStorage.setItem(`patms_dealers_${activeTournament.id}`, JSON.stringify(bestDealers));
   };
 
   const movePlayerTable = (playerId: string, sourceTable: string, targetTable: string) => {
