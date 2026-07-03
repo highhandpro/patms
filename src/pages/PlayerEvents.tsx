@@ -1,6 +1,5 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { PlayerBanner } from '../components/PlayerBanner';
 import { Calendar, Clock, MapPin, DollarSign, Coins, Timer, RefreshCcw, AlarmClock, Zap, Handshake, Plus } from 'lucide-react';
 import { getEmbeddableFlyerUrl } from '../utils/flyer';
 
@@ -36,9 +35,27 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
 
   return (
     <div className="player-page player-events-page animate-fade-in">
-      <PlayerBanner>
-        <h1 className="banner-title">Upcoming Events</h1>
-      </PlayerBanner>
+      <div 
+        className="upcoming-events-banner-container"
+        style={{
+          width: '100%',
+          overflow: 'hidden',
+          borderRadius: '16px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+          marginBottom: '32px',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
+      >
+        <img 
+          src="/upcoming-events-banner.png" 
+          alt="Upcoming Events" 
+          style={{
+            width: '100%',
+            height: 'auto',
+            display: 'block'
+          }}
+        />
+      </div>
 
       <div className="player-page-content">
         <div className="events-list-container">
