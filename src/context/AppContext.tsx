@@ -836,7 +836,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!t) return;
 
     const eliminatedCount = t.entries.filter(e => e.eliminatedAt).length;
-    const totalEntries = t.entries.length;
+    const totalEntries = t.entries.filter(e => e.hasBuyIn).length;
     const finishPosition = totalEntries - eliminatedCount;
 
     const updatedEntries = t.entries.map(e => {
@@ -913,7 +913,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const pctList = t.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
     const payouts = pctList.map(pct => Math.round(payoutPrizePool * (pct / 100)));
 
-    const N = entriesCount;
+    const N = buyInCount;
     const attendancePoints = state.settings.pointsBaseAttendance;
 
     updatedEntries = updatedEntries.map(e => {

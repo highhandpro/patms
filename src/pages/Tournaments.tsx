@@ -2607,9 +2607,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           .sort((a, b) => new Date(a.eliminatedAt!).getTime() - new Date(b.eliminatedAt!).getTime());
 
         // Calculate total stats for calculations
-        const N = activeTournament.entries.length;
-        const attendancePoints = state.settings.pointsBaseAttendance;
         const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
+        const N = buyInCount;
+        const attendancePoints = state.settings.pointsBaseAttendance;
         const addonCount = activeTournament.totalAddons !== undefined 
           ? activeTournament.totalAddons 
           : activeTournament.entries.filter(e => e.hasAddon).length;
