@@ -16,13 +16,15 @@ interface TournamentsProps {
   setSelectedTournamentId: (id: string | null) => void;
   isCreateTourOpen: boolean;
   setIsCreateTourOpen: (open: boolean) => void;
+  adminEmail?: string | null;
 }
 
 export const Tournaments: React.FC<TournamentsProps> = ({
   selectedTournamentId,
   setSelectedTournamentId,
   isCreateTourOpen,
-  setIsCreateTourOpen
+  setIsCreateTourOpen,
+  adminEmail
 }) => {
   const { 
     state, 
@@ -676,7 +678,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   };
 
   const handleDeleteTour = (id: string, name: string) => {
-    if (confirm(`Are you sure you want to permanently delete tournament "${name}"? This cannot be undone.`)) {
+    const t = state.tournaments.find(tour => tour.id === id);
+    if (!t) return;
+
+    let confirmMsg = `Are you sure you want to permanently delete tournament "${name}"? This cannot be undone.`;
+    if (t.status === 'completed') {
+      confirmMsg = `WARNING: Tournament "${name}" is completed and finalized. Deleting it will permanently remove its points/payouts and instantly recalculate the seasonal standings. Do you want to proceed?`;
+    }
+
+    if (confirm(confirmMsg)) {
       deleteTournament(id);
       setSelectedTournamentId(null);
     }
@@ -1312,13 +1322,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               >
                                 Manage
                               </button>
-                              <button
-                                onClick={() => handleDeleteTour(t.id, t.name)}
-                                className="btn btn-ghost"
-                                style={{ padding: '6px', color: 'var(--color-danger)' }}
-                              >
-                                <Trash2 size={16} />
-                              </button>
+                              {adminEmail !== 'steerbully777@gmail.com' && (
+                                <button
+                                  onClick={() => handleDeleteTour(t.id, t.name)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: '6px', color: 'var(--color-danger)' }}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>

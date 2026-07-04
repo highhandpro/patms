@@ -409,6 +409,7 @@ function App() {
             setSelectedTournamentId={setSelectedTournamentId}
             isCreateTourOpen={isCreateTourOpen}
             setIsCreateTourOpen={setIsCreateTourOpen}
+            adminEmail={adminEmail}
           />
         );
       case 'standings':
