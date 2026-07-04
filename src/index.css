@@ -1786,3 +1786,16 @@ body.display-mode-active .main-content {
     column-count: 1;
   }
 }
+
+/* Summary Table Columns Layout */
+.summary-columns-container > div {
+  flex: 1;
+  min-width: 450px;
+}
+
+@media (max-width: 992px) {
+  .summary-columns-container > div {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+}

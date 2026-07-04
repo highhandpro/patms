@@ -2621,6 +2621,73 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const pctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
         const payouts = pctList.map(pct => Math.round(payoutPrizePool * (pct / 100)));
 
+        const midpoint = Math.ceil(bustedEntries.length / 2);
+        const leftColumnEntries = bustedEntries.slice(0, midpoint);
+        const rightColumnEntries = bustedEntries.slice(midpoint);
+
+        const renderSummaryTable = (entries: typeof bustedEntries) => (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '2.5px solid var(--border-subtle)' }}>
+                  <th style={{ padding: '12px 10px', fontWeight: 700, color: 'var(--text-secondary)', width: '80px' }}>Position</th>
+                  <th style={{ padding: '12px 10px', fontWeight: 700, color: 'var(--text-secondary)' }}>Player Name</th>
+                  <th style={{ padding: '12px 10px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'center', width: '100px' }}>Points</th>
+                  <th style={{ padding: '12px 10px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'center', width: '110px' }}>Bounties</th>
+                  <th style={{ padding: '12px 10px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'right', width: '100px' }}>Money</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((entry) => {
+                  const name = getMemberName(entry.memberId);
+                  
+                  // Live dynamic calculations
+                  const pos = entry.finishPosition || N;
+                  const payoutEarned = payouts[pos - 1] || 0;
+                  
+                  const basePositionPoints = N - pos + 1;
+                  let multiplier = 1;
+                  if (pos === 1) {
+                    multiplier = 3;
+                  } else if (pos >= 2 && pos <= 10) {
+                    multiplier = 2;
+                  }
+                  const pointsEarned = (basePositionPoints * multiplier) + (entry.bountiesCollected * 3) + attendancePoints;
+                  const moneyReceived = payoutEarned + (entry.bountiesCollected * activeTournament.bountyAmount);
+
+                  return (
+                    <tr 
+                      key={entry.memberId}
+                      style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(255,255,255,0.005)' }}
+                    >
+                      <td style={{ padding: '10px 10px', fontWeight: 800, color: 'var(--color-danger)' }}>
+                        #{pos}
+                      </td>
+                      <td style={{ padding: '10px 10px', fontWeight: 600, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
+                        {name}
+                      </td>
+                      <td style={{ padding: '10px 10px', fontWeight: 700, textAlign: 'center', color: 'var(--color-gold)' }}>
+                        {pointsEarned} pts
+                      </td>
+                      <td style={{ padding: '10px 10px', fontWeight: 600, textAlign: 'center', color: entry.bountiesCollected > 0 ? '#34d399' : 'var(--text-secondary)' }}>
+                        {entry.bountiesCollected > 0 ? `${entry.bountiesCollected} bounty` + (entry.bountiesCollected > 1 ? 's' : '') : '0'}
+                      </td>
+                      <td style={{ padding: '10px 10px', fontWeight: 700, textAlign: 'right', color: 'var(--color-emerald)' }}>
+                        ${moneyReceived}
+                        {payoutEarned > 0 && (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', fontWeight: 400 }}>
+                            (${payoutEarned} + ${entry.bountiesCollected * activeTournament.bountyAmount})
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        );
+
         return (
           <div className="glass-card animate-slide-up" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2630,73 +2697,29 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </span>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2.5px solid var(--border-subtle)' }}>
-                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', width: '120px' }}>Position</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)' }}>Player Name</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'center', width: '140px' }}>Points Received</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'center', width: '160px' }}>Bounties Collected</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-secondary)', textAlign: 'right', width: '140px' }}>Money Received</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bustedEntries.map((entry) => {
-                    const name = getMemberName(entry.memberId);
-                    
-                    // Live dynamic calculations
-                    const pos = entry.finishPosition || N;
-                    const payoutEarned = payouts[pos - 1] || 0;
-                    
-                    const basePositionPoints = N - pos + 1;
-                    let multiplier = 1;
-                    if (pos === 1) {
-                      multiplier = 3;
-                    } else if (pos >= 2 && pos <= 10) {
-                      multiplier = 2;
-                    }
-                    const pointsEarned = (basePositionPoints * multiplier) + (entry.bountiesCollected * 3) + attendancePoints;
-                    const moneyReceived = payoutEarned + (entry.bountiesCollected * activeTournament.bountyAmount);
-
-                    return (
-                      <tr 
-                        key={entry.memberId}
-                        style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(255,255,255,0.005)' }}
-                      >
-                        <td style={{ padding: '12px 16px', fontWeight: 800, color: 'var(--color-danger)' }}>
-                          #{pos}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontWeight: 600, color: '#ffffff' }}>
-                          {name}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontWeight: 700, textAlign: 'center', color: 'var(--color-gold)' }}>
-                          {pointsEarned} pts
-                        </td>
-                        <td style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'center', color: entry.bountiesCollected > 0 ? '#34d399' : 'var(--text-secondary)' }}>
-                          {entry.bountiesCollected > 0 ? `${entry.bountiesCollected} bounty` + (entry.bountiesCollected > 1 ? 's' : '') : '0'}
-                        </td>
-                        <td style={{ padding: '12px 16px', fontWeight: 700, textAlign: 'right', color: 'var(--color-emerald)' }}>
-                          ${moneyReceived}
-                          {payoutEarned > 0 && (
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', fontWeight: 400 }}>
-                              (${payoutEarned} place + ${entry.bountiesCollected * activeTournament.bountyAmount} bounty)
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {bustedEntries.length === 0 && (
-                    <tr>
-                      <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                        No players have busted out yet.
-                      </td>
-                    </tr>
+            {bustedEntries.length > 0 ? (
+              <div style={{
+                display: 'flex',
+                gap: '24px',
+                width: '100%',
+                flexWrap: 'wrap'
+              }} className="summary-columns-container">
+                <div style={{ flex: 1 }}>
+                  {renderSummaryTable(leftColumnEntries)}
+                </div>
+                <div style={{ flex: 1 }}>
+                  {rightColumnEntries.length > 0 ? renderSummaryTable(rightColumnEntries) : (
+                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem', border: '1px dashed var(--border-subtle)', borderRadius: '8px' }}>
+                      Remaining players not yet knocked out.
+                    </div>
                   )}
-                </tbody>
-              </table>
-            </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                No players have busted out yet.
+              </div>
+            )}
           </div>
         );
       })()}
