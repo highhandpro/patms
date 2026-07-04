@@ -587,7 +587,6 @@ function App() {
                     <input 
                       type="text" 
                       required
-                      placeholder="e.g. Derek"
                       value={loginFirstName}
                       onChange={e => setLoginFirstName(e.target.value)}
                       className="form-input"
@@ -599,7 +598,6 @@ function App() {
                     <input 
                       type="text" 
                       required
-                      placeholder="e.g. Allen"
                       value={loginLastName}
                       onChange={e => setLoginLastName(e.target.value)}
                       onFocus={() => setShowLastNameDropdown(true)}

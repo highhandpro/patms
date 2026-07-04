@@ -470,12 +470,11 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>First Name</label>
-                      <input
+                       <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>First Name</label>
+                       <input
                         type="text"
                         required
                         disabled={!!memberFound}
-                        placeholder="First name"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         className="form-input"
@@ -483,12 +482,11 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                       />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Last Name</label>
-                      <input
+                       <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Last Name</label>
+                       <input
                         type="text"
                         required
                         disabled={!!memberFound}
-                        placeholder="Last name"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         className="form-input"

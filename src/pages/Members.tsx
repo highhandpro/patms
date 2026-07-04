@@ -551,7 +551,6 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     id="first-name"
                     type="text"
                     required
-                    placeholder="e.g. John"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     className="form-input"
@@ -563,7 +562,6 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     id="last-name"
                     type="text"
                     required
-                    placeholder="e.g. Doe"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     className="form-input"
