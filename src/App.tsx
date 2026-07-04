@@ -332,6 +332,28 @@ function App() {
       setPlayerCardError(null);
       setActivePlayerTab('events');
     } else {
+      if (!isAdminAuthenticated) {
+        setPlayerCardError(null);
+
+        const isPhoneMissingInDb = !matchedMember.phone;
+        if (isPhoneMissingInDb) {
+          const cleanPhone = playerCardPhone.replace(/\D/g, '');
+          if (cleanPhone.length !== 10) {
+            setPlayerCardError('Please enter a valid 10-digit phone number.');
+            return;
+          }
+        }
+
+        const isEmailMissingInDb = !matchedMember.email;
+        if (isEmailMissingInDb) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!playerCardEmail.trim() || !emailRegex.test(playerCardEmail.trim())) {
+            setPlayerCardError('Please enter a valid email address.');
+            return;
+          }
+        }
+      }
+
       const hasEdits = playerCardPhone.trim() !== matchedMember.phone || playerCardEmail.trim() !== matchedMember.email;
       if (hasEdits) {
         submitMemberUpdate(matchedMember.id, playerCardPhone.trim(), playerCardEmail.trim());
@@ -941,11 +963,10 @@ function App() {
                   {playerCardError}
                 </div>
               )}
- 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left', marginBottom: '28px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Phone Number {isNewMemberLogin && <span style={{ color: 'var(--color-danger)' }}>*</span>}
+                    Phone Number {(!isAdminAuthenticated && (isNewMemberLogin || !matchedMember.phone)) && <span style={{ color: 'var(--color-danger)' }}>*</span>}
                   </label>
                   <input 
                     type="tel"
@@ -967,7 +988,7 @@ function App() {
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Email Address {isNewMemberLogin && <span style={{ color: 'var(--color-danger)' }}>*</span>}
+                    Email Address {(!isAdminAuthenticated && (isNewMemberLogin || !matchedMember.email)) && <span style={{ color: 'var(--color-danger)' }}>*</span>}
                   </label>
                   <input 
                     type="email"
