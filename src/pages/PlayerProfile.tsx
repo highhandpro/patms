@@ -119,18 +119,23 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
                   reader.onload = (event) => {
                     const img = new Image();
                     img.onload = async () => {
-                      const canvas = document.createElement('canvas');
-                      canvas.width = 768;
-                      canvas.height = 768;
-                      const ctx = canvas.getContext('2d');
-                      if (!ctx) return;
-                      const size = Math.min(img.width, img.height);
-                      const sx = (img.width - size) / 2;
-                      const sy = (img.height - size) / 2;
-                      ctx.clearRect(0, 0, 768, 768);
-                      ctx.drawImage(img, sx, sy, size, size, 0, 0, 768, 768);
-                      const dataUrl = canvas.toDataURL('image/png');
-                      await updateMember(member.id, { logoUrl: dataUrl });
+                      try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 768;
+                        canvas.height = 768;
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) return;
+                        const size = Math.min(img.width, img.height);
+                        const sx = (img.width - size) / 2;
+                        const sy = (img.height - size) / 2;
+                        ctx.clearRect(0, 0, 768, 768);
+                        ctx.drawImage(img, sx, sy, size, size, 0, 0, 768, 768);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        await updateMember(member.id, { logoUrl: dataUrl });
+                      } catch (innerErr) {
+                        console.error('Error handling image upload:', innerErr);
+                        alert('Failed to upload logo: ' + (innerErr as Error).message);
+                      }
                     };
                     img.src = event.target?.result as string;
                   };
