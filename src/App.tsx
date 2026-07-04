@@ -134,8 +134,8 @@ function App() {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          canvas.width = 256;
-          canvas.height = 256;
+          canvas.width = 768;
+          canvas.height = 768;
           const ctx = canvas.getContext('2d');
           if (!ctx) {
             reject(new Error('Could not get canvas context'));
@@ -146,8 +146,8 @@ function App() {
           const sx = (img.width - size) / 2;
           const sy = (img.height - size) / 2;
           
-          ctx.clearRect(0, 0, 256, 256);
-          ctx.drawImage(img, sx, sy, size, size, 0, 0, 256, 256);
+          ctx.clearRect(0, 0, 768, 768);
+          ctx.drawImage(img, sx, sy, size, size, 0, 0, 768, 768);
           
           const dataUrl = canvas.toDataURL('image/png');
           resolve(dataUrl);
@@ -164,8 +164,8 @@ function App() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 500 * 1024) {
-      alert('Maximum file size is 500 KB.');
+    if (file.size > 1500 * 1024) {
+      alert('Maximum file size is 1.5 MB.');
       return;
     }
 
@@ -875,8 +875,8 @@ function App() {
               {/* Profile Card Header Badge */}
               <div 
                 style={{
-                  width: '72px',
-                  height: '72px',
+                  width: '216px',
+                  height: '216px',
                   borderRadius: '50%',
                   backgroundColor: 'rgba(212, 163, 89, 0.1)',
                   border: '2px solid var(--text-gold)',
@@ -885,7 +885,7 @@ function App() {
                   justifyContent: 'center',
                   margin: '0 auto 16px auto',
                   color: 'var(--text-gold)',
-                  fontSize: '2rem',
+                  fontSize: '6rem',
                   fontWeight: 800,
                   overflow: 'hidden'
                 }}

@@ -545,8 +545,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
               {/* Logo Upload Section */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <div style={{
-                  width: '64px',
-                  height: '64px',
+                  width: '192px',
+                  height: '192px',
                   borderRadius: '50%',
                   backgroundColor: 'rgba(255,255,255,0.03)',
                   border: '1px solid var(--border-subtle)',
@@ -555,7 +555,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   justifyContent: 'center',
                   overflow: 'hidden',
                   color: 'var(--text-gold)',
-                  fontSize: '1.75rem',
+                  fontSize: '5rem',
                   fontWeight: 800
                 }}>
                   {logoUrl ? (
@@ -591,8 +591,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      if (file.size > 500 * 1024) {
-                        alert('Maximum file size is 500 KB.');
+                      if (file.size > 1500 * 1024) {
+                        alert('Maximum file size is 1.5 MB.');
                         return;
                       }
                       const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
@@ -606,8 +606,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         const img = new Image();
                         img.onload = () => {
                           const canvas = document.createElement('canvas');
-                          canvas.width = 256;
-                          canvas.height = 256;
+                          canvas.width = 768;
+                          canvas.height = 768;
                           const ctx = canvas.getContext('2d');
                           if (!ctx) return;
                           
@@ -615,8 +615,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                           const sx = (img.width - size) / 2;
                           const sy = (img.height - size) / 2;
                           
-                          ctx.clearRect(0, 0, 256, 256);
-                          ctx.drawImage(img, sx, sy, size, size, 0, 0, 256, 256);
+                          ctx.clearRect(0, 0, 768, 768);
+                          ctx.drawImage(img, sx, sy, size, size, 0, 0, 768, 768);
                           
                           const dataUrl = canvas.toDataURL('image/png');
                           setLogoUrl(dataUrl);
@@ -757,10 +757,10 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   <img 
                     src={selectedMemberForProfile.logoUrl} 
                     alt="Logo" 
-                    style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                    style={{ width: '144px', height: '144px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
                   />
                 ) : (
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: 'var(--text-secondary)' }}>
+                  <div style={{ width: '144px', height: '144px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '4rem', color: 'var(--text-secondary)' }}>
                     ♣
                   </div>
                 )}
