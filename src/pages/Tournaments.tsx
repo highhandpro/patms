@@ -2186,28 +2186,39 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           {/* Checked-in list */}
           <div className="glass-card">
             <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>Checked-in Registrations</h4>
-            {activeTournament.entries.filter(e => e.hasBuyIn).length > 0 ? (
-              <div className="table-container">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Player Name</th>
-                      <th>ID</th>
-                      <th style={{ textAlign: 'center' }}>Dealer?</th>
-                      <th style={{ textAlign: 'center' }}>Buy-in (${activeTournament.buyInAmount})</th>
-                      <th style={{ textAlign: 'center' }}>ToC (${activeTournament.dealerAppreciationAmount})</th>
-                      {activeTournament.status === 'draft' && <th style={{ textAlign: 'right' }}>Action</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeTournament.entries
-                      .filter(e => e.hasBuyIn)
-                      .sort((a, b) => Number(a.memberId) - Number(b.memberId))
-                      .map((entry) => {
-                        const m = state.members.find(member => member.id === entry.memberId);
-                        if (!m) return null;
+            {(() => {
+              const checkedInEntries = activeTournament.entries
+                .filter(e => e.hasBuyIn)
+                .map(entry => {
+                  const m = state.members.find(member => member.id === entry.memberId);
+                  return { entry, member: m };
+                })
+                .filter((item): item is { entry: any; member: any } => item.member !== undefined)
+                .sort((a, b) => {
+                  const nameA = `${a.member.firstName} ${a.member.lastName}`.toLowerCase();
+                  const nameB = `${b.member.firstName} ${b.member.lastName}`.toLowerCase();
+                  return nameA.localeCompare(nameB);
+                });
 
-                      return (
+              const midpoint = Math.ceil(checkedInEntries.length / 2);
+              const leftCol = checkedInEntries.slice(0, midpoint);
+              const rightCol = checkedInEntries.slice(midpoint);
+
+              const renderCheckedInTable = (items: typeof checkedInEntries) => (
+                <div className="table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Player Name</th>
+                        <th>ID</th>
+                        <th style={{ textAlign: 'center' }}>Dealer?</th>
+                        <th style={{ textAlign: 'center' }}>Buy-in (${activeTournament.buyInAmount})</th>
+                        <th style={{ textAlign: 'center' }}>ToC (${activeTournament.dealerAppreciationAmount})</th>
+                        {activeTournament.status === 'draft' && <th style={{ textAlign: 'right' }}>Action</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map(({ entry, member: m }) => (
                         <tr key={entry.memberId}>
                           <td 
                             style={{ 
@@ -2275,16 +2286,36 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             </td>
                           )}
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                No players registered yet. Search for names to register check-ins.
-              </div>
-            )}
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+
+              return checkedInEntries.length > 0 ? (
+                <div style={{
+                  display: 'flex',
+                  gap: '24px',
+                  width: '100%',
+                  flexWrap: 'wrap'
+                }} className="summary-columns-container">
+                  <div style={{ flex: 1 }}>
+                    {renderCheckedInTable(leftCol)}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    {rightCol.length > 0 ? renderCheckedInTable(rightCol) : (
+                      <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem', border: '1px dashed var(--border-subtle)', borderRadius: '8px' }}>
+                        -
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                  No players registered yet. Search for names to register check-ins.
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
