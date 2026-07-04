@@ -13,7 +13,7 @@ import {
 interface AppContextProps {
   state: DatabaseState;
   activeSeason: Season | null;
-  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string) => void;
+  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string) => void;
   updateMember: (id: string, updated: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   addSeason: (name: string, startDate: string, endDate: string, isActive: boolean) => void;
@@ -557,7 +557,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeSeason = state.seasons.find(s => s.isActive) || null;
 
   // Member Management
-  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string) => {
+  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string) => {
     let id = '';
     if (customId && customId.trim()) {
       id = customId.trim();
@@ -578,7 +578,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       email,
       joinedDate: new Date().toISOString().split('T')[0],
       notes,
-      isDeleted: false
+      isDeleted: false,
+      logoUrl: logoUrl || ''
     };
     await setDoc(doc(db, 'members', id), newMember);
   };

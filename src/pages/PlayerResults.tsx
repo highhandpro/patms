@@ -102,7 +102,26 @@ export const PlayerResults: React.FC = () => {
                         )}
                       </td>
                       <td className="result-player-cell">
-                        {getPlayerName(entry.memberId)}
+                        {(() => {
+                          const m = state.members.find(member => member.id === entry.memberId);
+                          const name = m ? `${m.firstName} ${m.lastName}` : getPlayerName(entry.memberId);
+                          return (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {m?.logoUrl ? (
+                                <img 
+                                  src={m.logoUrl} 
+                                  alt="Logo" 
+                                  style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                                />
+                              ) : (
+                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)', flexShrink: 0 }}>
+                                  ♣
+                                </div>
+                              )}
+                              <span>{name}</span>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="result-points-cell">
                         {entry.pointsEarned}

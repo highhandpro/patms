@@ -10,6 +10,7 @@ export interface Member {
   nickname?: string;
   textReminders?: boolean;
   emailAnnouncements?: boolean;
+  logoUrl?: string;
 }
 
 export interface TournamentEntry {

@@ -540,6 +540,8 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {registeredCol1.map((entry, index) => {
                       const info = getMemberInitials(entry.memberId);
+                      const memberObj = state.members.find(m => m.id === entry.memberId);
+                      const logoUrl = memberObj?.logoUrl;
                       return (
                         <div key={entry.memberId} style={{
                           backgroundColor: 'rgba(255, 255, 255, 0.02)',
@@ -555,7 +557,14 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                           textOverflow: 'ellipsis'
                         }} title={info.full}>
                           <span style={{ color: 'var(--color-emerald)', fontWeight: 700, fontSize: '0.75rem', width: '20px' }}>{index + 1}</span>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{info.full}</span>
+                          {logoUrl ? (
+                            <img 
+                              src={logoUrl} 
+                              alt="Logo" 
+                              style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                            />
+                          ) : null}
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{info.full}</span>
                         </div>
                       );
                     })}
@@ -565,6 +574,8 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {registeredCol2.map((entry, index) => {
                       const info = getMemberInitials(entry.memberId);
+                      const memberObj = state.members.find(m => m.id === entry.memberId);
+                      const logoUrl = memberObj?.logoUrl;
                       return (
                         <div key={entry.memberId} style={{
                           backgroundColor: 'rgba(255, 255, 255, 0.02)',
@@ -580,7 +591,14 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                           textOverflow: 'ellipsis'
                         }} title={info.full}>
                           <span style={{ color: 'var(--color-emerald)', fontWeight: 700, fontSize: '0.75rem', width: '20px' }}>{registeredHalf + index + 1}</span>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{info.full}</span>
+                          {logoUrl ? (
+                            <img 
+                              src={logoUrl} 
+                              alt="Logo" 
+                              style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                            />
+                          ) : null}
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{info.full}</span>
                         </div>
                       );
                     })}
@@ -601,6 +619,8 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {sortedWaitlist.map((entry, index) => {
                     const info = getMemberInitials(entry.memberId);
+                    const memberObj = state.members.find(m => m.id === entry.memberId);
+                    const logoUrl = memberObj?.logoUrl;
                     return (
                       <div key={entry.memberId} style={{
                         display: 'flex',
@@ -614,6 +634,13 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                       }} title={info.full}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span style={{ color: 'var(--color-gold)', fontWeight: 700 }}>{index + 1}.</span>
+                          {logoUrl ? (
+                            <img 
+                              src={logoUrl} 
+                              alt="Logo" 
+                              style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                            />
+                          ) : null}
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{info.full}</span>
                         </div>
                         {entry.createdAt && (

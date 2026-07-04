@@ -148,7 +148,27 @@ export const Standings: React.FC = () => {
                     <td style={{ fontWeight: 700, fontSize: '1.05rem' }}>
                       {idx + 1}
                     </td>
-                    <td style={{ fontWeight: 600 }}>{player.name}</td>
+                    <td style={{ fontWeight: 600 }}>
+                      {(() => {
+                        const memberObj = state.members.find(m => m.id === player.memberId);
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {memberObj?.logoUrl ? (
+                              <img 
+                                src={memberObj.logoUrl} 
+                                alt="Logo" 
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                              />
+                            ) : (
+                              <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)', flexShrink: 0 }}>
+                                ♣
+                              </div>
+                            )}
+                            <span>{player.name}</span>
+                          </div>
+                        );
+                      })()}
+                    </td>
                     <td style={{ textAlign: 'center' }}>{player.played}</td>
                     <td style={{ textAlign: 'center', fontWeight: 600, color: player.wins > 0 ? 'var(--text-gold)' : 'inherit' }}>
                       {player.wins}

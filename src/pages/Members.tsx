@@ -24,6 +24,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [notes, setNotes] = useState('');
   const [memberIdInput, setMemberIdInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState('');
 
   // Phone input formatting
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,6 +45,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setEmail('');
     setNotes('');
     setMemberIdInput('');
+    setLogoUrl('');
     setErrorMsg(null);
     setIsAddMemberOpen(true);
   };
@@ -56,6 +58,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setEmail(m.email);
     setNotes(m.notes || '');
     setMemberIdInput(m.id);
+    setLogoUrl(m.logoUrl || '');
     setErrorMsg(null);
   };
 
@@ -69,7 +72,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
         lastName,
         phone,
         email,
-        notes
+        notes,
+        logoUrl
       });
       setEditingMember(null);
     } else {
@@ -80,7 +84,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           return;
         }
       }
-      addMember(firstName, lastName, phone, email, notes, memberIdInput.trim());
+      addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl);
       setIsAddMemberOpen(false);
     }
 
@@ -90,6 +94,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setPhone('');
     setEmail('');
     setNotes('');
+    setLogoUrl('');
     setMemberIdInput('');
     setErrorMsg(null);
   };
@@ -416,7 +421,22 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 filteredMembers.map((m) => (
                   <tr key={m.id}>
                     <td style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{m.id}</td>
-                    <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
+                    <td style={{ fontWeight: 600 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {m.logoUrl ? (
+                          <img 
+                            src={m.logoUrl} 
+                            alt="Logo" 
+                            style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                          />
+                        ) : (
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            ♣
+                          </div>
+                        )}
+                        <span>{m.firstName} {m.lastName}</span>
+                      </div>
+                    </td>
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                         <span style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -521,6 +541,93 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
             )}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              
+              {/* Logo Upload Section */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  color: 'var(--text-gold)',
+                  fontSize: '1.75rem',
+                  fontWeight: 800
+                }}>
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    '♣'
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('admin-edit-logo-input')?.click()}
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                  >
+                    Upload Logo
+                  </button>
+                  {logoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setLogoUrl('')}
+                      className="btn btn-ghost"
+                      style={{ padding: '4px 10px', fontSize: '0.75rem', color: 'var(--color-danger)', border: '1px solid rgba(239,68,68,0.15)' }}
+                    >
+                      Remove Logo
+                    </button>
+                  )}
+                  <input
+                    type="file"
+                    id="admin-edit-logo-input"
+                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                    style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 500 * 1024) {
+                        alert('Maximum file size is 500 KB.');
+                        return;
+                      }
+                      const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+                      if (!allowedTypes.includes(file.type)) {
+                        alert('Only PNG, JPG, WebP, and SVG formats are supported.');
+                        return;
+                      }
+                      
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                          const canvas = document.createElement('canvas');
+                          canvas.width = 256;
+                          canvas.height = 256;
+                          const ctx = canvas.getContext('2d');
+                          if (!ctx) return;
+                          
+                          const size = Math.min(img.width, img.height);
+                          const sx = (img.width - size) / 2;
+                          const sy = (img.height - size) / 2;
+                          
+                          ctx.clearRect(0, 0, 256, 256);
+                          ctx.drawImage(img, sx, sy, size, size, 0, 0, 256, 256);
+                          
+                          const dataUrl = canvas.toDataURL('image/png');
+                          setLogoUrl(dataUrl);
+                        };
+                        img.src = event.target?.result as string;
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </div>
+              </div>
               
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label htmlFor="member-id">Member ID</label>
@@ -645,11 +752,24 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
         }}>
           <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>MEMBER CARD ({selectedMemberForProfile.id})</span>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>
-                  {selectedMemberForProfile.firstName} {selectedMemberForProfile.lastName}
-                </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                {selectedMemberForProfile.logoUrl ? (
+                  <img 
+                    src={selectedMemberForProfile.logoUrl} 
+                    alt="Logo" 
+                    style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                  />
+                ) : (
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: 'var(--text-secondary)' }}>
+                    ♣
+                  </div>
+                )}
+                <div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>MEMBER CARD ({selectedMemberForProfile.id})</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>
+                    {selectedMemberForProfile.firstName} {selectedMemberForProfile.lastName}
+                  </h3>
+                </div>
               </div>
               <button 
                 onClick={() => setSelectedMemberForProfile(null)}

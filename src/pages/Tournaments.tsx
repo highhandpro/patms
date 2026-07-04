@@ -2242,8 +2242,19 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             onDoubleClick={() => toggleCheckedInDealer(entry.memberId)}
                             title="Double-click to toggle Dealer status"
                           >
-                            {preassignedDealers.includes(entry.memberId) ? '👑 ' : ''}
-                            {m.firstName} {m.lastName}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {m.logoUrl ? (
+                                <img 
+                                  src={m.logoUrl} 
+                                  alt="Logo" 
+                                  style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                                />
+                              ) : null}
+                              <span>
+                                {preassignedDealers.includes(entry.memberId) ? '👑 ' : ''}
+                                {m.firstName} {m.lastName}
+                              </span>
+                            </div>
                           </td>
                           <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
                           <td style={{ textAlign: 'center' }}>
@@ -2513,9 +2524,22 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               <div className="active-players-columns-grid">
                 {activePlayers.map(p => (
                   <div key={p.id} className="player-active-card">
-                    <span style={{ fontWeight: 600, fontSize: '0.82rem', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, paddingRight: '4px' }}>
-                      {p.firstName} {p.lastName}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', flex: 1 }}>
+                      {p.logoUrl ? (
+                        <img 
+                          src={p.logoUrl} 
+                          alt="Logo" 
+                          style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                        />
+                      ) : (
+                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: 'var(--text-secondary)', flexShrink: 0 }}>
+                          ♣
+                        </div>
+                      )}
+                      <span style={{ fontWeight: 600, fontSize: '0.82rem', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {p.firstName} {p.lastName}
+                      </span>
+                    </div>
                     <button 
                       onClick={() => {
                         setEliminatingPlayerId(p.id);
@@ -2682,7 +2706,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </thead>
               <tbody>
                 {entries.map((entry) => {
-                  const name = getMemberName(entry.memberId);
+                  const m = state.members.find(member => member.id === entry.memberId);
+                  const name = m ? `${m.firstName} ${m.lastName}` : getMemberName(entry.memberId);
                   
                   // Live dynamic calculations
                   const pos = entry.finishPosition || N;
@@ -2707,7 +2732,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         #{pos}
                       </td>
                       <td style={{ padding: '10px 10px', fontWeight: 600, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
-                        {name}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                          {m?.logoUrl ? (
+                            <img 
+                              src={m.logoUrl} 
+                              alt="Logo" 
+                              style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                            />
+                          ) : null}
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
+                        </div>
                       </td>
                       <td style={{ padding: '10px 10px', fontWeight: 700, textAlign: 'center', color: 'var(--color-gold)' }}>
                         {pointsEarned} pts
