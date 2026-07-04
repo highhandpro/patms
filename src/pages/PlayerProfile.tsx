@@ -13,7 +13,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
   setActiveTab,
   loggedInMemberId
 }) => {
-  const { state } = useApp();
+  const { state, updateMember } = useApp();
 
   if (!loggedInMemberId) {
     return (
@@ -74,7 +74,74 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
             </div>
           )}
           <h1 className="banner-title text-center">{displayName}</h1>
-          <p className="banner-subtitle text-center">ID: {member.id}</p>
+          <p className="banner-subtitle text-center" style={{ marginBottom: '12px' }}>ID: {member.id}</p>
+
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', justifyContent: 'center' }}>
+            <button
+              onClick={() => document.getElementById('player-profile-logo-input')?.click()}
+              className="btn btn-secondary"
+              style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', color: 'white' }}
+            >
+              Change Logo
+            </button>
+            {member.logoUrl && (
+              <button
+                onClick={async () => {
+                  if (confirm('Are you sure you want to remove your logo?')) {
+                    await updateMember(member.id, { logoUrl: '' });
+                  }
+                }}
+                className="btn btn-ghost"
+                style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'rgba(239, 68, 68, 0.9)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+              >
+                Remove Logo
+              </button>
+            )}
+            <input
+              type="file"
+              id="player-profile-logo-input"
+              accept="image/png, image/jpeg, image/webp, image/svg+xml"
+              style={{ display: 'none' }}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 1500 * 1024) {
+                  alert('Maximum file size is 1.5 MB.');
+                  return;
+                }
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+                if (!allowedTypes.includes(file.type)) {
+                  alert('Only PNG, JPG, WebP, and SVG formats are supported.');
+                  return;
+                }
+                try {
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = async () => {
+                      const canvas = document.createElement('canvas');
+                      canvas.width = 768;
+                      canvas.height = 768;
+                      const ctx = canvas.getContext('2d');
+                      if (!ctx) return;
+                      const size = Math.min(img.width, img.height);
+                      const sx = (img.width - size) / 2;
+                      const sy = (img.height - size) / 2;
+                      ctx.clearRect(0, 0, 768, 768);
+                      ctx.drawImage(img, sx, sy, size, size, 0, 0, 768, 768);
+                      const dataUrl = canvas.toDataURL('image/png');
+                      await updateMember(member.id, { logoUrl: dataUrl });
+                    };
+                    img.src = event.target?.result as string;
+                  };
+                  reader.readAsDataURL(file);
+                } catch (err) {
+                  console.error(err);
+                  alert('Failed to upload logo.');
+                }
+              }}
+            />
+          </div>
         </div>
       </PlayerBanner>
 

@@ -142,8 +142,17 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
               <button 
                 className="btn btn-navbar-user"
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
-                <User size={16} />
+                {loggedInMember?.logoUrl ? (
+                  <img 
+                    src={loggedInMember.logoUrl} 
+                    alt="User logo" 
+                    style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.15)', flexShrink: 0 }} 
+                  />
+                ) : (
+                  <User size={16} />
+                )}
                 <span className="user-name">{displayName}</span>
                 <ChevronDown size={14} className={`arrow-icon ${showUserDropdown ? 'open' : ''}`} />
               </button>
@@ -151,7 +160,15 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
               {showUserDropdown && (
                 <div className="navbar-dropdown-menu">
                   <button onClick={() => handleTabClick('profile')} className="dropdown-item">
-                    <User size={16} />
+                    {loggedInMember?.logoUrl ? (
+                      <img 
+                        src={loggedInMember.logoUrl} 
+                        alt="User logo" 
+                        style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.15)', flexShrink: 0 }} 
+                      />
+                    ) : (
+                      <User size={16} />
+                    )}
                     <span>My Profile</span>
                   </button>
                   <button onClick={() => setShowSimModal(true)} className="dropdown-item sim-switch">
