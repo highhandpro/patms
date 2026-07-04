@@ -320,7 +320,8 @@ function App() {
         matchedMember.firstName,
         matchedMember.lastName,
         playerCardPhone.trim(),
-        playerCardEmail.trim().toLowerCase()
+        playerCardEmail.trim().toLowerCase(),
+        matchedMember.logoUrl
       );
 
       setLoggedInMemberId(guestId);

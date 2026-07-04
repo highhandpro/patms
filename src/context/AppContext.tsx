@@ -58,7 +58,7 @@ interface AppContextProps {
   exportDatabase: () => string;
   resetDatabaseToDefault: () => void;
   submitMemberUpdate: (memberId: string, phone: string, email: string) => void;
-  registerGuestPlayer: (firstName: string, lastName: string, phone: string, email: string) => string;
+  registerGuestPlayer: (firstName: string, lastName: string, phone: string, email: string, logoUrl?: string) => string;
   approveMemberUpdate: (approvalId: string) => void;
   rejectMemberUpdate: (approvalId: string) => void;
   submitPlayerInfoForm: (firstName: string, lastName: string, phone: string, email: string, textReminders: boolean, emailAnnouncements: boolean) => Promise<void>;
@@ -1020,7 +1020,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await setDoc(doc(db, 'pendingApprovals', approvalId), newApproval);
   };
 
-  const registerGuestPlayer = (firstName: string, lastName: string, phone: string, email: string): string => {
+  const registerGuestPlayer = (firstName: string, lastName: string, phone: string, email: string, logoUrl?: string): string => {
     const numbers = state.members.map(m => {
       const parsed = parseInt(m.id, 10);
       return isNaN(parsed) ? 0 : parsed;
@@ -1036,7 +1036,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       email,
       joinedDate: new Date().toISOString().split('T')[0],
       isDeleted: false,
-      notes: 'Guest Player Registration'
+      notes: 'Guest Player Registration',
+      logoUrl: logoUrl || ''
     };
 
     const approvalId = `ap-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
