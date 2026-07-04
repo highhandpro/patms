@@ -18,6 +18,7 @@ import { PlayerProfile } from './pages/PlayerProfile';
 import { PlayerLanding } from './pages/PlayerLanding';
 import { PlayerUpdateInfo } from './pages/PlayerUpdateInfo';
 import { useApp } from './context/AppContext';
+import type { Member } from './types';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 import { ShieldAlert } from 'lucide-react';
@@ -82,15 +83,11 @@ function App() {
   const [adminEmailInput, setAdminEmailInput] = useState('');
   const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
 
-  const [showLastNameDropdown, setShowLastNameDropdown] = useState(false);
+  const [showFirstNameDropdown, setShowFirstNameDropdown] = useState(false);
 
   const typedFirst = loginFirstName.trim().toLowerCase();
-  const matchedLastNames = (!isGuestMode && typedFirst.length >= 1)
-    ? Array.from(new Set(
-        state.members
-          .filter(m => !m.isDeleted && m.firstName.toLowerCase().startsWith(typedFirst))
-          .map(m => m.lastName)
-      )).sort()
+  const matchedPlayers = (!isGuestMode && typedFirst.length >= 3)
+    ? state.members.filter(m => !m.isDeleted && m.firstName.toLowerCase().startsWith(typedFirst))
     : [];
 
   useEffect(() => {
@@ -130,6 +127,21 @@ function App() {
     return matrix[b.length][a.length];
   };
 
+  const performDirectLogin = (m: Member) => {
+    setMatchedMember(m);
+    setPlayerCardPhone(m.phone);
+    setPlayerCardEmail(m.email);
+    setIsLoginModalOpen(false);
+    setIsPlayerCardOpen(true);
+  };
+
+  const handleSelectMatchedPlayer = (m: Member) => {
+    setLoginFirstName(m.firstName);
+    setLoginLastName(m.lastName);
+    setShowFirstNameDropdown(false);
+    performDirectLogin(m);
+  };
+
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
@@ -148,11 +160,7 @@ function App() {
     );
 
     if (exactMatch) {
-      setMatchedMember(exactMatch);
-      setPlayerCardPhone(exactMatch.phone);
-      setPlayerCardEmail(exactMatch.email);
-      setIsLoginModalOpen(false);
-      setIsPlayerCardOpen(true);
+      performDirectLogin(exactMatch);
       return;
     }
 
@@ -171,11 +179,7 @@ function App() {
         return currDist < bestDist ? current : best;
       });
 
-      setMatchedMember(closest);
-      setPlayerCardPhone(closest.phone);
-      setPlayerCardEmail(closest.email);
-      setIsLoginModalOpen(false);
-      setIsPlayerCardOpen(true);
+      performDirectLogin(closest);
       return;
     }
 
@@ -582,30 +586,19 @@ function App() {
 
               <form onSubmit={isGuestMode ? handleGuestSubmit : handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
+                  <div className="form-group" style={{ marginBottom: 0, position: 'relative' }}>
                     <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>First Name</label>
                     <input 
                       type="text" 
                       required
                       value={loginFirstName}
                       onChange={e => setLoginFirstName(e.target.value)}
+                      onFocus={() => setShowFirstNameDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowFirstNameDropdown(false), 200)}
                       className="form-input"
                       style={{ padding: '10px 14px', borderRadius: '10px' }}
                     />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0, position: 'relative' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>Last Name</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={loginLastName}
-                      onChange={e => setLoginLastName(e.target.value)}
-                      onFocus={() => setShowLastNameDropdown(true)}
-                      onBlur={() => setTimeout(() => setShowLastNameDropdown(false), 200)}
-                      className="form-input"
-                      style={{ padding: '10px 14px', borderRadius: '10px' }}
-                    />
-                    {showLastNameDropdown && matchedLastNames.length > 0 && (
+                    {showFirstNameDropdown && matchedPlayers.length > 0 && (
                       <div 
                         style={{
                           position: 'absolute',
@@ -622,13 +615,10 @@ function App() {
                           marginTop: '4px'
                         }}
                       >
-                        {matchedLastNames.map(lastName => (
+                        {matchedPlayers.map(m => (
                           <div
-                            key={lastName}
-                            onClick={() => {
-                              setLoginLastName(lastName);
-                              setShowLastNameDropdown(false);
-                            }}
+                            key={m.id}
+                            onClick={() => handleSelectMatchedPlayer(m)}
                             style={{
                               padding: '10px 14px',
                               cursor: 'pointer',
@@ -639,11 +629,22 @@ function App() {
                             }}
                             className="dropdown-item"
                           >
-                            {lastName}
+                            {m.firstName} {m.lastName}
                           </div>
                         ))}
                       </div>
                     )}
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>Last Name</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={loginLastName}
+                      onChange={e => setLoginLastName(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '10px 14px', borderRadius: '10px' }}
+                    />
                   </div>
                 </div>
 
