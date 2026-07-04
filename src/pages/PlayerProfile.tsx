@@ -43,15 +43,36 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
     <div className="player-page player-profile-page animate-fade-in">
       <PlayerBanner>
         <div className="banner-details-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{
-            backgroundColor: 'rgba(255,255,255,0.1)',
-            borderRadius: '50%',
-            padding: '20px',
-            marginBottom: '16px',
-            border: '2px solid rgba(255,255,255,0.2)'
-          }}>
-            <User size={48} style={{ color: 'white' }} />
-          </div>
+          {member.logoUrl ? (
+            <img 
+              src={member.logoUrl} 
+              alt="Player Logo" 
+              style={{
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                marginBottom: '16px',
+                border: '3px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+              }}
+            />
+          ) : (
+            <div style={{
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderRadius: '50%',
+              width: '120px',
+              height: '120px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              border: '3px solid rgba(255,255,255,0.3)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+            }}>
+              <User size={64} style={{ color: 'white' }} />
+            </div>
+          )}
           <h1 className="banner-title text-center">{displayName}</h1>
           <p className="banner-subtitle text-center">ID: {member.id}</p>
         </div>
