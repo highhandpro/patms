@@ -923,40 +923,42 @@ function App() {
                   backgroundColor: 'rgba(212, 163, 89, 0.1)',
                   padding: '4px 12px',
                   borderRadius: '20px',
-                  marginBottom: '16px',
+                  marginBottom: isAdminAuthenticated ? '16px' : '24px',
                   letterSpacing: '0.05em'
                 }}
               >
                 {isNewMemberLogin ? `NEW MEMBER ID: #${matchedMember.id}` : `MEMBER ID: #${matchedMember.id}`}
               </div>
 
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
-                <button 
-                  type="button" 
-                  onClick={() => document.getElementById('player-card-logo-input')?.click()} 
-                  className="btn btn-secondary" 
-                  style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                >
-                  Upload Logo
-                </button>
-                {matchedMember.logoUrl && (
+              {isAdminAuthenticated && (
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
                   <button 
                     type="button" 
-                    onClick={() => handleRemovePlayerLogo(matchedMember.id)} 
-                    className="btn btn-ghost" 
-                    style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.15)' }}
+                    onClick={() => document.getElementById('player-card-logo-input')?.click()} 
+                    className="btn btn-secondary" 
+                    style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                   >
-                    Remove Logo
+                    Upload Logo
                   </button>
-                )}
-                <input
-                  type="file"
-                  id="player-card-logo-input"
-                  accept="image/png, image/jpeg, image/webp, image/svg+xml"
-                  style={{ display: 'none' }}
-                  onChange={(e) => handleUploadPlayerLogo(matchedMember.id, e)}
-                />
-              </div>
+                  {matchedMember.logoUrl && (
+                    <button 
+                      type="button" 
+                      onClick={() => handleRemovePlayerLogo(matchedMember.id)} 
+                      className="btn btn-ghost" 
+                      style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.15)' }}
+                    >
+                      Remove Logo
+                    </button>
+                  )}
+                  <input
+                    type="file"
+                    id="player-card-logo-input"
+                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                    style={{ display: 'none' }}
+                    onChange={(e) => handleUploadPlayerLogo(matchedMember.id, e)}
+                  />
+                </div>
+              )}
  
               <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
                 {isNewMemberLogin ? 'Enter your contact details below.' : 'Please review your contact details below. You can correct them if they are outdated.'}
