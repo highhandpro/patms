@@ -50,7 +50,7 @@ function App() {
     return 'events';
   });
 
-  const { state, submitMemberUpdate, registerGuestPlayer, updateMember } = useApp();
+  const { state, submitMemberUpdate, registerGuestPlayer } = useApp();
 
   // Login & Player Card Modal states
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -127,83 +127,7 @@ function App() {
     return matrix[b.length][a.length];
   };
 
-  const resizeImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = 768;
-          canvas.height = 768;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            reject(new Error('Could not get canvas context'));
-            return;
-          }
-          
-          const size = Math.min(img.width, img.height);
-          const sx = (img.width - size) / 2;
-          const sy = (img.height - size) / 2;
-          
-          ctx.clearRect(0, 0, 768, 768);
-          ctx.drawImage(img, sx, sy, size, size, 0, 0, 768, 768);
-          
-          let dataUrl = canvas.toDataURL('image/webp', 0.8);
-          if (dataUrl.length > 900 * 1024) {
-            dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-          }
-          if (dataUrl.length > 900 * 1024) {
-            const smallCanvas = document.createElement('canvas');
-            smallCanvas.width = 512;
-            smallCanvas.height = 512;
-            const sCtx = smallCanvas.getContext('2d');
-            if (sCtx) {
-              sCtx.drawImage(canvas, 0, 0, 512, 512);
-              dataUrl = smallCanvas.toDataURL('image/jpeg', 0.6);
-            }
-          }
-          resolve(dataUrl);
-        };
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = event.target?.result as string;
-      };
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
-  };
 
-  const handleUploadPlayerLogo = async (memberId: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 1500 * 1024) {
-      alert('Maximum file size is 1.5 MB.');
-      return;
-    }
-
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
-    if (!allowedTypes.includes(file.type)) {
-      alert('Only PNG, JPG, WebP, and SVG formats are supported.');
-      return;
-    }
-
-    try {
-      const resizedBase64 = await resizeImage(file);
-      await updateMember(memberId, { logoUrl: resizedBase64 });
-      setMatchedMember((prev: any) => prev ? { ...prev, logoUrl: resizedBase64 } : null);
-    } catch (error) {
-      console.error(error);
-      alert('Failed to resize and upload image.');
-    }
-  };
-
-  const handleRemovePlayerLogo = async (memberId: string) => {
-    if (confirm('Are you sure you want to remove this player\'s logo?')) {
-      await updateMember(memberId, { logoUrl: '' });
-      setMatchedMember((prev: any) => prev ? { ...prev, logoUrl: '' } : null);
-    }
-  };
 
   const performDirectLogin = (m: Member) => {
     setMatchedMember(m);
@@ -930,35 +854,7 @@ function App() {
                 {isNewMemberLogin ? `NEW MEMBER ID: #${matchedMember.id}` : `MEMBER ID: #${matchedMember.id}`}
               </div>
 
-              {isAdminAuthenticated && (
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
-                  <button 
-                    type="button" 
-                    onClick={() => document.getElementById('player-card-logo-input')?.click()} 
-                    className="btn btn-secondary" 
-                    style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                  >
-                    Upload Logo
-                  </button>
-                  {matchedMember.logoUrl && (
-                    <button 
-                      type="button" 
-                      onClick={() => handleRemovePlayerLogo(matchedMember.id)} 
-                      className="btn btn-ghost" 
-                      style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.15)' }}
-                    >
-                      Remove Logo
-                    </button>
-                  )}
-                  <input
-                    type="file"
-                    id="player-card-logo-input"
-                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
-                    style={{ display: 'none' }}
-                    onChange={(e) => handleUploadPlayerLogo(matchedMember.id, e)}
-                  />
-                </div>
-              )}
+
  
               <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
                 {isNewMemberLogin ? 'Enter your contact details below.' : 'Please review your contact details below. You can correct them if they are outdated.'}
