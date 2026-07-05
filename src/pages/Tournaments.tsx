@@ -55,7 +55,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary'>('rsvp');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print'>('rsvp');
+  const [printType, setPrintType] = useState<'signin' | 'scoresheet'>('signin');
 
   // Player search in checkin
   const [searchQuery, setSearchQuery] = useState('');
@@ -1700,6 +1701,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             >
               Seating Preview
             </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'print' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('print')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'print' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'print' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'print' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              TD Print Out
+            </button>
           </>
         ) : activeTournament.status === 'active' ? (
           <>
@@ -1772,6 +1787,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               }}
             >
               Summary ({activeTournament.entries.filter(e => e.eliminatedAt).length} busted)
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'print' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('print')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'print' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'print' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'print' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              TD Print Out
             </button>
           </>
         ) : (
@@ -2980,6 +3009,329 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
         </div>
       )}
+
+      {subTab === 'print' && (() => {
+        // Retrieve active members
+        const activeMembers = state.members.filter(m => !m.isDeleted);
+        // Sort active members alphabetically by first name
+        const sortedActiveMembers = [...activeMembers].sort((a, b) => 
+          a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName)
+        );
+
+        // Retrieve registered members for active tournament (both check-in and RSVP)
+        const registeredMembers = activeTournament.entries
+          .map(e => state.members.find(m => m.id === e.memberId))
+          .filter(Boolean) as Member[];
+        // Sort registered members alphabetically by first name
+        const sortedRegisteredMembers = [...registeredMembers].sort((a, b) => 
+          a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName)
+        );
+
+        // Decide which list to print
+        const printPlayers = printType === 'signin' ? sortedActiveMembers : sortedRegisteredMembers;
+
+        // Chunk players into pages of 50
+        const itemsPerPage = 50;
+        const pageChunks: Member[][] = [];
+        for (let i = 0; i < printPlayers.length; i += itemsPerPage) {
+          pageChunks.push(printPlayers.slice(i, i + itemsPerPage));
+        }
+        if (pageChunks.length === 0) {
+          pageChunks.push([]); // Ensure at least one empty page renders
+        }
+
+        return (
+          <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Screen controls - hidden on print */}
+            <div className="glass-card no-print" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                <div>
+                  <h4 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Print Tournament Sheets</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>
+                    Generate print-ready sheets optimized for standard 8.5" × 11" paper.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => window.print()}
+                  className="btn btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontWeight: 600 }}
+                >
+                  🖨️ Print Now
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => setPrintType('signin')}
+                  className={`btn ${printType === 'signin' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{
+                    backgroundColor: printType === 'signin' ? 'var(--color-emerald)' : 'rgba(255,255,255,0.05)',
+                    borderColor: printType === 'signin' ? 'var(--color-emerald)' : 'rgba(255,255,255,0.1)'
+                  }}
+                >
+                  Player Sign-In Sheet ({sortedActiveMembers.length} Active Players)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrintType('scoresheet')}
+                  className={`btn ${printType === 'scoresheet' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{
+                    backgroundColor: printType === 'scoresheet' ? 'var(--color-emerald)' : 'rgba(255,255,255,0.05)',
+                    borderColor: printType === 'scoresheet' ? 'var(--color-emerald)' : 'rgba(255,255,255,0.1)'
+                  }}
+                >
+                  TD Score Sheet ({sortedRegisteredMembers.length} Registered Players)
+                </button>
+              </div>
+            </div>
+
+            {/* Print Stylesheet Injection */}
+            <style dangerouslySetInnerHTML={{ __html: `
+              @media print {
+                body, html {
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                }
+                /* Hide screen-only containers */
+                .sidebar, .top-navbar, .no-print, button, input, .subtab-navigation, .back-button,
+                .tournament-header-banner, .payouts-config-banner, .tab-headers-container {
+                  display: none !important;
+                }
+                /* Reset layout on parent containers */
+                body, html, #root, .app-container, .admin-portal-layout, .main-content, 
+                .animate-slide-up, .tournament-details-container {
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  display: block !important;
+                  width: 100% !important;
+                  height: auto !important;
+                  overflow: visible !important;
+                  box-shadow: none !important;
+                  border: none !important;
+                }
+                /* Hide siblings inside the animate-slide-up wrapper */
+                .animate-slide-up > *:not(.print-root-container) {
+                  display: none !important;
+                }
+                .print-root-container {
+                  display: block !important;
+                  width: 100% !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                }
+                .print-page-layout {
+                  display: block !important;
+                  page-break-after: always !important;
+                  page-break-inside: avoid !important;
+                  box-sizing: border-box !important;
+                  width: 8.5in !important;
+                  height: 11in !important;
+                  padding: 0.5in !important;
+                  margin: 0 auto !important;
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                  position: relative !important;
+                  border: none !important;
+                  box-shadow: none !important;
+                }
+                .print-row-item {
+                  page-break-inside: avoid !important;
+                }
+              }
+              
+              /* Screen Preview Styles */
+              .preview-pages-container {
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+                align-items: center;
+                margin-top: 12px;
+                width: 100%;
+              }
+              .preview-page-sheet {
+                background: #ffffff;
+                color: #000000;
+                width: 8.5in;
+                height: 11in;
+                padding: 0.5in;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+                border-radius: 4px;
+                box-sizing: border-box;
+                position: relative;
+                border: 1px solid #ddd;
+              }
+            `}} />
+
+            {/* Print Content Preview / Print Target Container */}
+            <div className="print-root-container preview-pages-container">
+              {pageChunks.map((chunk, pageIdx) => {
+                const leftCol = chunk.slice(0, 25);
+                const rightCol = chunk.slice(25, 50);
+
+                return (
+                  <div key={pageIdx} className="print-page-layout preview-page-sheet">
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '8px', marginBottom: '16px' }}>
+                      <h3 style={{ fontSize: '14pt', fontWeight: 800, margin: 0, color: '#000' }}>
+                        {printType === 'signin' ? 'Penny Ante Club - Player Sign-In Sheet' : `${activeTournament.name} - TD Score Sheet`}
+                      </h3>
+                      <span style={{ fontSize: '9pt', color: '#555', fontWeight: 600 }}>
+                        Date: {activeTournament.date} | Page {pageIdx + 1} of {pageChunks.length}
+                      </span>
+                    </div>
+
+                    {/* Layout Body */}
+                    {printType === 'signin' ? (
+                      /* Sign-In Sheet Columns Layout */
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', fontSize: '9pt', fontWeight: 700, borderBottom: '2px solid #000', paddingBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#000' }}>
+                          <div style={{ width: '50%', display: 'flex', paddingRight: '0.25in' }}>
+                            <span style={{ width: '26px' }}></span>
+                            <span style={{ width: '60px' }}>ID</span>
+                            <span>Player Name</span>
+                          </div>
+                          <div style={{ width: '50%', display: 'flex', paddingLeft: '0.25in', borderLeft: '1px solid #000' }}>
+                            <span style={{ width: '26px' }}></span>
+                            <span style={{ width: '60px' }}>ID</span>
+                            <span>Player Name</span>
+                          </div>
+                        </div>
+
+                        {Array.from({ length: 25 }).map((_, rowIdx) => {
+                          const leftPlayer = leftCol[rowIdx];
+                          const rightPlayer = rightCol[rowIdx];
+
+                          return (
+                            <div 
+                              key={rowIdx} 
+                              className="print-row-item" 
+                              style={{ 
+                                display: 'flex', 
+                                height: '0.35in', 
+                                alignItems: 'center', 
+                                fontSize: '11pt', 
+                                borderBottom: '1px solid #ccc',
+                                color: '#000'
+                              }}
+                            >
+                              {/* Left Cell */}
+                              <div style={{ width: '50%', display: 'flex', alignItems: 'center', paddingRight: '0.25in', height: '100%' }}>
+                                {leftPlayer ? (
+                                  <>
+                                    <span style={{ 
+                                      width: '14px', 
+                                      height: '14px', 
+                                      border: '1.5px solid #000', 
+                                      marginRight: '12px', 
+                                      display: 'inline-block',
+                                      flexShrink: 0
+                                    }} />
+                                    <span style={{ width: '60px', fontWeight: 700 }}>{leftPlayer.id}</span>
+                                    <span style={{ fontWeight: 500 }}>
+                                      {leftPlayer.firstName} {leftPlayer.lastName ? leftPlayer.lastName[0] + '.' : ''}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <div style={{ visibility: 'hidden' }}>&nbsp;</div>
+                                )}
+                              </div>
+
+                              {/* Right Cell */}
+                              <div style={{ width: '50%', display: 'flex', alignItems: 'center', paddingLeft: '0.25in', borderLeft: '1px solid #000', height: '100%' }}>
+                                {rightPlayer ? (
+                                  <>
+                                    <span style={{ 
+                                      width: '14px', 
+                                      height: '14px', 
+                                      border: '1.5px solid #000', 
+                                      marginRight: '12px', 
+                                      display: 'inline-block',
+                                      flexShrink: 0
+                                    }} />
+                                    <span style={{ width: '60px', fontWeight: 700 }}>{rightPlayer.id}</span>
+                                    <span style={{ fontWeight: 500 }}>
+                                      {rightPlayer.firstName} {rightPlayer.lastName ? rightPlayer.lastName[0] + '.' : ''}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <div style={{ visibility: 'hidden' }}>&nbsp;</div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      /* TD Score Sheet Layout */
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10pt', color: '#000' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '2px solid #000', textTransform: 'uppercase', fontSize: '8.5pt', fontWeight: 700 }}>
+                            {/* Left Column Headers */}
+                            <th style={{ textAlign: 'left', padding: '6px 4px', width: '21%', color: '#000' }}>First Name</th>
+                            <th style={{ textAlign: 'left', padding: '6px 4px', width: '21%', color: '#000' }}>Last Name</th>
+                            <th style={{ textAlign: 'center', padding: '6px 4px', width: '8%', borderRight: '1px solid #ccc', color: '#000' }}>place</th>
+                            <th style={{ textAlign: 'center', padding: '6px 4px', width: '8%', borderRight: '2px solid #000', color: '#000' }}>bounties</th>
+                            
+                            {/* Right Column Headers */}
+                            <th style={{ textAlign: 'left', padding: '6px 4px', width: '21%', paddingLeft: '12px', color: '#000' }}>First Name</th>
+                            <th style={{ textAlign: 'left', padding: '6px 4px', width: '21%', color: '#000' }}>Last Name</th>
+                            <th style={{ textAlign: 'center', padding: '6px 4px', width: '8%', borderRight: '1px solid #ccc', color: '#000' }}>place</th>
+                            <th style={{ textAlign: 'center', padding: '6px 4px', width: '8%', color: '#000' }}>bounties</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Array.from({ length: 25 }).map((_, rowIdx) => {
+                            const leftPlayer = leftCol[rowIdx];
+                            const rightPlayer = rightCol[rowIdx];
+
+                            return (
+                              <tr 
+                                key={rowIdx} 
+                                className="print-row-item" 
+                                style={{ 
+                                  height: '0.35in', 
+                                  borderBottom: '1px solid #ccc'
+                                }}
+                              >
+                                {/* Left Column Data */}
+                                <td style={{ padding: '4px', fontWeight: 700, color: '#000' }}>
+                                  {leftPlayer?.firstName || ''}
+                                </td>
+                                <td style={{ padding: '4px', color: '#000' }}>
+                                  {leftPlayer?.lastName || ''}
+                                </td>
+                                <td style={{ padding: '4px', borderRight: '1px solid #ccc' }}></td>
+                                <td style={{ padding: '4px', borderRight: '2px solid #000' }}></td>
+                                
+                                {/* Right Column Data */}
+                                <td style={{ padding: '4px', paddingLeft: '12px', fontWeight: 700, color: '#000' }}>
+                                  {rightPlayer?.firstName || ''}
+                                </td>
+                                <td style={{ padding: '4px', color: '#000' }}>
+                                  {rightPlayer?.lastName || ''}
+                                </td>
+                                <td style={{ padding: '4px', borderRight: '1px solid #ccc' }}></td>
+                                <td style={{ padding: '4px' }}></td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {isPayoutModalOpen && (
         <div style={{
