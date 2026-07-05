@@ -2379,7 +2379,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Seating Assignments</h3>
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Seating Assignments</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px', margin: 0 }}>
+                Seating is generated only for checked-in (registered) players. RSVP'ed players who have not checked in yet will not be assigned a seat.
+              </p>
+            </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button className="btn btn-secondary" onClick={() => setIsDisplayModeOpen(true)}>
                 <Play size={16} />
