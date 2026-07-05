@@ -5,6 +5,7 @@ import {
   collection, 
   doc, 
   setDoc, 
+  updateDoc,
   onSnapshot, 
   deleteDoc, 
   getDocs
@@ -687,7 +688,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateTournament = async (id: string, updated: Partial<Tournament>) => {
-    await setDoc(doc(db, 'tournaments', id), updated, { merge: true });
+    await updateDoc(doc(db, 'tournaments', id), updated);
   };
 
   const deleteTournament = async (id: string) => {
@@ -782,9 +783,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const unregisterPlayer = async (tournamentId: string, memberId: string) => {
     const t = state.tournaments.find(tour => tour.id === tournamentId);
     if (!t) return;
-    await setDoc(doc(db, 'tournaments', tournamentId), {
-      entries: t.entries.filter(e => e.memberId !== memberId)
-    }, { merge: true });
+
+    const updatedEntries = t.entries.filter(e => e.memberId !== memberId);
+    const updateData: any = { entries: updatedEntries };
+
+    if (t.seating) {
+      const updatedSeating = { ...t.seating };
+      Object.keys(updatedSeating).forEach(tableName => {
+        updatedSeating[tableName] = updatedSeating[tableName].map(id => id === memberId ? "" : id);
+      });
+      updateData.seating = updatedSeating;
+    }
+
+    await updateDoc(doc(db, 'tournaments', tournamentId), updateData);
   };
 
   const togglePlayerCheckIn = async (tournamentId: string, memberId: string) => {
@@ -803,17 +814,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return e;
     });
 
-    await setDoc(doc(db, 'tournaments', tournamentId), {
+    await updateDoc(doc(db, 'tournaments', tournamentId), {
       entries: updatedEntries
-    }, { merge: true });
+    });
   };
 
   const toggleEntryBuyIn = async (tournamentId: string, memberId: string) => {
     const t = state.tournaments.find(tour => tour.id === tournamentId);
     if (!t) return;
 
+    const targetEntry = t.entries.find(e => e.memberId === memberId);
+    const turningOff = targetEntry ? targetEntry.hasBuyIn : false;
+
     const updatedEntries = t.entries.map(e => e.memberId === memberId ? { ...e, hasBuyIn: !e.hasBuyIn } : e);
-    await setDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries }, { merge: true });
+    const updateData: any = { entries: updatedEntries };
+
+    if (turningOff && t.seating) {
+      const updatedSeating = { ...t.seating };
+      Object.keys(updatedSeating).forEach(tableName => {
+        updatedSeating[tableName] = updatedSeating[tableName].map(id => id === memberId ? "" : id);
+      });
+      updateData.seating = updatedSeating;
+    }
+
+    await updateDoc(doc(db, 'tournaments', tournamentId), updateData);
   };
 
   const toggleEntryAddon = async (tournamentId: string, memberId: string) => {
@@ -821,7 +845,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!t) return;
 
     const updatedEntries = t.entries.map(e => e.memberId === memberId ? { ...e, hasAddon: !e.hasAddon } : e);
-    await setDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries }, { merge: true });
+    await updateDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries });
   };
 
   const toggleEntryDealerApp = async (tournamentId: string, memberId: string) => {
@@ -829,7 +853,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!t) return;
 
     const updatedEntries = t.entries.map(e => e.memberId === memberId ? { ...e, hasDealerAppreciation: !e.hasDealerAppreciation } : e);
-    await setDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries }, { merge: true });
+    await updateDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries });
   };
 
   const eliminatePlayer = async (tournamentId: string, memberId: string, bountiesWon: number) => {
