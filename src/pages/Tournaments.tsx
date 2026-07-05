@@ -3011,12 +3011,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       )}
 
       {subTab === 'print' && (() => {
-        // Retrieve active members
-        const activeMembers = state.members.filter(m => !m.isDeleted);
-        // Sort active members alphabetically by first name
-        const sortedActiveMembers = [...activeMembers].sort((a, b) => 
-          a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName)
-        );
 
         // Retrieve registered members for active tournament (both check-in and RSVP)
         const registeredMembers = activeTournament.entries
@@ -3028,7 +3022,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         );
 
         // Decide which list to print
-        const printPlayers = printType === 'signin' ? sortedActiveMembers : sortedRegisteredMembers;
+        const printPlayers = sortedRegisteredMembers;
 
         // Chunk players into pages of 50
         const itemsPerPage = 50;
@@ -3070,7 +3064,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     borderColor: printType === 'signin' ? 'var(--color-emerald)' : 'rgba(255,255,255,0.1)'
                   }}
                 >
-                  Player Sign-In Sheet ({sortedActiveMembers.length} Active Players)
+                  Player Sign-In Sheet ({sortedRegisteredMembers.length} RSVPs)
                 </button>
                 <button
                   type="button"
@@ -3235,7 +3229,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     }} />
                                     <span style={{ width: '60px', fontWeight: 700 }}>{leftPlayer.id}</span>
                                     <span style={{ fontWeight: 500 }}>
-                                      {leftPlayer.firstName} {leftPlayer.lastName ? leftPlayer.lastName[0] + '.' : ''}
+                                      {leftPlayer.firstName} {leftPlayer.lastName || ''}
                                     </span>
                                   </>
                                 ) : (
@@ -3257,7 +3251,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     }} />
                                     <span style={{ width: '60px', fontWeight: 700 }}>{rightPlayer.id}</span>
                                     <span style={{ fontWeight: 500 }}>
-                                      {rightPlayer.firstName} {rightPlayer.lastName ? rightPlayer.lastName[0] + '.' : ''}
+                                      {rightPlayer.firstName} {rightPlayer.lastName || ''}
                                     </span>
                                   </>
                                 ) : (
