@@ -1540,7 +1540,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   return (
     <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      
+      <div className="no-print" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Back & Title Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button 
@@ -1817,6 +1817,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             Standings & Results
           </button>
         )}
+      </div>
       </div>
 
       {/* Sub-tab contents */}
