@@ -623,7 +623,20 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                           ctx.clearRect(0, 0, 768, 768);
                           ctx.drawImage(img, sx, sy, size, size, 0, 0, 768, 768);
                           
-                          const dataUrl = canvas.toDataURL('image/png');
+                          let dataUrl = canvas.toDataURL('image/webp', 0.8);
+                          if (dataUrl.length > 900 * 1024) {
+                            dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                          }
+                          if (dataUrl.length > 900 * 1024) {
+                            const smallCanvas = document.createElement('canvas');
+                            smallCanvas.width = 512;
+                            smallCanvas.height = 512;
+                            const sCtx = smallCanvas.getContext('2d');
+                            if (sCtx) {
+                              sCtx.drawImage(canvas, 0, 0, 512, 512);
+                              dataUrl = smallCanvas.toDataURL('image/jpeg', 0.6);
+                            }
+                          }
                           setLogoUrl(dataUrl);
                         };
                         img.src = event.target?.result as string;
