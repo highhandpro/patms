@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import type { Member } from '../types';
 import { formatDate } from '../utils/stats';
+import { generateSignInSheetPDF, generateTDScoreSheetPDF } from '../utils/pdf';
 import { SeatingDisplayModal } from '../components/SeatingDisplayModal';
 import { EliminationModal } from '../components/EliminationModal';
 import { LateEntryModal } from '../components/LateEntryModal';
@@ -3047,11 +3048,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </p>
                 </div>
                 <button 
-                  onClick={() => window.print()}
+                  onClick={() => {
+                    if (printType === 'signin') {
+                      generateSignInSheetPDF(activeTournament.date, sortedRegisteredMembers);
+                    } else {
+                      generateTDScoreSheetPDF(activeTournament.name, activeTournament.date, sortedRegisteredMembers);
+                    }
+                  }}
                   className="btn btn-primary"
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontWeight: 600 }}
                 >
-                  🖨️ Print Now
+                  📥 Download PDF
                 </button>
               </div>
 
