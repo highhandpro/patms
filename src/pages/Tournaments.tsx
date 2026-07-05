@@ -1588,7 +1588,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             </span>
           </div>
           <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            Date: <strong>{formatDate(activeTournament.date)}</strong> | Total checked in: <strong>{activeTournament.entries.length} players</strong>
+            Date: <strong>{formatDate(activeTournament.date)}</strong> | Total checked in: <strong>{activeTournament.entries.filter(e => e.hasBuyIn).length} players</strong>
           </span>
         </div>
 
