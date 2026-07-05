@@ -62,41 +62,46 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setErrorMsg(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim()) return;
 
-    if (editingMember) {
-      updateMember(editingMember.id, {
-        firstName,
-        lastName,
-        phone,
-        email,
-        notes,
-        logoUrl
-      });
-      setEditingMember(null);
-    } else {
-      if (memberIdInput.trim()) {
-        const idExists = state.members.some(m => m.id === memberIdInput.trim());
-        if (idExists) {
-          setErrorMsg(`Member ID "${memberIdInput.trim()}" is already assigned. Please use a unique ID.`);
-          return;
+    try {
+      if (editingMember) {
+        await updateMember(editingMember.id, {
+          firstName,
+          lastName,
+          phone,
+          email,
+          notes,
+          logoUrl
+        });
+        setEditingMember(null);
+      } else {
+        if (memberIdInput.trim()) {
+          const idExists = state.members.some(m => m.id === memberIdInput.trim());
+          if (idExists) {
+            setErrorMsg(`Member ID "${memberIdInput.trim()}" is already assigned. Please use a unique ID.`);
+            return;
+          }
         }
+        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl);
+        setIsAddMemberOpen(false);
       }
-      addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl);
-      setIsAddMemberOpen(false);
-    }
 
-    // Reset fields
-    setFirstName('');
-    setLastName('');
-    setPhone('');
-    setEmail('');
-    setNotes('');
-    setLogoUrl('');
-    setMemberIdInput('');
-    setErrorMsg(null);
+      // Reset fields
+      setFirstName('');
+      setLastName('');
+      setPhone('');
+      setEmail('');
+      setNotes('');
+      setLogoUrl('');
+      setMemberIdInput('');
+      setErrorMsg(null);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save changes: ' + (err as Error).message);
+    }
   };
 
   const handleDelete = (id: string, name: string) => {
