@@ -150,26 +150,26 @@ export const generateTDScoreSheetPDF = (tournamentName: string, date: string, pl
     
     // Left column table headers
     doc.text('FIRST NAME', 0.5, 0.95);
-    doc.text('LAST NAME', 2.1, 0.95);
-    doc.text('PLACE', 3.25, 0.95);
-    doc.text('BOUNTIES', 3.72, 0.95);
+    doc.text('LAST NAME', 1.85, 0.95);
+    doc.text('PLACE', 3.03, 0.95);
+    doc.text('BOUNTIES', 3.52, 0.95);
 
     // Right column table headers
     doc.text('FIRST NAME', 4.35, 0.95);
-    doc.text('LAST NAME', 5.95, 0.95);
-    doc.text('PLACE', 7.1, 0.95);
-    doc.text('BOUNTIES', 7.57, 0.95);
+    doc.text('LAST NAME', 5.7, 0.95);
+    doc.text('PLACE', 6.88, 0.95);
+    doc.text('BOUNTIES', 7.37, 0.95);
 
     // Draw division vertical lines
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.015);
     doc.line(4.15, 0.8, 4.15, 10.25); // main center division line
 
-    doc.line(3.2, 0.8, 3.2, 10.25); // left column place boundary
-    doc.line(3.65, 0.8, 3.65, 10.25); // left column bounties boundary
+    doc.line(3.0, 0.8, 3.0, 10.25); // left column place boundary
+    doc.line(3.5, 0.8, 3.5, 10.25); // left column bounties boundary
 
-    doc.line(7.05, 0.8, 7.05, 10.25); // right column place boundary
-    doc.line(7.5, 0.8, 7.5, 10.25); // right column bounties boundary
+    doc.line(6.85, 0.8, 6.85, 10.25); // right column place boundary
+    doc.line(7.35, 0.8, 7.35, 10.25); // right column bounties boundary
 
     // Draw horizontal sub-header divider
     doc.line(0.5, 1.05, 8.0, 1.05);
@@ -196,7 +196,7 @@ export const generateTDScoreSheetPDF = (tournamentName: string, date: string, pl
         doc.setFont('Helvetica', 'bold');
         doc.text(leftPlayer.firstName, 0.5, y);
         doc.setFont('Helvetica', 'normal');
-        doc.text(leftPlayer.lastName || '', 2.1, y);
+        doc.text(leftPlayer.lastName || '', 1.85, y);
       }
 
       // Right Column
@@ -204,7 +204,7 @@ export const generateTDScoreSheetPDF = (tournamentName: string, date: string, pl
         doc.setFont('Helvetica', 'bold');
         doc.text(rightPlayer.firstName, 4.35, y);
         doc.setFont('Helvetica', 'normal');
-        doc.text(rightPlayer.lastName || '', 5.95, y);
+        doc.text(rightPlayer.lastName || '', 5.7, y);
       }
     }
   }
