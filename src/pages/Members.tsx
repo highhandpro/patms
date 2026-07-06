@@ -660,7 +660,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Player Card (2" x 3.5")</span>
                   <div style={{
                     width: '100px',
-                    height: '175px',
+                    height: '150px',
                     borderRadius: '8px',
                     backgroundColor: 'rgba(255,255,255,0.03)',
                     border: '1px solid var(--border-subtle)',
@@ -718,12 +718,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         const img = new Image();
                         img.onload = () => {
                           const canvas = document.createElement('canvas');
-                          canvas.width = 480;
-                          canvas.height = 840;
+                          canvas.width = 1024;
+                          canvas.height = 1536;
                           const ctx = canvas.getContext('2d');
                           if (!ctx) return;
                           
-                          const targetRatio = 480 / 840;
+                          const targetRatio = 1024 / 1536;
                           const sourceRatio = img.width / img.height;
                           let sx, sy, sWidth, sHeight;
                           if (sourceRatio > targetRatio) {
@@ -738,8 +738,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                             sy = (img.height - sHeight) / 2;
                           }
                           
-                          ctx.clearRect(0, 0, 480, 840);
-                          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 480, 840);
+                          ctx.clearRect(0, 0, 1024, 1536);
+                          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 1024, 1536);
                           
                           const dataUrl = canvas.toDataURL('image/webp', 0.85);
                           setCardUrl(dataUrl);
@@ -1012,7 +1012,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   alt="Player Card" 
                   style={{ 
                     width: '220px', 
-                    height: '385px', 
+                    height: '330px', 
                     borderRadius: '12px', 
                     boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                     border: '1px solid rgba(255,255,255,0.08)',
