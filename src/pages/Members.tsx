@@ -431,11 +431,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         {m.logoUrl ? (
                           <img 
                             src={m.logoUrl} 
-                            alt="Card Preview" 
-                            style={{ width: '24px', height: '32px', borderRadius: '4px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                            alt="Logo" 
+                            style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
                           />
                         ) : (
-                          <div style={{ width: '24px', height: '32px', borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                             ♣
                           </div>
                         )}
@@ -547,13 +547,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* Member Card Upload Section */}
+              {/* Logo Upload Section */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Member Card Artwork</span>
                 <div style={{
-                  width: '210px',
-                  height: '280px',
-                  borderRadius: '12px',
+                  width: '192px',
+                  height: '192px',
+                  borderRadius: '50%',
                   backgroundColor: 'rgba(255,255,255,0.03)',
                   border: '1px solid var(--border-subtle)',
                   display: 'flex',
@@ -562,11 +561,10 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   overflow: 'hidden',
                   color: 'var(--text-gold)',
                   fontSize: '5rem',
-                  fontWeight: 800,
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
+                  fontWeight: 800
                 }}>
                   {logoUrl ? (
-                    <img src={logoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <img src={logoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     '♣'
                   )}
@@ -578,7 +576,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     className="btn btn-secondary"
                     style={{ padding: '4px 10px', fontSize: '0.75rem' }}
                   >
-                    Upload Member Card
+                    Upload Logo
                   </button>
                   {logoUrl && (
                     <button
@@ -587,7 +585,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                       className="btn btn-ghost"
                       style={{ padding: '4px 10px', fontSize: '0.75rem', color: 'var(--color-danger)', border: '1px solid rgba(239,68,68,0.15)' }}
                     >
-                      Remove Card
+                      Remove Logo
                     </button>
                   )}
                   <input
@@ -772,11 +770,24 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
         }}>
           <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>MEMBER CARD ({selectedMemberForProfile.id})</span>
-                <h3 style={{ fontSize: '1.8rem', fontWeight: 800 }}>
-                  {selectedMemberForProfile.firstName} {selectedMemberForProfile.lastName}
-                </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                {selectedMemberForProfile.logoUrl ? (
+                  <img 
+                    src={selectedMemberForProfile.logoUrl} 
+                    alt="Logo" 
+                    style={{ width: '144px', height: '144px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                  />
+                ) : (
+                  <div style={{ width: '144px', height: '144px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '4rem', color: 'var(--text-secondary)' }}>
+                    ♣
+                  </div>
+                )}
+                <div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>MEMBER CARD ({selectedMemberForProfile.id})</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>
+                    {selectedMemberForProfile.firstName} {selectedMemberForProfile.lastName}
+                  </h3>
+                </div>
               </div>
               <button 
                 onClick={() => setSelectedMemberForProfile(null)}
@@ -879,23 +890,6 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 </p>
               )}
             </div>
-
-            {selectedMemberForProfile.logoUrl && (
-              <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
-                <img 
-                  src={selectedMemberForProfile.logoUrl} 
-                  alt="Member Card" 
-                  style={{ 
-                    width: '100%', 
-                    maxWidth: '400px', 
-                    borderRadius: '16px', 
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    display: 'block'
-                  }} 
-                />
-              </div>
-            )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
               <button 

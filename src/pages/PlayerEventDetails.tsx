@@ -560,8 +560,8 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                           {logoUrl ? (
                             <img 
                               src={logoUrl} 
-                              alt="Card Preview" 
-                              style={{ width: '15px', height: '20px', borderRadius: '2px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                              alt="Logo" 
+                              style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
                             />
                           ) : null}
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{info.full}</span>
@@ -594,8 +594,8 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                           {logoUrl ? (
                             <img 
                               src={logoUrl} 
-                              alt="Card Preview" 
-                              style={{ width: '15px', height: '20px', borderRadius: '2px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                              alt="Logo" 
+                              style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
                             />
                           ) : null}
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{info.full}</span>
@@ -637,8 +637,8 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                           {logoUrl ? (
                             <img 
                               src={logoUrl} 
-                              alt="Card Preview" 
-                              style={{ width: '15px', height: '20px', borderRadius: '2px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                              alt="Logo" 
+                              style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
                             />
                           ) : null}
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{info.full}</span>

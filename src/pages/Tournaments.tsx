@@ -2277,8 +2277,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               {m.logoUrl ? (
                                 <img 
                                   src={m.logoUrl} 
-                                  alt="Card Preview" 
-                                  style={{ width: '21px', height: '28px', borderRadius: '3px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                                  alt="Logo" 
+                                  style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
                                 />
                               ) : null}
                               <span>
@@ -2564,11 +2564,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       {p.logoUrl ? (
                         <img 
                           src={p.logoUrl} 
-                          alt="Card Preview" 
-                          style={{ width: '15px', height: '20px', borderRadius: '2px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                          alt="Logo" 
+                          style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
                         />
                       ) : (
-                        <div style={{ width: '15px', height: '20px', borderRadius: '2px', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: 'var(--text-secondary)', flexShrink: 0 }}>
+                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: 'var(--text-secondary)', flexShrink: 0 }}>
                           ♣
                         </div>
                       )}
@@ -2772,8 +2772,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           {m?.logoUrl ? (
                             <img 
                               src={m.logoUrl} 
-                              alt="Card Preview" 
-                              style={{ width: '15px', height: '20px', borderRadius: '2px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
+                              alt="Logo" 
+                              style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
                             />
                           ) : null}
                           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
