@@ -707,10 +707,6 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      if (file.size > 1500 * 1024) {
-                        alert('Maximum file size is 1.5 MB.');
-                        return;
-                      }
                       const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
                       if (!allowedTypes.includes(file.type)) {
                         alert('Only PNG, JPG, WebP, and SVG formats are supported.');
@@ -745,20 +741,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                           ctx.clearRect(0, 0, 480, 840);
                           ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 480, 840);
                           
-                          let dataUrl = canvas.toDataURL('image/webp', 0.85);
-                          if (dataUrl.length > 900 * 1024) {
-                            dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                          }
-                          if (dataUrl.length > 900 * 1024) {
-                            const smallCanvas = document.createElement('canvas');
-                            smallCanvas.width = 240;
-                            smallCanvas.height = 420;
-                            const sCtx = smallCanvas.getContext('2d');
-                            if (sCtx) {
-                              sCtx.drawImage(canvas, 0, 0, 240, 420);
-                              dataUrl = smallCanvas.toDataURL('image/jpeg', 0.6);
-                            }
-                          }
+                          const dataUrl = canvas.toDataURL('image/webp', 0.85);
                           setCardUrl(dataUrl);
                         };
                         img.src = event.target?.result as string;
