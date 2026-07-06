@@ -431,11 +431,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         {m.logoUrl ? (
                           <img 
                             src={m.logoUrl} 
-                            alt="Logo" 
-                            style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                            alt="Card Preview" 
+                            style={{ width: '24px', height: '32px', borderRadius: '4px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
                           />
                         ) : (
-                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          <div style={{ width: '24px', height: '32px', borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                             ♣
                           </div>
                         )}
@@ -547,12 +547,13 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* Logo Upload Section */}
+              {/* Member Card Upload Section */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Member Card Artwork</span>
                 <div style={{
-                  width: '192px',
-                  height: '192px',
-                  borderRadius: '50%',
+                  width: '210px',
+                  height: '280px',
+                  borderRadius: '12px',
                   backgroundColor: 'rgba(255,255,255,0.03)',
                   border: '1px solid var(--border-subtle)',
                   display: 'flex',
@@ -561,10 +562,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   overflow: 'hidden',
                   color: 'var(--text-gold)',
                   fontSize: '5rem',
-                  fontWeight: 800
+                  fontWeight: 800,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
                 }}>
                   {logoUrl ? (
-                    <img src={logoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={logoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   ) : (
                     '♣'
                   )}
@@ -576,7 +578,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     className="btn btn-secondary"
                     style={{ padding: '4px 10px', fontSize: '0.75rem' }}
                   >
-                    Upload Logo
+                    Upload Member Card
                   </button>
                   {logoUrl && (
                     <button
@@ -585,7 +587,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                       className="btn btn-ghost"
                       style={{ padding: '4px 10px', fontSize: '0.75rem', color: 'var(--color-danger)', border: '1px solid rgba(239,68,68,0.15)' }}
                     >
-                      Remove Logo
+                      Remove Card
                     </button>
                   )}
                   <input
