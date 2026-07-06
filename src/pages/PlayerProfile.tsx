@@ -43,36 +43,20 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
     <div className="player-page player-profile-page animate-fade-in">
       <PlayerBanner>
         <div className="banner-details-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {member.logoUrl ? (
-            <img 
-              src={member.logoUrl} 
-              alt="Player Logo" 
-              style={{
-                width: '120px',
-                height: '120px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                marginBottom: '16px',
-                border: '3px solid rgba(255, 255, 255, 0.3)',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
-              }}
-            />
-          ) : (
-            <div style={{
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderRadius: '50%',
-              width: '120px',
-              height: '120px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px',
-              border: '3px solid rgba(255,255,255,0.3)',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
-            }}>
-              <User size={64} style={{ color: 'white' }} />
-            </div>
-          )}
+          <div style={{
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: '50%',
+            width: '120px',
+            height: '120px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '16px',
+            border: '3px solid rgba(255,255,255,0.3)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+          }}>
+            <User size={64} style={{ color: 'white' }} />
+          </div>
           <h1 className="banner-title text-center">{displayName}</h1>
           <p className="banner-subtitle text-center" style={{ marginBottom: '0px' }}>ID: {member.id}</p>
         </div>
@@ -199,6 +183,24 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {member.logoUrl && (
+              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>My Custom Member Card</h3>
+                <img 
+                  src={member.logoUrl} 
+                  alt="Custom Member Card" 
+                  style={{ 
+                    width: '100%', 
+                    maxWidth: '420px', 
+                    borderRadius: '16px', 
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    display: 'block'
+                  }} 
+                />
               </div>
             )}
 

@@ -770,24 +770,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
         }}>
           <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                {selectedMemberForProfile.logoUrl ? (
-                  <img 
-                    src={selectedMemberForProfile.logoUrl} 
-                    alt="Logo" 
-                    style={{ width: '144px', height: '144px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
-                  />
-                ) : (
-                  <div style={{ width: '144px', height: '144px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '4rem', color: 'var(--text-secondary)' }}>
-                    ♣
-                  </div>
-                )}
-                <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>MEMBER CARD ({selectedMemberForProfile.id})</span>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>
-                    {selectedMemberForProfile.firstName} {selectedMemberForProfile.lastName}
-                  </h3>
-                </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>MEMBER CARD ({selectedMemberForProfile.id})</span>
+                <h3 style={{ fontSize: '1.8rem', fontWeight: 800 }}>
+                  {selectedMemberForProfile.firstName} {selectedMemberForProfile.lastName}
+                </h3>
               </div>
               <button 
                 onClick={() => setSelectedMemberForProfile(null)}
@@ -890,6 +877,23 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 </p>
               )}
             </div>
+
+            {selectedMemberForProfile.logoUrl && (
+              <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
+                <img 
+                  src={selectedMemberForProfile.logoUrl} 
+                  alt="Member Card" 
+                  style={{ 
+                    width: '100%', 
+                    maxWidth: '400px', 
+                    borderRadius: '16px', 
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    display: 'block'
+                  }} 
+                />
+              </div>
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
               <button 
