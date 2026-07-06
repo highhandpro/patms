@@ -210,7 +210,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
                   alt="Custom Member Card" 
                   style={{ 
                     width: '240px', 
-                    height: '360px', 
+                    height: '420px', 
                     borderRadius: '12px', 
                     boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                     border: '1px solid rgba(255,255,255,0.08)',
