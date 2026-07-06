@@ -859,21 +859,29 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
       {/* Member Statistics Profile Modal */}
       {selectedMemberForProfile && profileStats && createPortal(
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 999999,
-          padding: '20px'
-        }}>
-          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-surface)' }}>
+        <div 
+          onClick={() => setSelectedMemberForProfile(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            overflowY: 'auto',
+            zIndex: 999999,
+            padding: '40px 20px'
+          }}
+        >
+          <div 
+            className="glass-card animate-slide-up" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-surface)' }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 {selectedMemberForProfile.logoUrl ? (
