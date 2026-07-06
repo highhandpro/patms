@@ -202,6 +202,25 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
               </div>
             )}
 
+            {member.cardUrl && (
+              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>My Custom Member Card</h3>
+                <img 
+                  src={member.cardUrl} 
+                  alt="Custom Member Card" 
+                  style={{ 
+                    width: '240px', 
+                    height: '420px', 
+                    borderRadius: '12px', 
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }} 
+                />
+              </div>
+            )}
+
           </div>
 
         </div>

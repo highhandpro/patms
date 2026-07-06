@@ -25,6 +25,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [memberIdInput, setMemberIdInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState('');
+  const [cardUrl, setCardUrl] = useState('');
 
   // Phone input formatting
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +47,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setNotes('');
     setMemberIdInput('');
     setLogoUrl('');
+    setCardUrl('');
     setErrorMsg(null);
     setIsAddMemberOpen(true);
   };
@@ -59,6 +61,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setNotes(m.notes || '');
     setMemberIdInput(m.id);
     setLogoUrl(m.logoUrl || '');
+    setCardUrl(m.cardUrl || '');
     setErrorMsg(null);
   };
 
@@ -74,7 +77,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           phone,
           email,
           notes,
-          logoUrl
+          logoUrl,
+          cardUrl
         });
         setEditingMember(null);
       } else {
@@ -85,7 +89,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
             return;
           }
         }
-        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl);
+        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl, cardUrl);
         setIsAddMemberOpen(false);
       }
 
@@ -96,6 +100,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       setEmail('');
       setNotes('');
       setLogoUrl('');
+      setCardUrl('');
       setMemberIdInput('');
       setErrorMsg(null);
     } catch (err) {
@@ -547,47 +552,51 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* Logo Upload Section */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <div style={{
-                  width: '192px',
-                  height: '192px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255,255,255,0.03)',
-                  border: '1px solid var(--border-subtle)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                  color: 'var(--text-gold)',
-                  fontSize: '5rem',
-                  fontWeight: 800
-                }}>
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    '♣'
-                  )}
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('admin-edit-logo-input')?.click()}
-                    className="btn btn-secondary"
-                    style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-                  >
-                    Upload Logo
-                  </button>
-                  {logoUrl && (
+              {/* Logo & Player Card Upload Section */}
+              <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
+                {/* Logo Upload Section */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Player Logo</span>
+                  <div style={{
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    color: 'var(--text-gold)',
+                    fontSize: '2.5rem',
+                    fontWeight: 800
+                  }}>
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      '♣'
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
                     <button
                       type="button"
-                      onClick={() => setLogoUrl('')}
-                      className="btn btn-ghost"
-                      style={{ padding: '4px 10px', fontSize: '0.75rem', color: 'var(--color-danger)', border: '1px solid rgba(239,68,68,0.15)' }}
+                      onClick={() => document.getElementById('admin-edit-logo-input')?.click()}
+                      className="btn btn-secondary"
+                      style={{ padding: '3px 8px', fontSize: '0.7rem' }}
                     >
-                      Remove Logo
+                      Upload Logo
                     </button>
-                  )}
+                    {logoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setLogoUrl('')}
+                        className="btn btn-ghost"
+                        style={{ padding: '3px 8px', fontSize: '0.7rem', color: 'var(--color-danger)', border: '1px solid rgba(239,68,68,0.15)' }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="file"
                     id="admin-edit-logo-input"
@@ -638,6 +647,119 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                             }
                           }
                           setLogoUrl(dataUrl);
+                        };
+                        img.src = event.target?.result as string;
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </div>
+
+                {/* Player Card Upload Section */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Player Card (2" x 3.5")</span>
+                  <div style={{
+                    width: '100px',
+                    height: '175px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    color: 'var(--text-gold)',
+                    fontSize: '2rem',
+                    fontWeight: 800,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                  }}>
+                    {cardUrl ? (
+                      <img src={cardUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      '🃏'
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('admin-edit-card-input')?.click()}
+                      className="btn btn-secondary"
+                      style={{ padding: '3px 8px', fontSize: '0.7rem' }}
+                    >
+                      Upload Card
+                    </button>
+                    {cardUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setCardUrl('')}
+                        className="btn btn-ghost"
+                        style={{ padding: '3px 8px', fontSize: '0.7rem', color: 'var(--color-danger)', border: '1px solid rgba(239,68,68,0.15)' }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    id="admin-edit-card-input"
+                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                    style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 1500 * 1024) {
+                        alert('Maximum file size is 1.5 MB.');
+                        return;
+                      }
+                      const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+                      if (!allowedTypes.includes(file.type)) {
+                        alert('Only PNG, JPG, WebP, and SVG formats are supported.');
+                        return;
+                      }
+                      
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                          const canvas = document.createElement('canvas');
+                          canvas.width = 480;
+                          canvas.height = 840;
+                          const ctx = canvas.getContext('2d');
+                          if (!ctx) return;
+                          
+                          const targetRatio = 480 / 840;
+                          const sourceRatio = img.width / img.height;
+                          let sx, sy, sWidth, sHeight;
+                          if (sourceRatio > targetRatio) {
+                            sHeight = img.height;
+                            sWidth = img.height * targetRatio;
+                            sx = (img.width - sWidth) / 2;
+                            sy = 0;
+                          } else {
+                            sWidth = img.width;
+                            sHeight = img.width / targetRatio;
+                            sx = 0;
+                            sy = (img.height - sHeight) / 2;
+                          }
+                          
+                          ctx.clearRect(0, 0, 480, 840);
+                          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 480, 840);
+                          
+                          let dataUrl = canvas.toDataURL('image/webp', 0.85);
+                          if (dataUrl.length > 900 * 1024) {
+                            dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                          }
+                          if (dataUrl.length > 900 * 1024) {
+                            const smallCanvas = document.createElement('canvas');
+                            smallCanvas.width = 240;
+                            smallCanvas.height = 420;
+                            const sCtx = smallCanvas.getContext('2d');
+                            if (sCtx) {
+                              sCtx.drawImage(canvas, 0, 0, 240, 420);
+                              dataUrl = smallCanvas.toDataURL('image/jpeg', 0.6);
+                            }
+                          }
+                          setCardUrl(dataUrl);
                         };
                         img.src = event.target?.result as string;
                       };
@@ -890,6 +1012,25 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 </p>
               )}
             </div>
+
+            {selectedMemberForProfile.cardUrl && (
+              <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', gap: '8px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Player Card</span>
+                <img 
+                  src={selectedMemberForProfile.cardUrl} 
+                  alt="Player Card" 
+                  style={{ 
+                    width: '220px', 
+                    height: '385px', 
+                    borderRadius: '12px', 
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }} 
+                />
+              </div>
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
               <button 

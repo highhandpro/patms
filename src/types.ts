@@ -11,6 +11,7 @@ export interface Member {
   textReminders?: boolean;
   emailAnnouncements?: boolean;
   logoUrl?: string;
+  cardUrl?: string;
 }
 
 export interface TournamentEntry {
