@@ -582,7 +582,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           zIndex: 999999,
           padding: '20px'
         }}>
-          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '500px', backgroundColor: 'var(--bg-surface)' }}>
+          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '500px', backgroundColor: 'var(--bg-surface)', maxHeight: '95vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
                 {editingMember ? `Edit Member Info (${editingMember.id})` : 'Register New Player'}
@@ -609,9 +609,10 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              
-              {/* Logo & Player Card Upload Section */}
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flexGrow: 1 }}>
+              <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '8px', paddingBottom: '8px', flexGrow: 1 }}>
+                
+                {/* Logo & Player Card Upload Section */}
               <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
                 {/* Logo Upload Section */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
@@ -932,8 +933,9 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   style={{ resize: 'none' }}
                 />
               </div>
+            </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)', flexShrink: 0 }}>
                 <button
                   type="button"
                   onClick={() => { setIsAddMemberOpen(false); setEditingMember(null); }}
