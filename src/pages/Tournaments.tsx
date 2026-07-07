@@ -531,18 +531,47 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   const movePlayerTable = (playerId: string, sourceTable: string, targetTable: string) => {
     const updated = { ...seating };
-    
+    const updatedDealers = { ...dealers };
+    const isDealer = preassignedDealers.includes(playerId);
+
+    // Remove from source table
     if (updated[sourceTable]) {
       updated[sourceTable] = updated[sourceTable].map(id => id === playerId ? "" : id);
     }
-    
-    const targetPlayers = [...(updated[targetTable] || Array(10).fill(""))];
-    const firstEmptyIdx = targetPlayers.indexOf("");
-    if (firstEmptyIdx !== -1) {
-      targetPlayers[firstEmptyIdx] = playerId;
-    } else {
-      targetPlayers.push(playerId);
+    if (updatedDealers[sourceTable] === playerId) {
+      delete updatedDealers[sourceTable];
     }
+
+    // Add to target table
+    const targetPlayers = [...(updated[targetTable] || Array(10).fill(""))];
+    
+    if (isDealer && !updatedDealers[targetTable]) {
+      // If they are a dealer and target table has no dealer, make them the dealer
+      updatedDealers[targetTable] = playerId;
+      
+      // Place them at Seat 1 (index 0) of target table
+      const prevSeat1 = targetPlayers[0];
+      targetPlayers[0] = playerId;
+      
+      // If there was a player at Seat 1, move them to the first empty slot
+      if (prevSeat1) {
+        const firstEmptyIdx = targetPlayers.indexOf("", 1); // search from index 1
+        if (firstEmptyIdx !== -1) {
+          targetPlayers[firstEmptyIdx] = prevSeat1;
+        } else {
+          targetPlayers.push(prevSeat1);
+        }
+      }
+    } else {
+      // Standard non-dealer placement (or if target table already has a dealer)
+      const firstEmptyIdx = targetPlayers.indexOf("");
+      if (firstEmptyIdx !== -1) {
+        targetPlayers[firstEmptyIdx] = playerId;
+      } else {
+        targetPlayers.push(playerId);
+      }
+    }
+    
     updated[targetTable] = targetPlayers;
 
     const hasAnyPlayers = updated[sourceTable]?.some(id => id !== "") ?? false;
@@ -552,13 +581,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
     setSeating(updated);
     localStorage.setItem(`patms_seating_${activeTournament!.id}`, JSON.stringify(updated));
-
-    const updatedDealers = { ...dealers };
-    if (updatedDealers[sourceTable] === playerId) {
-      delete updatedDealers[sourceTable];
-      setDealers(updatedDealers);
-      localStorage.setItem(`patms_dealers_${activeTournament!.id}`, JSON.stringify(updatedDealers));
-    }
+    setDealers(updatedDealers);
+    localStorage.setItem(`patms_dealers_${activeTournament!.id}`, JSON.stringify(updatedDealers));
 
     updateTournament(activeTournament!.id, {
       seating: updated,
