@@ -20,7 +20,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
   tournamentName,
   tournamentDate,
   seating,
-  dealers,
+  dealers: _dealers,
   members,
   activeTournament,
   onEliminatePlayer
@@ -208,7 +208,6 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
           {tableColors.map((t) => {
             const players = seating[t.key] || [];
             const hasPlayers = players.some(p => p !== "");
-            const tableDealerId = dealers[t.key];
 
             // Always generate exactly 10 slots
             const seatSlots = Array(10).fill("");
@@ -255,7 +254,8 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                 {/* Seated Players List (Always exactly 10 slots) */}
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
                   {seatSlots.map((playerId, idx) => {
-                    const isDealer = playerId ? tableDealerId === playerId : false;
+                    const preassigned = activeTournament?.preassignedDealers || [];
+                    const isDealer = playerId ? preassigned.includes(playerId) : false;
                     
                     if (!playerId) {
                       return (

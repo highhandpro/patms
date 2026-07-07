@@ -267,32 +267,40 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   const toggleDealerStatus = (playerId: string, tableName: string) => {
     if (!activeTournament) return;
-    const currentDealerId = dealers[tableName];
+    
+    let updatedPreassigned = [...preassignedDealers];
     const newDealers = { ...dealers };
     const newSeating = { ...seating };
-    let updatedPreassigned = [...preassignedDealers];
 
-    if (currentDealerId === playerId) {
-      delete newDealers[tableName];
+    if (updatedPreassigned.includes(playerId)) {
+      // Remove dealer
       updatedPreassigned = updatedPreassigned.filter(id => id !== playerId);
+      if (newDealers[tableName] === playerId) {
+        // If they were the primary dealer, clear them
+        delete newDealers[tableName];
+        // If there are other dealers at this table, promote one to primary dealer
+        const otherDealersAtTable = (newSeating[tableName] || []).filter(id => id !== playerId && updatedPreassigned.includes(id));
+        if (otherDealersAtTable.length > 0) {
+          newDealers[tableName] = otherDealersAtTable[0];
+        }
+      }
     } else {
-      newDealers[tableName] = playerId;
-
-      // Move player to Seat 1 (index 0) of this table by swapping positions
-      const players = [...(newSeating[tableName] || Array(10).fill(""))];
-      const targetIdx = players.indexOf(playerId);
-      if (targetIdx !== -1) {
-        const prevSeat1 = players[0];
-        players[0] = playerId;
-        players[targetIdx] = prevSeat1;
-        newSeating[tableName] = players;
-      }
-
-      if (currentDealerId) {
-        updatedPreassigned = updatedPreassigned.filter(id => id !== currentDealerId);
-      }
-      if (!updatedPreassigned.includes(playerId)) {
-        updatedPreassigned.push(playerId);
+      // Add dealer
+      updatedPreassigned.push(playerId);
+      
+      // If table has no primary dealer, make this player the primary dealer and move to Seat 1
+      if (!newDealers[tableName]) {
+        newDealers[tableName] = playerId;
+        
+        // Move player to Seat 1 (index 0) of this table by swapping positions
+        const players = [...(newSeating[tableName] || Array(10).fill(""))];
+        const targetIdx = players.indexOf(playerId);
+        if (targetIdx !== -1) {
+          const prevSeat1 = players[0];
+          players[0] = playerId;
+          players[targetIdx] = prevSeat1;
+          newSeating[tableName] = players;
+        }
       }
     }
 
@@ -2465,7 +2473,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                         const entry = activeTournament.entries.find(e => e.memberId === playerId);
                         const isEliminated = entry ? !!entry.eliminatedAt : false;
-                        const isDealer = dealers[tableName] === playerId;
+                        const isDealer = preassignedDealers.includes(playerId);
                         
                         return (
                           <li 

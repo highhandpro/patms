@@ -667,10 +667,6 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
           })();
           if (!seatingData || Object.keys(seatingData).length === 0) return null;
 
-          const dealersData = tournament.dealers || (() => {
-            const saved = localStorage.getItem(`patms_dealers_${tournament.id}`);
-            return saved ? JSON.parse(saved) as Record<string, string> : {};
-          })();
 
           return (
             <div style={{
@@ -720,7 +716,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                             </li>
                           );
                         }
-                        const isDealer = dealersData[tableName] === playerId;
+                        const isDealer = tournament.preassignedDealers?.includes(playerId) || false;
                         const memberInfo = getMemberInitials(playerId);
                         return (
                           <li key={playerId} style={{ display: 'flex', alignItems: 'center', fontSize: '0.85rem' }}>
