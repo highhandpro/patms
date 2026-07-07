@@ -78,6 +78,9 @@ function App() {
   const [adminEmail, setAdminEmail] = useState<string | null>(() => {
     return sessionStorage.getItem('patms_admin_email') || null;
   });
+  const [isSubAdmin, setIsSubAdmin] = useState(() => {
+    return sessionStorage.getItem('patms_admin_sub') === 'true';
+  });
   const [isAdminPasswordModalOpen, setIsAdminPasswordModalOpen] = useState(false);
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [adminEmailInput, setAdminEmailInput] = useState('');
@@ -326,8 +329,35 @@ function App() {
     return unsubscribe;
   }, []);
 
+  // Sync sub-admin state dynamically based on authenticated adminEmail
+  useEffect(() => {
+    if (adminEmail) {
+      const matchedMember = state.members.find(m => m.email.toLowerCase() === adminEmail.toLowerCase() && !m.isDeleted);
+      const isSub = matchedMember?.role === 'sub-admin';
+      setIsSubAdmin(isSub);
+      sessionStorage.setItem('patms_admin_sub', isSub ? 'true' : 'false');
+    } else {
+      setIsSubAdmin(false);
+      sessionStorage.setItem('patms_admin_sub', 'false');
+    }
+  }, [adminEmail, state.members]);
+
   const handleSwitchPortalMode = (mode: 'player' | 'admin') => {
     if (mode === 'admin') {
+      // Check if logged in player is sub-admin/admin in members database
+      const loggedInMember = loggedInMemberId ? state.members.find(m => m.id === loggedInMemberId && !m.isDeleted) : null;
+      if (loggedInMember && (loggedInMember.role === 'sub-admin' || loggedInMember.role === 'admin')) {
+        const isSub = loggedInMember.role === 'sub-admin';
+        sessionStorage.setItem('patms_admin_auth', 'true');
+        sessionStorage.setItem('patms_admin_email', loggedInMember.email || 'subadmin@pennyantepoker.com');
+        sessionStorage.setItem('patms_admin_sub', isSub ? 'true' : 'false');
+        setIsAdminAuthenticated(true);
+        setAdminEmail(loggedInMember.email || 'subadmin@pennyantepoker.com');
+        setIsSubAdmin(isSub);
+        setPortalMode('admin');
+        return;
+      }
+
       if (isAdminAuthenticated) {
         setPortalMode('admin');
       } else {
@@ -344,6 +374,21 @@ function App() {
   const handleAdminPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAdminPasswordError(null);
+
+    // Check for local sub-admin passcode bypass
+    const targetMember = state.members.find(m => m.email.toLowerCase() === adminEmailInput.toLowerCase() && !m.isDeleted);
+    if (targetMember && targetMember.role === 'sub-admin' && adminPasswordInput === 'pennysub') {
+      sessionStorage.setItem('patms_admin_auth', 'true');
+      sessionStorage.setItem('patms_admin_email', targetMember.email);
+      sessionStorage.setItem('patms_admin_sub', 'true');
+      setIsAdminAuthenticated(true);
+      setAdminEmail(targetMember.email);
+      setIsSubAdmin(true);
+      setIsAdminPasswordModalOpen(false);
+      setPortalMode('admin');
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, adminEmailInput, adminPasswordInput);
       setIsAdminPasswordModalOpen(false);
@@ -352,6 +397,17 @@ function App() {
       console.error('Firebase Auth error during sign-in:', err);
       // If user is not found or invalid credentials, attempt auto-registration
       if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        const hasSubAdminOrAdminRole = state.members.some(m => 
+          m.email.toLowerCase() === adminEmailInput.toLowerCase() && 
+          (m.role === 'sub-admin' || m.role === 'admin')
+        );
+        const isInitialSetup = state.members.length === 0;
+
+        if (!hasSubAdminOrAdminRole && !isInitialSetup && adminEmailInput !== 'steerbully777@gmail.com') {
+          setAdminPasswordError('Unauthorized email. Only registered admins/sub-admins can log in.');
+          return;
+        }
+
         try {
           console.log('User not found. Attempting to auto-register new administrator...');
           await createUserWithEmailAndPassword(auth, adminEmailInput, adminPasswordInput);
@@ -384,9 +440,23 @@ function App() {
   const handleAdminLogout = async () => {
     try {
       await signOut(auth);
+      sessionStorage.removeItem('patms_admin_auth');
+      sessionStorage.removeItem('patms_admin_email');
+      sessionStorage.removeItem('patms_admin_sub');
+      setIsAdminAuthenticated(false);
+      setAdminEmail(null);
+      setIsSubAdmin(false);
       setPortalMode('player');
     } catch (err) {
       console.error('Failed to log out:', err);
+      // Fallback manual cleanup on error
+      sessionStorage.removeItem('patms_admin_auth');
+      sessionStorage.removeItem('patms_admin_email');
+      sessionStorage.removeItem('patms_admin_sub');
+      setIsAdminAuthenticated(false);
+      setAdminEmail(null);
+      setIsSubAdmin(false);
+      setPortalMode('player');
     }
   };
 
@@ -422,6 +492,7 @@ function App() {
             setSelectedTournamentId={setSelectedTournamentId}
             setIsCreateTourOpen={setIsCreateTourOpen}
             setIsAddMemberOpen={setIsAddMemberOpen}
+            isSubAdmin={isSubAdmin}
           />
         );
       case 'members':
@@ -429,6 +500,7 @@ function App() {
           <Members
             isAddMemberOpen={isAddMemberOpen}
             setIsAddMemberOpen={setIsAddMemberOpen}
+            isSubAdmin={isSubAdmin}
           />
         );
       case 'tournaments':
@@ -439,12 +511,13 @@ function App() {
             isCreateTourOpen={isCreateTourOpen}
             setIsCreateTourOpen={setIsCreateTourOpen}
             adminEmail={adminEmail}
+            isSubAdmin={isSubAdmin}
           />
         );
       case 'standings':
         return <Standings />;
       case 'settings':
-        if (adminEmail === 'steerbully777@gmail.com') {
+        if (adminEmail === 'steerbully777@gmail.com' || isSubAdmin) {
           return (
             <div className="glass-card text-center animate-slide-up" style={{ padding: '60px 40px', maxWidth: '600px', margin: '80px auto 0 auto' }}>
               <ShieldAlert size={64} style={{ color: 'var(--color-danger)', marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }} />
@@ -460,7 +533,7 @@ function App() {
         }
         return <Settings />;
       default:
-        return <Dashboard setActiveTab={setActiveTab} setSelectedTournamentId={setSelectedTournamentId} setIsCreateTourOpen={setIsCreateTourOpen} setIsAddMemberOpen={setIsAddMemberOpen} />;
+        return <Dashboard setActiveTab={setActiveTab} setSelectedTournamentId={setSelectedTournamentId} setIsCreateTourOpen={setIsCreateTourOpen} setIsAddMemberOpen={setIsAddMemberOpen} isSubAdmin={isSubAdmin} />;
     }
   };
 
@@ -1100,6 +1173,7 @@ function App() {
         onSwitchPortal={() => setPortalMode('player')}
         onLogoutAdmin={handleAdminLogout}
         adminEmail={adminEmail}
+        isSubAdmin={isSubAdmin}
       />
       <main className="main-content">
         {renderAdminContent()}

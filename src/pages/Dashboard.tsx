@@ -9,13 +9,15 @@ interface DashboardProps {
   setSelectedTournamentId: (id: string | null) => void;
   setIsCreateTourOpen: (open: boolean) => void;
   setIsAddMemberOpen: (open: boolean) => void;
+  isSubAdmin?: boolean;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   setActiveTab,
   setSelectedTournamentId,
   setIsCreateTourOpen,
-  setIsAddMemberOpen
+  setIsAddMemberOpen,
+  isSubAdmin
 }) => {
   const { state, activeSeason } = useApp();
 
@@ -228,34 +230,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Right Actions & Recent Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
-          {/* Quick Actions Card */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Quick Actions</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button 
-                onClick={() => {
-                  setActiveTab('tournaments');
-                  setIsCreateTourOpen(true);
-                }}
-                className="btn btn-primary" 
-                style={{ width: '100%', justifyContent: 'flex-start', padding: '14px 20px' }}
-              >
-                <Plus size={20} />
-                <span>Create New Tournament</span>
-              </button>
-              <button 
-                onClick={() => {
-                  setActiveTab('members');
-                  setIsAddMemberOpen(true);
-                }}
-                className="btn btn-secondary" 
-                style={{ width: '100%', justifyContent: 'flex-start', padding: '14px 20px' }}
-              >
-                <Plus size={20} />
-                <span>Register New Member</span>
-              </button>
-            </div>
-          </div>
+           {/* Quick Actions Card */}
+           {!isSubAdmin && (
+             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+               <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Quick Actions</h3>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                 <button 
+                   onClick={() => {
+                     setActiveTab('tournaments');
+                     setIsCreateTourOpen(true);
+                   }}
+                   className="btn btn-primary" 
+                   style={{ width: '100%', justifyContent: 'flex-start', padding: '14px 20px' }}
+                 >
+                   <Plus size={20} />
+                   <span>Create New Tournament</span>
+                 </button>
+                 <button 
+                   onClick={() => {
+                     setActiveTab('members');
+                     setIsAddMemberOpen(true);
+                   }}
+                   className="btn btn-secondary" 
+                   style={{ width: '100%', justifyContent: 'flex-start', padding: '14px 20px' }}
+                 >
+                   <Plus size={20} />
+                   <span>Register New Member</span>
+                 </button>
+               </div>
+             </div>
+           )}
 
           {/* Recent Tournaments Card */}
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

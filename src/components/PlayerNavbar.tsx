@@ -175,10 +175,17 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
                     <Settings size={16} />
                     <span>Switch Player (Sim)</span>
                   </button>
-                  <button onClick={() => setPortalMode('admin')} className="dropdown-item admin-switch">
-                    <Settings size={16} style={{ color: 'var(--color-emerald)' }} />
-                    <span style={{ color: 'var(--color-emerald)', fontWeight: 600 }}>Admin Dashboard</span>
-                  </button>
+                  {loggedInMember?.role === 'sub-admin' ? (
+                    <button onClick={() => setPortalMode('admin')} className="dropdown-item admin-switch">
+                      <Settings size={16} style={{ color: 'var(--color-gold)' }} />
+                      <span style={{ color: 'var(--color-gold)', fontWeight: 600 }}>Sub-Admin Dashboard</span>
+                    </button>
+                  ) : (
+                    <button onClick={() => setPortalMode('admin')} className="dropdown-item admin-switch">
+                      <Settings size={16} style={{ color: 'var(--color-emerald)' }} />
+                      <span style={{ color: 'var(--color-emerald)', fontWeight: 600 }}>Admin Dashboard</span>
+                    </button>
+                  )}
                   <div className="dropdown-divider"></div>
                   <button 
                     onClick={() => {

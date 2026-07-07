@@ -12,6 +12,7 @@ export interface Member {
   emailAnnouncements?: boolean;
   logoUrl?: string;
   cardUrl?: string;
+  role?: 'admin' | 'sub-admin' | 'player';
 }
 
 export interface TournamentEntry {

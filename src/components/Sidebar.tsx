@@ -8,9 +8,10 @@ interface SidebarProps {
   onSwitchPortal?: () => void;
   onLogoutAdmin?: () => void;
   adminEmail?: string | null;
+  isSubAdmin?: boolean;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin, adminEmail }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin, adminEmail, isSubAdmin }) => {
   const { activeSeason, state } = useApp();
   const pendingApprovalsCount = state.pendingApprovals?.length || 0;
 
@@ -19,7 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
     { id: 'members', name: 'Members', icon: Users },
     { id: 'tournaments', name: 'Tournaments', icon: Trophy },
     { id: 'standings', name: 'Standings', icon: Award },
-    ...(adminEmail === 'steerbully777@gmail.com' ? [] : [{ id: 'settings', name: 'Settings', icon: SettingsIcon }]),
+    ...(adminEmail === 'steerbully777@gmail.com' || isSubAdmin ? [] : [{ id: 'settings', name: 'Settings', icon: SettingsIcon }]),
   ];
 
   return (
@@ -40,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
           border: '1px solid var(--border-subtle)',
           borderRadius: '8px',
           padding: '8px 12px',
-          marginBottom: '24px'
+          marginBottom: isSubAdmin ? '12px' : '24px'
         }}>
           <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', fontWeight: 600 }}>
             Active Season
@@ -48,6 +49,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
           <span style={{ fontSize: '0.9rem', color: 'var(--text-gold)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
             <span className="indicator indicator-gold" style={{ width: '6px', height: '6px' }}></span>
             {activeSeason.name}
+          </span>
+        </div>
+      )}
+
+      {isSubAdmin && (
+        <div style={{
+          backgroundColor: 'rgba(245,158,11,0.05)',
+          border: '1px solid rgba(245,158,11,0.2)',
+          borderRadius: '8px',
+          padding: '8px 12px',
+          marginBottom: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px'
+        }}>
+          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-gold)', fontWeight: 700 }}>
+            Sub-Admin Mode
+          </span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            View-Only Access
           </span>
         </div>
       )}

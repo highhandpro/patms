@@ -18,6 +18,7 @@ interface TournamentsProps {
   isCreateTourOpen: boolean;
   setIsCreateTourOpen: (open: boolean) => void;
   adminEmail?: string | null;
+  isSubAdmin?: boolean;
 }
 
 export const Tournaments: React.FC<TournamentsProps> = ({
@@ -25,7 +26,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   setSelectedTournamentId,
   isCreateTourOpen,
   setIsCreateTourOpen,
-  adminEmail
+  adminEmail,
+  isSubAdmin
 }) => {
   const { 
     state, 
@@ -1256,10 +1258,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               Create, search, or administer Penny Ante club tournaments.
             </p>
           </div>
-          <button className="btn btn-primary" onClick={() => setIsCreateTourOpen(true)}>
-            <Plus size={18} />
-            <span>New Tournament</span>
-          </button>
+          {!isSubAdmin && (
+            <button className="btn btn-primary" onClick={() => setIsCreateTourOpen(true)}>
+              <Plus size={18} />
+              <span>New Tournament</span>
+            </button>
+          )}
         </div>
 
         {/* List of Tournaments */}
@@ -1322,9 +1326,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 className="btn btn-primary"
                                 style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                               >
-                                Manage
+                                {isSubAdmin ? 'View' : 'Manage'}
                               </button>
-                              {adminEmail !== 'steerbully777@gmail.com' && (
+                              {!isSubAdmin && adminEmail !== 'steerbully777@gmail.com' && (
                                 <button
                                   onClick={() => handleDeleteTour(t.id, t.name)}
                                   className="btn btn-ghost"
@@ -1554,23 +1558,27 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         </button>
 
         <div style={{ display: 'inline-flex', gap: '10px' }}>
-          {activeTournament.status === 'draft' && (
-            <button className="btn btn-primary" onClick={handleStartTournament}>
-              <Play size={16} fill="currentColor" />
-              <span>Lock Entries & Start Game</span>
-            </button>
-          )}
-          {activeTournament.status !== 'completed' && (
-            <button className="btn btn-primary" onClick={handleFinalize} style={{ backgroundColor: 'var(--color-gold)', color: '#78350f' }}>
-              <Award size={16} />
-              <span>Finalize Standings</span>
-            </button>
-          )}
-          {activeTournament.status === 'completed' && (
-            <button className="btn btn-secondary" onClick={handleReopen}>
-              <Unlock size={16} />
-              <span>Reopen Tournament</span>
-            </button>
+          {!isSubAdmin && (
+            <>
+              {activeTournament.status === 'draft' && (
+                <button className="btn btn-primary" onClick={handleStartTournament}>
+                  <Play size={16} fill="currentColor" />
+                  <span>Lock Entries & Start Game</span>
+                </button>
+              )}
+              {activeTournament.status !== 'completed' && (
+                <button className="btn btn-primary" onClick={handleFinalize} style={{ backgroundColor: 'var(--color-gold)', color: '#78350f' }}>
+                  <Award size={16} />
+                  <span>Finalize Standings</span>
+                </button>
+              )}
+              {activeTournament.status === 'completed' && (
+                <button className="btn btn-secondary" onClick={handleReopen}>
+                  <Unlock size={16} />
+                  <span>Reopen Tournament</span>
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -1637,22 +1645,24 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               )}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button 
-              className="btn btn-secondary"
-              onClick={openEditTourDetails}
-              style={{ fontSize: '0.85rem', padding: '8px 16px' }}
-            >
-              Edit Tournament Details
-            </button>
-            <button 
-              className="btn btn-secondary"
-              onClick={() => setIsPayoutModalOpen(true)}
-              style={{ fontSize: '0.85rem', padding: '8px 16px', borderColor: 'rgba(251, 191, 36, 0.3)', color: 'var(--color-gold)' }}
-            >
-              {activeTournament.totalAddons !== undefined ? 'Edit Payouts & Add-ons' : 'Enter Add-ons & Payouts'}
-            </button>
-          </div>
+          {!isSubAdmin && (
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                className="btn btn-secondary"
+                onClick={openEditTourDetails}
+                style={{ fontSize: '0.85rem', padding: '8px 16px' }}
+              >
+                Edit Tournament Details
+              </button>
+              <button 
+                className="btn btn-secondary"
+                onClick={() => setIsPayoutModalOpen(true)}
+                style={{ fontSize: '0.85rem', padding: '8px 16px', borderColor: 'rgba(251, 191, 36, 0.3)', color: 'var(--color-gold)' }}
+              >
+                {activeTournament.totalAddons !== undefined ? 'Edit Payouts & Add-ons' : 'Enter Add-ons & Payouts'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -1841,8 +1851,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
-            <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px', alignItems: 'start' }}>
-              {renderFastPlayerLookup("Fast RSVP Player Lookup", rsvpSearchRef)}
+            <div style={{ display: 'grid', gridTemplateColumns: isSubAdmin ? '1fr' : '6fr 4fr', gap: '20px', alignItems: 'start' }}>
+              {!isSubAdmin && renderFastPlayerLookup("Fast RSVP Player Lookup", rsvpSearchRef)}
 
               <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>RSVP Summary</h4>
@@ -1899,7 +1909,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     });
                                   }}
                                   className="btn btn-primary"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px' }}
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px', opacity: isSubAdmin ? 0.5 : 1, cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                                  disabled={isSubAdmin}
                                 >
                                   Check In
                                 </button>
@@ -1908,11 +1919,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               <td style={{ textAlign: 'center' }}>
                                 <button
                                   type="button"
+                                  disabled={isSubAdmin}
                                   onClick={() => toggleCheckedInDealer(entry.memberId)}
                                   style={{
                                     background: 'none',
                                     border: 'none',
-                                    cursor: 'pointer',
+                                    cursor: isSubAdmin ? 'not-allowed' : 'pointer',
                                     fontSize: '1.25rem',
                                     opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
                                     filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
@@ -1977,7 +1989,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     });
                                   }}
                                   className="btn btn-primary"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px' }}
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px', opacity: isSubAdmin ? 0.5 : 1, cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                                  disabled={isSubAdmin}
                                 >
                                   Check In
                                 </button>
@@ -1986,11 +1999,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               <td style={{ textAlign: 'center' }}>
                                 <button
                                   type="button"
+                                  disabled={isSubAdmin}
                                   onClick={() => toggleCheckedInDealer(entry.memberId)}
                                   style={{
                                     background: 'none',
                                     border: 'none',
-                                    cursor: 'pointer',
+                                    cursor: isSubAdmin ? 'not-allowed' : 'pointer',
                                     fontSize: '1.25rem',
                                     opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
                                     filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
@@ -2055,7 +2069,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     });
                                   }}
                                   className="btn btn-primary"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px' }}
+                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px', opacity: isSubAdmin ? 0.5 : 1, cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                                  disabled={isSubAdmin}
                                 >
                                   Check In
                                 </button>
@@ -2064,11 +2079,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               <td style={{ textAlign: 'center' }}>
                                 <button
                                   type="button"
+                                  disabled={isSubAdmin}
                                   onClick={() => toggleCheckedInDealer(entry.memberId)}
                                   style={{
                                     background: 'none',
                                     border: 'none',
-                                    cursor: 'pointer',
+                                    cursor: isSubAdmin ? 'not-allowed' : 'pointer',
                                     fontSize: '1.25rem',
                                     opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
                                     filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
@@ -2112,8 +2128,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {subTab === 'checkin' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
           {activeTournament.status === 'draft' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px' }}>
-              {renderFastPlayerLookup("Fast Player Lookup", checkinSearchRef)}
+            <div style={{ display: 'grid', gridTemplateColumns: isSubAdmin ? '1fr' : '6fr 4fr', gap: '20px' }}>
+              {!isSubAdmin && renderFastPlayerLookup("Fast Player Lookup", checkinSearchRef)}
 
               {/* Configure Game Pricing */}
               <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -2128,6 +2144,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       onChange={(e) => updateTournament(activeTournament.id, { buyInAmount: Number(e.target.value) })}
                       className="form-input"
                       style={{ padding: '8px 12px' }}
+                      disabled={isSubAdmin}
                     />
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -2139,6 +2156,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       onChange={(e) => updateTournament(activeTournament.id, { addonAmount: Number(e.target.value) })}
                       className="form-input"
                       style={{ padding: '8px 12px' }}
+                      disabled={isSubAdmin}
                     />
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -2150,6 +2168,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       onChange={(e) => updateTournament(activeTournament.id, { bountyAmount: Number(e.target.value) })}
                       className="form-input"
                       style={{ padding: '8px 12px' }}
+                      disabled={isSubAdmin}
                     />
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -2161,6 +2180,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       onChange={(e) => updateTournament(activeTournament.id, { dealerAppreciationAmount: Number(e.target.value) })}
                       className="form-input"
                       style={{ padding: '8px 12px' }}
+                      disabled={isSubAdmin}
                     />
                   </div>
                 </div>
@@ -2174,6 +2194,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       onChange={(e) => updateTournament(activeTournament.id, { flyerUrl: e.target.value })}
                       className="form-input"
                       style={{ padding: '8px 12px' }}
+                      disabled={isSubAdmin}
                     />
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -2182,7 +2203,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       value={activeTournament.flyerType || ''}
                       onChange={(e) => updateTournament(activeTournament.id, { flyerType: (e.target.value as any) || null })}
                       className="form-input"
-                      style={{ padding: '8px 12px', cursor: 'pointer' }}
+                      style={{ padding: '8px 12px', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                      disabled={isSubAdmin}
                     >
                       <option value="">None</option>
                       <option value="pdf">PDF</option>
@@ -2210,6 +2232,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             }}
                             className="form-input"
                             style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
+                            disabled={isSubAdmin}
                           />
                           <span style={{ fontSize: '0.8rem' }}>%</span>
                         </div>
@@ -2223,7 +2246,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </div>
             </div>
           ) : (
-            renderFastPlayerLookup("Fast Player Lookup (Late Entry / Registration)", lateSearchRef)
+            !isSubAdmin && renderFastPlayerLookup("Fast Player Lookup (Late Entry / Registration)", lateSearchRef)
           )}
           
           {/* Checked-in list */}
@@ -2295,7 +2318,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               style={{
                                 background: 'none',
                                 border: 'none',
-                                cursor: 'pointer',
+                                cursor: isSubAdmin ? 'not-allowed' : 'pointer',
                                 fontSize: '1.25rem',
                                 opacity: preassignedDealers.includes(entry.memberId) ? 1 : 0.25,
                                 filter: preassignedDealers.includes(entry.memberId) ? 'grayscale(0)' : 'grayscale(100%)',
@@ -2305,6 +2328,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 justifyContent: 'center'
                               }}
                               title="Toggle Player Dealer status"
+                              disabled={isSubAdmin}
                             >
                               👑
                             </button>
@@ -2314,8 +2338,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               type="checkbox"
                               checked={entry.hasBuyIn}
                               onChange={() => toggleEntryBuyIn(activeTournament.id, entry.memberId)}
-                              style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-emerald)' }}
-                              disabled={activeTournament.status !== 'draft' && activeTournament.status !== 'active'}
+                              style={{ width: '18px', height: '18px', cursor: isSubAdmin ? 'not-allowed' : 'pointer', accentColor: 'var(--color-emerald)' }}
+                              disabled={isSubAdmin || (activeTournament.status !== 'draft' && activeTournament.status !== 'active')}
                             />
                           </td>
 
@@ -2324,11 +2348,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               type="checkbox"
                               checked={entry.hasDealerAppreciation}
                               onChange={() => toggleEntryDealerApp(activeTournament.id, entry.memberId)}
-                              style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-emerald)' }}
-                              disabled={activeTournament.status !== 'draft' && activeTournament.status !== 'active'}
+                              style={{ width: '18px', height: '18px', cursor: isSubAdmin ? 'not-allowed' : 'pointer', accentColor: 'var(--color-emerald)' }}
+                              disabled={isSubAdmin || (activeTournament.status !== 'draft' && activeTournament.status !== 'active')}
                             />
                           </td>
-                          {activeTournament.status === 'draft' && (
+                          {!isSubAdmin && activeTournament.status === 'draft' && (
                             <td style={{ textAlign: 'right' }}>
                               <button
                                 onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
@@ -2390,10 +2414,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 <Play size={16} />
                 <span>Display Mode</span>
               </button>
-              <button className="btn btn-secondary" onClick={generateSeating}>
-                <RotateCcw size={16} />
-                <span>Reshuffle & Balance Seating</span>
-              </button>
+              {!isSubAdmin && (
+                <button className="btn btn-secondary" onClick={generateSeating}>
+                  <RotateCcw size={16} />
+                  <span>Reshuffle & Balance Seating</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -2472,7 +2498,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 style={{
                                   background: 'none',
                                   border: 'none',
-                                  cursor: 'pointer',
+                                  cursor: isSubAdmin ? 'not-allowed' : 'pointer',
                                   fontSize: '1rem',
                                   opacity: isDealer ? 1 : 0.2,
                                   filter: isDealer ? 'grayscale(0)' : 'grayscale(100%)',
@@ -2483,6 +2509,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   justifyContent: 'center'
                                 }}
                                 title="Toggle Dealer status"
+                                disabled={isSubAdmin}
                               >
                                 👑
                               </button>
@@ -2494,6 +2521,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               <select
                                 value={tableName}
                                 onChange={(e) => movePlayerTable(playerId, tableName, e.target.value)}
+                                disabled={isSubAdmin}
                                 style={{
                                   backgroundColor: 'rgba(0,0,0,0.3)',
                                   color: 'var(--text-secondary)',
@@ -2501,7 +2529,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   borderRadius: '4px',
                                   fontSize: '0.75rem',
                                   padding: '2px 4px',
-                                  cursor: 'pointer'
+                                  cursor: isSubAdmin ? 'not-allowed' : 'pointer'
                                 }}
                               >
                                 {Object.keys(seating).map(tName => (
@@ -2540,19 +2568,21 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             
             <div style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Active Players ({activePlayers.length})</h3>
-              <button 
-                className="btn btn-primary" 
-                onClick={() => {
-                  setIsLateEntryOpen(true);
-                  setSelectedLateMemberId('');
-                  setSelectedLateTable('');
-                  setLateSearchQuery('');
-                }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}
-              >
-                <Plus size={16} />
-                <span>Add Late Entry</span>
-              </button>
+              {!isSubAdmin && (
+                <button 
+                  className="btn btn-primary" 
+                  onClick={() => {
+                    setIsLateEntryOpen(true);
+                    setSelectedLateMemberId('');
+                    setSelectedLateTable('');
+                    setLateSearchQuery('');
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}
+                >
+                  <Plus size={16} />
+                  <span>Add Late Entry</span>
+                </button>
+              )}
             </div>
 
             {/* 5 Columns Responsive Grid of Active Players */}
@@ -2576,16 +2606,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         {p.firstName} {p.lastName}
                       </span>
                     </div>
-                    <button 
-                      onClick={() => {
-                        setEliminatingPlayerId(p.id);
-                        setBountiesWon(0);
-                      }}
-                      className="btn btn-danger"
-                      style={{ padding: '2px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '24px', flexShrink: 0 }}
-                    >
-                      Bust Out
-                    </button>
+                    {!isSubAdmin && (
+                      <button 
+                        onClick={() => {
+                          setEliminatingPlayerId(p.id);
+                          setBountiesWon(0);
+                        }}
+                        className="btn btn-danger"
+                        style={{ padding: '2px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '24px', flexShrink: 0 }}
+                      >
+                        Bust Out
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -2649,7 +2681,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               type="button"
                               onClick={() => handleUpdateBounties(entry.memberId, Math.max(0, entry.bountiesCollected - 1))}
                               className="btn btn-secondary"
-                              style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem' }}
+                              style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                              disabled={isSubAdmin}
                             >
                               -
                             </button>
@@ -2658,6 +2691,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               min={0}
                               value={entry.bountiesCollected}
                               onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
+                              disabled={isSubAdmin}
                               style={{
                                 width: '36px',
                                 height: '22px',
@@ -2667,14 +2701,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 color: '#ffffff',
                                 borderRadius: '4px',
                                 fontSize: '0.75rem',
-                                padding: 0
+                                padding: 0,
+                                cursor: isSubAdmin ? 'not-allowed' : 'text'
                               }}
                             />
                             <button
                               type="button"
                               onClick={() => handleUpdateBounties(entry.memberId, entry.bountiesCollected + 1)}
                               className="btn btn-secondary"
-                              style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem' }}
+                              style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                              disabled={isSubAdmin}
                             >
                               +
                             </button>
@@ -2682,13 +2718,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         </div>
                       </div>
 
-                      <button 
-                        onClick={() => undoElimination(activeTournament.id, entry.memberId)}
-                        className="btn btn-ghost"
-                        style={{ padding: '6px 10px', fontSize: '0.8rem', minHeight: 'auto', height: '32px', color: 'var(--text-secondary)' }}
-                      >
-                        Undo
-                      </button>
+                      {!isSubAdmin && (
+                        <button 
+                          onClick={() => undoElimination(activeTournament.id, entry.memberId)}
+                          className="btn btn-ghost"
+                          style={{ padding: '6px 10px', fontSize: '0.8rem', minHeight: 'auto', height: '32px', color: 'var(--text-secondary)' }}
+                        >
+                          Undo
+                        </button>
+                      )}
                     </div>
                   );
                 })}

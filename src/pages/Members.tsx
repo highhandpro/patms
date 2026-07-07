@@ -8,9 +8,10 @@ import type { Member } from '../types';
 interface MembersProps {
   isAddMemberOpen: boolean;
   setIsAddMemberOpen: (open: boolean) => void;
+  isSubAdmin?: boolean;
 }
 
-export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMemberOpen }) => {
+export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMemberOpen, isSubAdmin }) => {
   const { state, addMember, updateMember, deleteMember, approveMemberUpdate, rejectMemberUpdate } = useApp();
   const [search, setSearch] = useState('');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
@@ -22,6 +23,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [notes, setNotes] = useState('');
+  const [role, setRole] = useState<'admin' | 'sub-admin' | 'player'>('player');
   const [memberIdInput, setMemberIdInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState('');
@@ -45,6 +47,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setPhone('');
     setEmail('');
     setNotes('');
+    setRole('player');
     setMemberIdInput('');
     setLogoUrl('');
     setCardUrl('');
@@ -59,6 +62,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setPhone(m.phone);
     setEmail(m.email);
     setNotes(m.notes || '');
+    setRole(m.role || 'player');
     setMemberIdInput(m.id);
     setLogoUrl(m.logoUrl || '');
     setCardUrl(m.cardUrl || '');
@@ -78,7 +82,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           email,
           notes,
           logoUrl,
-          cardUrl
+          cardUrl,
+          role
         });
         setEditingMember(null);
       } else {
@@ -89,7 +94,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
             return;
           }
         }
-        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl, cardUrl);
+        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl, cardUrl, role);
         setIsAddMemberOpen(false);
       }
 
@@ -99,6 +104,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       setPhone('');
       setEmail('');
       setNotes('');
+      setRole('player');
       setLogoUrl('');
       setCardUrl('');
       setMemberIdInput('');
@@ -232,24 +238,28 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           <button className="btn btn-secondary" onClick={exportMembersCSV}>
             <span>Export CSV</span>
           </button>
-          <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center' }}>
-            <span>Import CSV</span>
-            <input 
-              type="file" 
-              accept=".csv" 
-              onChange={handleCSVImport} 
-              style={{ display: 'none' }} 
-            />
-          </label>
-          <button className="btn btn-primary" onClick={handleOpenAdd}>
-            <UserPlus size={18} />
-            <span>Register New Player</span>
-          </button>
+          {!isSubAdmin && (
+            <>
+              <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center' }}>
+                <span>Import CSV</span>
+                <input 
+                  type="file" 
+                  accept=".csv" 
+                  onChange={handleCSVImport} 
+                  style={{ display: 'none' }} 
+                />
+              </label>
+              <button className="btn btn-primary" onClick={handleOpenAdd}>
+                <UserPlus size={18} />
+                <span>Register New Player</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       {/* Pending Approvals Review Section */}
-      {state.pendingApprovals && state.pendingApprovals.length > 0 && (
+      {!isSubAdmin && state.pendingApprovals && state.pendingApprovals.length > 0 && (
         <div className="glass-card" style={{ border: '1px solid rgba(212, 163, 89, 0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--text-gold)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
@@ -475,22 +485,26 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         >
                           <Eye size={16} />
                         </button>
-                        <button
-                          title="Edit Info"
-                          onClick={() => handleOpenEdit(m)}
-                          className="btn btn-ghost"
-                          style={{ padding: '6px' }}
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          title="Retire Player"
-                          onClick={() => handleDelete(m.id, `${m.firstName} ${m.lastName}`)}
-                          className="btn btn-ghost"
-                          style={{ padding: '6px', color: 'var(--color-danger)' }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {!isSubAdmin && (
+                          <>
+                            <button
+                              title="Edit Info"
+                              onClick={() => handleOpenEdit(m)}
+                              className="btn btn-ghost"
+                              style={{ padding: '6px' }}
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              title="Retire Player"
+                              onClick={() => handleDelete(m.id, `${m.firstName} ${m.lastName}`)}
+                              className="btn btn-ghost"
+                              style={{ padding: '6px', color: 'var(--color-danger)' }}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -822,6 +836,22 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   className="form-input"
                 />
               </div>
+
+              {!isSubAdmin && (
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="role">Admin Role / Permissions</label>
+                  <select
+                    id="role"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as any)}
+                    className="form-input"
+                  >
+                    <option value="player">Player (Default - No Admin Access)</option>
+                    <option value="sub-admin">Sub-Admin (View-Only Admin Access)</option>
+                    <option value="admin">Full Admin (Full Edit/Change Access)</option>
+                  </select>
+                </div>
+              )}
 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label htmlFor="notes">Admin Notes</label>

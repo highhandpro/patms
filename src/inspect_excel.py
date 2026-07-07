@@ -1,7 +1,10 @@
-with open(r"C:\Users\thufl\.gemini\antigravity\scratch\patms\src\pages\Standings.tsx", 'r', encoding='utf-8') as f:
-    content = f.read()
+import os
 
-lines = content.splitlines()
-for idx, line in enumerate(lines):
-    if "tournaments" in line.lower() or "points" in line.lower():
-        print(f"Line {idx+1}: {line.strip()}")
+for root, dirs, files in os.walk(r"C:\Users\thufl\.gemini\antigravity\scratch\patms\src"):
+    for file in files:
+        if file.endswith((".ts", ".tsx", ".css")):
+            path = os.path.join(root, file)
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            if "08d90d" in content:
+                print(f"Found in: {path}")

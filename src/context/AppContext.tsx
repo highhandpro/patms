@@ -14,7 +14,7 @@ import {
 interface AppContextProps {
   state: DatabaseState;
   activeSeason: Season | null;
-  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string) => void;
+  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'admin' | 'sub-admin' | 'player') => void;
   updateMember: (id: string, updated: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   addSeason: (name: string, startDate: string, endDate: string, isActive: boolean) => void;
@@ -558,7 +558,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeSeason = state.seasons.find(s => s.isActive) || null;
 
   // Member Management
-  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string) => {
+  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'admin' | 'sub-admin' | 'player') => {
     let id = '';
     if (customId && customId.trim()) {
       id = customId.trim();
@@ -581,7 +581,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       notes,
       isDeleted: false,
       logoUrl: logoUrl || '',
-      cardUrl: cardUrl || ''
+      cardUrl: cardUrl || '',
+      role: role || 'player'
     };
     await setDoc(doc(db, 'members', id), newMember);
   };
