@@ -1732,7 +1732,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 fontSize: '0.85rem'
               }}
             >
-              RSVP
+              REGISTERED
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'checkin' ? 'active-subtab' : ''}`}
@@ -1746,7 +1746,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 fontSize: '0.85rem'
               }}
             >
-              Check-in Registration
+              CHECKED-IN
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'seating' ? 'active-subtab' : ''}`}
@@ -1791,7 +1791,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 fontSize: '0.85rem'
               }}
             >
-              RSVP
+              REGISTERED
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'checkin' ? 'active-subtab' : ''}`}
@@ -1805,7 +1805,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 fontSize: '0.85rem'
               }}
             >
-              Edit Check-ins
+              CHECKED-IN
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'seating' ? 'active-subtab' : ''}`}
