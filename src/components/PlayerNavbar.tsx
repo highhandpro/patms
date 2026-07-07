@@ -40,9 +40,6 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
       .forEach(t => {
         if (t.status === 'completed') {
           pool += t.totalDealerAppreciation;
-        } else {
-          const dealerCount = t.entries.filter(e => e.hasDealerAppreciation).length;
-          pool += dealerCount * t.dealerAppreciationAmount;
         }
       });
     return pool;

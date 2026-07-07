@@ -28,15 +28,8 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
 
   const seasonToCPool = selectedSeasonId
     ? state.tournaments
-        .filter(t => t.seasonId === selectedSeasonId)
-        .reduce((sum, t) => {
-          if (t.status === 'completed') {
-            return sum + t.totalDealerAppreciation;
-          } else {
-            const dealerCount = t.entries.filter(e => e.hasDealerAppreciation).length;
-            return sum + (dealerCount * t.dealerAppreciationAmount);
-          }
-        }, 0)
+        .filter(t => t.seasonId === selectedSeasonId && t.status === 'completed')
+        .reduce((sum, t) => sum + t.totalDealerAppreciation, 0)
     : 0;
 
   const handleAddSeason = (e: React.FormEvent) => {

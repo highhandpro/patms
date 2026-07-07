@@ -31,15 +31,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const totalDealerStaffApprec = activeSeason
     ? state.tournaments
-        .filter(t => t.seasonId === activeSeason.id)
-        .reduce((sum, t) => {
-          if (t.status === 'completed') {
-            return sum + t.totalDealerAppreciation;
-          } else {
-            const dealerCount = t.entries.filter(e => e.hasDealerAppreciation).length;
-            return sum + (dealerCount * t.dealerAppreciationAmount);
-          }
-        }, 0)
+        .filter(t => t.seasonId === activeSeason.id && t.status === 'completed')
+        .reduce((sum, t) => sum + t.totalDealerAppreciation, 0)
     : 0;
 
   // Active or draft tournaments (running right now)
