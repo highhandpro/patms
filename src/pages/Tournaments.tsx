@@ -393,8 +393,19 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     const players = activeTournament.entries.filter(e => e.hasBuyIn).map(e => e.memberId);
     if (players.length === 0) return;
 
-    const checkedInDealers = players.filter(id => preassignedDealers.includes(id));
-    const checkedInNonDealers = players.filter(id => !preassignedDealers.includes(id));
+    const derekMember = state.members.find(m => m.email.toLowerCase() === 'steerbully777@gmail.com');
+    const derekId = derekMember ? derekMember.id : '';
+    const isDerekPlaying = derekId && players.includes(derekId);
+
+    let checkedInDealers = players.filter(id => preassignedDealers.includes(id));
+    let checkedInNonDealers = players.filter(id => !preassignedDealers.includes(id));
+
+    if (isDerekPlaying) {
+      if (!checkedInDealers.includes(derekId)) {
+        checkedInDealers.push(derekId);
+      }
+      checkedInNonDealers = checkedInNonDealers.filter(id => id !== derekId);
+    }
 
     const tableConfigs = getTableConfigurations(players.length);
 
@@ -451,6 +462,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       const candidateSeating: Record<string, string[]> = {};
       const candidateDealers: Record<string, string> = {};
 
+      const dealersWithoutDerek = shuffledDealers.filter(id => id !== derekId);
       let dealerIdx = 0;
       let nonDealerIdx = 0;
 
@@ -458,8 +470,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const tablePlayers: string[] = [];
         let dealerId = "";
 
-        if (dealerIdx < shuffledDealers.length) {
-          dealerId = shuffledDealers[dealerIdx++];
+        if (tableName === 'red table' && isDerekPlaying) {
+          dealerId = derekId;
+          tablePlayers.push(dealerId);
+          candidateDealers[tableName] = dealerId;
+        } else if (dealerIdx < dealersWithoutDerek.length) {
+          dealerId = dealersWithoutDerek[dealerIdx++];
           tablePlayers.push(dealerId);
           candidateDealers[tableName] = dealerId;
         }
@@ -468,8 +484,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         while (tablePlayers.length + remainingTablePlayers.length < size) {
           if (nonDealerIdx < shuffledNonDealers.length) {
             remainingTablePlayers.push(shuffledNonDealers[nonDealerIdx++]);
-          } else if (dealerIdx < shuffledDealers.length) {
-            remainingTablePlayers.push(shuffledDealers[dealerIdx++]);
+          } else if (dealerIdx < dealersWithoutDerek.length) {
+            remainingTablePlayers.push(dealersWithoutDerek[dealerIdx++]);
           } else {
             break;
           }
@@ -523,9 +539,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setDealers(bestDealers);
     localStorage.setItem(`patms_dealers_${activeTournament.id}`, JSON.stringify(bestDealers));
 
+    let updatedPreassigned = [...preassignedDealers];
+    if (isDerekPlaying && !updatedPreassigned.includes(derekId)) {
+      updatedPreassigned.push(derekId);
+      setPreassignedDealers(updatedPreassigned);
+      localStorage.setItem(`patms_preassigned_dealers_${activeTournament.id}`, JSON.stringify(updatedPreassigned));
+    }
+
     updateTournament(activeTournament.id, {
       seating: bestSeating,
-      dealers: bestDealers
+      dealers: bestDealers,
+      preassignedDealers: updatedPreassigned
     });
   };
 
