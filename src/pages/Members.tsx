@@ -487,20 +487,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   <tr key={m.id}>
                     <td style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{m.id}</td>
                     <td style={{ fontWeight: 600 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {m.logoUrl ? (
-                          <img 
-                            src={m.logoUrl} 
-                            alt="Logo" 
-                            style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
-                          />
-                        ) : (
-                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                            ♣
-                          </div>
-                        )}
-                        <span>{m.firstName} {m.lastName}</span>
-                      </div>
+                      {m.firstName} {m.lastName}
                     </td>
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
