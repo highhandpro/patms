@@ -288,18 +288,60 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       // Add dealer
       updatedPreassigned.push(playerId);
       
-      // If table has no primary dealer, make this player the primary dealer and move to Seat 1
-      if (!newDealers[tableName]) {
-        newDealers[tableName] = playerId;
-        
-        // Move player to Seat 1 (index 0) of this table by swapping positions
-        const players = [...(newSeating[tableName] || Array(10).fill(""))];
-        const targetIdx = players.indexOf(playerId);
-        if (targetIdx !== -1) {
-          const prevSeat1 = players[0];
-          players[0] = playerId;
-          players[targetIdx] = prevSeat1;
-          newSeating[tableName] = players;
+      // Find if there is any table that currently has 0 dealers
+      let tableWithoutDealer = '';
+      for (const [tName, tPlayers] of Object.entries(newSeating)) {
+        const hasDealer = tPlayers.some(pId => pId && updatedPreassigned.includes(pId));
+        if (!hasDealer) {
+          tableWithoutDealer = tName;
+          break;
+        }
+      }
+
+      if (tableWithoutDealer && tableWithoutDealer !== tableName) {
+        // Swap playerId with a non-dealer from that table to keep sizes balanced
+        const sourcePlayers = [...(newSeating[tableName] || Array(10).fill(""))];
+        const targetPlayers = [...(newSeating[tableWithoutDealer] || Array(10).fill(""))];
+
+        // Find a non-dealer in target table
+        const nonDealerIdxInTarget = targetPlayers.findIndex(pId => pId && !updatedPreassigned.includes(pId));
+
+        if (nonDealerIdxInTarget !== -1) {
+          const targetPlayerId = targetPlayers[nonDealerIdxInTarget];
+          const sourcePlayerIdx = sourcePlayers.indexOf(playerId);
+
+          if (sourcePlayerIdx !== -1) {
+            // Perform the swap
+            sourcePlayers[sourcePlayerIdx] = targetPlayerId;
+            targetPlayers[nonDealerIdxInTarget] = playerId;
+
+            // Move the new dealer to Seat 1 (index 0) of the target table by swapping positions
+            const targetPlayerCurrentIdx = targetPlayers.indexOf(playerId);
+            if (targetPlayerCurrentIdx !== -1 && targetPlayerCurrentIdx !== 0) {
+              const prevSeat1 = targetPlayers[0];
+              targetPlayers[0] = playerId;
+              targetPlayers[targetPlayerCurrentIdx] = prevSeat1;
+            }
+
+            newSeating[tableName] = sourcePlayers;
+            newSeating[tableWithoutDealer] = targetPlayers;
+            newDealers[tableWithoutDealer] = playerId;
+          }
+        }
+      } else {
+        // Standard flow: if table has no primary dealer, make this player the primary dealer and move to Seat 1
+        if (!newDealers[tableName]) {
+          newDealers[tableName] = playerId;
+          
+          // Move player to Seat 1 (index 0) of this table by swapping positions
+          const players = [...(newSeating[tableName] || Array(10).fill(""))];
+          const targetIdx = players.indexOf(playerId);
+          if (targetIdx !== -1) {
+            const prevSeat1 = players[0];
+            players[0] = playerId;
+            players[targetIdx] = prevSeat1;
+            newSeating[tableName] = players;
+          }
         }
       }
     }
