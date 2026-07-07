@@ -2735,113 +2735,137 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </span>
               </h4>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', maxHeight: '450px', overflowY: 'auto', paddingRight: '4px' }}>
-                {Array.from({ length: totalBountiesAvailable }).map((_, idx) => {
-                  const place = idx + 1;
-                  const entry = activeTournament.entries.find(e => e.finishPosition === place);
-
-                  if (!entry) {
+              <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '10px' }}>
+                {totalBountiesAvailable > 0 ? (
+                  Array.from({ length: Math.ceil(totalBountiesAvailable / 10) }).map((_, colIdx) => {
+                    const start = colIdx * 10 + 1;
+                    const end = Math.min(start + 9, totalBountiesAvailable);
+                    
                     return (
                       <div 
-                        key={`pos-empty-${place}`}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '10px 14px',
-                          borderRadius: '10px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.005)',
-                          border: '1px dashed rgba(255, 255, 255, 0.03)',
-                          opacity: 0.5
+                        key={colIdx} 
+                        style={{ 
+                          flex: '1 0 250px',
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: '8px'
                         }}
                       >
-                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                          <span style={{ marginRight: '6px' }}>{getOrdinal(place)}:</span>
-                          [Active Player]
-                        </span>
+                        <h5 style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-gold)', textTransform: 'uppercase', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '4px', marginBottom: '4px', letterSpacing: '0.05em' }}>
+                          Places {start} - {end}
+                        </h5>
+                        
+                        {Array.from({ length: end - start + 1 }).map((_, itemIdx) => {
+                          const place = start + itemIdx;
+                          const entry = activeTournament.entries.find(e => e.finishPosition === place);
+
+                          if (!entry) {
+                            return (
+                              <div 
+                                key={`pos-empty-${place}`}
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  padding: '10px 14px',
+                                  borderRadius: '10px',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.005)',
+                                  border: '1px dashed rgba(255, 255, 255, 0.03)',
+                                  opacity: 0.5,
+                                  minHeight: '62px'
+                                }}
+                              >
+                                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                                  <span style={{ marginRight: '6px' }}>{getOrdinal(place)}:</span>
+                                  [Active Player]
+                                </span>
+                              </div>
+                            );
+                          }
+
+                          const name = getMemberName(entry.memberId);
+                          return (
+                            <div 
+                              key={entry.memberId}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '10px 14px',
+                                borderRadius: '10px',
+                                backgroundColor: 'rgba(248,113,113,0.02)',
+                                border: '1px solid rgba(248,113,113,0.08)',
+                                minHeight: '62px'
+                              }}
+                            >
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden' }}>
+                                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                  <span style={{ color: 'var(--color-danger)', marginRight: '6px' }}>{getOrdinal(place)}:</span>
+                                  {name}
+                                </span>
+                                
+                                {/* Bounty Editor Controls */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Bounties:</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUpdateBounties(entry.memberId, Math.max(0, entry.bountiesCollected - 1))}
+                                      className="btn btn-secondary"
+                                      style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                                      disabled={isSubAdmin}
+                                    >
+                                      -
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      value={entry.bountiesCollected}
+                                      onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
+                                      disabled={isSubAdmin}
+                                      style={{
+                                        width: '36px',
+                                        height: '22px',
+                                        textAlign: 'center',
+                                        backgroundColor: 'rgba(255,255,255,0.03)',
+                                        border: '1px solid var(--border-subtle)',
+                                        color: '#ffffff',
+                                        borderRadius: '4px',
+                                        fontSize: '0.75rem',
+                                        padding: 0,
+                                        cursor: isSubAdmin ? 'not-allowed' : 'text'
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUpdateBounties(entry.memberId, entry.bountiesCollected + 1)}
+                                      className="btn btn-secondary"
+                                      style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                                      disabled={isSubAdmin}
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {!isSubAdmin && (
+                                <button 
+                                  onClick={() => undoElimination(activeTournament.id, entry.memberId)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: '6px 10px', fontSize: '0.8rem', minHeight: 'auto', height: '32px', color: 'var(--text-secondary)' }}
+                                >
+                                  Undo
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     );
-                  }
-
-                  const name = getMemberName(entry.memberId);
-                  return (
-                    <div 
-                      key={entry.memberId}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(248,113,113,0.02)',
-                        border: '1px solid rgba(248,113,113,0.08)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden' }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                          <span style={{ color: 'var(--color-danger)', marginRight: '6px' }}>{getOrdinal(place)}:</span>
-                          {name}
-                        </span>
-                        
-                        {/* Bounty Editor Controls */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Bounties:</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateBounties(entry.memberId, Math.max(0, entry.bountiesCollected - 1))}
-                              className="btn btn-secondary"
-                              style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
-                              disabled={isSubAdmin}
-                            >
-                              -
-                            </button>
-                            <input
-                              type="number"
-                              min={0}
-                              value={entry.bountiesCollected}
-                              onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
-                              disabled={isSubAdmin}
-                              style={{
-                                width: '36px',
-                                height: '22px',
-                                textAlign: 'center',
-                                backgroundColor: 'rgba(255,255,255,0.03)',
-                                border: '1px solid var(--border-subtle)',
-                                color: '#ffffff',
-                                borderRadius: '4px',
-                                fontSize: '0.75rem',
-                                padding: 0,
-                                cursor: isSubAdmin ? 'not-allowed' : 'text'
-                              }}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateBounties(entry.memberId, entry.bountiesCollected + 1)}
-                              className="btn btn-secondary"
-                              style={{ width: '22px', height: '22px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.75rem', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
-                              disabled={isSubAdmin}
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {!isSubAdmin && (
-                        <button 
-                          onClick={() => undoElimination(activeTournament.id, entry.memberId)}
-                          className="btn btn-ghost"
-                          style={{ padding: '6px 10px', fontSize: '0.8rem', minHeight: 'auto', height: '32px', color: 'var(--text-secondary)' }}
-                        >
-                          Undo
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-                {totalBountiesAvailable === 0 && (
-                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                  })
+                ) : (
+                  <div style={{ flex: 1, textAlign: 'center', padding: '24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem' }}>
                     No players checked in yet.
                   </div>
                 )}
