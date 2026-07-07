@@ -5,7 +5,11 @@ import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircl
 import { calculateStandings } from '../utils/stats';
 import * as XLSX from 'xlsx';
 
-export const Settings: React.FC = () => {
+interface SettingsProps {
+  onChangePassword?: () => void;
+}
+
+export const Settings: React.FC<SettingsProps> = ({ onChangePassword }) => {
   const { state, activeSeason, updateSettings, exportDatabase, importDatabase, resetDatabaseToDefault } = useApp();
 
   // Settings states
@@ -242,6 +246,25 @@ export const Settings: React.FC = () => {
         {/* Portability Panel */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
+          {/* Account & Security Card */}
+          {onChangePassword && (
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Account & Security</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Protect your account by updating your administrative password.
+              </p>
+              
+              <button 
+                onClick={onChangePassword} 
+                className="btn btn-secondary" 
+                style={{ width: '100%', justifyContent: 'flex-start', marginTop: '8px' }}
+              >
+                <SettingsIcon size={18} />
+                <span>Change Password</span>
+              </button>
+            </div>
+          )}
+
           {/* Backups Card */}
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Data Portability</h3>

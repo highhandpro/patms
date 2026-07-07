@@ -4,6 +4,9 @@ import { useApp } from '../context/AppContext';
 import { calculateMemberStats } from '../utils/stats';
 import { Search, UserPlus, Phone, Mail, Calendar, Eye, Edit2, Trash2, X } from 'lucide-react';
 import type { Member } from '../types';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { firebaseConfig } from '../firebase';
 
 interface MembersProps {
   isAddMemberOpen: boolean;
@@ -28,6 +31,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState('');
   const [cardUrl, setCardUrl] = useState('');
+  const [tempPassword, setTempPassword] = useState('');
 
   // Phone input formatting
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +55,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setMemberIdInput('');
     setLogoUrl('');
     setCardUrl('');
+    setTempPassword('');
     setErrorMsg(null);
     setIsAddMemberOpen(true);
   };
@@ -66,12 +71,47 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setMemberIdInput(m.id);
     setLogoUrl(m.logoUrl || '');
     setCardUrl(m.cardUrl || '');
+    setTempPassword('');
     setErrorMsg(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim()) return;
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // If role is admin or sub-admin, check/create Firebase Auth account
+    if (role === 'admin' || role === 'sub-admin') {
+      if (!cleanEmail) {
+        setErrorMsg("Email address is required for Administrator/Sub-Admin roles.");
+        return;
+      }
+
+      const isNewAdminRole = !editingMember || (editingMember.role !== 'admin' && editingMember.role !== 'sub-admin');
+      const needsPass = isNewAdminRole || tempPassword.trim().length > 0;
+
+      if (needsPass) {
+        const pass = tempPassword.trim();
+        if (pass.length < 6) {
+          setErrorMsg("Password must be at least 6 characters long.");
+          return;
+        }
+
+        try {
+          const secondaryApp = initializeApp(firebaseConfig, 'SecondaryAuth');
+          const secondaryAuth = getAuth(secondaryApp);
+          await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, pass);
+          await deleteApp(secondaryApp);
+        } catch (authErr: any) {
+          console.error("Firebase auth creation failed:", authErr);
+          if (authErr.code !== 'auth/email-already-in-use') {
+            setErrorMsg("Auth Error: " + (authErr.message || authErr.code));
+            return;
+          }
+        }
+      }
+    }
 
     try {
       if (editingMember) {
@@ -108,6 +148,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       setLogoUrl('');
       setCardUrl('');
       setMemberIdInput('');
+      setTempPassword('');
       setErrorMsg(null);
     } catch (err) {
       console.error(err);
@@ -850,6 +891,25 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     <option value="sub-admin">Sub-Admin (View-Only Admin Access)</option>
                     <option value="admin">Full Admin (Full Edit/Change Access)</option>
                   </select>
+                </div>
+              )}
+
+              {!isSubAdmin && (role === 'admin' || role === 'sub-admin') && (
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="tempPassword">
+                    {editingMember && (editingMember.role === 'admin' || editingMember.role === 'sub-admin')
+                      ? "Reset Password (leave blank to keep current)"
+                      : "Temporary Password (min 6 characters)"}
+                  </label>
+                  <input
+                    type="password"
+                    id="tempPassword"
+                    placeholder="Enter password"
+                    value={tempPassword}
+                    onChange={(e) => setTempPassword(e.target.value)}
+                    className="form-input"
+                    required={!(editingMember && (editingMember.role === 'admin' || editingMember.role === 'sub-admin'))}
+                  />
                 </div>
               )}
 

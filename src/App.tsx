@@ -5,6 +5,7 @@ import { Members } from './pages/Members';
 import { Tournaments } from './pages/Tournaments';
 import { Standings } from './pages/Standings';
 import { Settings } from './pages/Settings';
+import { ChangePasswordModal } from './components/ChangePasswordModal';
 
 // Player Portal Imports
 import { PlayerNavbar } from './components/PlayerNavbar';
@@ -85,6 +86,7 @@ function App() {
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [adminEmailInput, setAdminEmailInput] = useState('');
   const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const [showFirstNameDropdown, setShowFirstNameDropdown] = useState(false);
 
@@ -344,20 +346,6 @@ function App() {
 
   const handleSwitchPortalMode = (mode: 'player' | 'admin') => {
     if (mode === 'admin') {
-      // Check if logged in player is sub-admin/admin in members database
-      const loggedInMember = loggedInMemberId ? state.members.find(m => m.id === loggedInMemberId && !m.isDeleted) : null;
-      if (loggedInMember && (loggedInMember.role === 'sub-admin' || loggedInMember.role === 'admin')) {
-        const isSub = loggedInMember.role === 'sub-admin';
-        sessionStorage.setItem('patms_admin_auth', 'true');
-        sessionStorage.setItem('patms_admin_email', loggedInMember.email || 'subadmin@pennyantepoker.com');
-        sessionStorage.setItem('patms_admin_sub', isSub ? 'true' : 'false');
-        setIsAdminAuthenticated(true);
-        setAdminEmail(loggedInMember.email || 'subadmin@pennyantepoker.com');
-        setIsSubAdmin(isSub);
-        setPortalMode('admin');
-        return;
-      }
-
       if (isAdminAuthenticated) {
         setPortalMode('admin');
       } else {
@@ -375,50 +363,57 @@ function App() {
     e.preventDefault();
     setAdminPasswordError(null);
 
-    // Check for local sub-admin passcode bypass
-    const targetMember = state.members.find(m => m.email.toLowerCase() === adminEmailInput.toLowerCase() && !m.isDeleted);
-    if (targetMember && targetMember.role === 'sub-admin' && adminPasswordInput === 'pennysub') {
-      sessionStorage.setItem('patms_admin_auth', 'true');
-      sessionStorage.setItem('patms_admin_email', targetMember.email);
-      sessionStorage.setItem('patms_admin_sub', 'true');
-      setIsAdminAuthenticated(true);
-      setAdminEmail(targetMember.email);
-      setIsSubAdmin(true);
-      setIsAdminPasswordModalOpen(false);
-      setPortalMode('admin');
+    const cleanEmail = adminEmailInput.trim().toLowerCase();
+    const pass = adminPasswordInput;
+
+    const targetMember = state.members.find(m => m.email.toLowerCase() === cleanEmail && !m.isDeleted);
+    const isInitialSetup = state.members.length === 0;
+    const isPrimaryAdmin = cleanEmail === 'steerbully777@gmail.com';
+
+    // Verify they are authorized to sign in
+    if (!targetMember && !isInitialSetup && !isPrimaryAdmin) {
+      setAdminPasswordError('Unauthorized email. Only registered admins/sub-admins can log in.');
+      return;
+    }
+
+    const isSub = targetMember ? targetMember.role === 'sub-admin' : false;
+    const isAdmin = targetMember ? targetMember.role === 'admin' : (isInitialSetup || isPrimaryAdmin);
+
+    if (!isSub && !isAdmin) {
+      setAdminPasswordError('Unauthorized email. Only registered admins/sub-admins can log in.');
       return;
     }
 
     try {
-      await signInWithEmailAndPassword(auth, adminEmailInput, adminPasswordInput);
+      await signInWithEmailAndPassword(auth, cleanEmail, pass);
+      
+      sessionStorage.setItem('patms_admin_auth', 'true');
+      sessionStorage.setItem('patms_admin_email', cleanEmail);
+      sessionStorage.setItem('patms_admin_sub', isSub ? 'true' : 'false');
+      setIsAdminAuthenticated(true);
+      setAdminEmail(cleanEmail);
+      setIsSubAdmin(isSub);
       setIsAdminPasswordModalOpen(false);
       setPortalMode('admin');
     } catch (err: any) {
       console.error('Firebase Auth error during sign-in:', err);
-      // If user is not found or invalid credentials, attempt auto-registration
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        const hasSubAdminOrAdminRole = state.members.some(m => 
-          m.email.toLowerCase() === adminEmailInput.toLowerCase() && 
-          (m.role === 'sub-admin' || m.role === 'admin')
-        );
-        const isInitialSetup = state.members.length === 0;
-
-        if (!hasSubAdminOrAdminRole && !isInitialSetup && adminEmailInput !== 'steerbully777@gmail.com') {
-          setAdminPasswordError('Unauthorized email. Only registered admins/sub-admins can log in.');
-          return;
-        }
-
+      // Auto-register initial setup or primary admin if they don't have account yet
+      if ((err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') && (isInitialSetup || isPrimaryAdmin)) {
         try {
           console.log('User not found. Attempting to auto-register new administrator...');
-          await createUserWithEmailAndPassword(auth, adminEmailInput, adminPasswordInput);
+          await createUserWithEmailAndPassword(auth, cleanEmail, pass);
+          sessionStorage.setItem('patms_admin_auth', 'true');
+          sessionStorage.setItem('patms_admin_email', cleanEmail);
+          sessionStorage.setItem('patms_admin_sub', 'false');
+          setIsAdminAuthenticated(true);
+          setAdminEmail(cleanEmail);
+          setIsSubAdmin(false);
           setIsAdminPasswordModalOpen(false);
           setPortalMode('admin');
           return;
         } catch (createErr: any) {
           console.error('Firebase Auth error during auto-registration:', createErr);
-          if (createErr.code === 'auth/email-already-in-use') {
-            setAdminPasswordError('Invalid email or password. Please try again.');
-          } else if (createErr.code === 'auth/weak-password') {
+          if (createErr.code === 'auth/weak-password') {
             setAdminPasswordError('Password should be at least 6 characters.');
           } else if (createErr.code === 'auth/invalid-email') {
             setAdminPasswordError('Please enter a valid email address.');
@@ -430,6 +425,8 @@ function App() {
       }
       
       if (err.code === 'auth/wrong-password') {
+        setAdminPasswordError('Invalid email or password. Please try again.');
+      } else if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
         setAdminPasswordError('Invalid email or password. Please try again.');
       } else {
         setAdminPasswordError(err.message || 'Authentication failed. Please try again.');
@@ -531,7 +528,7 @@ function App() {
             </div>
           );
         }
-        return <Settings />;
+        return <Settings onChangePassword={() => setIsChangePasswordOpen(true)} />;
       default:
         return <Dashboard setActiveTab={setActiveTab} setSelectedTournamentId={setSelectedTournamentId} setIsCreateTourOpen={setIsCreateTourOpen} setIsAddMemberOpen={setIsAddMemberOpen} isSubAdmin={isSubAdmin} />;
     }
@@ -1174,10 +1171,12 @@ function App() {
         onLogoutAdmin={handleAdminLogout}
         adminEmail={adminEmail}
         isSubAdmin={isSubAdmin}
+        onChangePassword={() => setIsChangePasswordOpen(true)}
       />
       <main className="main-content">
         {renderAdminContent()}
       </main>
+      <ChangePasswordModal isOpen={isChangePasswordOpen} onClose={() => setIsChangePasswordOpen(false)} />
     </div>
   );
 }

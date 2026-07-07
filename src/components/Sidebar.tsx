@@ -9,9 +9,10 @@ interface SidebarProps {
   onLogoutAdmin?: () => void;
   adminEmail?: string | null;
   isSubAdmin?: boolean;
+  onChangePassword?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin, adminEmail, isSubAdmin }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin, adminEmail, isSubAdmin, onChangePassword }) => {
   const { activeSeason, state } = useApp();
   const pendingApprovalsCount = state.pendingApprovals?.length || 0;
 
@@ -62,14 +63,34 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
           marginBottom: '24px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '2px'
+          gap: '6px'
         }}>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-gold)', fontWeight: 700 }}>
-            Sub-Admin Mode
-          </span>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            View-Only Access
-          </span>
+          <div>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-gold)', fontWeight: 700, display: 'block' }}>
+              Sub-Admin Mode
+            </span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              View-Only Access
+            </span>
+          </div>
+          {onChangePassword && (
+            <button 
+              onClick={onChangePassword}
+              className="btn btn-ghost"
+              style={{
+                fontSize: '0.75rem',
+                padding: '4px 8px',
+                color: 'var(--color-gold)',
+                borderColor: 'rgba(245,158,11,0.2)',
+                backgroundColor: 'rgba(245,158,11,0.05)',
+                width: '100%',
+                justifyContent: 'center',
+                minHeight: '28px'
+              }}
+            >
+              Change Password
+            </button>
+          )}
         </div>
       )}
 
