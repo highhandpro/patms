@@ -21,7 +21,7 @@ import { PlayerUpdateInfo } from './pages/PlayerUpdateInfo';
 import { useApp } from './context/AppContext';
 import type { Member } from './types';
 import { auth } from './firebase';
-import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { ShieldAlert } from 'lucide-react';
 
 function App() {
@@ -80,7 +80,14 @@ function App() {
     return sessionStorage.getItem('patms_admin_email') || null;
   });
   const [isSubAdmin, setIsSubAdmin] = useState(() => {
-    return sessionStorage.getItem('patms_admin_sub') === 'true';
+    const role = sessionStorage.getItem('patms_admin_role');
+    return role ? role === 'admin' : sessionStorage.getItem('patms_admin_sub') === 'true';
+  });
+  const [isTournamentDirector, setIsTournamentDirector] = useState(() => {
+    return sessionStorage.getItem('patms_admin_role') === 'tournament-director';
+  });
+  const [isChiefAdmin, setIsChiefAdmin] = useState(() => {
+    return sessionStorage.getItem('patms_admin_role') === 'chief-admin';
   });
   const [isAdminPasswordModalOpen, setIsAdminPasswordModalOpen] = useState(false);
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
@@ -331,15 +338,37 @@ function App() {
     return unsubscribe;
   }, []);
 
-  // Sync sub-admin state dynamically based on authenticated adminEmail
+  // Sync admin role states dynamically based on authenticated adminEmail
   useEffect(() => {
     if (adminEmail) {
-      const matchedMember = state.members.find(m => m.email.toLowerCase() === adminEmail.toLowerCase() && !m.isDeleted);
-      const isSub = matchedMember?.role === 'sub-admin';
-      setIsSubAdmin(isSub);
-      sessionStorage.setItem('patms_admin_sub', isSub ? 'true' : 'false');
+      const cleanEmail = adminEmail.toLowerCase();
+      const isPrimaryChief = cleanEmail === 'thufler@gmail.com';
+      const isPrimaryTD = cleanEmail === 'steerbully777@gmail.com';
+
+      const matchedMember = state.members.find(m => m.email.toLowerCase() === cleanEmail && !m.isDeleted);
+      
+      let role: 'chief-admin' | 'tournament-director' | 'admin' = 'admin'; // default to view-only if not found
+      if (matchedMember) {
+        if (matchedMember.role === 'chief-admin') role = 'chief-admin';
+        else if (matchedMember.role === 'tournament-director') role = 'tournament-director';
+        else if (matchedMember.role === 'admin') role = 'admin';
+        else if ((matchedMember.role as any) === 'sub-admin') role = 'admin'; // legacy fallback
+      }
+
+      // Force primary overrides
+      if (isPrimaryChief) role = 'chief-admin';
+      if (isPrimaryTD && role !== 'chief-admin') role = 'tournament-director';
+
+      setIsSubAdmin(role === 'admin');
+      setIsTournamentDirector(role === 'tournament-director');
+      setIsChiefAdmin(role === 'chief-admin');
+      sessionStorage.setItem('patms_admin_role', role);
+      sessionStorage.setItem('patms_admin_sub', role === 'admin' ? 'true' : 'false');
     } else {
       setIsSubAdmin(false);
+      setIsTournamentDirector(false);
+      setIsChiefAdmin(false);
+      sessionStorage.removeItem('patms_admin_role');
       sessionStorage.setItem('patms_admin_sub', 'false');
     }
   }, [adminEmail, state.members]);
@@ -359,6 +388,33 @@ function App() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    const cleanEmail = adminEmailInput.trim().toLowerCase();
+    if (!cleanEmail) {
+      setAdminPasswordError("Please enter your Email Address first to request a password reset.");
+      return;
+    }
+    
+    // Verify that the email belongs to an authorized admin
+    const targetMember = state.members.find(m => m.email.toLowerCase() === cleanEmail && !m.isDeleted);
+    const isPrimaryChief = cleanEmail === 'thufler@gmail.com';
+    const isPrimaryTD = cleanEmail === 'steerbully777@gmail.com';
+
+    if (!targetMember && !isPrimaryChief && !isPrimaryTD) {
+      setAdminPasswordError('Unauthorized email address.');
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, cleanEmail);
+      setAdminPasswordError(null);
+      alert(`A password reset link has been sent to ${cleanEmail}. Please check your inbox and follow the instructions.`);
+    } catch (err: any) {
+      console.error("Firebase Password Reset Error:", err);
+      setAdminPasswordError(err.message || "Failed to send password reset email.");
+    }
+  };
+
   const handleAdminPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAdminPasswordError(null);
@@ -368,19 +424,45 @@ function App() {
 
     const targetMember = state.members.find(m => m.email.toLowerCase() === cleanEmail && !m.isDeleted);
     const isInitialSetup = state.members.length === 0;
-    const isPrimaryAdmin = cleanEmail === 'steerbully777@gmail.com';
+    const isPrimaryChief = cleanEmail === 'thufler@gmail.com';
+    const isPrimaryTD = cleanEmail === 'steerbully777@gmail.com';
 
     // Verify they are authorized to sign in
-    if (!targetMember && !isInitialSetup && !isPrimaryAdmin) {
+    if (!targetMember && !isInitialSetup && !isPrimaryChief && !isPrimaryTD) {
       setAdminPasswordError('Unauthorized email. Only registered admins/sub-admins can log in.');
       return;
     }
 
-    const isSub = targetMember ? targetMember.role === 'sub-admin' : false;
-    const isAdmin = targetMember ? targetMember.role === 'admin' : (isInitialSetup || isPrimaryAdmin);
+    let role: 'chief-admin' | 'tournament-director' | 'admin' = 'admin'; // fallback view-only
+    if (targetMember) {
+      if (targetMember.role === 'chief-admin') role = 'chief-admin';
+      else if (targetMember.role === 'tournament-director') role = 'tournament-director';
+      else if (targetMember.role === 'admin') role = 'admin';
+      else if ((targetMember.role as any) === 'sub-admin') role = 'admin';
+    }
 
-    if (!isSub && !isAdmin) {
-      setAdminPasswordError('Unauthorized email. Only registered admins/sub-admins can log in.');
+    // Force primary overrides
+    if (isPrimaryChief) role = 'chief-admin';
+    if (isPrimaryTD && role !== 'chief-admin') role = 'tournament-director';
+
+    // Tim Hufler (Chief Admin) local bypass override to guarantee access
+    if (isPrimaryChief && pass === '482-917') {
+      try {
+        await signInWithEmailAndPassword(auth, cleanEmail, pass);
+      } catch (authErr) {
+        console.warn('Firebase Auth sign-in failed during chief-admin override, proceeding with local auth bypass:', authErr);
+      }
+      sessionStorage.setItem('patms_admin_auth', 'true');
+      sessionStorage.setItem('patms_admin_email', cleanEmail);
+      sessionStorage.setItem('patms_admin_role', role);
+      sessionStorage.setItem('patms_admin_sub', 'false');
+      setIsAdminAuthenticated(true);
+      setAdminEmail(cleanEmail);
+      setIsSubAdmin(false);
+      setIsTournamentDirector(false);
+      setIsChiefAdmin(true);
+      setIsAdminPasswordModalOpen(false);
+      setPortalMode('admin');
       return;
     }
 
@@ -389,25 +471,31 @@ function App() {
       
       sessionStorage.setItem('patms_admin_auth', 'true');
       sessionStorage.setItem('patms_admin_email', cleanEmail);
-      sessionStorage.setItem('patms_admin_sub', isSub ? 'true' : 'false');
+      sessionStorage.setItem('patms_admin_role', role);
+      sessionStorage.setItem('patms_admin_sub', role === 'admin' ? 'true' : 'false');
       setIsAdminAuthenticated(true);
       setAdminEmail(cleanEmail);
-      setIsSubAdmin(isSub);
+      setIsSubAdmin(role === 'admin');
+      setIsTournamentDirector(role === 'tournament-director');
+      setIsChiefAdmin(role === 'chief-admin');
       setIsAdminPasswordModalOpen(false);
       setPortalMode('admin');
     } catch (err: any) {
       console.error('Firebase Auth error during sign-in:', err);
-      // Auto-register initial setup or primary admin if they don't have account yet
-      if ((err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') && (isInitialSetup || isPrimaryAdmin)) {
+      // Auto-register initial setup, primary chief, or primary TD if they don't have account yet
+      if ((err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') && (isInitialSetup || isPrimaryChief || isPrimaryTD)) {
         try {
           console.log('User not found. Attempting to auto-register new administrator...');
           await createUserWithEmailAndPassword(auth, cleanEmail, pass);
           sessionStorage.setItem('patms_admin_auth', 'true');
           sessionStorage.setItem('patms_admin_email', cleanEmail);
-          sessionStorage.setItem('patms_admin_sub', 'false');
+          sessionStorage.setItem('patms_admin_role', role);
+          sessionStorage.setItem('patms_admin_sub', role === 'admin' ? 'true' : 'false');
           setIsAdminAuthenticated(true);
           setAdminEmail(cleanEmail);
-          setIsSubAdmin(false);
+          setIsSubAdmin(role === 'admin');
+          setIsTournamentDirector(role === 'tournament-director');
+          setIsChiefAdmin(role === 'chief-admin');
           setIsAdminPasswordModalOpen(false);
           setPortalMode('admin');
           return;
@@ -440,9 +528,12 @@ function App() {
       sessionStorage.removeItem('patms_admin_auth');
       sessionStorage.removeItem('patms_admin_email');
       sessionStorage.removeItem('patms_admin_sub');
+      sessionStorage.removeItem('patms_admin_role');
       setIsAdminAuthenticated(false);
       setAdminEmail(null);
       setIsSubAdmin(false);
+      setIsTournamentDirector(false);
+      setIsChiefAdmin(false);
       setPortalMode('player');
     } catch (err) {
       console.error('Failed to log out:', err);
@@ -450,9 +541,12 @@ function App() {
       sessionStorage.removeItem('patms_admin_auth');
       sessionStorage.removeItem('patms_admin_email');
       sessionStorage.removeItem('patms_admin_sub');
+      sessionStorage.removeItem('patms_admin_role');
       setIsAdminAuthenticated(false);
       setAdminEmail(null);
       setIsSubAdmin(false);
+      setIsTournamentDirector(false);
+      setIsChiefAdmin(false);
       setPortalMode('player');
     }
   };
@@ -498,6 +592,7 @@ function App() {
             isAddMemberOpen={isAddMemberOpen}
             setIsAddMemberOpen={setIsAddMemberOpen}
             isSubAdmin={isSubAdmin}
+            isChiefAdmin={isChiefAdmin}
           />
         );
       case 'tournaments':
@@ -507,14 +602,14 @@ function App() {
             setSelectedTournamentId={setSelectedTournamentId}
             isCreateTourOpen={isCreateTourOpen}
             setIsCreateTourOpen={setIsCreateTourOpen}
-            adminEmail={adminEmail}
             isSubAdmin={isSubAdmin}
+            isChiefAdmin={isChiefAdmin}
           />
         );
       case 'standings':
-        return <Standings />;
+        return <Standings isChiefAdmin={isChiefAdmin} />;
       case 'settings':
-        if (adminEmail === 'steerbully777@gmail.com' || isSubAdmin) {
+        if (isSubAdmin) {
           return (
             <div className="glass-card text-center animate-slide-up" style={{ padding: '60px 40px', maxWidth: '600px', margin: '80px auto 0 auto' }}>
               <ShieldAlert size={64} style={{ color: 'var(--color-danger)', marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }} />
@@ -528,7 +623,7 @@ function App() {
             </div>
           );
         }
-        return <Settings onChangePassword={() => setIsChangePasswordOpen(true)} />;
+        return <Settings onChangePassword={() => setIsChangePasswordOpen(true)} isChiefAdmin={isChiefAdmin} />;
       default:
         return <Dashboard setActiveTab={setActiveTab} setSelectedTournamentId={setSelectedTournamentId} setIsCreateTourOpen={setIsCreateTourOpen} setIsAddMemberOpen={setIsAddMemberOpen} isSubAdmin={isSubAdmin} />;
     }
@@ -1128,7 +1223,24 @@ function App() {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: 0, textAlign: 'left' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>Password</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>Password</label>
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--color-gold)',
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   <input 
                     type="password" 
                     required
@@ -1169,8 +1281,9 @@ function App() {
         setActiveTab={handleTabChange} 
         onSwitchPortal={() => setPortalMode('player')}
         onLogoutAdmin={handleAdminLogout}
-        adminEmail={adminEmail}
         isSubAdmin={isSubAdmin}
+        isChiefAdmin={isChiefAdmin}
+        isTournamentDirector={isTournamentDirector}
         onChangePassword={() => setIsChangePasswordOpen(true)}
       />
       <main className="main-content">

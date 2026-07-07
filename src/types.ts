@@ -12,7 +12,7 @@ export interface Member {
   emailAnnouncements?: boolean;
   logoUrl?: string;
   cardUrl?: string;
-  role?: 'admin' | 'sub-admin' | 'player';
+  role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player';
 }
 
 export interface TournamentEntry {

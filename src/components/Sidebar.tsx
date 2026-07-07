@@ -7,12 +7,13 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   onSwitchPortal?: () => void;
   onLogoutAdmin?: () => void;
-  adminEmail?: string | null;
   isSubAdmin?: boolean;
+  isChiefAdmin?: boolean;
+  isTournamentDirector?: boolean;
   onChangePassword?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin, adminEmail, isSubAdmin, onChangePassword }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin, isSubAdmin, isChiefAdmin, isTournamentDirector, onChangePassword }) => {
   const { activeSeason, state } = useApp();
   const pendingApprovalsCount = state.pendingApprovals?.length || 0;
 
@@ -21,7 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
     { id: 'members', name: 'Members', icon: Users },
     { id: 'tournaments', name: 'Tournaments', icon: Trophy },
     { id: 'standings', name: 'Standings', icon: Award },
-    ...(adminEmail === 'steerbully777@gmail.com' || isSubAdmin ? [] : [{ id: 'settings', name: 'Settings', icon: SettingsIcon }]),
+    ...(isSubAdmin ? [] : [{ id: 'settings', name: 'Settings', icon: SettingsIcon }]),
   ];
 
   return (
@@ -54,6 +55,86 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
         </div>
       )}
 
+      {isChiefAdmin && (
+        <div style={{
+          backgroundColor: 'rgba(16, 185, 129, 0.05)',
+          border: '1px solid rgba(16, 185, 129, 0.2)',
+          borderRadius: '8px',
+          padding: '8px 12px',
+          marginBottom: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px'
+        }}>
+          <div>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-emerald)', fontWeight: 700, display: 'block' }}>
+              Chief Admin Mode
+            </span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              Full Authority
+            </span>
+          </div>
+          {onChangePassword && (
+            <button 
+              onClick={onChangePassword}
+              className="btn btn-ghost"
+              style={{
+                fontSize: '0.75rem',
+                padding: '4px 8px',
+                color: 'var(--color-emerald)',
+                borderColor: 'rgba(16, 185, 129, 0.2)',
+                backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                width: '100%',
+                justifyContent: 'center',
+                minHeight: '28px'
+              }}
+            >
+              Change Password
+            </button>
+          )}
+        </div>
+      )}
+
+      {isTournamentDirector && (
+        <div style={{
+          backgroundColor: 'rgba(99, 102, 241, 0.05)',
+          border: '1px solid rgba(99, 102, 241, 0.2)',
+          borderRadius: '8px',
+          padding: '8px 12px',
+          marginBottom: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px'
+        }}>
+          <div>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#818CF8', fontWeight: 700, display: 'block' }}>
+              Tournament Director Mode
+            </span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+              Full Access, except Reset
+            </span>
+          </div>
+          {onChangePassword && (
+            <button 
+              onClick={onChangePassword}
+              className="btn btn-ghost"
+              style={{
+                fontSize: '0.75rem',
+                padding: '4px 8px',
+                color: '#818CF8',
+                borderColor: 'rgba(99, 102, 241, 0.2)',
+                backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                width: '100%',
+                justifyContent: 'center',
+                minHeight: '28px'
+              }}
+            >
+              Change Password
+            </button>
+          )}
+        </div>
+      )}
+
       {isSubAdmin && (
         <div style={{
           backgroundColor: 'rgba(245,158,11,0.05)',
@@ -66,8 +147,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
           gap: '6px'
         }}>
           <div>
-            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-gold)', fontWeight: 700, display: 'block' }}>
-              Sub-Admin Mode
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-gold)', fontWeight: 700, display: 'block' }}>
+              Admin Mode
             </span>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               View-Only Access
@@ -80,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
               style={{
                 fontSize: '0.75rem',
                 padding: '4px 8px',
-                color: 'var(--color-gold)',
+                color: 'var(--text-gold)',
                 borderColor: 'rgba(245,158,11,0.2)',
                 backgroundColor: 'rgba(245,158,11,0.05)',
                 width: '100%',

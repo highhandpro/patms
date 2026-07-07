@@ -12,9 +12,10 @@ interface MembersProps {
   isAddMemberOpen: boolean;
   setIsAddMemberOpen: (open: boolean) => void;
   isSubAdmin?: boolean;
+  isChiefAdmin?: boolean;
 }
 
-export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMemberOpen, isSubAdmin }) => {
+export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMemberOpen, isSubAdmin, isChiefAdmin }) => {
   const { state, addMember, updateMember, deleteMember, approveMemberUpdate, rejectMemberUpdate } = useApp();
   const [search, setSearch] = useState('');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
@@ -26,7 +27,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [notes, setNotes] = useState('');
-  const [role, setRole] = useState<'admin' | 'sub-admin' | 'player'>('player');
+  const [role, setRole] = useState<'chief-admin' | 'tournament-director' | 'admin' | 'player'>('player');
   const [memberIdInput, setMemberIdInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState('');
@@ -81,14 +82,14 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // If role is admin or sub-admin, check/create Firebase Auth account
-    if (role === 'admin' || role === 'sub-admin') {
+    // If role is administrative, check/create Firebase Auth account
+    if (role !== 'player') {
       if (!cleanEmail) {
-        setErrorMsg("Email address is required for Administrator/Sub-Admin roles.");
+        setErrorMsg("Email address is required for administrative roles.");
         return;
       }
 
-      const isNewAdminRole = !editingMember || (editingMember.role !== 'admin' && editingMember.role !== 'sub-admin');
+      const isNewAdminRole = !editingMember || !editingMember.role || editingMember.role === 'player';
       const needsPass = isNewAdminRole || tempPassword.trim().length > 0;
 
       if (needsPass) {
@@ -529,7 +530,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         >
                           <Eye size={16} />
                         </button>
-                        {!isSubAdmin && (
+                        {!isSubAdmin && (m.role !== 'chief-admin' || isChiefAdmin) && (
                           <>
                             <button
                               title="Edit Info"
@@ -891,16 +892,19 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     className="form-input"
                   >
                     <option value="player">Player (Default - No Admin Access)</option>
-                    <option value="sub-admin">Sub-Admin (View-Only Admin Access)</option>
-                    <option value="admin">Full Admin (Full Edit/Change Access)</option>
+                    <option value="admin">Admin (View-Only Admin Access)</option>
+                    <option value="tournament-director">Tournament Director (Full Access, except Reset)</option>
+                    {isChiefAdmin && (
+                      <option value="chief-admin">Chief Administrator (Full Authority)</option>
+                    )}
                   </select>
                 </div>
               )}
 
-              {!isSubAdmin && (role === 'admin' || role === 'sub-admin') && (
+              {!isSubAdmin && role !== 'player' && (
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label htmlFor="tempPassword">
-                    {editingMember && (editingMember.role === 'admin' || editingMember.role === 'sub-admin')
+                    {editingMember && editingMember.role && editingMember.role !== 'player'
                       ? "Reset Password (leave blank to keep current)"
                       : "Temporary Password (min 6 characters)"}
                   </label>
@@ -911,7 +915,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     value={tempPassword}
                     onChange={(e) => setTempPassword(e.target.value)}
                     className="form-input"
-                    required={!(editingMember && (editingMember.role === 'admin' || editingMember.role === 'sub-admin'))}
+                    required={!(editingMember && editingMember.role && editingMember.role !== 'player')}
                   />
                 </div>
               )}

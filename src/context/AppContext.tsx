@@ -14,7 +14,7 @@ import {
 interface AppContextProps {
   state: DatabaseState;
   activeSeason: Season | null;
-  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'admin' | 'sub-admin' | 'player') => void;
+  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player') => void;
   updateMember: (id: string, updated: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   addSeason: (name: string, startDate: string, endDate: string, isActive: boolean) => void;
@@ -204,7 +204,7 @@ const rawMockData: DatabaseState = {
     { id: '4660', firstName: 'David', lastName: 'Philossof', phone: '(360) 991-4837', email: 'dpcountry46@gmail.com', joinedDate: '2025-06-30', notes: '', isDeleted: false },
     { id: '7375', firstName: 'Davin', lastName: 'Colby', phone: '', email: '', joinedDate: '2025-06-30', notes: '', isDeleted: false },
     { id: '8011', firstName: 'DeLorean', lastName: 'Walton', phone: '', email: '', joinedDate: '2022-06-30', notes: '', isDeleted: false },
-    { id: '7224', firstName: 'Derek', lastName: 'Allen', phone: '(360) 772-9768', email: 'steerbully777@gmail.com', joinedDate: '2018-05-06', notes: '', isDeleted: false },
+    { id: '7224', firstName: 'Derek', lastName: 'Allen', phone: '(360) 772-9768', email: 'steerbully777@gmail.com', joinedDate: '2018-05-06', notes: '', isDeleted: false, role: 'tournament-director' },
     { id: '5915', firstName: 'Derek', lastName: 'Chilcoate', phone: '', email: '', joinedDate: '2025-10-15', notes: '', isDeleted: false },
     { id: '6948', firstName: 'Donald', lastName: 'Lund', phone: '', email: '', joinedDate: '2023-03-04', notes: '', isDeleted: false },
     { id: '4080', firstName: 'Doug', lastName: 'Berg', phone: '(360) 910-6884', email: 'dmberg2@comcast.net', joinedDate: '2024-08-25', notes: '', isDeleted: false },
@@ -321,7 +321,7 @@ const rawMockData: DatabaseState = {
     { id: '3868', firstName: 'Tanner', lastName: 'Trangmar', phone: '', email: '', joinedDate: '2025-09-30', notes: '', isDeleted: false },
     { id: '7058', firstName: 'Terri', lastName: 'Angell', phone: '(360) 901-5768', email: 'terter59@gmail.com', joinedDate: '2019-05-21', notes: '', isDeleted: false },
     { id: '5819', firstName: 'Tiffany', lastName: 'Field', phone: '(702) 665-3555', email: 'fieldtjean@gmail.com', joinedDate: '2025-06-30', notes: '', isDeleted: false },
-    { id: '6905', firstName: 'Tim', lastName: 'Hufler', phone: '(360) 869-2538', email: 'thufler@gmail.com', joinedDate: '2024-06-30', notes: '', isDeleted: false },
+    { id: '6905', firstName: 'Tim', lastName: 'Hufler', phone: '(360) 869-2538', email: 'thufler@gmail.com', joinedDate: '2024-06-30', notes: '', isDeleted: false, role: 'chief-admin' },
     { id: '4877', firstName: 'Tina', lastName: 'Thorp', phone: '', email: '', joinedDate: '2023-11-11', notes: '', isDeleted: false },
     { id: '7410', firstName: 'Tom', lastName: 'Baker', phone: '', email: '', joinedDate: '2025-07-30', notes: '', isDeleted: false },
     { id: '6942', firstName: 'Tom', lastName: 'Scharf', phone: '(360) 989-7370', email: 't.e.scharf@gmail.com', joinedDate: '2025-06-30', notes: '', isDeleted: false },
@@ -558,7 +558,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeSeason = state.seasons.find(s => s.isActive) || null;
 
   // Member Management
-  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'admin' | 'sub-admin' | 'player') => {
+  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player') => {
     let id = '';
     if (customId && customId.trim()) {
       id = customId.trim();

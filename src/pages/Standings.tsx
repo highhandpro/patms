@@ -3,7 +3,11 @@ import { useApp } from '../context/AppContext';
 import { calculateStandings, formatDate } from '../utils/stats';
 import { Plus, Award, Calendar, AlertCircle } from 'lucide-react';
 
-export const Standings: React.FC = () => {
+interface StandingsProps {
+  isChiefAdmin?: boolean;
+}
+
+export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
   const { state, addSeason, updateSeason } = useApp();
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>(
     state.seasons.find(s => s.isActive)?.id || (state.seasons[0]?.id || '')
@@ -110,13 +114,15 @@ export const Standings: React.FC = () => {
             {activeSeason.isActive ? (
               <span className="badge badge-gold">Active Season</span>
             ) : (
-              <button 
-                onClick={() => handleSetSeasonActive(activeSeason.id)}
-                className="btn btn-ghost" 
-                style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-              >
-                Set as Active Season
-              </button>
+              isChiefAdmin && (
+                <button 
+                  onClick={() => handleSetSeasonActive(activeSeason.id)}
+                  className="btn btn-ghost" 
+                  style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                >
+                  Set as Active Season
+                </button>
+              )
             )}
           </div>
         )}

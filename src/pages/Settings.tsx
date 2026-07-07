@@ -7,9 +7,10 @@ import * as XLSX from 'xlsx';
 
 interface SettingsProps {
   onChangePassword?: () => void;
+  isChiefAdmin?: boolean;
 }
 
-export const Settings: React.FC<SettingsProps> = ({ onChangePassword }) => {
+export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdmin }) => {
   const { state, activeSeason, updateSettings, exportDatabase, importDatabase, resetDatabaseToDefault } = useApp();
 
   // Settings states
@@ -289,6 +290,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword }) => {
                   type="file"
                   accept=".json"
                   onChange={handleImport}
+                  disabled={!isChiefAdmin}
                   style={{
                     position: 'absolute',
                     top: 0,
@@ -296,12 +298,16 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword }) => {
                     width: '100%',
                     height: '100%',
                     opacity: 0,
-                    cursor: 'pointer'
+                    cursor: isChiefAdmin ? 'pointer' : 'not-allowed'
                   }}
                 />
-                <button className="btn btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }}>
+                <button 
+                  className="btn btn-secondary" 
+                  style={{ width: '100%', justifyContent: 'flex-start', cursor: isChiefAdmin ? 'pointer' : 'not-allowed', opacity: isChiefAdmin ? 1 : 0.6 }}
+                  disabled={!isChiefAdmin}
+                >
                   <Upload size={18} />
-                  <span>Import Database File</span>
+                  <span>Import Database File {!isChiefAdmin && '🔒'}</span>
                 </button>
               </div>
 
@@ -329,9 +335,14 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword }) => {
               Completely clear the browser storage. This will delete all custom records and reset the database back to default mock data.
             </p>
 
-            <button onClick={handleReset} className="btn btn-danger" style={{ alignSelf: 'flex-start', marginTop: '8px' }}>
+            <button 
+              onClick={handleReset} 
+              className="btn btn-danger" 
+              style={{ alignSelf: 'flex-start', marginTop: '8px', cursor: isChiefAdmin ? 'pointer' : 'not-allowed', opacity: isChiefAdmin ? 1 : 0.6 }}
+              disabled={!isChiefAdmin}
+            >
               <RefreshCw size={18} />
-              <span>Full Database Reset</span>
+              <span>Full Database Reset {!isChiefAdmin && '🔒'}</span>
             </button>
           </div>
 

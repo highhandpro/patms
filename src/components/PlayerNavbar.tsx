@@ -175,15 +175,22 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
                     <Settings size={16} />
                     <span>Switch Player (Sim)</span>
                   </button>
-                  {loggedInMember?.role === 'sub-admin' ? (
+                  {loggedInMember?.role === 'admin' && (
                     <button onClick={() => setPortalMode('admin')} className="dropdown-item admin-switch">
                       <Settings size={16} style={{ color: 'var(--color-gold)' }} />
-                      <span style={{ color: 'var(--color-gold)', fontWeight: 600 }}>Sub-Admin Dashboard</span>
+                      <span style={{ color: 'var(--color-gold)', fontWeight: 600 }}>Admin Dashboard (View-Only)</span>
                     </button>
-                  ) : (
+                  )}
+                  {loggedInMember?.role === 'tournament-director' && (
+                    <button onClick={() => setPortalMode('admin')} className="dropdown-item admin-switch">
+                      <Settings size={16} style={{ color: '#818CF8' }} />
+                      <span style={{ color: '#818CF8', fontWeight: 600 }}>TD Dashboard</span>
+                    </button>
+                  )}
+                  {loggedInMember?.role === 'chief-admin' && (
                     <button onClick={() => setPortalMode('admin')} className="dropdown-item admin-switch">
                       <Settings size={16} style={{ color: 'var(--color-emerald)' }} />
-                      <span style={{ color: 'var(--color-emerald)', fontWeight: 600 }}>Admin Dashboard</span>
+                      <span style={{ color: 'var(--color-emerald)', fontWeight: 600 }}>Chief Admin Dashboard</span>
                     </button>
                   )}
                   <div className="dropdown-divider"></div>

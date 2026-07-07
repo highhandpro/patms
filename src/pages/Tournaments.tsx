@@ -17,8 +17,8 @@ interface TournamentsProps {
   setSelectedTournamentId: (id: string | null) => void;
   isCreateTourOpen: boolean;
   setIsCreateTourOpen: (open: boolean) => void;
-  adminEmail?: string | null;
   isSubAdmin?: boolean;
+  isChiefAdmin?: boolean;
 }
 
 export const Tournaments: React.FC<TournamentsProps> = ({
@@ -26,8 +26,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   setSelectedTournamentId,
   isCreateTourOpen,
   setIsCreateTourOpen,
-  adminEmail,
-  isSubAdmin
+  isSubAdmin,
+  isChiefAdmin
 }) => {
   const { 
     state, 
@@ -1378,7 +1378,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               >
                                 {isSubAdmin ? 'View' : 'Manage'}
                               </button>
-                              {!isSubAdmin && adminEmail !== 'steerbully777@gmail.com' && (
+                              {isChiefAdmin && (
                                 <button
                                   onClick={() => handleDeleteTour(t.id, t.name)}
                                   className="btn btn-ghost"
