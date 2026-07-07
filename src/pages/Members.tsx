@@ -5,7 +5,7 @@ import { calculateMemberStats } from '../utils/stats';
 import { Search, UserPlus, Phone, Mail, Calendar, Eye, Edit2, Trash2, X } from 'lucide-react';
 import type { Member } from '../types';
 import { initializeApp, deleteApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { initializeAuth, inMemoryPersistence, createUserWithEmailAndPassword } from 'firebase/auth';
 import { firebaseConfig } from '../firebase';
 
 interface MembersProps {
@@ -99,8 +99,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
         }
 
         try {
-          const secondaryApp = initializeApp(firebaseConfig, 'SecondaryAuth');
-          const secondaryAuth = getAuth(secondaryApp);
+          const appName = 'SecondaryAuth_' + Math.random().toString(36).slice(2, 9);
+          const secondaryApp = initializeApp(firebaseConfig, appName);
+          const secondaryAuth = initializeAuth(secondaryApp, {
+            persistence: inMemoryPersistence
+          });
           await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, pass);
           await deleteApp(secondaryApp);
         } catch (authErr: any) {
