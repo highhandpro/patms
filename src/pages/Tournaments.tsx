@@ -2178,123 +2178,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {subTab === 'checkin' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
           {activeTournament.status === 'draft' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: isSubAdmin ? '1fr' : '6fr 4fr', gap: '20px' }}>
-              {!isSubAdmin && renderFastPlayerLookup("Fast Player Lookup", checkinSearchRef)}
-
-              {/* Configure Game Pricing */}
-              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Configure Game Pricing</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Buy-In ($)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={activeTournament.buyInAmount}
-                      onChange={(e) => updateTournament(activeTournament.id, { buyInAmount: Number(e.target.value) })}
-                      className="form-input"
-                      style={{ padding: '8px 12px' }}
-                      disabled={isSubAdmin}
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Add-On ($)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={activeTournament.addonAmount}
-                      onChange={(e) => updateTournament(activeTournament.id, { addonAmount: Number(e.target.value) })}
-                      className="form-input"
-                      style={{ padding: '8px 12px' }}
-                      disabled={isSubAdmin}
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Bounty ($)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={activeTournament.bountyAmount}
-                      onChange={(e) => updateTournament(activeTournament.id, { bountyAmount: Number(e.target.value) })}
-                      className="form-input"
-                      style={{ padding: '8px 12px' }}
-                      disabled={isSubAdmin}
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ToC ($)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={activeTournament.dealerAppreciationAmount}
-                      onChange={(e) => updateTournament(activeTournament.id, { dealerAppreciationAmount: Number(e.target.value) })}
-                      className="form-input"
-                      style={{ padding: '8px 12px' }}
-                      disabled={isSubAdmin}
-                    />
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Flyer / PDF URL (Google Drive)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. https://drive.google.com/..."
-                      value={activeTournament.flyerUrl || ''}
-                      onChange={(e) => updateTournament(activeTournament.id, { flyerUrl: e.target.value })}
-                      className="form-input"
-                      style={{ padding: '8px 12px' }}
-                      disabled={isSubAdmin}
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Flyer Type</label>
-                    <select
-                      value={activeTournament.flyerType || ''}
-                      onChange={(e) => updateTournament(activeTournament.id, { flyerType: (e.target.value as any) || null })}
-                      className="form-input"
-                      style={{ padding: '8px 12px', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
-                      disabled={isSubAdmin}
-                    >
-                      <option value="">None</option>
-                      <option value="pdf">PDF</option>
-                      <option value="image">Image</option>
-                    </select>
-                  </div>
-                </div>
-                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Payout Structure (% per place paid)</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(place => {
-                      const currentPctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
-                      return (
-                        <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ fontSize: '0.8rem', width: '35px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
-                          <input
-                            type="number"
-                            min={0}
-                            max={100}
-                            value={currentPctList[place - 1]}
-                            onChange={(e) => {
-                              const next = [...currentPctList];
-                              next[place - 1] = Number(e.target.value);
-                              updateTournament(activeTournament.id, { payoutPercentages: next });
-                            }}
-                            className="form-input"
-                            style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
-                            disabled={isSubAdmin}
-                          />
-                          <span style={{ fontSize: '0.8rem' }}>%</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '6px', textAlign: 'right' }}>
-                    Total: <strong>{(activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0]).reduce((a,b)=>a+b, 0)}%</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
+            !isSubAdmin && renderFastPlayerLookup("Fast Player Lookup", checkinSearchRef)
           ) : (
             !isSubAdmin && renderFastPlayerLookup("Fast Player Lookup (Late Entry / Registration)", lateSearchRef)
           )}
@@ -2445,6 +2329,122 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               );
             })()}
           </div>
+
+          {/* Configure Game Pricing (if draft and not sub-admin) */}
+          {activeTournament.status === 'draft' && !isSubAdmin && (
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Configure Game Pricing</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Buy-In ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={activeTournament.buyInAmount}
+                    onChange={(e) => updateTournament(activeTournament.id, { buyInAmount: Number(e.target.value) })}
+                    className="form-input"
+                    style={{ padding: '8px 12px' }}
+                    disabled={isSubAdmin}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Add-On ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={activeTournament.addonAmount}
+                    onChange={(e) => updateTournament(activeTournament.id, { addonAmount: Number(e.target.value) })}
+                    className="form-input"
+                    style={{ padding: '8px 12px' }}
+                    disabled={isSubAdmin}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Bounty ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={activeTournament.bountyAmount}
+                    onChange={(e) => updateTournament(activeTournament.id, { bountyAmount: Number(e.target.value) })}
+                    className="form-input"
+                    style={{ padding: '8px 12px' }}
+                    disabled={isSubAdmin}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ToC ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={activeTournament.dealerAppreciationAmount}
+                    onChange={(e) => updateTournament(activeTournament.id, { dealerAppreciationAmount: Number(e.target.value) })}
+                    className="form-input"
+                    style={{ padding: '8px 12px' }}
+                    disabled={isSubAdmin}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Flyer / PDF URL (Google Drive)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. https://drive.google.com/..."
+                    value={activeTournament.flyerUrl || ''}
+                    onChange={(e) => updateTournament(activeTournament.id, { flyerUrl: e.target.value })}
+                    className="form-input"
+                    style={{ padding: '8px 12px' }}
+                    disabled={isSubAdmin}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Flyer Type</label>
+                  <select
+                    value={activeTournament.flyerType || ''}
+                    onChange={(e) => updateTournament(activeTournament.id, { flyerType: (e.target.value as any) || null })}
+                    className="form-input"
+                    style={{ padding: '8px 12px', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                    disabled={isSubAdmin}
+                  >
+                    <option value="">None</option>
+                    <option value="pdf">PDF</option>
+                    <option value="image">Image</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
+                <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Payout Structure (% per place paid)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(place => {
+                    const currentPctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+                    return (
+                      <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '0.8rem', width: '35px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={currentPctList[place - 1]}
+                          onChange={(e) => {
+                            const next = [...currentPctList];
+                            next[place - 1] = Number(e.target.value);
+                            updateTournament(activeTournament.id, { payoutPercentages: next });
+                          }}
+                          className="form-input"
+                          style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
+                          disabled={isSubAdmin}
+                        />
+                        <span style={{ fontSize: '0.8rem' }}>%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '6px', textAlign: 'right' }}>
+                  Total: <strong>{(activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0]).reduce((a,b)=>a+b, 0)}%</strong>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

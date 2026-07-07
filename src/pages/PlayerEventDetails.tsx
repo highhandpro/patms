@@ -265,7 +265,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
               </div>
             ) : (
               <div className="action-status-container">
-                <span className="status-text" style={{ fontWeight: 600 }}>Use the RSVP / Sign Up form below to register instantly!</span>
+                <span className="status-text" style={{ fontWeight: 600 }}>Use the Sign Up form below to register instantly!</span>
               </div>
             )}
           </div>
@@ -376,7 +376,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
               <h4 style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px', fontSize: '1rem' }}>Tournament Details & Chips:</h4>
               <ul style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '8px', listStyleType: 'disc' }}>
                 <li><strong>Starting Stack:</strong> {tournament.startingStack || '20,000 Starting Chips'}</li>
-                <li><strong>RSVP & Arrive On Time:</strong> Receive +5,000 Bonus Chips</li>
+                <li><strong>Register & Arrive On Time:</strong> Receive +5,000 Bonus Chips</li>
                 {tournament.addonAmount > 0 ? (
                   <li><strong>Add-On (${tournament.addonAmount}):</strong> Available at the First Break for +{(tournament.addonChips || 15000).toLocaleString()} Chips</li>
                 ) : (
@@ -391,14 +391,14 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
             </div>
           </div>
 
-          {/* Section 2: RSVP Form & Registered list stack */}
+          {/* Section 2: Registration Form & Registered list stack */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             
-            {/* Public RSVP Form Card */}
+            {/* Public Registration Form Card */}
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                  {tournament.entries.length >= totalSeats ? 'Join the Waitlist' : 'RSVP & Sign Up'}
+                  {tournament.entries.length >= totalSeats ? 'Join the Waitlist' : 'Register & Sign Up'}
                 </h3>
                 <span 
                   style={{
@@ -422,10 +422,10 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
               {submitSuccess ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '10px 0' }}>
                   <p style={{ color: 'var(--color-emerald)', fontWeight: 600, margin: 0 }}>
-                    🎉 RSVP successful! You have been added to the event.
+                    🎉 Registration successful! You have been added to the event.
                   </p>
                   <button className="btn btn-secondary" onClick={() => setSubmitSuccess(false)} style={{ alignSelf: 'flex-start' }}>
-                    RSVP Another Player
+                    Register Another Player
                   </button>
                 </div>
               ) : (
@@ -510,7 +510,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                   </div>
 
                   <button type="submit" className="btn btn-primary" style={{ marginTop: '6px', padding: '10px' }}>
-                    {tournament.entries.length >= totalSeats ? 'Join Waitlist' : 'RSVP & Sign Up'}
+                    {tournament.entries.length >= totalSeats ? 'Join Waitlist' : 'Register & Sign Up'}
                   </button>
                 </form>
               )}
@@ -527,7 +527,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
 
               {tournament.entries.length === 0 ? (
                 <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  <p style={{ margin: 0 }}>No players registered yet. Be the first to RSVP!</p>
+                  <p style={{ margin: 0 }}>No players registered yet. Be the first to register!</p>
                 </div>
               ) : (
                 <div className="registered-players-grid" style={{
