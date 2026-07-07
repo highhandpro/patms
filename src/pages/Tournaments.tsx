@@ -1901,8 +1901,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
-            <div style={{ display: 'grid', gridTemplateColumns: isSubAdmin ? '1fr' : '6fr 4fr', gap: '20px', alignItems: 'start' }}>
-              {!isSubAdmin && renderFastPlayerLookup("Fast RSVP Player Lookup", rsvpSearchRef)}
+            <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px', alignItems: 'start' }}>
+              {renderFastPlayerLookup("Fast RSVP Player Lookup", rsvpSearchRef)}
 
               <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>RSVP Summary</h4>
