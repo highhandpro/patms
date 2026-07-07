@@ -21,6 +21,12 @@ interface TournamentsProps {
   isChiefAdmin?: boolean;
 }
 
+const getOrdinal = (n: number) => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
+
 export const Tournaments: React.FC<TournamentsProps> = ({
   selectedTournamentId,
   setSelectedTournamentId,
@@ -2730,7 +2736,33 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </h4>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', maxHeight: '450px', overflowY: 'auto', paddingRight: '4px' }}>
-                {bustedEntries.map((entry, idx) => {
+                {Array.from({ length: totalBountiesAvailable }).map((_, idx) => {
+                  const place = idx + 1;
+                  const entry = activeTournament.entries.find(e => e.finishPosition === place);
+
+                  if (!entry) {
+                    return (
+                      <div 
+                        key={`pos-empty-${place}`}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.005)',
+                          border: '1px dashed rgba(255, 255, 255, 0.03)',
+                          opacity: 0.5
+                        }}
+                      >
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                          <span style={{ marginRight: '6px' }}>{getOrdinal(place)}:</span>
+                          [Active Player]
+                        </span>
+                      </div>
+                    );
+                  }
+
                   const name = getMemberName(entry.memberId);
                   return (
                     <div 
@@ -2747,7 +2779,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     >
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden' }}>
                         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                          <span style={{ color: 'var(--color-danger)', marginRight: '6px' }}>{idx + 1}.</span>
+                          <span style={{ color: 'var(--color-danger)', marginRight: '6px' }}>{getOrdinal(place)}:</span>
                           {name}
                         </span>
                         
@@ -2808,9 +2840,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     </div>
                   );
                 })}
-                {bustedEntries.length === 0 && (
+                {totalBountiesAvailable === 0 && (
                   <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem' }}>
-                    No players have busted out yet.
+                    No players checked in yet.
                   </div>
                 )}
               </div>
@@ -2840,11 +2872,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const pctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
         const payouts = pctList.map(pct => Math.round(payoutPrizePool * (pct / 100)));
 
-        const midpoint = Math.ceil(bustedEntries.length / 2);
-        const leftColumnEntries = bustedEntries.slice(0, midpoint);
-        const rightColumnEntries = bustedEntries.slice(midpoint);
+        // Generate all positions from 1 to N
+        const allPositions = Array.from({ length: N }, (_, idx) => {
+          const pos = idx + 1;
+          const entry = activeTournament.entries.find(e => e.finishPosition === pos);
+          return { pos, entry };
+        });
 
-        const renderSummaryTable = (entries: typeof bustedEntries) => (
+        const midpoint = Math.ceil(allPositions.length / 2);
+        const leftColumnEntries = allPositions.slice(0, midpoint);
+        const rightColumnEntries = allPositions.slice(midpoint);
+
+        const renderSummaryTable = (positions: typeof leftColumnEntries) => (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
@@ -2857,14 +2896,31 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {entries.map((entry) => {
+                {positions.map(({ pos, entry }) => {
+                  if (!entry) {
+                    return (
+                      <tr 
+                        key={`pos-summary-empty-${pos}`}
+                        style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(255,255,255,0.002)' }}
+                      >
+                        <td style={{ padding: '10px 10px', fontWeight: 700, color: 'var(--text-muted)' }}>
+                          #{pos}
+                        </td>
+                        <td style={{ padding: '10px 10px', fontStyle: 'italic', color: 'var(--text-muted)' }}>
+                          [Active Player]
+                        </td>
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: 'var(--text-muted)' }}>-</td>
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: 'var(--text-muted)' }}>-</td>
+                        <td style={{ padding: '10px 10px', textAlign: 'right', color: 'var(--text-muted)' }}>-</td>
+                      </tr>
+                    );
+                  }
+
                   const m = state.members.find(member => member.id === entry.memberId);
                   const name = m ? `${m.firstName} ${m.lastName}` : getMemberName(entry.memberId);
                   
                   // Live dynamic calculations
-                  const pos = entry.finishPosition || N;
                   const payoutEarned = payouts[pos - 1] || 0;
-                  
                   const basePositionPoints = N - pos + 1;
                   let multiplier = 1;
                   if (pos === 1) {
