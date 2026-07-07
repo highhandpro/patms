@@ -2230,19 +2230,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             onDoubleClick={() => toggleCheckedInDealer(entry.memberId)}
                             title="Double-click to toggle Dealer status"
                           >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              {m.logoUrl ? (
-                                <img 
-                                  src={m.logoUrl} 
-                                  alt="Logo" 
-                                  style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
-                                />
-                              ) : null}
-                              <span>
-                                {preassignedDealers.includes(entry.memberId) ? '👑 ' : ''}
-                                {m.firstName} {m.lastName}
-                              </span>
-                            </div>
+                            <span>
+                              {preassignedDealers.includes(entry.memberId) ? '👑 ' : ''}
+                              {m.firstName} {m.lastName}
+                            </span>
                           </td>
                           <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
                           <td style={{ textAlign: 'center' }}>
@@ -2641,17 +2632,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 {activePlayers.map(p => (
                   <div key={p.id} className="player-active-card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', flex: 1 }}>
-                      {p.logoUrl ? (
-                        <img 
-                          src={p.logoUrl} 
-                          alt="Logo" 
-                          style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
-                        />
-                      ) : (
-                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: 'var(--text-secondary)', flexShrink: 0 }}>
-                          ♣
-                        </div>
-                      )}
                       <span style={{ fontWeight: 600, fontSize: '0.82rem', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {p.firstName} {p.lastName}
                       </span>
@@ -2856,16 +2836,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         #{pos}
                       </td>
                       <td style={{ padding: '10px 10px', fontWeight: 600, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                          {m?.logoUrl ? (
-                            <img 
-                              src={m.logoUrl} 
-                              alt="Logo" 
-                              style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} 
-                            />
-                          ) : null}
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
-                        </div>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
                       </td>
                       <td style={{ padding: '10px 10px', fontWeight: 700, textAlign: 'center', color: 'var(--color-gold)' }}>
                         {pointsEarned} pts
