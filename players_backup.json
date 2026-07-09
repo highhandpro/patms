@@ -751,7 +751,7 @@
     {
       "id": "tour-s4g1",
       "seasonId": "season-4",
-      "date": "2026-01-08",
+      "date": "2026-06-20",
       "name": "Season 4, Game 1",
       "status": "completed",
       "buyInAmount": 40,
@@ -1103,7 +1103,20 @@
           "pointsEarned": 11.0,
           "eliminatedAt": "2026-01-08T22:00:00.000Z"
         }
-      ]
+      ],
+      "payoutPercentages": [
+        36,
+        23,
+        14,
+        10,
+        8,
+        5,
+        4,
+        0,
+        0,
+        0
+      ],
+      "overridePrizePool": 1450
     }
   ],
   "settings": {
