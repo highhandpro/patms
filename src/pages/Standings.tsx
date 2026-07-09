@@ -31,8 +31,23 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
   // Find active season
   const activeSeason = state.seasons.find(s => s.id === selectedSeasonId) || null;
 
+  const [sortField, setSortField] = useState<string>('default');
+
   // Calculate standings
   const standings = selectedSeasonId ? calculateStandings(state, selectedSeasonId) : [];
+
+  // Sort standings based on selected sortField
+  const sortedStandings = [...standings].sort((a, b) => {
+    if (sortField === 'default') return 0;
+    const pointsA = a.gamePoints[sortField] || 0;
+    const pointsB = b.gamePoints[sortField] || 0;
+    if (pointsA !== pointsB) {
+      return pointsB - pointsA; // Descending (1st to last order)
+    }
+    const indexA = standings.findIndex(s => s.memberId === a.memberId);
+    const indexB = standings.findIndex(s => s.memberId === b.memberId);
+    return indexA - indexB;
+  });
 
   // Get completed tournaments sorted chronologically
   const completedTournaments = selectedSeasonId
@@ -160,16 +175,34 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                   <th style={{ textAlign: 'center' }}>Top 10s</th>
                   <th style={{ textAlign: 'center' }}>Bounties</th>
                   <th style={{ textAlign: 'right' }}>Total Earnings</th>
-                  <th style={{ textAlign: 'right', color: 'var(--color-gold)' }}>Season Points</th>
+                  <th 
+                    style={{ textAlign: 'right', color: 'var(--color-gold)', cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => setSortField('default')}
+                    title="Click to sort by overall Season Points"
+                  >
+                    Season Points {sortField === 'default' && '▼'}
+                  </th>
                   {completedTournaments.map(t => (
-                    <th key={t.id} style={{ textAlign: 'center', minWidth: '85px' }} title={t.name}>
-                      {abbreviateTournamentName(t.name)}
+                    <th 
+                      key={t.id} 
+                      style={{ 
+                        textAlign: 'center', 
+                        minWidth: '85px', 
+                        cursor: 'pointer', 
+                        userSelect: 'none',
+                        color: sortField === t.id ? 'var(--color-gold)' : 'inherit',
+                        borderBottom: sortField === t.id ? '2px solid var(--color-gold)' : 'none'
+                      }} 
+                      onClick={() => setSortField(sortField === t.id ? 'default' : t.id)}
+                      title={`Click to sort by ${t.name} points`}
+                    >
+                      {abbreviateTournamentName(t.name)} {sortField === t.id && '▼'}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {standings.map((player, idx) => (
+                {sortedStandings.map((player, idx) => (
                   <tr key={player.memberId}>
                     <td style={{ fontWeight: 700, fontSize: '1.05rem' }}>
                       {idx + 1}
