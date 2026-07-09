@@ -9,6 +9,7 @@ export interface PlayerStanding {
   top10: number;
   earnings: number;
   bounties: number;
+  gamePoints: Record<string, number>;
 }
 
 // Calculate standings for a specific season or all seasons if seasonId is empty
@@ -30,7 +31,8 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
       wins: 0,
       top10: 0,
       earnings: 0,
-      bounties: 0
+      bounties: 0,
+      gamePoints: {}
     };
   });
 
@@ -48,7 +50,8 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
           wins: 0,
           top10: 0,
           earnings: 0,
-          bounties: 0
+          bounties: 0,
+          gamePoints: {}
         };
       }
 
@@ -59,6 +62,7 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
       if (entry.finishPosition && entry.finishPosition <= 10) standing.top10 += 1;
       standing.earnings += entry.payoutEarned + (entry.bountiesCollected * t.bountyAmount);
       standing.bounties += entry.bountiesCollected;
+      standing.gamePoints[t.id] = entry.pointsEarned;
     });
   });
 

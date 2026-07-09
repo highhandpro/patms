@@ -7,6 +7,14 @@ interface StandingsProps {
   isChiefAdmin?: boolean;
 }
 
+const abbreviateTournamentName = (name: string): string => {
+  const match = name.match(/Season\s+(\d+)\s*,?\s*Game\s+(\d+)/i);
+  if (match) {
+    return `S${match[1]}-G${match[2]}`;
+  }
+  return name;
+};
+
 export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
   const { state, addSeason, updateSeason } = useApp();
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>(
@@ -25,6 +33,13 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
 
   // Calculate standings
   const standings = selectedSeasonId ? calculateStandings(state, selectedSeasonId) : [];
+
+  // Get completed tournaments sorted chronologically
+  const completedTournaments = selectedSeasonId
+    ? state.tournaments
+        .filter(t => t.seasonId === selectedSeasonId && t.status === 'completed')
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    : [];
 
   const seasonToCPool = selectedSeasonId
     ? state.tournaments
@@ -146,6 +161,11 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                   <th style={{ textAlign: 'center' }}>Bounties</th>
                   <th style={{ textAlign: 'right' }}>Total Earnings</th>
                   <th style={{ textAlign: 'right', color: 'var(--color-gold)' }}>Season Points</th>
+                  {completedTournaments.map(t => (
+                    <th key={t.id} style={{ textAlign: 'center', minWidth: '85px' }} title={t.name}>
+                      {abbreviateTournamentName(t.name)}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -187,6 +207,14 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                     <td style={{ textAlign: 'right', fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-gold)' }}>
                       {player.points}
                     </td>
+                    {completedTournaments.map(t => {
+                      const pts = player.gamePoints[t.id];
+                      return (
+                        <td key={t.id} style={{ textAlign: 'center', color: pts > 0 ? 'var(--text-primary)' : 'var(--text-secondary)', opacity: pts > 0 ? 1 : 0.35 }}>
+                          {pts !== undefined ? pts : 0}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
