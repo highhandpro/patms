@@ -805,7 +805,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        backgroundColor: '#0b2545',
+        backgroundColor: '#06260B',
         color: '#ffffff',
         fontFamily: '"Outfit", -apple-system, sans-serif',
         padding: isFullscreen ? '24px 40px 12px 40px' : '24px',
@@ -862,7 +862,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         {/* Left Column: Stats Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: isFullscreen ? '10px' : '6px' }}>
           {/* Card 1: Level */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#071830', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
             <span style={{ fontSize: isFullscreen ? '3.5rem' : '2.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {currentLevel.type === 'round' ? currentLevel.roundNumber : 'BREAK'}
@@ -870,7 +870,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           </div>
 
           {/* Card 2: Current Time */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#071830', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CURRENT TIME</span>
             <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {realTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toLowerCase()}
@@ -878,15 +878,15 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           </div>
 
           {/* Card 3: Next Break */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#071830', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NEXT BREAK IN</span>
-            <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#fbbf24', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#F2C166', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {formatHoursMinsSecs(getNextBreakInSeconds())}
             </span>
           </div>
 
           {/* Card 4: Players In */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#071830', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PLAYERS IN / ALIVE</span>
             <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {activePlayers.length} / {checkedInPlayers.length}
@@ -894,7 +894,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           </div>
 
           {/* Card 5: Average Stack */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#071830', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AVERAGE STACK</span>
             <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(avgStack)}
@@ -902,7 +902,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           </div>
 
           {/* Card 6: Chips In Play */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#071830', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CHIPS IN PLAY</span>
             <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(totalChips)}
@@ -961,7 +961,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 <span style={{ fontSize: isFullscreen ? '1.2rem' : '1.05rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
                   CURRENT BLINDS
                 </span>
-                <span style={{ fontSize: isFullscreen ? '5.8rem' : '3rem', fontWeight: 900, color: '#fbbf24', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
+                <span style={{ fontSize: isFullscreen ? '5.8rem' : '3rem', fontWeight: 900, color: '#F2C166', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
                   {currentLevel.type === 'round' 
                     ? `${currentLevel.smallBlind?.toLocaleString()} / ${currentLevel.bigBlind?.toLocaleString()}` 
                     : 'BREAK TIME'}
@@ -1068,7 +1068,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             display: 'flex', 
             flexDirection: 'column',
             gap: '12px', 
-            backgroundColor: '#071830', 
+            backgroundColor: '#0D4014', 
             border: '1px solid rgba(255,255,255,0.1)', 
             borderRadius: '12px', 
             padding: isFullscreen ? '14px 20px' : '10px 16px',
@@ -1144,7 +1144,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             }}>
               {/* Left Side: Tournament Name and Tagline */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left', flex: 1, minWidth: '280px' }}>
-                <h3 style={{ fontSize: isFullscreen ? '1.4rem' : '1.15rem', fontWeight: 800, margin: 0, color: '#fbbf24', lineHeight: 1.15 }}>
+                <h3 style={{ fontSize: isFullscreen ? '1.4rem' : '1.15rem', fontWeight: 800, margin: 0, color: '#F2C166', lineHeight: 1.15 }}>
                   {tournament.name} — Tournament Clock
                 </h3>
                 <span style={{ fontSize: isFullscreen ? '0.85rem' : '0.75rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.15 }}>
@@ -1162,11 +1162,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                     e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = '#071830';
+                    e.currentTarget.style.backgroundColor = '#0D4014';
                     e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                   }}
                   style={{ 
-                    backgroundColor: '#071830', 
+                    backgroundColor: '#0D4014', 
                     color: '#ffffff', 
                     border: '1px solid rgba(255,255,255,0.15)', 
                     padding: isFullscreen ? '8px 14px' : '6px 10px', 
@@ -1191,11 +1191,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#071830';
+                  e.currentTarget.style.backgroundColor = '#0D4014';
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                 }}
                 style={{ 
-                  backgroundColor: '#071830', 
+                  backgroundColor: '#0D4014', 
                   color: '#ffffff', 
                   border: '1px solid rgba(255,255,255,0.15)', 
                   padding: isFullscreen ? '8px 14px' : '6px 10px', 
@@ -1221,11 +1221,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#071830';
+                  e.currentTarget.style.backgroundColor = '#0D4014';
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                 }}
                 style={{ 
-                  backgroundColor: '#071830', 
+                  backgroundColor: '#0D4014', 
                   color: '#ffffff', 
                   border: '1px solid rgba(255,255,255,0.15)', 
                   padding: isFullscreen ? '8px 10px' : '6px 8px', 
@@ -1251,11 +1251,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#071830';
+                  e.currentTarget.style.backgroundColor = '#0D4014';
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                 }}
                 style={{ 
-                  backgroundColor: '#071830', 
+                  backgroundColor: '#0D4014', 
                   color: '#ffffff', 
                   border: '1px solid rgba(255,255,255,0.15)', 
                   padding: isFullscreen ? '8px 14px' : '6px 10px', 
@@ -1280,11 +1280,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#071830';
+                  e.currentTarget.style.backgroundColor = '#0D4014';
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                 }}
                 style={{ 
-                  backgroundColor: '#071830', 
+                  backgroundColor: '#0D4014', 
                   color: '#ffffff', 
                   border: '1px solid rgba(255,255,255,0.15)', 
                   padding: isFullscreen ? '8px 14px' : '6px 10px', 
@@ -1309,11 +1309,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#071830';
+                  e.currentTarget.style.backgroundColor = '#0D4014';
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                 }}
                 style={{ 
-                  backgroundColor: '#071830', 
+                  backgroundColor: '#0D4014', 
                   color: '#ffffff', 
                   border: '1px solid rgba(255,255,255,0.15)', 
                   padding: isFullscreen ? '8px 14px' : '6px 10px', 
@@ -1339,11 +1339,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#071830';
+                  e.currentTarget.style.backgroundColor = '#0D4014';
                   e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                 }}
                 style={{ 
-                  backgroundColor: '#071830', 
+                  backgroundColor: '#0D4014', 
                   color: '#ffffff', 
                   border: '1px solid rgba(255,255,255,0.15)', 
                   padding: isFullscreen ? '8px 14px' : '6px 10px', 
@@ -1370,11 +1370,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                     e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = '#071830';
+                    e.currentTarget.style.backgroundColor = '#0D4014';
                     e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                   }}
                   style={{ 
-                    backgroundColor: '#071830', 
+                    backgroundColor: '#0D4014', 
                     color: 'var(--color-gold)', 
                     border: '1px solid var(--color-gold)', 
                     padding: isFullscreen ? '8px 14px' : '6px 10px', 
@@ -1427,7 +1427,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             style={{
               width: '100%',
               maxWidth: '320px',
-              backgroundColor: '#071830',
+              backgroundColor: '#0D4014',
               border: '1px solid rgba(255,255,255,0.15)',
               padding: '20px',
               display: 'flex',
@@ -1436,7 +1436,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               borderRadius: '12px'
             }}
           >
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 4px 0', color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 4px 0', color: '#F2C166', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
               Clock Options
             </h3>
             
@@ -1486,7 +1486,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   onClick={handleSaveCustomTime}
                   style={{
                     backgroundColor: '#ffffff',
-                    color: '#071830',
+                    color: '#0D4014',
                     border: 'none',
                     borderRadius: '6px',
                     padding: '6px 12px',
