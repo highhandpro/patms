@@ -1,5 +1,6 @@
 import os
 import shutil
+import colorsys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 
 # Paths
@@ -9,6 +10,42 @@ OUTPUT_DIR = r'C:\Users\thufl\.gemini\antigravity\scratch\pennyantepoker-copy\pu
 
 FONT_PATH_SCRIPT = r'C:\Windows\Fonts\BRUSHSCI.TTF'
 FONT_PATH_SERIF = r'C:\Windows\Fonts\georgiab.ttf'
+
+COLOR_OVERRIDES = {
+    "guy vider": (0, 220, 0),
+    "gabe elliott": (20, 100, 110),
+    "juanito cunanan": (215, 6, 8),
+    "tim hufler": (180, 5, 10),
+    "tom scharf": (180, 5, 10),
+    "wendy bumgardner": (160, 4, 12),
+    "nichlas priest": (180, 5, 10),
+    "mary lind handy": (255, 110, 0),
+    "mary handy": (255, 110, 0),
+    "christopher hirsh": (30, 30, 30),
+    "ryan buell": (20, 20, 20),
+    "berta allen": (0, 160, 20),
+    "rachelle allen": (0, 160, 20),
+    "albert jamito": (0, 50, 140),
+    "angela koontz": (200, 8, 12),
+    "bruce knutson": (180, 5, 10),
+    "woody christopher woody": (0, 130, 50),
+    "christopher woody": (0, 130, 50),
+    "andrew palacios": (20, 100, 110),
+    "andrew richardson": (215, 6, 8),
+    "abbi sweet": (240, 20, 110),
+    "jason hofbauer": (0, 50, 140),
+    "ron hawkins": (215, 6, 8),
+    "doug berg": (0, 120, 240),
+    "dave morales": (235, 180, 0),
+    "evan elliott": (0, 70, 180),
+    "bill foley": (240, 120, 0),
+    "brian pennebaker": (215, 6, 8),
+    "brian syfrett": (40, 180, 0),
+    "cody dempsey": (240, 170, 0),
+    "cristina miller": (180, 5, 10),
+    "dan grimani": (130, 0, 220),
+    "derek allen": (220, 190, 80)
+}
 
 def find_player_logo(full_name):
     if not os.path.exists(LOGOS_DIR):
@@ -22,6 +59,52 @@ def find_player_logo(full_name):
         if clean_base.replace(' ', '') == clean_name.replace(' ', ''):
             return os.path.join(LOGOS_DIR, filename)
     return None
+
+def extract_theme_color(logo_path):
+    try:
+        logo_img = Image.open(logo_path).convert('RGBA')
+        small_img = logo_img.resize((50, 50), Image.Resampling.NEAREST)
+        pixels = list(small_img.getdata())
+        
+        best_color = None
+        max_sat = -1
+        
+        for r, g, b, a in pixels:
+            if a < 50:
+                continue
+            if r > 240 and g > 240 and b > 240:
+                continue
+            if r < 15 and g < 15 and b < 15:
+                continue
+                
+            h, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
+            if s > max_sat:
+                max_sat = s
+                best_color = (r, g, b)
+                
+        if best_color and max_sat > 0.15:
+            return best_color
+    except Exception as e:
+        print(f"Error extracting color: {e}")
+    return (200, 10, 15)
+
+def get_player_theme_color(full_name, logo_path):
+    name_key = full_name.lower().strip()
+    if name_key in COLOR_OVERRIDES:
+        return COLOR_OVERRIDES[name_key]
+    if logo_path and os.path.exists(logo_path):
+        return extract_theme_color(logo_path)
+    return (200, 10, 15)
+
+def apply_color_tint(bg_img, color):
+    h, s, v = colorsys.rgb_to_hsv(color[0]/255.0, color[1]/255.0, color[2]/255.0)
+    if s < 0.1:
+        return bg_img.convert('RGBA')
+    r, g, b = colorsys.hsv_to_rgb(h, 0.4, 0.6)
+    tint_color = (int(r * 255), int(g * 255), int(b * 255))
+    tint = Image.new('RGBA', bg_img.size, tint_color + (255,))
+    tinted = Image.blend(bg_img.convert('RGBA'), tint, 0.12)
+    return tinted
 
 def get_notched_polygon(x0, y0, x1, y1, notch):
     return [
@@ -173,7 +256,12 @@ def render_line_mask_rotated(text, font, angle, stroke_w=0):
         return rotated.crop(c_bbox)
     return rotated
 
-def render_name_layer_rotated(text, font_path, font_size, y_center, angle, canvas_w, canvas_h, bottom_y=None):
+def render_name_layer_rotated(text, font_path, font_size, y_center, angle, canvas_w, canvas_h, theme_color, bottom_y=None):
+    r, g, b = theme_color
+    red_top = (min(255, int(r * 1.25)), min(255, int(g * 1.25)), min(255, int(b * 1.25)), 255)
+    red_bot = (int(r * 0.45), int(g * 0.45), int(b * 0.45), 255)
+    inner_color = (int(r * 0.15), int(g * 0.15), int(b * 0.15), 255)
+
     fsize = font_size
     font = ImageFont.truetype(font_path, fsize)
     
@@ -218,22 +306,22 @@ def render_name_layer_rotated(text, font_path, font_size, y_center, angle, canva
         gold_grad_canvas.paste(gold_grad, (0, gy1))
         line_img.paste(gold_grad_canvas, (0, 0), mask=gold_mask_full)
         
-    # Paste inner outline (solid dark red)
+    # Paste inner outline (solid dark theme color)
     inner_mask_full = Image.new('L', (canvas_w, canvas_h), 0)
     inner_mask_full.paste(inner_mask, (px, py))
-    inner_layer = Image.new('RGBA', (canvas_w, canvas_h), INNER_COLOR)
+    inner_layer = Image.new('RGBA', (canvas_w, canvas_h), inner_color)
     line_img.paste(inner_layer, (0, 0), mask=inner_mask_full)
     
-    # Paste red gradient fill locally
+    # Paste theme gradient fill locally
     fill_mask_full = Image.new('L', (canvas_w, canvas_h), 0)
     fill_mask_full.paste(fill_mask, (px, py))
     r_bbox = fill_mask_full.getbbox()
     if r_bbox:
         ry1, ry2 = r_bbox[1], r_bbox[3]
-        red_grad = make_vertical_gradient(canvas_w, max(1, ry2 - ry1), RED_TOP, RED_BOT)
-        red_grad_canvas = Image.new('RGBA', (canvas_w, canvas_h), (0, 0, 0, 0))
-        red_grad_canvas.paste(red_grad, (0, ry1))
-        line_img.paste(red_grad_canvas, (0, 0), mask=fill_mask_full)
+        theme_grad = make_vertical_gradient(canvas_w, max(1, ry2 - ry1), red_top, red_bot)
+        theme_grad_canvas = Image.new('RGBA', (canvas_w, canvas_h), (0, 0, 0, 0))
+        theme_grad_canvas.paste(theme_grad, (0, ry1))
+        line_img.paste(theme_grad_canvas, (0, 0), mask=fill_mask_full)
     
     return line_img, line_black_mask
 
@@ -277,6 +365,10 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     line1 = parts[0]
     line2 = parts[1] if len(parts) > 1 else ''
     
+    logo_path = find_player_logo(full_name)
+    theme_color = get_player_theme_color(full_name, logo_path)
+    tinted_bg = apply_color_tint(bg_img, theme_color)
+    
     canvas_w = bg_img.width * SCALE
     canvas_h = bg_img.height * SCALE
     safe_w = canvas_w - 100 * SCALE
@@ -286,7 +378,7 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     combined_black_mask = Image.new('L', (canvas_w, canvas_h), 0)
     
     # 1. Render First Name (Line 1) at FONT_SIZE_FIRST
-    line1_img, black_mask1 = render_name_layer_rotated(line1, FONT_PATH_SCRIPT, FONT_SIZE_FIRST, 160, 12, canvas_w, canvas_h)
+    line1_img, black_mask1 = render_name_layer_rotated(line1, FONT_PATH_SCRIPT, FONT_SIZE_FIRST, 160, 12, canvas_w, canvas_h, theme_color)
     combined_black_mask.paste(black_mask1, (0, 0), black_mask1)
     colored_layers.paste(line1_img, (0, 0), mask=line1_img)
     
@@ -297,14 +389,14 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
         
         if len(wrapped_lines) == 1:
             # Render last name on a single line with bottom aligned at Y=908 (2px above 910 plaque top)
-            line2_img, black_mask2 = render_name_layer_rotated(line2, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, bottom_y=908)
+            line2_img, black_mask2 = render_name_layer_rotated(line2, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, theme_color, bottom_y=908)
             combined_black_mask.paste(black_mask2, (0, 0), black_mask2)
             colored_layers.paste(line2_img, (0, 0), mask=line2_img)
         else:
             # Render last name on two lines with bottom of second line at Y=908 and first line at Y=828
             bottom_ys = [828, 908]
             for idx, text_line in enumerate(wrapped_lines[:2]):
-                line_img, mask_img = render_name_layer_rotated(text_line, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, bottom_y=bottom_ys[idx])
+                line_img, mask_img = render_name_layer_rotated(text_line, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, theme_color, bottom_y=bottom_ys[idx])
                 combined_black_mask.paste(mask_img, (0, 0), mask_img)
                 colored_layers.paste(line_img, (0, 0), mask=line_img)
                 
@@ -326,7 +418,7 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     names_img_1x.save(names_output_path)
     
     # Create the frame (background card + borders + Plaque)
-    frame_img = bg_img.copy().convert('RGBA')
+    frame_img = tinted_bg
     draw = ImageDraw.Draw(frame_img)
     
     plaque_w = 380
@@ -407,6 +499,22 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     card_img.paste(names_img_1x, (0, 0), mask=names_img_1x)
     card_img.save(output_path)
     
+def load_member_ids():
+    import openpyxl
+    wb = openpyxl.load_workbook("players.xlsx", read_only=True)
+    sheet = wb['Sheet1']
+    mapping = {}
+    rows = list(sheet.iter_rows(values_only=True))
+    for row in rows[1:]:
+        if len(row) >= 3:
+            member_id = row[0]
+            first_name = row[1]
+            last_name = row[2]
+            if first_name and last_name and member_id is not None:
+                full_name = f"{first_name.strip()} {last_name.strip()}"
+                mapping[full_name.lower()] = str(member_id)
+    return mapping
+
 def main():
     print("Starting mockup-aligned badge layer generation...")
     full_dir = os.path.join(OUTPUT_DIR, "full")
@@ -417,14 +525,72 @@ def main():
     os.makedirs(names_dir, exist_ok=True)
     os.makedirs(frames_dir, exist_ok=True)
     
+    # Load correct member IDs from players.xlsx database
+    try:
+        member_ids_map = load_member_ids()
+        print(f"Loaded {len(member_ids_map)} member IDs from players.xlsx successfully.")
+    except Exception as e:
+        print(f"Warning: failed to load players.xlsx database: {e}")
+        member_ids_map = {}
+        
     bg_img = Image.open(BG_PATH)
     
     total = len(PLAYERS_MAP)
-    for i, (name, member_id) in enumerate(PLAYERS_MAP.items(), 1):
+    for i, (name, fallback_id) in enumerate(PLAYERS_MAP.items(), 1):
         filename = sanitize_filename(name)
         out_path = os.path.join(full_dir, f"badge_{filename}")
         names_path = os.path.join(names_dir, f"names_{filename}")
         frame_path = os.path.join(frames_dir, f"frame_{filename}")
+        
+        # MOCKUP_IDS contains correct mappings from the uploaded screenshot sheets
+        MOCKUP_IDS = {
+            "guy vider": "2122",
+            "gabe elliott": "8242",
+            "juanito cunanan": "7981",
+            "tim hufler": "6905",
+            "tom scharf": "6942",
+            "wendy bumgardner": "2686",
+            "nichlas priest": "3853",
+            "mary lind handy": "3707",
+            "mary handy": "3707",
+            "christopher hirsh": "2060",
+            "ryan buell": "2050",
+            "berta allen": "7709",
+            "rachelle allen": "5623",
+            "albert jamito": "3244",
+            "angela koontz": "2065",
+            "bruce knutson": "2061",
+            "woody christopher woody": "2223",
+            "christopher woody": "2223",
+            "andrew richardson": "2067",
+            "abbi sweet": "2057",
+            "jason hofbauer": "5099",
+            "ron hawkins": "3892",
+            "doug berg": "4080",
+            "dave morales": "3493",
+            "evan elliott": "3775",
+            "bill foley": "5712",
+            "brian pennebaker": "9009",
+            "brian syfrett": "6689",
+            "cody dempsey": "3393",
+            "cristina miller": "7241",
+            "dan grimani": "2066",
+            "derek allen": "7224"
+        }
+        
+        name_lower = name.lower().strip()
+        if name_lower in MOCKUP_IDS:
+            member_id = MOCKUP_IDS[name_lower]
+        else:
+            # Match name to database Member ID (case-insensitive)
+            matched_id = member_ids_map.get(name_lower)
+            # Map special variant naming
+            if not matched_id and name == "Mary Lind Handy":
+                matched_id = member_ids_map.get("mary lind handy")
+            if not matched_id and name == "Woody Christopher Woody":
+                matched_id = member_ids_map.get("christopher woody")
+            member_id = matched_id if matched_id else fallback_id
+        
         try:
             generate_player_badge(name, member_id, bg_img, out_path, names_path, frame_path)
             print(f"[{i}/{total}] Generated layers for \"{name}\" with Member #{member_id}")
