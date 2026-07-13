@@ -4,7 +4,7 @@ import colorsys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 
 # Paths
-BG_PATH = r'C:\Users\thufl\.gemini\antigravity\brain\e168043b-9df5-49f2-8266-46e4603c911b\media__1783942261671.jpg'
+BG_PATH = r'C:\Users\thufl\.gemini\antigravity\brain\bfca5fac-3900-4a34-ada1-8ed9e46d0898\media__1783980914559.jpg'
 LOGOS_DIR = r'C:\Users\thufl\Downloads\playerlogos (1)'
 OUTPUT_DIR = r'C:\Users\thufl\.gemini\antigravity\scratch\pennyantepoker-copy\public\player_badges'
 
@@ -388,13 +388,13 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
         wrapped_lines = wrap_text(line2, font_last, safe_w)
         
         if len(wrapped_lines) == 1:
-            # Render last name on a single line with bottom aligned at Y=908 (2px above 910 plaque top)
-            line2_img, black_mask2 = render_name_layer_rotated(line2, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, theme_color, bottom_y=908)
+            # Render last name on a single line with bottom aligned at Y=914 (2px above 916 plaque top)
+            line2_img, black_mask2 = render_name_layer_rotated(line2, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, theme_color, bottom_y=914)
             combined_black_mask.paste(black_mask2, (0, 0), black_mask2)
             colored_layers.paste(line2_img, (0, 0), mask=line2_img)
         else:
-            # Render last name on two lines with bottom of second line at Y=908 and first line at Y=828
-            bottom_ys = [828, 908]
+            # Render last name on two lines with bottom of second line at Y=914 and first line at Y=834
+            bottom_ys = [834, 914]
             for idx, text_line in enumerate(wrapped_lines[:2]):
                 line_img, mask_img = render_name_layer_rotated(text_line, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, theme_color, bottom_y=bottom_ys[idx])
                 combined_black_mask.paste(mask_img, (0, 0), mask_img)
@@ -417,52 +417,8 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     names_img_1x = names_canvas.resize((bg_img.width, bg_img.height), Image.Resampling.LANCZOS)
     names_img_1x.save(names_output_path)
     
-    # Create the frame (background card + borders + Plaque)
+    # Save the frame (background card) - plaque is pre-printed on the card template
     frame_img = tinted_bg
-    draw = ImageDraw.Draw(frame_img)
-    
-    plaque_w = 380
-    plaque_h = 56
-    plaque_x = (frame_img.width - plaque_w) // 2
-    plaque_y = 910
-    notch = 8
-    
-    fill_color = (15, 12, 10, 255)
-    outline_color = (255, 230, 110, 255)
-    wing_color = (170, 130, 40, 255)
-    
-    # 1. Gold side bars (3 horizontal lines)
-    # Left side wings
-    draw.line([(plaque_x - 35, plaque_y + plaque_h//2), (plaque_x, plaque_y + plaque_h//2)], fill=wing_color, width=2)
-    draw.line([(plaque_x - 22, plaque_y + plaque_h//2 - 8), (plaque_x, plaque_y + plaque_h//2 - 8)], fill=wing_color, width=2)
-    draw.line([(plaque_x - 22, plaque_y + plaque_h//2 + 8), (plaque_x, plaque_y + plaque_h//2 + 8)], fill=wing_color, width=2)
-    
-    # Right side wings
-    draw.line([(plaque_x + plaque_w, plaque_y + plaque_h//2), (plaque_x + plaque_w + 35, plaque_y + plaque_h//2)], fill=wing_color, width=2)
-    draw.line([(plaque_x + plaque_w, plaque_y + plaque_h//2 - 8), (plaque_x + plaque_w + 22, plaque_y + plaque_h//2 - 8)], fill=wing_color, width=2)
-    draw.line([(plaque_x + plaque_w, plaque_y + plaque_h//2 + 8), (plaque_x + plaque_w + 22, plaque_y + plaque_h//2 + 8)], fill=wing_color, width=2)
-    
-    # 2. Draw outer notched border
-    draw.polygon(get_notched_polygon(plaque_x, plaque_y, plaque_x + plaque_w, plaque_y + plaque_h, notch), fill=fill_color, outline=outline_color, width=2)
-    
-    # 3. Draw inner notched border
-    draw.polygon(get_notched_polygon(plaque_x + 4, plaque_y + 4, plaque_x + plaque_w - 4, plaque_y + plaque_h - 4, notch - 4), fill=None, outline=outline_color, width=1)
-    
-    # 4. Gold rivet dots
-    draw.ellipse([plaque_x + 22, plaque_y + plaque_h//2 - 4, plaque_x + 30, plaque_y + plaque_h//2 + 4], fill=outline_color)
-    draw.ellipse([plaque_x + plaque_w - 30, plaque_y + plaque_h//2 - 4, plaque_x + plaque_w - 22, plaque_y + plaque_h//2 + 4], fill=outline_color)
-    
-    # 5. Plaque Text MEMBER #XXX (3-digits only)
-    plaque_text = f"MEMBER #{member_id}"
-    font_plaque = ImageFont.truetype(FONT_PATH_SERIF, 24)
-    p_bbox = draw.textbbox((0, 0), plaque_text, font=font_plaque)
-    p_w = p_bbox[2] - p_bbox[0]
-    p_h = p_bbox[3] - p_bbox[1]
-    
-    tx = plaque_x + (plaque_w - p_w) // 2
-    ty = plaque_y + (plaque_h - p_h) // 2 - p_bbox[1]
-    
-    draw.text((tx, ty), plaque_text, font=font_plaque, fill=outline_color)
     frame_img.save(frame_output_path)
     
     # Create full composite card
