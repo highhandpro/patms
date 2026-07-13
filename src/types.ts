@@ -66,6 +66,24 @@ export interface Tournament {
   seating?: Record<string, string[]>;
   dealers?: Record<string, string>;
   preassignedDealers?: string[];
+  clockState?: {
+    currentLevelIndex: number;
+    timeRemainingSeconds: number;
+    isRunning: boolean;
+    lastUpdated: string;
+  };
+  finalTableTriggered?: boolean;
+  foodAmount?: number;
+  startingChips?: number;
+}
+
+export interface BlindLevel {
+  type: 'round' | 'break';
+  roundNumber?: number;
+  duration: number; // in minutes
+  smallBlind?: number;
+  bigBlind?: number;
+  chipUp?: boolean;
 }
 
 export interface Season {
@@ -84,6 +102,7 @@ export interface Settings {
   pointsBaseAttendance: number;
   maxPlayersPerTable: number;
   adminPassword?: string;
+  blinds?: BlindLevel[];
 }
 
 export interface PendingApproval {
