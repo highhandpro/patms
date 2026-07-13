@@ -1281,9 +1281,17 @@ function App() {
     );
   }
 
+  const isAdminHomePage = activeTab === 'dashboard';
+
   // Admin Dashboard layout
   return (
-    <div className="app-container admin-portal-layout">
+    <div 
+      className="app-container admin-portal-layout"
+      style={{
+        backgroundColor: isAdminHomePage ? '#061c0f' : 'transparent',
+        backgroundImage: isAdminHomePage ? 'radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, #061c0f 80%)' : undefined
+      }}
+    >
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={handleTabChange} 
