@@ -691,8 +691,8 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #06260B;
-  background-image: linear-gradient(rgba(6, 38, 11, 0.82), rgba(6, 38, 11, 0.82)), url('/upcoming-events-bg.png');
+  background-color: #f3f4f6;
+  background-image: url('/upcoming-events-bg.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -708,18 +708,18 @@ p {
 .banner-title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: white;
+  color: #06260B;
   margin: 0;
   letter-spacing: -0.03em;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .banner-subtitle {
   font-size: 1.15rem;
-  color: #a7f3d0;
+  color: #558C2E;
   margin-top: 8px;
-  font-weight: 500;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .banner-alert-box {
