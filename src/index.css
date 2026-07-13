@@ -61,7 +61,7 @@ body {
   background-color: var(--bg-main);
   background-image: url('/bg-felt.png');
   background-repeat: repeat;
-  background-size: auto;
+  background-size: 150px;
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
@@ -679,9 +679,11 @@ p {
 
 /* Card Suit Pattern Felt Background */
 .poker-pattern {
-  background-color: #0c5737;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='%23073f27' fill-opacity='0.55'%3E%3Cpath d='M20 15 L30 5 L40 15 L30 25 Z'/%3E%3Ccircle cx='30' cy='60' r='5'/%3E%3Ccircle cx='23' cy='69' r='5'/%3E%3Ccircle cx='37' cy='69' r='5'/%3E%3Cpath d='M30 67 L30 75 L32 75 L32 67 Z'/%3E%3Cpath d='M100 20 C100 20 94 11 88 17 C82 23 88 32 100 44 C112 32 118 23 112 17 C106 11 100 20 100 20 Z'/%3E%3Cpath d='M100 64 C100 64 94 73 88 67 C82 61 88 52 100 40 C112 52 118 61 112 67 C106 73 100 64 100 64 Z M99 62 L99 70 L101 70 L101 62 Z'/%3E%3C/g%3E%3C/svg%3E");
-  border-bottom: 3px solid #083c26;
+  background-color: #06260B;
+  background-image: url('/bg-felt.png');
+  background-repeat: repeat;
+  background-size: 150px;
+  border-bottom: 3px solid var(--color-gold);
 }
 
 /* Player Banner */
