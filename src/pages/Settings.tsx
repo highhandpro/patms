@@ -1,9 +1,35 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import type { Settings as SettingsType } from '../types';
-import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircle, AlertTriangle } from 'lucide-react';
+import type { Settings as SettingsType, BlindLevel } from '../types';
+import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, X } from 'lucide-react';
 import { calculateStandings } from '../utils/stats';
 import * as XLSX from 'xlsx';
+
+const DEFAULT_BLINDS: BlindLevel[] = [
+  { type: 'round', roundNumber: 1, duration: 18, smallBlind: 100, bigBlind: 200 },
+  { type: 'round', roundNumber: 2, duration: 18, smallBlind: 200, bigBlind: 400 },
+  { type: 'round', roundNumber: 3, duration: 18, smallBlind: 300, bigBlind: 600 },
+  { type: 'round', roundNumber: 4, duration: 18, smallBlind: 400, bigBlind: 800 },
+  { type: 'break', duration: 15, chipUp: false }, // Break 1
+  { type: 'round', roundNumber: 5, duration: 18, smallBlind: 500, bigBlind: 1000 },
+  { type: 'round', roundNumber: 6, duration: 18, smallBlind: 600, bigBlind: 1200 },
+  { type: 'round', roundNumber: 7, duration: 18, smallBlind: 700, bigBlind: 1400 },
+  { type: 'round', roundNumber: 8, duration: 18, smallBlind: 800, bigBlind: 1600 },
+  { type: 'round', roundNumber: 9, duration: 18, smallBlind: 900, bigBlind: 1800 },
+  { type: 'break', duration: 10, chipUp: true }, // Break 2
+  { type: 'round', roundNumber: 10, duration: 18, smallBlind: 1000, bigBlind: 2000 },
+  { type: 'round', roundNumber: 11, duration: 18, smallBlind: 1500, bigBlind: 3000 },
+  { type: 'round', roundNumber: 12, duration: 18, smallBlind: 2000, bigBlind: 4000 },
+  { type: 'round', roundNumber: 13, duration: 18, smallBlind: 2500, bigBlind: 5000 },
+  { type: 'round', roundNumber: 14, duration: 18, smallBlind: 3000, bigBlind: 6000 },
+  { type: 'break', duration: 10, chipUp: true }, // Break 3
+  { type: 'round', roundNumber: 15, duration: 18, smallBlind: 4000, bigBlind: 8000 },
+  { type: 'round', roundNumber: 16, duration: 18, smallBlind: 5000, bigBlind: 10000 },
+  { type: 'round', roundNumber: 17, duration: 18, smallBlind: 10000, bigBlind: 20000 },
+  { type: 'round', roundNumber: 18, duration: 18, smallBlind: 15000, bigBlind: 30000 },
+  { type: 'round', roundNumber: 19, duration: 18, smallBlind: 20000, bigBlind: 40000 },
+  { type: 'round', roundNumber: 20, duration: 18, smallBlind: 25000, bigBlind: 50000 },
+];
 
 interface SettingsProps {
   onChangePassword?: () => void;
@@ -24,6 +50,80 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
+  const [blindsList, setBlindsList] = useState<BlindLevel[]>(() => {
+    return state.settings.blinds && state.settings.blinds.length > 0
+      ? state.settings.blinds
+      : DEFAULT_BLINDS;
+  });
+
+  const handleUpdateLevel = (index: number, field: keyof BlindLevel, value: any) => {
+    const updated = blindsList.map((level, idx) => {
+      if (idx === index) {
+        return { ...level, [field]: value };
+      }
+      return level;
+    });
+
+    let roundCounter = 1;
+    const finalLevels = updated.map(level => {
+      if (level.type === 'round') {
+        const nextRound = { ...level, roundNumber: roundCounter };
+        roundCounter++;
+        return nextRound;
+      }
+      return level;
+    });
+
+    setBlindsList(finalLevels);
+  };
+
+  const handleRemoveLevel = (index: number) => {
+    const updated = blindsList.filter((_, idx) => idx !== index);
+    
+    let roundCounter = 1;
+    const finalLevels = updated.map(level => {
+      if (level.type === 'round') {
+        const nextRound = { ...level, roundNumber: roundCounter };
+        roundCounter++;
+        return nextRound;
+      }
+      return level;
+    });
+
+    setBlindsList(finalLevels);
+  };
+
+  const handleAddLevel = () => {
+    const roundsOnly = blindsList.filter(l => l.type === 'round');
+    let lastSmall = 100;
+    let lastBig = 200;
+    if (roundsOnly.length > 0) {
+      const lastRound = roundsOnly[roundsOnly.length - 1];
+      lastSmall = lastRound.smallBlind ?? 100;
+      lastBig = lastRound.bigBlind ?? 200;
+    }
+
+    const newLevel: BlindLevel = {
+      type: 'round',
+      roundNumber: roundsOnly.length + 1,
+      duration: 18,
+      smallBlind: lastSmall * 2,
+      bigBlind: lastBig * 2,
+      chipUp: false
+    };
+
+    setBlindsList([...blindsList, newLevel]);
+  };
+
+  const handleAddBreak = () => {
+    const newBreak: BlindLevel = {
+      type: 'break',
+      duration: 10,
+      chipUp: false
+    };
+    setBlindsList([...blindsList, newBreak]);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     const updated: SettingsType = {
@@ -32,7 +132,8 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
       defaultBounty: bounty,
       defaultDealerAppreciation: dealerApp,
       pointsBaseAttendance: attendancePoints,
-      maxPlayersPerTable: maxPlayers
+      maxPlayersPerTable: maxPlayers,
+      blinds: blindsList
     };
 
     updateSettings(updated);
@@ -168,9 +269,124 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
 
       <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: '32px' }}>
         
-        {/* Column 1: Rules & Chip Assistant */}
+        {/* Column 1: Rules & Blinds */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
+          {/* Blinds Configuration Card */}
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <span>⏱️</span>
+                <span>Blinds Configuration</span>
+              </h3>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={handleAddLevel}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                >
+                  + Add Level
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddBreak}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                >
+                  + Add Break
+                </button>
+              </div>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
+              Customize the levels, blind amounts, break durations, and chip-up alarms.
+            </p>
+
+            <div style={{ maxHeight: '350px', overflowY: 'auto', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Level</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Duration (mins)</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Small Blind</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 600 }}>Big Blind</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'center' }}>Chip Up</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'center' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {blindsList.map((level, idx) => {
+                    const isRound = level.type === 'round';
+                    return (
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: !isRound ? 'rgba(16, 185, 129, 0.05)' : 'transparent' }}>
+                        <td style={{ padding: '8px 16px', fontWeight: 700, color: isRound ? '#ffffff' : 'var(--color-emerald)' }}>
+                          {isRound ? `Level ${level.roundNumber}` : 'Break'}
+                        </td>
+                        <td style={{ padding: '8px 16px' }}>
+                          <input
+                            type="number"
+                            min={1}
+                            value={level.duration}
+                            onChange={e => handleUpdateLevel(idx, 'duration', Number(e.target.value))}
+                            className="form-input"
+                            style={{ width: '80px', padding: '6px 8px', borderRadius: '4px', textAlign: 'center', margin: 0 }}
+                          />
+                        </td>
+                        <td style={{ padding: '8px 16px' }}>
+                          {isRound ? (
+                            <input
+                              type="number"
+                              min={0}
+                              value={level.smallBlind ?? 0}
+                              onChange={e => handleUpdateLevel(idx, 'smallBlind', Number(e.target.value))}
+                              className="form-input"
+                              style={{ width: '100px', padding: '6px 8px', borderRadius: '4px', margin: 0 }}
+                            />
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>—</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '8px 16px' }}>
+                          {isRound ? (
+                            <input
+                              type="number"
+                              min={0}
+                              value={level.bigBlind ?? 0}
+                              onChange={e => handleUpdateLevel(idx, 'bigBlind', Number(e.target.value))}
+                              className="form-input"
+                              style={{ width: '100px', padding: '6px 8px', borderRadius: '4px', margin: 0 }}
+                            />
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>—</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '8px 16px', textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            checked={!!level.chipUp}
+                            onChange={e => handleUpdateLevel(idx, 'chipUp', e.target.checked)}
+                            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                          />
+                        </td>
+                        <td style={{ padding: '8px 16px', textAlign: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLevel(idx)}
+                            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                            onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                          >
+                            <X size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* Rules & Defaults Form */}
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
