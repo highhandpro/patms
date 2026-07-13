@@ -16,7 +16,8 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
         justifyContent: 'center',
         minHeight: 'calc(100vh - 72px)',
         padding: '20px',
-        backgroundImage: 'radial-gradient(circle at center, rgba(16, 185, 129, 0.05) 0%, transparent 70%)',
+        backgroundColor: '#000000',
+        backgroundImage: 'radial-gradient(circle at center, rgba(16, 185, 129, 0.05) 0%, #000000 70%)',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden'

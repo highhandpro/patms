@@ -684,8 +684,16 @@ function App() {
   };
 
   if (portalMode === 'player') {
+    const isHomePage = !loggedInMemberId;
     return (
-      <div className="app-container player-portal-layout" style={{ flexDirection: 'column' }}>
+      <div 
+        className="app-container player-portal-layout" 
+        style={{ 
+          flexDirection: 'column',
+          backgroundColor: isHomePage ? '#000000' : 'transparent',
+          backgroundImage: isHomePage ? 'none' : undefined
+        }}
+      >
         <PlayerNavbar 
           activeTab={activePlayerTab} 
           setActiveTab={setActivePlayerTab}
