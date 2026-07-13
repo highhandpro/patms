@@ -253,7 +253,7 @@ def wrap_text(text, font, max_width):
         lines.append(' '.join(current_line))
     return lines
 
-def generate_player_badge(full_name, member_id, bg_img, output_path):
+def generate_player_badge(full_name, member_id, bg_img, output_path, names_output_path, frame_output_path):
     parts = full_name.split(' ', 1)
     line1 = parts[0]
     line2 = parts[1] if len(parts) > 1 else ''
@@ -304,44 +304,15 @@ def generate_player_badge(full_name, member_id, bg_img, output_path):
     
     # Downsample name layer to 1x and composite onto background
     names_img_1x = names_canvas.resize((bg_img.width, bg_img.height), Image.Resampling.LANCZOS)
+    names_img_1x.save(names_output_path)
     
-    card_img = bg_img.copy().convert('RGBA')
-    
-    # If the player has a custom logo, crop, resize, feather and paste it onto card_img first
-    logo_path = find_player_logo(full_name)
-    if logo_path:
-        try:
-            logo_img = Image.open(logo_path).convert('RGBA')
-            logo_resized = logo_img.resize((470, 470), Image.Resampling.LANCZOS)
-            
-            # Create rounded rectangle feathered mask
-            mask = Image.new('L', (470, 470), 0)
-            draw_m = ImageDraw.Draw(mask)
-            draw_m.rounded_rectangle([10, 10, 460, 460], radius=40, fill=255)
-            mask = mask.filter(ImageFilter.GaussianBlur(15))
-            
-            # Combine alpha channels if logo has alpha, else just use mask
-            if 'A' in logo_resized.mode:
-                logo_alpha = logo_resized.split()[3]
-                combined_mask = ImageChops.multiply(logo_alpha, mask)
-            else:
-                combined_mask = mask
-                
-            # Center the logo vertically in the blank middle space
-            px = (card_img.width - 470) // 2
-            py = 250
-            card_img.paste(logo_resized, (px, py), mask=combined_mask)
-        except Exception as e:
-            print(f"  Warning: failed to paste logo for {full_name}: {e}")
-            
-    card_img.paste(names_img_1x, (0, 0), mask=names_img_1x)
-    
-    # --- Draw Plaque at the Bottom ---
-    draw = ImageDraw.Draw(card_img)
+    # Create the frame (background card + borders + Plaque)
+    frame_img = bg_img.copy().convert('RGBA')
+    draw = ImageDraw.Draw(frame_img)
     
     plaque_w = 360
     plaque_h = 56
-    plaque_x = (card_img.width - plaque_w) // 2
+    plaque_x = (frame_img.width - plaque_w) // 2
     plaque_y = 910
     
     # 1. Gold side bars
@@ -371,27 +342,67 @@ def generate_player_badge(full_name, member_id, bg_img, output_path):
     ty = plaque_y + (plaque_h - p_h) // 2 - p_bbox[1]
     
     draw.text((tx, ty), plaque_text, font=font_plaque, fill=(255, 230, 110, 255))
+    frame_img.save(frame_output_path)
     
+    # Create full composite card
+    card_img = frame_img.copy()
+    
+    # If the player has a custom logo, crop, resize, feather and paste it onto card_img first
+    logo_path = find_player_logo(full_name)
+    if logo_path:
+        try:
+            logo_img = Image.open(logo_path).convert('RGBA')
+            logo_resized = logo_img.resize((470, 470), Image.Resampling.LANCZOS)
+            
+            # Create rounded rectangle feathered mask
+            mask = Image.new('L', (470, 470), 0)
+            draw_m = ImageDraw.Draw(mask)
+            draw_m.rounded_rectangle([10, 10, 460, 460], radius=40, fill=255)
+            mask = mask.filter(ImageFilter.GaussianBlur(15))
+            
+            # Combine alpha channels if logo has alpha, else just use mask
+            if 'A' in logo_resized.mode:
+                logo_alpha = logo_resized.split()[3]
+                combined_mask = ImageChops.multiply(logo_alpha, mask)
+            else:
+                combined_mask = mask
+                
+            # Center the logo vertically in the blank middle space
+            px = (card_img.width - 470) // 2
+            py = 250
+            card_img.paste(logo_resized, (px, py), mask=combined_mask)
+        except Exception as e:
+            print(f"  Warning: failed to paste logo for {full_name}: {e}")
+            
+    # Paste names on top of logo
+    card_img.paste(names_img_1x, (0, 0), mask=names_img_1x)
     card_img.save(output_path)
-
+    
 def main():
-    print("Starting mockup-aligned badge generation (larger first names, smaller last names, word-wrapped)...")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    print("Starting mockup-aligned badge layer generation...")
+    full_dir = os.path.join(OUTPUT_DIR, "full")
+    names_dir = os.path.join(OUTPUT_DIR, "names")
+    frames_dir = os.path.join(OUTPUT_DIR, "frames")
+    
+    os.makedirs(full_dir, exist_ok=True)
+    os.makedirs(names_dir, exist_ok=True)
+    os.makedirs(frames_dir, exist_ok=True)
     
     bg_img = Image.open(BG_PATH)
     
     total = len(PLAYERS_MAP)
     for i, (name, member_id) in enumerate(PLAYERS_MAP.items(), 1):
         filename = sanitize_filename(name)
-        out_path = os.path.join(OUTPUT_DIR, f"badge_{filename}")
+        out_path = os.path.join(full_dir, f"badge_{filename}")
+        names_path = os.path.join(names_dir, f"names_{filename}")
+        frame_path = os.path.join(frames_dir, f"frame_{filename}")
         try:
-            generate_player_badge(name, member_id, bg_img, out_path)
-            print(f"[{i}/{total}] Generated badge for \"{name}\" with Member #{member_id}")
-            print(f"  Verified file exists: {os.path.exists(out_path)}")
+            generate_player_badge(name, member_id, bg_img, out_path, names_path, frame_path)
+            print(f"[{i}/{total}] Generated layers for \"{name}\" with Member #{member_id}")
         except Exception as e:
-            print(f"[{i}/{total}] Failed to generate badge for \"{name}\": {e}")
+            print(f"[{i}/{total}] Failed to generate layers for \"{name}\": {e}")
             
-    print("All player name badges generated successfully!")
+    print("All player name badge layers generated successfully!")
 
 if __name__ == '__main__':
     main()
