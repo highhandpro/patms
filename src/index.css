@@ -691,6 +691,12 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #06260B;
+  background-image: linear-gradient(rgba(6, 38, 11, 0.82), rgba(6, 38, 11, 0.82)), url('/upcoming-events-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-bottom: 3px solid var(--color-gold);
 }
 
 .player-banner-content {

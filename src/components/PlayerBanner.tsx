@@ -11,7 +11,7 @@ export const PlayerBanner: React.FC<PlayerBannerProps> = ({
 }) => {
   return (
     <div 
-      className="player-banner poker-pattern"
+      className="player-banner"
       style={{ minHeight: height }}
     >
       <div className="player-banner-content">
