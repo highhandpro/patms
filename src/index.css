@@ -1800,3 +1800,41 @@ body.display-mode-active .main-content {
     min-width: 100%;
   }
 }
+
+/* Casino Chips and Assistant */
+.chip-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border: 3px dashed rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.chip-circle.white { background: #ffffff; color: #000; border-color: #ccc; }
+.chip-circle.red { background: #e63946; color: #fff; border-color: #aa111c; }
+.chip-circle.blue { background: #3a86c8; color: #fff; border-color: #1a4f80; }
+.chip-circle.green { background: #06d6a0; color: #000; border-color: #037f5f; }
+.chip-circle.black { background: #1a202c; color: #fff; border-color: #000; }
+.chip-circle.purple { background: #8338ec; color: #fff; border-color: #551ba8; }
+
+.chip-qty {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-gold, #fbbf24);
+}
+
+.chip-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+

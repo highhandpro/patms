@@ -24,6 +24,99 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
+  // Chip Denominations & Calculator states
+  const [chipVals, setChipVals] = useState(() => {
+    const saved = localStorage.getItem('patms_chip_setup');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.values) return parsed.values;
+      } catch (e) {}
+    }
+    return { white: 25, red: 100, blue: 500, green: 1000, black: 5000 };
+  });
+
+  const [startingStackTarget, setStartingStackTarget] = useState(() => {
+    const saved = localStorage.getItem('patms_chip_setup');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.target) return parsed.target;
+      } catch (e) {}
+    }
+    return 10000;
+  });
+
+  const handleChipValChange = (color: 'white' | 'red' | 'blue' | 'green' | 'black', val: number) => {
+    const updated = { ...chipVals, [color]: val };
+    setChipVals(updated);
+    localStorage.setItem('patms_chip_setup', JSON.stringify({ values: updated, target: startingStackTarget }));
+  };
+
+  const handleStackTargetChange = (val: number) => {
+    setStartingStackTarget(val);
+    localStorage.setItem('patms_chip_setup', JSON.stringify({ values: chipVals, target: val }));
+  };
+
+  // Run the heuristics algorithm
+  const calculateChipDistribution = () => {
+    const denoms = [
+      { color: 'black', text: 'Black', val: chipVals.black },
+      { color: 'green', text: 'Green', val: chipVals.green },
+      { color: 'blue', text: 'Blue', val: chipVals.blue },
+      { color: 'red', text: 'Red', val: chipVals.red },
+      { color: 'white', text: 'White', val: chipVals.white }
+    ].filter(d => d.val > 0);
+
+    let remaining = startingStackTarget;
+    const distribution: Record<string, number> = {};
+    const ascendingDenoms = [...denoms].reverse();
+
+    ascendingDenoms.forEach((d, idx) => {
+      if (remaining <= 0) {
+        distribution[d.color] = 0;
+        return;
+      }
+      let count = 0;
+      if (idx === 0) {
+        count = Math.min(12, Math.floor(remaining / d.val));
+      } else if (idx === 1) {
+        count = Math.min(10, Math.floor(remaining / d.val));
+      } else if (idx === 2) {
+        count = Math.min(8, Math.floor(remaining / d.val));
+      } else if (idx === ascendingDenoms.length - 1) {
+        count = Math.floor(remaining / d.val);
+      } else {
+        count = Math.min(6, Math.floor(remaining / d.val));
+      }
+      distribution[d.color] = count;
+      remaining -= count * d.val;
+    });
+
+    // Greedily allocate remaining backwards if any (high to low)
+    denoms.forEach(d => {
+      if (remaining >= d.val) {
+        const extra = Math.floor(remaining / d.val);
+        distribution[d.color] = (distribution[d.color] || 0) + extra;
+        remaining -= extra * d.val;
+      }
+    });
+
+    // Remainder to smallest denom
+    if (remaining > 0 && ascendingDenoms.length > 0) {
+      const smallest = ascendingDenoms[0];
+      distribution[smallest.color] = (distribution[smallest.color] || 0) + 1;
+    }
+
+    return denoms.map(d => {
+      const qty = distribution[d.color] || 0;
+      return { ...d, qty };
+    }).filter(d => d.qty > 0);
+  };
+
+  const distributionResults = calculateChipDistribution();
+  const computedTotal = distributionResults.reduce((sum, d) => sum + d.qty * d.val, 0);
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     const updated: SettingsType = {
@@ -168,80 +261,199 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
 
       <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: '32px' }}>
         
-        {/* Rules & Defaults Form */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <SettingsIcon size={22} style={{ color: 'var(--color-emerald)' }} />
-            App Rules & Financial Defaults
-          </h3>
+        {/* Column 1: Rules & Chip Assistant */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          
+          {/* Rules & Defaults Form */}
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <SettingsIcon size={22} style={{ color: 'var(--color-emerald)' }} />
+              App Rules & Financial Defaults
+            </h3>
 
-          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Default Buy-in ($)</label>
-                <input
-                  type="number"
-                  min={0}
-                  required
-                  value={buyIn}
-                  onChange={(e) => setBuyIn(Number(e.target.value))}
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Default Bounty ($)</label>
-                <input
-                  type="number"
-                  min={0}
-                  required
-                  value={bounty}
-                  onChange={(e) => setBounty(Number(e.target.value))}
-                  className="form-input"
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Attendance Points</label>
-                <input
-                  type="number"
-                  min={0}
-                  required
-                  value={attendancePoints}
-                  onChange={(e) => setAttendancePoints(Number(e.target.value))}
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Max Players Per Table</label>
-                <input
-                  type="number"
-                  min={2}
-                  max={20}
-                  required
-                  value={maxPlayers}
-                  onChange={(e) => setMaxPlayers(Number(e.target.value))}
-                  className="form-input"
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '12px' }}>
-              <button type="submit" className="btn btn-primary">
-                <Save size={18} />
-                <span>Save Rules Config</span>
-              </button>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {saveSuccess && (
-                <span style={{ color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', fontWeight: 600 }}>
-                  <CheckCircle size={16} />
-                  Changes saved successfully!
-                </span>
-              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>Default Buy-in ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={buyIn}
+                    onChange={(e) => setBuyIn(Number(e.target.value))}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>Default Bounty ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={bounty}
+                    onChange={(e) => setBounty(Number(e.target.value))}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>Default Add-on ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={addon}
+                    onChange={(e) => setAddon(Number(e.target.value))}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>Default Dealer Appreciation ($)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={dealerApp}
+                    onChange={(e) => setDealerApp(Number(e.target.value))}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>Attendance Points</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={attendancePoints}
+                    onChange={(e) => setAttendancePoints(Number(e.target.value))}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>Max Players Per Table</label>
+                  <input
+                    type="number"
+                    min={2}
+                    max={20}
+                    required
+                    value={maxPlayers}
+                    onChange={(e) => setMaxPlayers(Number(e.target.value))}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '12px' }}>
+                <button type="submit" className="btn btn-primary">
+                  <Save size={18} />
+                  <span>Save Rules Config</span>
+                </button>
+                
+                {saveSuccess && (
+                  <span style={{ color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', fontWeight: 600 }}>
+                    <CheckCircle size={16} />
+                    Changes saved successfully!
+                  </span>
+                )}
+              </div>
+            </form>
+          </div>
+
+          {/* Starting Stack Assistant & Chip Denominations */}
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.4rem' }}>🪙</span>
+              Starting Stack Assistant & Chip Denominations
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '-10px' }}>
+              Define values for color denominations and calculate a balanced starting chip stack distribution.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '8px' }}>
+              {/* Left Column: Input Fields */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ color: 'var(--color-emerald)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '4px' }}>
+                  Chip Value Configuration
+                </h4>
+                {(['white', 'red', 'blue', 'green', 'black'] as const).map((color) => (
+                  <div key={color} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className={`chip-circle ${color}`} style={{ width: '28px', height: '28px', fontSize: '0.7rem' }}>
+                        {color[0].toUpperCase()}
+                      </span>
+                      <span style={{ fontSize: '0.9rem', textTransform: 'capitalize' }}>{color} Chip:</span>
+                    </div>
+                    <input
+                      type="number"
+                      min={0}
+                      value={chipVals[color]}
+                      onChange={(e) => handleChipValChange(color, Number(e.target.value))}
+                      className="form-input"
+                      style={{ width: '100px', padding: '6px 10px', margin: 0, textAlign: 'right' }}
+                    />
+                  </div>
+                ))}
+
+                <div className="form-group" style={{ marginTop: '16px', marginBottom: 0 }}>
+                  <label style={{ fontWeight: 700, color: 'var(--color-emerald)' }}>Starting Chips Needed</label>
+                  <input
+                    type="number"
+                    min={100}
+                    step={100}
+                    value={startingStackTarget}
+                    onChange={(e) => handleStackTargetChange(Number(e.target.value))}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              {/* Right Column: Recommended Distribution */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ color: 'var(--color-emerald)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '4px' }}>
+                  Recommended Distribution
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {distributionResults.map((d) => (
+                    <div key={d.color} className="chip-item">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className={`chip-circle ${d.color}`}>
+                          {d.text[0]}
+                        </span>
+                        <span style={{ fontSize: '0.9rem' }}>${d.val} Chips</span>
+                      </div>
+                      <div>
+                        <span className="chip-qty">× {d.qty}</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>
+                          (${ (d.qty * d.val).toLocaleString() })
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderTop: '1px dashed rgba(255,255,255,0.1)',
+                  marginTop: 'auto'
+                }}>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Calculated Total Stack:</span>
+                  <span style={{ color: 'var(--color-gold)', fontSize: '1.25rem', fontWeight: 800 }}>
+                    ${computedTotal.toLocaleString()}
+                  </span>
+                </div>
+              </div>
             </div>
-          </form>
+          </div>
+
         </div>
 
         {/* Portability Panel */}

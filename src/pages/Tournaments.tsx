@@ -9,7 +9,8 @@ import { EliminationModal } from '../components/EliminationModal';
 import { LateEntryModal } from '../components/LateEntryModal';
 import { 
   Trophy, Play, RotateCcw, Plus, Trash2, 
-  UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award
+  UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award,
+  Pause, SkipForward, SkipBack, Volume2, Users, Activity
 } from 'lucide-react';
 
 interface TournamentsProps {
@@ -26,6 +27,33 @@ const getOrdinal = (n: number) => {
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 };
+
+interface BlindLevel {
+  level: number;
+  smallBlind: number;
+  bigBlind: number;
+  isBreak: boolean;
+}
+
+const defaultBlindStructure: BlindLevel[] = [
+  { level: 1, smallBlind: 25, bigBlind: 50, isBreak: false },
+  { level: 2, smallBlind: 50, bigBlind: 100, isBreak: false },
+  { level: 3, smallBlind: 100, bigBlind: 200, isBreak: false },
+  { level: 4, smallBlind: 150, bigBlind: 300, isBreak: false },
+  { level: 0, smallBlind: 0, bigBlind: 0, isBreak: true }, // 5 min Break
+  { level: 5, smallBlind: 200, bigBlind: 400, isBreak: false },
+  { level: 6, smallBlind: 300, bigBlind: 600, isBreak: false },
+  { level: 7, smallBlind: 400, bigBlind: 800, isBreak: false },
+  { level: 8, smallBlind: 500, bigBlind: 1000, isBreak: false },
+  { level: 0, smallBlind: 0, bigBlind: 0, isBreak: true }, // Break
+  { level: 9, smallBlind: 600, bigBlind: 1200, isBreak: false },
+  { level: 10, smallBlind: 800, bigBlind: 1600, isBreak: false },
+  { level: 11, smallBlind: 1000, bigBlind: 2000, isBreak: false },
+  { level: 12, smallBlind: 1500, bigBlind: 3000, isBreak: false },
+  { level: 13, smallBlind: 2000, bigBlind: 4000, isBreak: false },
+  { level: 14, smallBlind: 3000, bigBlind: 6000, isBreak: false },
+  { level: 15, smallBlind: 5000, bigBlind: 10000, isBreak: false }
+];
 
 export const Tournaments: React.FC<TournamentsProps> = ({
   selectedTournamentId,
@@ -64,7 +92,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print'>('rsvp');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'timer'>('rsvp');
   const [printType, setPrintType] = useState<'signin' | 'scoresheet'>('signin');
 
   // Player search in checkin
@@ -151,6 +179,188 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   // Load tournament specific states when ID changes
   const activeTournament = state.tournaments.find(t => t.id === selectedTournamentId) || null;
+
+  // Web Audio Context for audio alert synthesis
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const getAudioContext = () => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
+  };
+
+  const playAlertSound = (type: 'alarm' | 'warning' | 'click' = 'alarm') => {
+    try {
+      const ctx = getAudioContext();
+      if (type === 'click') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.06);
+      } else if (type === 'warning') {
+        const playBeep = (delay: number, freq: number) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime + delay);
+          gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.16);
+        };
+        playBeep(0, 440);
+        playBeep(0.2, 440);
+      } else {
+        const playAlarmBeep = (delay: number) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, ctx.currentTime + delay);
+          gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+          gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + delay + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.4);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.45);
+        };
+        playAlarmBeep(0);
+        playAlarmBeep(0.3);
+        playAlarmBeep(0.6);
+      }
+    } catch (e) {
+      console.warn('Web Audio API not supported or interaction required:', e);
+    }
+  };
+
+  // Timer states cached locally per tournament ID
+  const [timerActive, setTimerActive] = useState(false);
+  const [timerLevelIdx, setTimerLevelIdx] = useState(0);
+  const [timerSecondsLeft, setTimerSecondsLeft] = useState(0);
+
+  // Load/initialize timer state on tournament change
+  useEffect(() => {
+    if (!activeTournament) return;
+    setTimerActive(false);
+    
+    const saved = localStorage.getItem(`patms_timer_${activeTournament.id}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setTimerLevelIdx(parsed.levelIndex ?? 0);
+        setTimerSecondsLeft(parsed.secondsLeft ?? (activeTournament.roundLength || 15) * 60);
+        return;
+      } catch (e) {}
+    }
+    
+    setTimerLevelIdx(0);
+    const duration = (defaultBlindStructure[0].isBreak ? 5 : (activeTournament.roundLength || 15)) * 60;
+    setTimerSecondsLeft(duration);
+  }, [selectedTournamentId, activeTournament?.roundLength]);
+
+  // Save timer state locally
+  const saveTimerState = (lvlIdx: number, secs: number) => {
+    if (!activeTournament) return;
+    localStorage.setItem(`patms_timer_${activeTournament.id}`, JSON.stringify({
+      levelIndex: lvlIdx,
+      secondsLeft: secs
+    }));
+  };
+
+  // Timer Interval Hook
+  useEffect(() => {
+    if (!timerActive || !activeTournament) return;
+
+    const interval = setInterval(() => {
+      setTimerSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          playAlertSound('alarm');
+          
+          const nextIdx = timerLevelIdx + 1;
+          if (nextIdx < defaultBlindStructure.length) {
+            setTimerLevelIdx(nextIdx);
+            const nextLvl = defaultBlindStructure[nextIdx];
+            const nextDuration = (nextLvl.isBreak ? 5 : (activeTournament.roundLength || 15)) * 60;
+            saveTimerState(nextIdx, nextDuration);
+            setTimeout(() => {
+              setTimerActive(true);
+            }, 100);
+            return nextDuration;
+          } else {
+            setTimerActive(false);
+            saveTimerState(timerLevelIdx, 0);
+            return 0;
+          }
+        } else {
+          const updated = prev - 1;
+          saveTimerState(timerLevelIdx, updated);
+          return updated;
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timerActive, timerLevelIdx, activeTournament?.id, activeTournament?.roundLength]);
+
+  const handlePlayPause = () => {
+    getAudioContext();
+    setTimerActive(!timerActive);
+  };
+
+  const handleSkipForward = () => {
+    if (!activeTournament) return;
+    const nextIdx = timerLevelIdx + 1;
+    if (nextIdx < defaultBlindStructure.length) {
+      setTimerLevelIdx(nextIdx);
+      const nextLvl = defaultBlindStructure[nextIdx];
+      const nextDuration = (nextLvl.isBreak ? 5 : (activeTournament.roundLength || 15)) * 60;
+      setTimerSecondsLeft(nextDuration);
+      saveTimerState(nextIdx, nextDuration);
+      playAlertSound('click');
+    }
+  };
+
+  const handleSkipBackward = () => {
+    if (!activeTournament) return;
+    const prevIdx = timerLevelIdx - 1;
+    if (prevIdx >= 0) {
+      setTimerLevelIdx(prevIdx);
+      const prevLvl = defaultBlindStructure[prevIdx];
+      const prevDuration = (prevLvl.isBreak ? 5 : (activeTournament.roundLength || 15)) * 60;
+      setTimerSecondsLeft(prevDuration);
+      saveTimerState(prevIdx, prevDuration);
+      playAlertSound('click');
+    }
+  };
+
+  const handleResetLevel = () => {
+    if (!activeTournament) return;
+    if (window.confirm("Reset current blind level timer?")) {
+      const currentLvl = defaultBlindStructure[timerLevelIdx];
+      const duration = (currentLvl.isBreak ? 5 : (activeTournament.roundLength || 15)) * 60;
+      setTimerSecondsLeft(duration);
+      saveTimerState(timerLevelIdx, duration);
+      playAlertSound('click');
+    }
+  };
+
+  const formatTimer = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     if (activeTournament) {
@@ -1817,6 +2027,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               Seating Preview
             </button>
             <button 
+              className={`btn btn-ghost ${subTab === 'timer' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('timer')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'timer' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'timer' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'timer' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              LIVE TIMER ⏱
+            </button>
+            <button 
               className={`btn btn-ghost ${subTab === 'print' ? 'active-subtab' : ''}`}
               onClick={() => setSubTab('print')}
               style={{
@@ -1902,6 +2126,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               }}
             >
               Summary ({activeTournament.entries.filter(e => e.eliminatedAt).length} busted)
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'timer' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('timer')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'timer' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'timer' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'timer' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              LIVE TIMER ⏱
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'print' ? 'active-subtab' : ''}`}
@@ -3522,6 +3760,240 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </div>
                 );
               })}
+            </div>
+          </div>
+        );
+      })()}
+
+      {subTab === 'timer' && (() => {
+        const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
+        const startingStackStr = activeTournament.startingStack || '10,000';
+        const startingChips = parseInt(startingStackStr.replace(/[^0-9]/g, ''), 10) || 10000;
+        const totalChipsPool = buyInCount * startingChips;
+        const activePlayers = activeTournament.entries.filter(e => e.hasBuyIn && !e.eliminatedAt);
+        const activeCount = activePlayers.length;
+        const averageStack = activeCount > 0 ? Math.round(totalChipsPool / activeCount) : 0;
+
+        const currentLevel = defaultBlindStructure[timerLevelIdx];
+        const nextLevel = timerLevelIdx + 1 < defaultBlindStructure.length ? defaultBlindStructure[timerLevelIdx + 1] : null;
+
+        return (
+          <div className="animate-slide-up" style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: '32px', marginTop: '16px' }}>
+            {/* Left Side: Clock Card */}
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', position: 'relative', overflow: 'hidden', minHeight: '450px' }}>
+              {/* Radial gradient background accent for glowing effect */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '350px',
+                height: '350px',
+                background: 'radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%)',
+                pointerEvents: 'none',
+                zIndex: 0
+              }} />
+
+              <div style={{ zIndex: 1, textAlign: 'center', width: '100%' }}>
+                {/* Level Title */}
+                <div style={{ color: 'var(--color-gold)', fontSize: '1.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  {currentLevel.isBreak ? '☕ BREAK' : `LEVEL ${currentLevel.level}`}
+                </div>
+
+                {/* Clock Countdown */}
+                <div style={{ fontSize: '7.5rem', fontWeight: 900, fontFamily: 'monospace', color: '#ffffff', lineHeight: 1, margin: '20px 0', letterSpacing: '-0.02em', textShadow: '0 0 20px rgba(255,255,255,0.1)' }}>
+                  {formatTimer(timerSecondsLeft)}
+                </div>
+
+                {/* Current Blinds */}
+                <div style={{ color: 'var(--color-emerald)', fontSize: '1.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em', marginBottom: '8px' }}>
+                  {currentLevel.isBreak ? 'Take a short break' : `Blinds: $${currentLevel.smallBlind.toLocaleString()} / $${currentLevel.bigBlind.toLocaleString()}`}
+                </div>
+
+                {/* Ante Rules */}
+                <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: 500, letterSpacing: '0.05em', marginBottom: '40px' }}>
+                  {!currentLevel.isBreak && `Big Blind Ante: $${currentLevel.bigBlind.toLocaleString()}`}
+                </div>
+
+                {/* Controls Panel */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+                  {/* Skip Back */}
+                  <button 
+                    onClick={handleSkipBackward}
+                    className="btn btn-secondary"
+                    style={{ width: '48px', height: '48px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Previous Level"
+                  >
+                    <SkipBack size={20} />
+                  </button>
+
+                  {/* Play/Pause */}
+                  <button 
+                    onClick={handlePlayPause}
+                    className="btn btn-primary"
+                    style={{ 
+                      width: '72px', 
+                      height: '72px', 
+                      borderRadius: '50%', 
+                      padding: 0, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      backgroundColor: timerActive ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                      borderColor: timerActive ? 'var(--color-danger)' : 'var(--color-emerald)',
+                      color: timerActive ? 'var(--color-danger)' : 'var(--color-emerald)',
+                      boxShadow: timerActive ? '0 0 20px rgba(239, 68, 68, 0.2)' : '0 0 20px rgba(16, 185, 129, 0.2)'
+                    }}
+                    title={timerActive ? "Pause" : "Play"}
+                  >
+                    {timerActive ? <Pause size={32} /> : <Play size={32} style={{ marginLeft: '4px' }} />}
+                  </button>
+
+                  {/* Skip Forward */}
+                  <button 
+                    onClick={handleSkipForward}
+                    className="btn btn-secondary"
+                    style={{ width: '48px', height: '48px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Next Level"
+                  >
+                    <SkipForward size={20} />
+                  </button>
+
+                  {/* Reset Level */}
+                  <button 
+                    onClick={handleResetLevel}
+                    className="btn btn-secondary"
+                    style={{ width: '48px', height: '48px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Reset Level Clock"
+                  >
+                    <RotateCcw size={18} />
+                  </button>
+
+                  {/* Sound Test */}
+                  <button 
+                    onClick={() => playAlertSound('alarm')}
+                    className="btn btn-secondary"
+                    style={{ width: '48px', height: '48px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Sound Alarm Test"
+                  >
+                    <Volume2 size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Next Level Indicator (Bottom Bar) */}
+              {nextLevel && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  borderTop: '1px solid var(--border-subtle)',
+                  padding: '12px 24px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '0.85rem',
+                  color: 'var(--text-secondary)',
+                  zIndex: 1
+                }}>
+                  <span>NEXT UP:</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {nextLevel.isBreak ? '☕ 5 MINUTE BREAK' : `LEVEL ${nextLevel.level} (Blinds: $${nextLevel.smallBlind.toLocaleString()} / $${nextLevel.bigBlind.toLocaleString()})`}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Right Side: Stats & Players */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Stats Card */}
+              <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Activity size={20} />
+                  Live Tournament Stats
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{ padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>TOTAL CHIPS IN PLAY</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+                      {totalChipsPool.toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>AVERAGE CHIP STACK</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-gold)', marginTop: '4px' }}>
+                      {averageStack.toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>PLAYERS ALIVE / REG</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+                      {activeCount} / {buyInCount}
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>STARTING STACK</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+                      {startingChips.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seating/Players Status Overview */}
+              <div className="glass-card" style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Users size={20} />
+                  Active Roster ({activeCount} Alive)
+                </h3>
+
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  maxHeight: '230px',
+                  overflowY: 'auto',
+                  paddingRight: '4px'
+                }}>
+                  {activeTournament.entries
+                    .filter(e => e.hasBuyIn)
+                    .map(e => {
+                      const m = state.members.find(member => member.id === e.memberId);
+                      if (!m) return null;
+                      return (
+                        <div 
+                          key={e.memberId} 
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            backgroundColor: e.eliminatedAt ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)',
+                            border: `1px solid ${e.eliminatedAt ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
+                            fontSize: '0.8rem',
+                            color: e.eliminatedAt ? 'var(--text-secondary)' : '#ffffff',
+                            textDecoration: e.eliminatedAt ? 'line-through' : 'none'
+                          }}
+                        >
+                          <span style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: e.eliminatedAt ? 'var(--color-danger)' : 'var(--color-emerald)'
+                          }} />
+                          {m.firstName} {m.lastName[0]}.
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
             </div>
           </div>
         );
