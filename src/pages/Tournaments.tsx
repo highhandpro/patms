@@ -67,7 +67,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock'>('rsvp');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting'>('rsvp');
   const [printType, setPrintType] = useState<'signin' | 'scoresheet'>('signin');
 
   // Player search in checkin
@@ -1775,7 +1775,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
       {/* Navigation tabs inside tournament */}
       <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid var(--border-subtle)', gap: '8px' }}>
-        {activeTournament.status === 'draft' ? (
+        {activeTournament.status === 'draft' || activeTournament.status === 'active' ? (
           <>
             <button 
               className={`btn btn-ghost ${subTab === 'rsvp' ? 'active-subtab' : ''}`}
@@ -1817,80 +1817,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 fontSize: '0.85rem'
               }}
             >
-              Seating Preview
-            </button>
-            <button 
-              className={`btn btn-ghost ${subTab === 'clock' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('clock')}
-              style={{
-                borderRadius: '8px 8px 0 0',
-                borderBottom: subTab === 'clock' ? '3px solid var(--color-emerald)' : 'none',
-                color: subTab === 'clock' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'clock' ? 600 : 400,
-                padding: '8px 12px',
-                fontSize: '0.85rem'
-              }}
-            >
-              TOURNAMENT CLOCK ⏱
-            </button>
-            <button 
-              className={`btn btn-ghost ${subTab === 'print' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('print')}
-              style={{
-                borderRadius: '8px 8px 0 0',
-                borderBottom: subTab === 'print' ? '3px solid var(--color-emerald)' : 'none',
-                color: subTab === 'print' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'print' ? 600 : 400,
-                padding: '8px 12px',
-                fontSize: '0.85rem'
-              }}
-            >
-              TD Print Out
-            </button>
-          </>
-        ) : activeTournament.status === 'active' ? (
-          <>
-            <button 
-              className={`btn btn-ghost ${subTab === 'rsvp' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('rsvp')}
-              style={{
-                borderRadius: '8px 8px 0 0',
-                borderBottom: subTab === 'rsvp' ? '3px solid var(--color-emerald)' : 'none',
-                color: subTab === 'rsvp' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'rsvp' ? 600 : 400,
-                padding: '8px 12px',
-                fontSize: '0.85rem'
-              }}
-            >
-              REGISTERED
-            </button>
-            <button 
-              className={`btn btn-ghost ${subTab === 'checkin' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('checkin')}
-              style={{
-                borderRadius: '8px 8px 0 0',
-                borderBottom: subTab === 'checkin' ? '3px solid var(--color-emerald)' : 'none',
-                color: subTab === 'checkin' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'checkin' ? 600 : 400,
-                padding: '8px 12px',
-                fontSize: '0.85rem'
-              }}
-            >
-              CHECKED-IN
-            </button>
-            <button 
-              className={`btn btn-ghost ${subTab === 'seating' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('seating')}
-              style={{
-                borderRadius: '8px 8px 0 0',
-                borderBottom: subTab === 'seating' ? '3px solid var(--color-emerald)' : 'none',
-                color: subTab === 'seating' ? 'var(--color-emerald)' : 'var(--text-secondary)',
-                fontWeight: subTab === 'seating' ? 600 : 400,
-                padding: '8px 12px',
-                fontSize: '0.85rem'
-              }}
-            >
-              Seating Tables
+              {activeTournament.status === 'draft' ? "Seating Preview" : "Seating Tables"}
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'players' ? 'active-subtab' : ''}`}
@@ -1904,7 +1831,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 fontSize: '0.85rem'
               }}
             >
-              Players ({activeTournament.entries.filter(e => !e.eliminatedAt).length} alive)
+              Players ({activeTournament.status === 'draft' ? 0 : activeTournament.entries.filter(e => !e.eliminatedAt).length} alive)
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'summary' ? 'active-subtab' : ''}`}
@@ -1918,7 +1845,21 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 fontSize: '0.85rem'
               }}
             >
-              Summary ({activeTournament.entries.filter(e => e.eliminatedAt).length} busted)
+              Summary ({activeTournament.status === 'draft' ? 0 : activeTournament.entries.filter(e => e.eliminatedAt).length} busted)
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'accounting' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('accounting')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'accounting' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'accounting' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'accounting' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              ACCOUNTING
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'clock' ? 'active-subtab' : ''}`}
@@ -3554,6 +3495,154 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 );
               })}
             </div>
+          </div>
+        );
+      })()}
+
+      {subTab === 'accounting' && (() => {
+        // Calculate dynamic financials
+        const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
+        const addonCount = buyInCount === 0 ? 0 : (activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length);
+        const dealerCount = activeTournament.entries.filter(e => e.hasDealerAppreciation).length;
+
+        const netBuyIn = activeTournament.buyInAmount - (activeTournament.dealerAppreciationAmount || 0) - (activeTournament.foodAmount || 0);
+        const netAddon = activeTournament.addonAmount;
+        const rawPrizePool = (buyInCount * netBuyIn) + (addonCount * netAddon);
+        const currentPrizePool = activeTournament.status === 'completed' 
+          ? activeTournament.totalPrizePool 
+          : Math.max(0, rawPrizePool);
+
+        const currentDealerPool = activeTournament.status === 'completed'
+          ? activeTournament.totalDealerAppreciation
+          : (dealerCount * (activeTournament.dealerAppreciationAmount || 0));
+
+        const foodCollected = buyInCount * (activeTournament.foodAmount || 0);
+        const totalCollected = (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
+
+        const payouts = (activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0])
+          .map((pct, idx) => ({ place: idx + 1, pct }))
+          .filter(p => p.pct > 0);
+
+        return (
+          <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}>
+            {/* Metrics cards grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+              
+              {/* Card 1: TOTAL collected */}
+              <div className="glass-card" style={{ padding: '20px', border: '1px solid rgba(251,191,36,0.15)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em' }}>
+                  TOTAL COLLECTED
+                </span>
+                <h3 style={{ fontSize: '1.8rem', color: '#ffffff', fontWeight: 800, margin: 0 }}>
+                  ${totalCollected.toLocaleString()}
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  {buyInCount} buy-ins @ ${activeTournament.buyInAmount} + {addonCount} add-ons @ ${activeTournament.addonAmount}
+                </span>
+              </div>
+
+              {/* Card 2: Prize Pool */}
+              <div className="glass-card" style={{ padding: '20px', border: '1px solid rgba(251,191,36,0.15)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-gold)', fontWeight: 600, letterSpacing: '0.05em' }}>
+                  PRIZE POOL
+                </span>
+                <h3 style={{ fontSize: '1.8rem', color: 'var(--color-emerald)', fontWeight: 800, margin: 0 }}>
+                  ${currentPrizePool.toLocaleString()}
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  {buyInCount} net buy-ins @ ${netBuyIn} + {addonCount} add-ons @ ${netAddon}
+                </span>
+              </div>
+
+              {/* Card 3: ToC Pool */}
+              <div className="glass-card" style={{ padding: '20px', border: '1px solid rgba(251,191,36,0.15)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em' }}>
+                  TOC POOL
+                </span>
+                <h3 style={{ fontSize: '1.8rem', color: 'var(--text-primary)', fontWeight: 800, margin: 0 }}>
+                  ${currentDealerPool.toLocaleString()}
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  {buyInCount} players checked in @ ${activeTournament.dealerAppreciationAmount || 0}
+                </span>
+              </div>
+
+              {/* Card 4: Food Collected */}
+              <div className="glass-card" style={{ padding: '20px', border: '1px solid rgba(251,191,36,0.15)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em' }}>
+                  FOOD COLLECTED
+                </span>
+                <h3 style={{ fontSize: '1.8rem', color: 'var(--text-primary)', fontWeight: 800, margin: 0 }}>
+                  ${foodCollected.toLocaleString()}
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  {buyInCount} buy-ins @ ${activeTournament.foodAmount || 0}
+                </span>
+              </div>
+
+            </div>
+
+            {/* Payout Breakdown Section */}
+            <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-gold)' }}>
+                  Prize Pool & Player Payouts
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px', marginBottom: 0 }}>
+                  Based on the configured placing percentages and the net prize pool.
+                </p>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                      <th style={{ padding: '12px 8px', width: '80px', textAlign: 'center' }}>Place</th>
+                      <th style={{ padding: '12px 8px', width: '120px', textAlign: 'center' }}>Percentage</th>
+                      <th style={{ padding: '12px 8px', width: '150px', textAlign: 'right' }}>Prize Amount</th>
+                      <th style={{ padding: '12px 8px', paddingLeft: '24px' }}>Recipient Player</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payouts.length > 0 ? (
+                      payouts.map(p => {
+                        const amount = (p.pct / 100) * currentPrizePool;
+                        
+                        // Find matching player if completed
+                        const placingPlayer = activeTournament.entries.find(e => e.eliminatedAt && e.finishPosition === p.place);
+                        const recipientName = placingPlayer 
+                          ? getMemberName(placingPlayer.memberId) 
+                          : (activeTournament.status === 'completed' ? 'Unplaced' : 'TBD (Game In Progress)');
+
+                        return (
+                          <tr key={p.place} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700, color: 'var(--color-gold)' }}>
+                              {p.place === 10 ? 'House' : (p.place === 1 ? '1st' : p.place === 2 ? '2nd' : p.place === 3 ? '3rd' : `${p.place}th`)}
+                            </td>
+                            <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600 }}>
+                              {p.pct}%
+                            </td>
+                            <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--color-emerald)' }}>
+                              ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </td>
+                            <td style={{ padding: '12px 8px', paddingLeft: '24px', color: (placingPlayer || p.place === 10) ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: (placingPlayer || p.place === 10) ? 'normal' : 'italic' }}>
+                              {p.place === 10 ? 'House' : recipientName}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic', padding: '24px' }}>
+                          No payout percentages configured yet. Click 'Edit Payouts & Add-ons' banner above to setup.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
         );
       })()}
