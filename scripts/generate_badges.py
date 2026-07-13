@@ -419,6 +419,19 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     
     # Save the frame (background card) - plaque is pre-printed on the card template
     frame_img = tinted_bg
+    draw = ImageDraw.Draw(frame_img)
+    
+    plaque_text = f"MEMBER #{member_id}"
+    font_plaque = ImageFont.truetype(FONT_PATH_SERIF, 26)
+    p_bbox = draw.textbbox((0, 0), plaque_text, font=font_plaque)
+    p_w = p_bbox[2] - p_bbox[0]
+    p_h = p_bbox[3] - p_bbox[1]
+    
+    tx = (frame_img.width - p_w) // 2
+    ty = 916 + (72 - p_h) // 2 - p_bbox[1]
+    
+    # Draw gold plaque text MEMBER #XXX
+    draw.text((tx, ty), plaque_text, font=font_plaque, fill=(255, 230, 110, 255))
     frame_img.save(frame_output_path)
     
     # Create full composite card
