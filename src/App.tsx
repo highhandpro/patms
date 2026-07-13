@@ -684,16 +684,8 @@ function App() {
   };
 
   if (portalMode === 'player') {
-    const isHomePage = !loggedInMemberId;
     return (
-      <div 
-        className="app-container player-portal-layout" 
-        style={{ 
-          flexDirection: 'column',
-          backgroundColor: isHomePage ? '#000000' : 'transparent',
-          backgroundImage: isHomePage ? 'none' : undefined
-        }}
-      >
+      <div className="app-container player-portal-layout" style={{ flexDirection: 'column' }}>
         <PlayerNavbar 
           activeTab={activePlayerTab} 
           setActiveTab={setActivePlayerTab}
@@ -1281,17 +1273,9 @@ function App() {
     );
   }
 
-  const isAdminHomePage = activeTab === 'dashboard';
-
   // Admin Dashboard layout
   return (
-    <div 
-      className="app-container admin-portal-layout"
-      style={{
-        backgroundColor: isAdminHomePage ? '#061c0f' : 'transparent',
-        backgroundImage: isAdminHomePage ? 'radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, #061c0f 80%)' : undefined
-      }}
-    >
+    <div className="app-container admin-portal-layout">
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={handleTabChange} 
