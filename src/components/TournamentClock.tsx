@@ -17,19 +17,19 @@ const DEFAULT_BLINDS: BlindLevel[] = [
   { type: 'round', roundNumber: 2, duration: 18, smallBlind: 200, bigBlind: 400 },
   { type: 'round', roundNumber: 3, duration: 18, smallBlind: 300, bigBlind: 600 },
   { type: 'round', roundNumber: 4, duration: 18, smallBlind: 400, bigBlind: 800 },
-  { type: 'break', duration: 15, chipUp: false }, // Break 1
   { type: 'round', roundNumber: 5, duration: 18, smallBlind: 500, bigBlind: 1000 },
+  { type: 'break', duration: 10, chipUp: false }, // Break 1 (10m)
   { type: 'round', roundNumber: 6, duration: 18, smallBlind: 600, bigBlind: 1200 },
   { type: 'round', roundNumber: 7, duration: 18, smallBlind: 700, bigBlind: 1400 },
   { type: 'round', roundNumber: 8, duration: 18, smallBlind: 800, bigBlind: 1600 },
   { type: 'round', roundNumber: 9, duration: 18, smallBlind: 900, bigBlind: 1800 },
-  { type: 'break', duration: 10, chipUp: true }, // Break 2
+  { type: 'break', duration: 10, chipUp: true },  // Break 2 (10m)
   { type: 'round', roundNumber: 10, duration: 18, smallBlind: 1000, bigBlind: 2000 },
   { type: 'round', roundNumber: 11, duration: 18, smallBlind: 1500, bigBlind: 3000 },
   { type: 'round', roundNumber: 12, duration: 18, smallBlind: 2000, bigBlind: 4000 },
   { type: 'round', roundNumber: 13, duration: 18, smallBlind: 2500, bigBlind: 5000 },
   { type: 'round', roundNumber: 14, duration: 18, smallBlind: 3000, bigBlind: 6000 },
-  { type: 'break', duration: 10, chipUp: true }, // Break 3
+  { type: 'break', duration: 10, chipUp: true },  // Break 3 (10m)
   { type: 'round', roundNumber: 15, duration: 18, smallBlind: 4000, bigBlind: 8000 },
   { type: 'round', roundNumber: 16, duration: 18, smallBlind: 5000, bigBlind: 10000 },
   { type: 'round', roundNumber: 17, duration: 18, smallBlind: 10000, bigBlind: 20000 },
