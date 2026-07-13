@@ -499,21 +499,6 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     card_img.paste(names_img_1x, (0, 0), mask=names_img_1x)
     card_img.save(output_path)
     
-def load_member_ids():
-    import openpyxl
-    wb = openpyxl.load_workbook("players.xlsx", read_only=True)
-    sheet = wb['Sheet1']
-    mapping = {}
-    rows = list(sheet.iter_rows(values_only=True))
-    for row in rows[1:]:
-        if len(row) >= 3:
-            member_id = row[0]
-            first_name = row[1]
-            last_name = row[2]
-            if first_name and last_name and member_id is not None:
-                full_name = f"{first_name.strip()} {last_name.strip()}"
-                mapping[full_name.lower()] = str(member_id)
-    return mapping
 
 def main():
     print("Starting mockup-aligned badge layer generation...")
@@ -525,71 +510,17 @@ def main():
     os.makedirs(names_dir, exist_ok=True)
     os.makedirs(frames_dir, exist_ok=True)
     
-    # Load correct member IDs from players.xlsx database
-    try:
-        member_ids_map = load_member_ids()
-        print(f"Loaded {len(member_ids_map)} member IDs from players.xlsx successfully.")
-    except Exception as e:
-        print(f"Warning: failed to load players.xlsx database: {e}")
-        member_ids_map = {}
-        
     bg_img = Image.open(BG_PATH)
     
     total = len(PLAYERS_MAP)
-    for i, (name, fallback_id) in enumerate(PLAYERS_MAP.items(), 1):
+    for i, (name, member_id) in enumerate(PLAYERS_MAP.items(), 1):
         filename = sanitize_filename(name)
         out_path = os.path.join(full_dir, f"badge_{filename}")
         names_path = os.path.join(names_dir, f"names_{filename}")
         frame_path = os.path.join(frames_dir, f"frame_{filename}")
         
-        # MOCKUP_IDS contains correct mappings from the uploaded screenshot sheets
-        MOCKUP_IDS = {
-            "guy vider": "2122",
-            "gabe elliott": "8242",
-            "juanito cunanan": "7981",
-            "tim hufler": "6905",
-            "tom scharf": "6942",
-            "wendy bumgardner": "2686",
-            "nichlas priest": "3853",
-            "mary lind handy": "3707",
-            "mary handy": "3707",
-            "christopher hirsh": "2060",
-            "ryan buell": "2050",
-            "berta allen": "7709",
-            "rachelle allen": "5623",
-            "albert jamito": "3244",
-            "angela koontz": "2065",
-            "bruce knutson": "2061",
-            "woody christopher woody": "2223",
-            "christopher woody": "2223",
-            "andrew richardson": "2067",
-            "abbi sweet": "2057",
-            "jason hofbauer": "5099",
-            "ron hawkins": "3892",
-            "doug berg": "4080",
-            "dave morales": "3493",
-            "evan elliott": "3775",
-            "bill foley": "5712",
-            "brian pennebaker": "9009",
-            "brian syfrett": "6689",
-            "cody dempsey": "3393",
-            "cristina miller": "7241",
-            "dan grimani": "2066",
-            "derek allen": "7224"
-        }
-        
-        name_lower = name.lower().strip()
-        if name_lower in MOCKUP_IDS:
-            member_id = MOCKUP_IDS[name_lower]
-        else:
-            # Match name to database Member ID (case-insensitive)
-            matched_id = member_ids_map.get(name_lower)
-            # Map special variant naming
-            if not matched_id and name == "Mary Lind Handy":
-                matched_id = member_ids_map.get("mary lind handy")
-            if not matched_id and name == "Woody Christopher Woody":
-                matched_id = member_ids_map.get("christopher woody")
-            member_id = matched_id if matched_id else fallback_id
+        # Mappings are strictly pulled from the user-confirmed table in PLAYERS_MAP
+        # (e.g. Derek Allen = 101, Berta Allen = 102, Abbi Sweet = 163, Guy Vider = 168)
         
         try:
             generate_player_badge(name, member_id, bg_img, out_path, names_path, frame_path)
