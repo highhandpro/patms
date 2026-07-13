@@ -23,6 +23,22 @@ def find_player_logo(full_name):
             return os.path.join(LOGOS_DIR, filename)
     return None
 
+def get_notched_polygon(x0, y0, x1, y1, notch):
+    return [
+        (x0 + notch, y0),
+        (x1 - notch, y0),
+        (x1 - notch, y0 + notch),
+        (x1, y0 + notch),
+        (x1, y1 - notch),
+        (x1 - notch, y1 - notch),
+        (x1 - notch, y1),
+        (x0 + notch, y1),
+        (x0 + notch, y1 - notch),
+        (x0, y1 - notch),
+        (x0, y0 + notch),
+        (x0 + notch, y0 + notch)
+    ]
+
 # Resolution scale
 SCALE = 4
 FONT_SIZE_FIRST = 180 * SCALE  # 50% bigger than 120
@@ -157,7 +173,7 @@ def render_line_mask_rotated(text, font, angle, stroke_w=0):
         return rotated.crop(c_bbox)
     return rotated
 
-def render_name_layer_rotated(text, font_path, font_size, y_center, angle, canvas_w, canvas_h):
+def render_name_layer_rotated(text, font_path, font_size, y_center, angle, canvas_w, canvas_h, bottom_y=None):
     fsize = font_size
     font = ImageFont.truetype(font_path, fsize)
     
@@ -178,7 +194,10 @@ def render_name_layer_rotated(text, font_path, font_size, y_center, angle, canva
     
     w_rot, h_rot = black_mask.size
     px = (canvas_w - w_rot) // 2
-    py = y_center * SCALE - h_rot // 2
+    if bottom_y is not None:
+        py = bottom_y * SCALE - h_rot
+    else:
+        py = y_center * SCALE - h_rot // 2
     
     line_img = Image.new('RGBA', (canvas_w, canvas_h), (0, 0, 0, 0))
     line_black_mask = Image.new('L', (canvas_w, canvas_h), 0)
@@ -277,15 +296,15 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
         wrapped_lines = wrap_text(line2, font_last, safe_w)
         
         if len(wrapped_lines) == 1:
-            # Render last name on a single line centered at Y=780
-            line2_img, black_mask2 = render_name_layer_rotated(line2, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 780, 12, canvas_w, canvas_h)
+            # Render last name on a single line with bottom aligned at Y=908 (2px above 910 plaque top)
+            line2_img, black_mask2 = render_name_layer_rotated(line2, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, bottom_y=908)
             combined_black_mask.paste(black_mask2, (0, 0), black_mask2)
             colored_layers.paste(line2_img, (0, 0), mask=line2_img)
         else:
-            # Render last name on two lines centered vertically around 780 (Line 1 at Y=740, Line 2 at Y=820)
-            y_centers = [740, 820]
+            # Render last name on two lines with bottom of second line at Y=908 and first line at Y=828
+            bottom_ys = [828, 908]
             for idx, text_line in enumerate(wrapped_lines[:2]):
-                line_img, mask_img = render_name_layer_rotated(text_line, FONT_PATH_SCRIPT, FONT_SIZE_LAST, y_centers[idx], 12, canvas_w, canvas_h)
+                line_img, mask_img = render_name_layer_rotated(text_line, FONT_PATH_SCRIPT, FONT_SIZE_LAST, 0, 12, canvas_w, canvas_h, bottom_y=bottom_ys[idx])
                 combined_black_mask.paste(mask_img, (0, 0), mask_img)
                 colored_layers.paste(line_img, (0, 0), mask=line_img)
                 
@@ -310,28 +329,38 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     frame_img = bg_img.copy().convert('RGBA')
     draw = ImageDraw.Draw(frame_img)
     
-    plaque_w = 360
+    plaque_w = 380
     plaque_h = 56
     plaque_x = (frame_img.width - plaque_w) // 2
     plaque_y = 910
+    notch = 8
     
-    # 1. Gold side bars
-    draw.line([(plaque_x - 30, plaque_y + plaque_h//2 - 4), (plaque_x, plaque_y + plaque_h//2 - 4)], fill=(170, 130, 40, 255), width=2)
-    draw.line([(plaque_x - 30, plaque_y + plaque_h//2 + 4), (plaque_x, plaque_y + plaque_h//2 + 4)], fill=(170, 130, 40, 255), width=2)
-    draw.line([(plaque_x + plaque_w, plaque_y + plaque_h//2 - 4), (plaque_x + plaque_w + 30, plaque_y + plaque_h//2 - 4)], fill=(170, 130, 40, 255), width=2)
-    draw.line([(plaque_x + plaque_w, plaque_y + plaque_h//2 + 4), (plaque_x + plaque_w + 30, plaque_y + plaque_h//2 + 4)], fill=(170, 130, 40, 255), width=2)
+    fill_color = (15, 12, 10, 255)
+    outline_color = (255, 230, 110, 255)
+    wing_color = (170, 130, 40, 255)
     
-    # 2. Solid black plaque container
-    draw.rectangle([plaque_x, plaque_y, plaque_x + plaque_w, plaque_y + plaque_h], fill=(0, 0, 0, 255))
+    # 1. Gold side bars (3 horizontal lines)
+    # Left side wings
+    draw.line([(plaque_x - 35, plaque_y + plaque_h//2), (plaque_x, plaque_y + plaque_h//2)], fill=wing_color, width=2)
+    draw.line([(plaque_x - 22, plaque_y + plaque_h//2 - 8), (plaque_x, plaque_y + plaque_h//2 - 8)], fill=wing_color, width=2)
+    draw.line([(plaque_x - 22, plaque_y + plaque_h//2 + 8), (plaque_x, plaque_y + plaque_h//2 + 8)], fill=wing_color, width=2)
     
-    # 3. Double gold border
-    draw.rectangle([plaque_x + 2, plaque_y + 2, plaque_x + plaque_w - 2, plaque_y + plaque_h - 2], outline=(255, 230, 110, 255), width=2)
+    # Right side wings
+    draw.line([(plaque_x + plaque_w, plaque_y + plaque_h//2), (plaque_x + plaque_w + 35, plaque_y + plaque_h//2)], fill=wing_color, width=2)
+    draw.line([(plaque_x + plaque_w, plaque_y + plaque_h//2 - 8), (plaque_x + plaque_w + 22, plaque_y + plaque_h//2 - 8)], fill=wing_color, width=2)
+    draw.line([(plaque_x + plaque_w, plaque_y + plaque_h//2 + 8), (plaque_x + plaque_w + 22, plaque_y + plaque_h//2 + 8)], fill=wing_color, width=2)
+    
+    # 2. Draw outer notched border
+    draw.polygon(get_notched_polygon(plaque_x, plaque_y, plaque_x + plaque_w, plaque_y + plaque_h, notch), fill=fill_color, outline=outline_color, width=2)
+    
+    # 3. Draw inner notched border
+    draw.polygon(get_notched_polygon(plaque_x + 4, plaque_y + 4, plaque_x + plaque_w - 4, plaque_y + plaque_h - 4, notch - 4), fill=None, outline=outline_color, width=1)
     
     # 4. Gold rivet dots
-    draw.ellipse([plaque_x + 15, plaque_y + plaque_h//2 - 4, plaque_x + 23, plaque_y + plaque_h//2 + 4], fill=(255, 230, 110, 255))
-    draw.ellipse([plaque_x + plaque_w - 23, plaque_y + plaque_h//2 - 4, plaque_x + plaque_w - 15, plaque_y + plaque_h//2 + 4], fill=(255, 230, 110, 255))
+    draw.ellipse([plaque_x + 22, plaque_y + plaque_h//2 - 4, plaque_x + 30, plaque_y + plaque_h//2 + 4], fill=outline_color)
+    draw.ellipse([plaque_x + plaque_w - 30, plaque_y + plaque_h//2 - 4, plaque_x + plaque_w - 22, plaque_y + plaque_h//2 + 4], fill=outline_color)
     
-    # 5. Plaque Text MEMBER #XXX
+    # 5. Plaque Text MEMBER #XXX (3-digits only)
     plaque_text = f"MEMBER #{member_id}"
     font_plaque = ImageFont.truetype(FONT_PATH_SERIF, 24)
     p_bbox = draw.textbbox((0, 0), plaque_text, font=font_plaque)
@@ -341,7 +370,7 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     tx = plaque_x + (plaque_w - p_w) // 2
     ty = plaque_y + (plaque_h - p_h) // 2 - p_bbox[1]
     
-    draw.text((tx, ty), plaque_text, font=font_plaque, fill=(255, 230, 110, 255))
+    draw.text((tx, ty), plaque_text, font=font_plaque, fill=outline_color)
     frame_img.save(frame_output_path)
     
     # Create full composite card
