@@ -555,6 +555,75 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     checkAndSeed();
   }, []);
 
+  // Synchronize/migrate old local storage tournament entries to Firestore if they are missing
+  useEffect(() => {
+    if (state.tournaments.length === 0 || state.members.length === 0) return;
+
+    const saved = localStorage.getItem('patms_database');
+    if (!saved) return;
+
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && Array.isArray(parsed.tournaments) && parsed.tournaments.length > 0) {
+        console.log("Found local database in localStorage. Checking for tournament entries to migrate...");
+        const migratedLocalDb = migrateDatabaseToSequentialIds(parsed);
+
+        const normalizeName = (name: string) => 
+          name.toLowerCase()
+              .replace(/season\s*/, 's')
+              .replace(/game\s*/, 'g')
+              .replace(/[^a-z0-9]/g, '');
+
+        let didMigrateAny = false;
+
+        migratedLocalDb.tournaments.forEach(async (localTour) => {
+          if (!localTour.entries || localTour.entries.length === 0) return;
+
+          const localNorm = normalizeName(localTour.name);
+          
+          // Find matching tournament in Firestore
+          const firestoreTour = state.tournaments.find(ft => normalizeName(ft.name) === localNorm);
+
+          if (firestoreTour) {
+            // Only migrate if Firestore has no entries or fewer entries
+            if (firestoreTour.entries.length < localTour.entries.length) {
+              console.log(`Migrating ${localTour.entries.length} entries for "${firestoreTour.name}" (ID: ${firestoreTour.id}) to Firestore...`);
+              
+              await updateDoc(doc(db, 'tournaments', firestoreTour.id), {
+                entries: localTour.entries
+              });
+
+              // Also migrate seating and dealers if present under old ID
+              const oldSeating = localStorage.getItem(`patms_seating_${localTour.id}`);
+              if (oldSeating) {
+                localStorage.setItem(`patms_seating_${firestoreTour.id}`, oldSeating);
+              }
+              const oldDealers = localStorage.getItem(`patms_dealers_${localTour.id}`);
+              if (oldDealers) {
+                localStorage.setItem(`patms_dealers_${firestoreTour.id}`, oldDealers);
+              }
+              const oldPreassigned = localStorage.getItem(`patms_preassigned_dealers_${localTour.id}`);
+              if (oldPreassigned) {
+                localStorage.setItem(`patms_preassigned_dealers_${firestoreTour.id}`, oldPreassigned);
+              }
+
+              didMigrateAny = true;
+            }
+          }
+        });
+
+        if (didMigrateAny) {
+          // Rename to prevent running again
+          localStorage.setItem('patms_database_migrated_to_firestore', saved);
+          localStorage.removeItem('patms_database');
+          console.log("Local database migration to Firestore complete!");
+        }
+      }
+    } catch (err) {
+      console.error("Error migrating local storage tournament entries to Firestore:", err);
+    }
+  }, [state.tournaments, state.members]);
+
   const activeSeason = state.seasons.find(s => s.isActive) || null;
 
   // Member Management
