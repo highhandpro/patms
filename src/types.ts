@@ -61,6 +61,7 @@ export interface Tournament {
   addonChips?: number;
   maxPlayers: number;
   highHandAmount?: number;
+  bubbleAmount?: number;
   flyerUrl?: string;
   flyerType?: 'pdf' | 'image' | null;
   seating?: Record<string, string[]>;

@@ -102,6 +102,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
   const [modalAddons, setModalAddons] = useState(0);
   const [modalPayoutPcts, setModalPayoutPcts] = useState<number[]>([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+  const [modalHighHand, setModalHighHand] = useState(0);
+  const [modalBubble, setModalBubble] = useState(0);
 
   // Check-in phone prompt modal states
   const [phonePromptMember, setPhonePromptMember] = useState<Member | null>(null);
@@ -159,6 +161,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     if (activeTournament) {
       setModalAddons(activeTournament.totalAddons || 0);
       setModalPayoutPcts(activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+      setModalHighHand(activeTournament.highHandAmount || 0);
+      setModalBubble(activeTournament.bubbleAmount || 0);
     }
   }, [activeTournament, isPayoutModalOpen]);
 
@@ -1640,7 +1644,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const rawPrizePool = (buyInCount * netBuyIn) + (addonCount * activeTournament.addonAmount);
   const currentPrizePool = activeTournament.status === 'completed' 
     ? activeTournament.totalPrizePool 
-    : Math.max(0, rawPrizePool - (activeTournament.highHandAmount || 0));
+    : Math.max(0, rawPrizePool - (activeTournament.highHandAmount || 0) - (activeTournament.bubbleAmount || 0));
 
   const currentBountyPool = activeTournament.status === 'completed'
     ? activeTournament.totalBountyPool
@@ -2861,7 +2865,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           ? activeTournament.totalAddons 
           : activeTournament.entries.filter(e => e.hasAddon).length;
         const netBuyInContribution = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
-        const totalPrizePool = Math.max(0, (buyInCount * netBuyInContribution) + (addonCount * activeTournament.addonAmount) - (activeTournament.highHandAmount || 0));
+        const totalPrizePool = Math.max(0, (buyInCount * netBuyInContribution) + (addonCount * activeTournament.addonAmount) - (activeTournament.highHandAmount || 0) - (activeTournament.bubbleAmount || 0));
         const payoutPrizePool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
           ? activeTournament.overridePrizePool
           : totalPrizePool;
@@ -2916,7 +2920,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   const name = m ? `${m.firstName} ${m.lastName}` : getMemberName(entry.memberId);
                   
                   // Live dynamic calculations
-                  const payoutEarned = payouts[pos - 1] || 0;
+                  let payoutEarned = payouts[pos - 1] || 0;
+                  if (pos === 9) {
+                    payoutEarned = activeTournament.bubbleAmount || 0;
+                  }
                   const basePositionPoints = N - pos + 1;
                   let multiplier = 1;
                   if (pos === 1) {
@@ -3510,7 +3517,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const rawPrizePool = (buyInCount * netBuyIn) + (addonCount * netAddon);
         const currentPrizePool = activeTournament.status === 'completed' 
           ? activeTournament.totalPrizePool 
-          : Math.max(0, rawPrizePool);
+          : Math.max(0, rawPrizePool - (activeTournament.highHandAmount || 0) - (activeTournament.bubbleAmount || 0));
 
         const currentDealerPool = activeTournament.status === 'completed'
           ? activeTournament.totalDealerAppreciation
@@ -3617,7 +3624,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         return (
                           <tr key={p.place} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                             <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700, color: 'var(--color-gold)' }}>
-                              {p.place === 10 ? 'House' : (p.place === 1 ? '1st' : p.place === 2 ? '2nd' : p.place === 3 ? '3rd' : `${p.place}th`)}
+                              {p.place === 1 ? '1st' : p.place === 2 ? '2nd' : p.place === 3 ? '3rd' : `${p.place}th`}
                             </td>
                             <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600 }}>
                               {p.pct}%
@@ -3625,16 +3632,60 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--color-emerald)' }}>
                               ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </td>
-                            <td style={{ padding: '12px 8px', paddingLeft: '24px', color: (placingPlayer || p.place === 10) ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: (placingPlayer || p.place === 10) ? 'normal' : 'italic' }}>
-                              {p.place === 10 ? 'House' : recipientName}
+                            <td style={{ padding: '12px 8px', paddingLeft: '24px', color: placingPlayer ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: placingPlayer ? 'normal' : 'italic' }}>
+                              {recipientName}
                             </td>
                           </tr>
                         );
                       })
-                    ) : (
+                    ) : null}
+
+                    {/* Pay-the-Bubble Row */}
+                    {(activeTournament.bubbleAmount || 0) > 0 && (() => {
+                      const placingPlayer = activeTournament.entries.find(e => e.eliminatedAt && e.finishPosition === 9); // Bubble is 9th position
+                      const recipientName = placingPlayer 
+                        ? getMemberName(placingPlayer.memberId) 
+                        : (activeTournament.status === 'completed' ? 'Unplaced' : 'TBD (Bubble Player)');
+                      return (
+                        <tr style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(242, 193, 102, 0.05)' }}>
+                          <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700, color: 'var(--color-gold)' }}>
+                            Bubble
+                          </td>
+                          <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            Fixed
+                          </td>
+                          <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--color-emerald)' }}>
+                            ${(activeTournament.bubbleAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </td>
+                          <td style={{ padding: '12px 8px', paddingLeft: '24px', color: placingPlayer ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: placingPlayer ? 'normal' : 'italic' }}>
+                            {recipientName}
+                          </td>
+                        </tr>
+                      );
+                    })()}
+
+                    {/* High Hand Row */}
+                    {(activeTournament.highHandAmount || 0) > 0 && (
+                      <tr style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(242, 193, 102, 0.05)' }}>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700, color: 'var(--color-gold)' }}>
+                          High Hand
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                          Fixed
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--color-emerald)' }}>
+                          ${(activeTournament.highHandAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td style={{ padding: '12px 8px', paddingLeft: '24px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                          TBD (Highest Hand)
+                        </td>
+                      </tr>
+                    )}
+
+                    {payouts.length === 0 && (!activeTournament.bubbleAmount) && (!activeTournament.highHandAmount) && (
                       <tr>
                         <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic', padding: '24px' }}>
-                          No payout percentages configured yet. Click 'Edit Payouts & Add-ons' banner above to setup.
+                          No payouts configured yet. Click 'Edit Payouts & Add-ons' banner above to setup.
                         </td>
                       </tr>
                     )}
@@ -3690,9 +3741,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
             <form onSubmit={(e) => {
               e.preventDefault();
+              const finalPayoutPcts = [...modalPayoutPcts];
+              finalPayoutPcts[8] = 0; // 9th is Bubble
+              finalPayoutPcts[9] = 0; // 10th is High Hand
               updateTournament(activeTournament.id, {
                 totalAddons: modalAddons,
-                payoutPercentages: modalPayoutPcts
+                payoutPercentages: finalPayoutPcts,
+                highHandAmount: modalHighHand,
+                bubbleAmount: modalBubble
               });
               setIsPayoutModalOpen(false);
             }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -3711,32 +3767,68 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               </div>
 
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
-                <label style={{ fontWeight: 600, display: 'block', marginBottom: '12px', fontSize: '0.9rem' }}>Payout Percentages (1st - 10th Place)</label>
+                <label style={{ fontWeight: 600, display: 'block', marginBottom: '12px', fontSize: '0.9rem' }}>Payout Structure (1st - 10th Place)</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => (
-                    <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '0.8rem', width: '35px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
-                      <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        required
-                        value={modalPayoutPcts[place - 1]}
-                        onChange={(e) => {
-                          const next = [...modalPayoutPcts];
-                          next[place - 1] = Number(e.target.value);
-                          setModalPayoutPcts(next);
-                        }}
-                        className="form-input"
-                        style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
-                      />
-                      <span style={{ fontSize: '0.8rem' }}>%</span>
-                    </div>
-                  ))}
+                  {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => {
+                    if (place === 9) {
+                      return (
+                        <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.8rem', width: '65px', textAlign: 'right', fontWeight: 600, color: 'var(--text-secondary)' }}>Bubble:</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>$</span>
+                          <input
+                            type="number"
+                            min={0}
+                            required
+                            value={modalBubble}
+                            onChange={(e) => setModalBubble(Number(e.target.value))}
+                            className="form-input"
+                            style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
+                          />
+                        </div>
+                      );
+                    }
+                    if (place === 10) {
+                      return (
+                        <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.8rem', width: '65px', textAlign: 'right', fontWeight: 600, color: 'var(--text-secondary)' }}>Hi Hand:</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>$</span>
+                          <input
+                            type="number"
+                            min={0}
+                            required
+                            value={modalHighHand}
+                            onChange={(e) => setModalHighHand(Number(e.target.value))}
+                            className="form-input"
+                            style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
+                          />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '0.8rem', width: '65px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          required
+                          value={modalPayoutPcts[place - 1]}
+                          onChange={(e) => {
+                            const next = [...modalPayoutPcts];
+                            next[place - 1] = Number(e.target.value);
+                            setModalPayoutPcts(next);
+                          }}
+                          className="form-input"
+                          style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
+                        />
+                        <span style={{ fontSize: '0.8rem' }}>%</span>
+                      </div>
+                    );
+                  })}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'right' }}>
-                  Total: <strong style={{ color: modalPayoutPcts.reduce((a,b)=>a+b,0) === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
-                    {modalPayoutPcts.reduce((a,b)=>a+b,0)}%
+                  Total: <strong style={{ color: modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0) === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
+                    {modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0)}%
                   </strong> (should be 100%)
                 </div>
               </div>
@@ -3746,9 +3838,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>Live Payout Breakdown</h4>
                 {(() => {
                   const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
-          const rawCalculatedPrizePool = (buyInCount * netBuyIn) + (modalAddons * activeTournament.addonAmount);
-          const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - (activeTournament.highHandAmount || 0));
-                  const previewRows = modalPayoutPcts.map((pct, idx) => {
+                  const rawCalculatedPrizePool = (buyInCount * netBuyIn) + (modalAddons * activeTournament.addonAmount);
+                  const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - modalHighHand - modalBubble);
+                  const previewRows = modalPayoutPcts.slice(0, 8).map((pct, idx) => {
                     if (pct <= 0) return null;
                     const place = idx + 1;
                     const amt = Math.round(calculatedPrizePool * (pct / 100));
@@ -3763,13 +3855,21 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700, borderBottom: '1px dashed var(--border-subtle)', paddingBottom: '4px', marginBottom: '4px' }}>
-                        <span>Total Prize Pool:</span>
+                        <span>Percentage Prize Pool:</span>
                         <span style={{ color: 'var(--color-emerald)' }}>${calculatedPrizePool}</span>
                       </div>
                       {previewRows.length > 0 ? previewRows : <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>No payouts. Configure percentages above.</p>}
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)', borderTop: '1px dashed var(--border-subtle)', paddingTop: '6px', marginTop: '4px' }}>
+                        <span>Bubble Payout:</span>
+                        <strong style={{ color: 'var(--color-gold)' }}>${modalBubble}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         <span>High Hand Payout:</span>
-                        <strong style={{ color: 'var(--color-gold)' }}>${activeTournament.highHandAmount || 0}</strong>
+                        <strong style={{ color: 'var(--color-gold)' }}>${modalHighHand}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700, borderTop: '1px dashed var(--border-subtle)', paddingTop: '6px', marginTop: '4px' }}>
+                        <span>Total Collected:</span>
+                        <span style={{ color: '#ffffff' }}>${rawCalculatedPrizePool}</span>
                       </div>
                     </div>
                   );
@@ -3784,7 +3884,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   type="submit"
                   className="btn btn-primary"
                   style={{ backgroundColor: 'var(--color-gold)', color: '#78350f' }}
-                  disabled={modalPayoutPcts.reduce((a,b)=>a+b,0) !== 100}
+                  disabled={modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0) !== 100}
                 >
                   Save Configuration
                 </button>
