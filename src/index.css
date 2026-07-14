@@ -15,9 +15,9 @@
   --color-emerald-rgb: 2, 89, 8;
   --color-emerald-glow: rgba(2, 89, 8, 0.1);
   
-  --color-gold: #014005;                  /* Forest Green for secondary accents */
-  --color-gold-rgb: 1, 64, 5;
-  --color-gold-glow: rgba(1, 64, 5, 0.1);
+  --color-gold: #0078d4;                  /* Microsoft Blue for high-contrast highlights */
+  --color-gold-rgb: 0, 120, 212;
+  --color-gold-glow: rgba(0, 120, 212, 0.1);
   
   --color-danger: #ef4444;                /* High contrast danger red */
   --color-danger-rgb: 239, 68, 68;
@@ -31,7 +31,7 @@
   --text-secondary: #374151;              /* Medium Dark Grey */
   --text-muted: #6B7280;                  /* Muted Grey */
   --text-emerald: #025908;
-  --text-gold: #014005;
+  --text-gold: #0078d4;
 
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;

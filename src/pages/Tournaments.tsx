@@ -1678,7 +1678,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </button>
               )}
               {activeTournament.status !== 'completed' && (
-                <button className="btn btn-primary" onClick={handleFinalize} style={{ backgroundColor: 'var(--color-gold)', color: '#78350f' }}>
+                <button className="btn btn-primary" onClick={handleFinalize} style={{ backgroundColor: '#0078d4', color: '#FFFFFF' }}>
                   <Award size={16} />
                   <span>Finalize Standings</span>
                 </button>
@@ -3647,7 +3647,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         ? getMemberName(placingPlayer.memberId) 
                         : (activeTournament.status === 'completed' ? 'Unplaced' : 'TBD (Bubble Player)');
                       return (
-                        <tr style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(242, 193, 102, 0.05)' }}>
+                        <tr style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(0, 120, 212, 0.04)' }}>
                           <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700, color: 'var(--color-gold)' }}>
                             Bubble
                           </td>
@@ -3666,7 +3666,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                     {/* High Hand Row */}
                     {(activeTournament.highHandAmount || 0) > 0 && (
-                      <tr style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(242, 193, 102, 0.05)' }}>
+                      <tr style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(0, 120, 212, 0.04)' }}>
                         <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700, color: 'var(--color-gold)' }}>
                           High Hand
                         </td>
@@ -3883,7 +3883,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ backgroundColor: 'var(--color-gold)', color: '#78350f' }}
+                  style={{ backgroundColor: '#0078d4', color: '#FFFFFF' }}
                   disabled={modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0) !== 100}
                 >
                   Save Configuration

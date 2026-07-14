@@ -78,9 +78,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
     >
       <div 
         style={{
-          backgroundColor: 'rgba(15, 15, 18, 0.9)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(16, 185, 129, 0.15)',
+          backgroundColor: '#FFFFFF',
+          border: '1px solid var(--border-subtle)',
+          boxShadow: 'var(--shadow-lg)',
           borderRadius: '20px',
           width: '100%',
           maxWidth: '400px',

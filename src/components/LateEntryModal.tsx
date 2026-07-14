@@ -53,7 +53,7 @@ export const LateEntryModal: React.FC<LateEntryModalProps> = ({
       zIndex: 1001,
       padding: '20px'
     }}>
-      <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '450px', backgroundColor: 'var(--bg-surface)', display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px' }}>
+      <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '450px', backgroundColor: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px' }}>
         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Add Late Entry</h3>
         
         {/* Search Input for Member Lookup */}

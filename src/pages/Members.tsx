@@ -305,7 +305,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
       {/* Pending Approvals Review Section */}
       {!isSubAdmin && state.pendingApprovals && state.pendingApprovals.length > 0 && (
-        <div className="glass-card" style={{ border: '1px solid rgba(212, 163, 89, 0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="glass-card" style={{ border: '1px solid rgba(0, 120, 212, 0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--text-gold)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
               <span className="indicator indicator-gold" style={{ width: '8px', height: '8px', backgroundColor: 'var(--text-gold)' }}></span>
@@ -347,7 +347,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                           fontWeight: 600,
                           padding: '2px 8px',
                           borderRadius: '12px',
-                          backgroundColor: isGuest ? 'rgba(16, 185, 129, 0.15)' : 'rgba(212, 163, 89, 0.15)',
+                          backgroundColor: isGuest ? 'rgba(16, 185, 129, 0.15)' : 'rgba(0, 120, 212, 0.1)',
                           color: isGuest ? 'var(--color-emerald)' : 'var(--text-gold)'
                         }}
                       >

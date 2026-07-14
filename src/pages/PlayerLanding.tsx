@@ -42,7 +42,7 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
           width: '350px',
           height: '350px',
           borderRadius: '50%',
-          backgroundColor: 'rgba(212, 163, 89, 0.02)',
+          backgroundColor: 'rgba(0, 120, 212, 0.02)',
           filter: 'blur(100px)',
           bottom: '15%',
           right: '10%',
