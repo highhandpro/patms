@@ -1729,7 +1729,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       </div>
 
       {activeTournament.status !== 'completed' && (
-        <div className="glass-card" style={{
+        <div className="glass-card translucent-banner" style={{
           background: 'linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%)',
           borderLeft: '4px solid var(--color-gold)',
           display: 'flex',

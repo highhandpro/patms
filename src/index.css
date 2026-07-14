@@ -1932,3 +1932,34 @@ select, option, input, textarea {
   color: #025908 !important;
   border-color: rgba(2, 89, 8, 0.25) !important;
 }
+
+/* Translucent warning/info banners sitting on green felt background */
+.main-content .translucent-banner,
+.main-content .translucent-banner h1,
+.main-content .translucent-banner h2,
+.main-content .translucent-banner h3,
+.main-content .translucent-banner h4,
+.main-content .translucent-banner h5,
+.main-content .translucent-banner h6,
+.main-content .translucent-banner p,
+.main-content .translucent-banner span,
+.main-content .translucent-banner strong,
+.main-content .translucent-banner label,
+.main-content .translucent-banner div {
+  color: #FFFFFF !important;              /* Force white text */
+}
+
+.main-content .translucent-banner p {
+  color: #BFBFBF !important;              /* Light grey subtitle text */
+}
+
+.main-content .translucent-banner .btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.main-content .translucent-banner .btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+}
