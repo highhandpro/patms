@@ -701,7 +701,7 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #0B6B2A;              /* Primary Green */
+  background-color: #052e16 !important;   /* Darker Forest Green */
   border-bottom: 3px solid var(--color-gold);
 }
  
@@ -714,18 +714,18 @@ p {
 .banner-title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #012603;                          /* Very Dark Forest Green */
+  color: #FFFFFF !important;               /* Pure White text */
   margin: 0;
   letter-spacing: -0.03em;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.35) !important;
 }
  
 .banner-subtitle {
   font-size: 1.15rem;
-  color: #025908;                          /* Vibrant Poker Green */
+  color: rgba(255, 255, 255, 0.85) !important; /* Soft White text */
   margin-top: 8px;
   font-weight: 600;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
 }
 
 .banner-alert-box {
