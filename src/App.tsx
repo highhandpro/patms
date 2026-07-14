@@ -803,10 +803,10 @@ function App() {
                           top: '100%',
                           left: 0,
                           right: 0,
-                          backgroundColor: '#16161a',
-                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          backgroundColor: '#FFFFFF',
+                          border: '1px solid var(--border-subtle)',
                           borderRadius: '10px',
-                          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                           zIndex: 10,
                           maxHeight: '180px',
                           overflowY: 'auto',
@@ -822,7 +822,7 @@ function App() {
                               cursor: 'pointer',
                               color: 'var(--text-primary)',
                               fontSize: '0.9rem',
-                              borderBottom: '1px solid rgba(255, 255, 255, 0.02)',
+                              borderBottom: '1px solid var(--border-subtle)',
                               textAlign: 'left'
                             }}
                             className="dropdown-item"
@@ -852,10 +852,10 @@ function App() {
                           top: '100%',
                           left: 0,
                           right: 0,
-                          backgroundColor: '#16161a',
-                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          backgroundColor: '#FFFFFF',
+                          border: '1px solid var(--border-subtle)',
                           borderRadius: '10px',
-                          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                           zIndex: 10,
                           maxHeight: '180px',
                           overflowY: 'auto',
@@ -871,7 +871,7 @@ function App() {
                               cursor: 'pointer',
                               color: 'var(--text-primary)',
                               fontSize: '0.9rem',
-                              borderBottom: '1px solid rgba(255, 255, 255, 0.02)',
+                              borderBottom: '1px solid var(--border-subtle)',
                               textAlign: 'left'
                             }}
                             className="dropdown-item"
