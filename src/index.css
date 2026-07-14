@@ -1845,19 +1845,47 @@ body.display-mode-active .main-content {
   border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* Ghost Tab Navigation buttons outside of cards on felt background */
+/* Ghost Tab Navigation buttons outside of cards on felt background styled as pill buttons */
 .main-content .btn-ghost {
-  color: #BFBFBF !important;              /* Light grey for inactive subtabs */
+  background-color: #FFFFFF !important;    /* Solid white background for high contrast */
+  color: #374151 !important;               /* Dark grey text */
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  border-radius: 8px !important;           /* Rounded pill corners */
+  padding: 8px 16px !important;
+  font-weight: 500 !important;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .main-content .btn-ghost:hover {
-  color: #FFFFFF !important;
-  background-color: rgba(255, 255, 255, 0.08) !important;
+  background-color: #F3F4F6 !important;
+  color: #111827 !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
 }
 
 .main-content .btn-ghost.active-subtab {
-  color: #FFFFFF !important;              /* White active subtab text */
-  border-bottom: 3px solid #FFFFFF !important; /* White active subtab underline */
+  background-color: #0078d4 !important;    /* Microsoft Blue active tab background */
+  color: #FFFFFF !important;               /* High contrast white text */
+  border-color: #005a9e !important;        /* Darker blue border */
+  border-bottom: 1px solid #005a9e !important; /* Override bottom border */
+  font-weight: 600 !important;
+  box-shadow: 0 0 10px rgba(0, 120, 212, 0.3) !important; /* Premium subtle blue glow */
+}
+
+/* Maintain standard ghost styles for buttons inside white glass cards */
+.glass-card .btn-ghost {
+  background-color: transparent !important;
+  color: var(--text-secondary) !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+.glass-card .btn-ghost:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Active season status badge outside cards */
