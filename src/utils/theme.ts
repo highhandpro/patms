@@ -1,11 +1,33 @@
 export interface ThemePalette {
   name: string;
-  colors: string[]; // representative colors shown as swatches (Primary, Accent, Background)
+  colors: string[]; // representative colors shown as swatches (Primary, Accent, Background, etc.)
   variables: Record<string, string>;
 }
 
 export const COLOR_PALETTES: Record<string, ThemePalette> = {
   default: {
+    name: 'Penny Ante Blue & Teal (Default)',
+    colors: ['#0477BF', '#77D0CB', '#F8F4F3', '#0F1926', '#E6EFFD'],
+    variables: {
+      '--bg-main': '#F8F4F3',
+      '--bg-surface': '#0477BF',
+      '--border-focus': '#0477BF',
+      '--color-emerald': '#0477BF',
+      '--color-emerald-rgb': '4, 119, 191',
+      '--color-emerald-glow': 'rgba(4, 119, 191, 0.1)',
+      '--text-emerald': '#0477BF',
+      '--bg-card-hover': '#E6EFFD',
+      '--color-gold': '#77D0CB',
+      '--color-gold-rgb': '119, 208, 203',
+      '--color-gold-glow': 'rgba(119, 208, 203, 0.1)',
+      '--text-gold': '#77D0CB',
+      '--text-primary': '#0F1926',
+      '--color-danger': '#800020',
+      '--color-danger-rgb': '128, 0, 32',
+      '--color-danger-glow': 'rgba(128, 0, 32, 0.1)',
+    }
+  },
+  pennyantegreen: {
     name: 'Penny Ante Green',
     colors: ['#0B6B2A', '#D4AF37', '#F5F7F5'],
     variables: {
@@ -21,6 +43,10 @@ export const COLOR_PALETTES: Record<string, ThemePalette> = {
       '--color-gold-rgb': '212, 175, 55',
       '--color-gold-glow': 'rgba(212, 175, 55, 0.1)',
       '--text-gold': '#D4AF37',
+      '--text-primary': '#1F2937',
+      '--color-danger': '#D93A2F',
+      '--color-danger-rgb': '217, 58, 47',
+      '--color-danger-glow': 'rgba(217, 58, 47, 0.1)',
     }
   },
   royalblue: {
@@ -39,6 +65,10 @@ export const COLOR_PALETTES: Record<string, ThemePalette> = {
       '--color-gold-rgb': '212, 175, 55',
       '--color-gold-glow': 'rgba(212, 175, 55, 0.1)',
       '--text-gold': '#D4AF37',
+      '--text-primary': '#1F2937',
+      '--color-danger': '#D93A2F',
+      '--color-danger-rgb': '217, 58, 47',
+      '--color-danger-glow': 'rgba(217, 58, 47, 0.1)',
     }
   },
   vegasred: {
@@ -57,6 +87,10 @@ export const COLOR_PALETTES: Record<string, ThemePalette> = {
       '--color-gold-rgb': '212, 175, 55',
       '--color-gold-glow': 'rgba(212, 175, 55, 0.1)',
       '--text-gold': '#D4AF37',
+      '--text-primary': '#1F2937',
+      '--color-danger': '#D93A2F',
+      '--color-danger-rgb': '217, 58, 47',
+      '--color-danger-glow': 'rgba(217, 58, 47, 0.1)',
     }
   },
   emerald: {
@@ -75,6 +109,10 @@ export const COLOR_PALETTES: Record<string, ThemePalette> = {
       '--color-gold-rgb': '245, 158, 11',
       '--color-gold-glow': 'rgba(245, 158, 11, 0.1)',
       '--text-gold': '#F59E0B',
+      '--text-primary': '#1F2937',
+      '--color-danger': '#D93A2F',
+      '--color-danger-rgb': '217, 58, 47',
+      '--color-danger-glow': 'rgba(217, 58, 47, 0.1)',
     }
   },
   burgundy: {
@@ -93,6 +131,10 @@ export const COLOR_PALETTES: Record<string, ThemePalette> = {
       '--color-gold-rgb': '245, 158, 11',
       '--color-gold-glow': 'rgba(245, 158, 11, 0.1)',
       '--text-gold': '#F59E0B',
+      '--text-primary': '#1F2937',
+      '--color-danger': '#D93A2F',
+      '--color-danger-rgb': '217, 58, 47',
+      '--color-danger-glow': 'rgba(217, 58, 47, 0.1)',
     }
   }
 };

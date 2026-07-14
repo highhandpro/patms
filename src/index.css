@@ -1,37 +1,37 @@
 :root {
   /* Colors */
-  --bg-main: #F5F7F5;                     /* Light Background */
-  --bg-surface: #0B6B2A;                  /* Primary Green Navigation & Sidebar */
+  --bg-main: #F8F4F3;                     /* Warm Off-White Background */
+  --bg-surface: #0477BF;                  /* Primary Blue Navigation & Sidebar */
   --bg-card: #FFFFFF;                     /* Card Background */
-  --bg-card-hover: #E8F5E9;               /* Table Row Hover */
+  --bg-card-hover: #E6EFFD;               /* Table Row Hover / Soft Blue */
   --bg-input: #FFFFFF;                    /* Pure White inputs */
   --bg-input-focus: #FFFFFF;
   
   --border-subtle: #D7DDD7;               /* Light Gray Border */
-  --border-focus: #0B6B2A;                /* Primary Green focus border */
-  --border-focus-gold: #D4AF37;
+  --border-focus: #0477BF;                /* Primary Blue focus border */
+  --border-focus-gold: #77D0CB;
   
-  --color-emerald: #0B6B2A;               /* Primary Green */
-  --color-emerald-rgb: 11, 107, 42;
-  --color-emerald-glow: rgba(11, 107, 42, 0.1);
+  --color-emerald: #0477BF;               /* Primary Blue */
+  --color-emerald-rgb: 4, 119, 191;
+  --color-emerald-glow: rgba(4, 119, 191, 0.1);
   
-  --color-gold: #D4AF37;                  /* Gold Accent for championships/TOC */
-  --color-gold-rgb: 212, 175, 55;
-  --color-gold-glow: rgba(212, 175, 55, 0.1);
+  --color-gold: #77D0CB;                  /* Teal/Mint Accent */
+  --color-gold-rgb: 119, 208, 203;
+  --color-gold-glow: rgba(119, 208, 203, 0.1);
   
-  --color-danger: #D93A2F;                /* Danger Red */
-  --color-danger-rgb: 217, 58, 47;
-  --color-danger-glow: rgba(217, 58, 47, 0.1);
+  --color-danger: #800020;                /* Burgundy Alert/Danger */
+  --color-danger-rgb: 128, 0, 32;
+  --color-danger-glow: rgba(128, 0, 32, 0.1);
 
-  --color-warning: #D4AF37;               /* Warning Gold */
-  --color-info: #0B6B2A;
+  --color-warning: #77D0CB;               /* Warning Teal */
+  --color-info: #0477BF;
 
   /* Typography */
-  --text-primary: #1F2937;                /* Dark text */
+  --text-primary: #0F1926;                /* Dark Slate Text */
   --text-secondary: #6B7280;              /* Secondary Text */
   --text-muted: #9CA3AF;                  /* Muted text */
-  --text-emerald: #0B6B2A;
-  --text-gold: #D4AF37;
+  --text-emerald: #0477BF;
+  --text-gold: #77D0CB;
 
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
