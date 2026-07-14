@@ -1969,3 +1969,29 @@ select, option, input, textarea {
   background-color: rgba(255, 255, 255, 0.2) !important;
   border-color: rgba(255, 255, 255, 0.6) !important;
 }
+
+/* Global button, badge, and icon span overrides to fix specificity bugs */
+.glass-card .btn span,
+.table-container .btn span,
+.translucent-banner .btn span,
+.btn span {
+  color: inherit !important;
+}
+
+.btn-primary,
+.btn-primary span,
+.btn-primary svg {
+  color: #FFFFFF !important;
+  fill: currentColor;
+}
+
+.btn-danger,
+.btn-danger span,
+.btn-danger svg {
+  color: #FFFFFF !important;
+}
+
+.badge span {
+  color: inherit !important;
+}
+

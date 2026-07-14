@@ -73,7 +73,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Active Tournament Alert / Notification */}
       {activeTournaments.length > 0 && (
-        <div className="glass-card" style={{
+        <div className="glass-card translucent-banner" style={{
           borderLeft: '4px solid var(--color-emerald)',
           background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%)',
           display: 'flex',
