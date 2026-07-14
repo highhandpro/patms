@@ -92,7 +92,7 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
         <p 
           style={{
             fontSize: '1rem',
-            color: 'var(--text-muted)',
+            color: 'rgba(255, 255, 255, 0.85)',
             lineHeight: 1.6,
             margin: '0 auto',
             maxWidth: '460px'
@@ -138,10 +138,10 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
               width: '100%',
               padding: '12px 24px',
               fontSize: '0.95rem',
-              color: 'var(--text-secondary)',
+              color: '#FFFFFF',
               borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              backgroundColor: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
               cursor: 'pointer'
             }}
           >

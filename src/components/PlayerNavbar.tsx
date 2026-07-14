@@ -128,7 +128,7 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
           
           {/* Season ToC Pool Badge */}
           <div className="navbar-earnings-badge" title="Season ToC Pool" style={{ cursor: 'default' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginRight: '2px' }}>ToC</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginRight: '2px' }}>ToC</span>
             <Trophy size={16} style={{ color: 'var(--color-gold)' }} />
             <span className="earnings-amount">${tocPool}</span>
           </div>
