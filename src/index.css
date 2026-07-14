@@ -2024,31 +2024,32 @@ body.display-mode-active .main-content {
   color: #FFFFFF !important;
 }
 
-/* Login button inside Player Navbar styled as premium secondary button (white pill) */
+/* Login button inside Player Navbar styled to match the primary Gold/Teal Login & Register button */
 .btn-navbar-login {
-  background-color: #FFFFFF !important;
-  color: var(--color-emerald) !important;
-  border: 1px solid transparent !important;
-  font-weight: 600 !important;
+  background-color: var(--color-gold) !important;
+  color: #1F2937 !important;
+  border: 1px solid var(--color-gold) !important;
+  font-weight: 700 !important;
   transition: all var(--transition-fast) ease !important;
+  box-shadow: 0 4px 10px rgba(119, 208, 203, 0.2) !important;
 }
 
 .btn-navbar-login:hover {
-  background-color: var(--bg-main) !important;
-  color: var(--border-focus) !important;
-  box-shadow: var(--shadow-sm) !important;
+  opacity: 0.9 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(119, 208, 203, 0.3) !important;
 }
 
 .btn-navbar-login *,
 .btn-navbar-login span,
 .btn-navbar-login svg {
-  color: var(--color-emerald) !important;
+  color: #1F2937 !important;
 }
 
 .btn-navbar-login:hover *,
 .btn-navbar-login:hover span,
 .btn-navbar-login:hover svg {
-  color: var(--border-focus) !important;
+  color: #1F2937 !important;
 }
 
 /* Page headers and text outside of cards should remain light/white on green felt background */
