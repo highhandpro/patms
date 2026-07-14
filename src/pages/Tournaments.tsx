@@ -68,6 +68,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // active: 'seating' | 'players'
   // completed: 'results'
   const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting'>('rsvp');
+  const [viewCompletedOnly, setViewCompletedOnly] = useState(false);
   const [printType, setPrintType] = useState<'signin' | 'scoresheet'>('signin');
 
   // Player search in checkin
@@ -1360,26 +1361,53 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
         
         {/* Header */}
-        <div style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-0.03em' }}>
-              Tournaments Manager
+              {viewCompletedOnly ? 'Completed Tournaments' : 'Tournaments Manager'}
             </h1>
             <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
-              Create, search, or administer Penny Ante club tournaments.
+              {viewCompletedOnly 
+                ? 'View results, standings, and payouts for completed season tournaments.' 
+                : 'Create, search, or administer Penny Ante club tournaments.'}
             </p>
           </div>
-          {!isSubAdmin && (
-            <button className="btn btn-primary" onClick={() => setIsCreateTourOpen(true)}>
-              <Plus size={18} />
-              <span>New Tournament</span>
-            </button>
-          )}
+          
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {viewCompletedOnly ? (
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setViewCompletedOnly(false)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              >
+                <ChevronLeft size={18} />
+                <span>Back to Registry</span>
+              </button>
+            ) : (
+              <>
+                <button 
+                  className="btn btn-success" 
+                  onClick={() => setViewCompletedOnly(true)}
+                  style={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}
+                >
+                  Completed
+                </button>
+                {!isSubAdmin && (
+                  <button className="btn btn-primary" onClick={() => setIsCreateTourOpen(true)}>
+                    <Plus size={18} />
+                    <span>New Tournament</span>
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         {/* List of Tournaments */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Tournaments Registry</h3>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+            {viewCompletedOnly ? 'Completed Tournaments Registry' : 'Tournaments Registry'}
+          </h3>
           
           <div className="table-container">
             <table className="data-table">
@@ -1395,10 +1423,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {state.tournaments.length > 0 ? (
-                  [...state.tournaments]
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((t) => {
+                {(() => {
+                  const displayedTournaments = [...state.tournaments]
+                    .filter(t => viewCompletedOnly ? t.status === 'completed' : t.status !== 'completed')
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+                  if (displayedTournaments.length > 0) {
+                    return displayedTournaments.map((t) => {
                       const seasonName = state.seasons.find(s => s.id === t.seasonId)?.name || 'Unassigned';
                       
                       // Calculate dynamic values for drafts
@@ -1452,14 +1483,19 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           </td>
                         </tr>
                       );
-                    })
-                ) : (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                      No tournament records created yet. Create one using the button above.
-                    </td>
-                  </tr>
-                )}
+                    });
+                  }
+
+                  return (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                        {viewCompletedOnly 
+                          ? 'No completed tournaments found.' 
+                          : 'No active or draft tournament records found. Create one using the button above.'}
+                      </td>
+                    </tr>
+                  );
+                })()}
               </tbody>
             </table>
           </div>
