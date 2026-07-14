@@ -966,7 +966,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           <div 
             className="glass-card animate-slide-up" 
             onClick={(e) => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-surface)' }}
+            style={{ width: '100%', maxWidth: '600px', backgroundColor: '#FFFFFF' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

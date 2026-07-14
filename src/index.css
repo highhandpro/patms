@@ -7,7 +7,7 @@
   --bg-input: #FFFFFF;                    /* Pure White inputs */
   --bg-input-focus: #FFFFFF;
   
-  --border-subtle: rgba(0, 0, 0, 0.08);   /* Darker subtle borders for light mode contrast */
+  --border-subtle: #E5E7EB;               /* Crisp light grey borders for card dividers and tables */
   --border-focus: #025908;                /* Vibrant Poker Green border on focus */
   --border-focus-gold: #BFBFBF;
   
