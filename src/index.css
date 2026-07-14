@@ -1924,9 +1924,9 @@ body.display-mode-active .main-content {
   background-color: transparent !important;
   color: var(--text-primary) !important;   /* Dark slate text */
   font-weight: 500 !important;
-  border: none !important;
+  border: 1.5px solid #A3AFA3 !important;   /* Darker grey-green outline */
   border-left: 4px solid transparent !important;
-  border-radius: 0 8px 8px 0 !important;
+  border-radius: 8px !important;
   padding: 12px 16px 12px 12px !important;
   display: flex !important;
   align-items: center !important;
@@ -1941,6 +1941,7 @@ body.display-mode-active .main-content {
 .sidebar-nav-item:hover {
   background-color: var(--color-success) !important;    /* Hover Accent Green background (#2E9B45) */
   color: #FFFFFF !important;
+  border: 1.5px solid var(--color-success) !important;
   border-left: 4px solid transparent !important;
 }
 
@@ -1948,12 +1949,14 @@ body.display-mode-active .main-content {
   background-color: rgba(11, 107, 42, 0.06) !important;  /* Soft green tint */
   color: var(--color-emerald) !important;                 /* Active text primary green */
   font-weight: 700 !important;
+  border: 1.5px solid var(--color-emerald) !important;
   border-left: 4px solid var(--color-emerald) !important; /* Left indicator bar */
 }
 
 .sidebar-nav-item.active:hover {
   background-color: rgba(11, 107, 42, 0.1) !important;
   color: var(--color-emerald) !important;
+  border: 1.5px solid var(--color-emerald) !important;
   border-left: 4px solid var(--color-emerald) !important;
 }
 
@@ -2055,7 +2058,7 @@ body.display-mode-active .main-content {
 .glass-card p, .glass-card span, .glass-card label, .glass-card div, .glass-card strong,
 .glass-card .text-secondary, .glass-card .text-muted,
 .table-container h1, .table-container h2, .table-container p, .table-container span, .table-container strong,
-.table-container td, .table-container th, .table-container tr,
+.table-container td, .table-container tr,
 .form-group label, .form-group span, .form-group p,
 select, option, input, textarea {
   color: var(--text-primary) !important;
@@ -2067,4 +2070,13 @@ select, option, input, textarea {
 
 .glass-card .text-muted, .table-container .text-muted {
   color: var(--text-muted) !important;
+}
+
+/* Ensure all table header columns (Rank, Player, Games, Cash, Points, etc.) are styled in off-white */
+.table-container th,
+.data-table th,
+.players-table th,
+.results-table th,
+.standings-table th {
+  color: #F5F7F5 !important;              /* Elegant off-white */
 }
