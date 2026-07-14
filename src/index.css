@@ -1,47 +1,47 @@
 :root {
   /* Colors */
-  --bg-main: #0D0D0D;                     /* Matte Black */
-  --bg-surface: #012603;                  /* Very Dark Forest Green */
-  --bg-card: rgba(1, 64, 5, 0.35);        /* Medium Dark Green with opacity */
-  --bg-card-hover: rgba(2, 89, 8, 0.35);  /* Vibrant Poker Green with opacity */
-  --bg-input: rgba(1, 38, 3, 0.5);        /* Dark input bg */
-  --bg-input-focus: rgba(2, 89, 8, 0.55);
+  --bg-main: #F8F9FA;                     /* Light Off-White Background */
+  --bg-surface: #BFBFBF;                  /* Light Silver/Grey Sidebar & Header Background */
+  --bg-card: #FFFFFF;                     /* Pure White Cards */
+  --bg-card-hover: #F3F4F6;               /* Off-White hover */
+  --bg-input: #FFFFFF;                    /* Pure White inputs */
+  --bg-input-focus: #FFFFFF;
   
-  --border-subtle: rgba(191, 191, 191, 0.12); /* Lighter border using #BFBFBF */
-  --border-focus: rgba(191, 191, 191, 0.4);
-  --border-focus-gold: rgba(191, 191, 191, 0.45);
+  --border-subtle: rgba(0, 0, 0, 0.08);   /* Darker subtle borders for light mode contrast */
+  --border-focus: #025908;                /* Vibrant Poker Green border on focus */
+  --border-focus-gold: #BFBFBF;
   
   --color-emerald: #025908;               /* Vibrant Poker Green */
   --color-emerald-rgb: 2, 89, 8;
-  --color-emerald-glow: rgba(2, 89, 8, 0.15);
+  --color-emerald-glow: rgba(2, 89, 8, 0.1);
   
-  --color-gold: #BFBFBF;                  /* Leaning towards lighter colors (light silver/grey) */
-  --color-gold-rgb: 191, 191, 191;
-  --color-gold-glow: rgba(191, 191, 191, 0.15);
+  --color-gold: #014005;                  /* Forest Green for secondary accents */
+  --color-gold-rgb: 1, 64, 5;
+  --color-gold-glow: rgba(1, 64, 5, 0.1);
   
-  --color-danger: #f87171;
-  --color-danger-rgb: 248, 113, 113;
-  --color-danger-glow: rgba(248, 113, 113, 0.15);
+  --color-danger: #ef4444;                /* High contrast danger red */
+  --color-danger-rgb: 239, 68, 68;
+  --color-danger-glow: rgba(239, 68, 68, 0.1);
 
-  --color-warning: #fb923c;
-  --color-info: #BFBFBF;                  /* Silver info color */
+  --color-warning: #f97316;
+  --color-info: #025908;
 
   /* Typography */
-  --text-primary: #FFFFFF;                /* Crisp White */
-  --text-secondary: #BFBFBF;              /* Light Silver/Grey */
-  --text-muted: #9CA3AF;                  /* Muted Grey */
+  --text-primary: #111827;                /* Dark Slate / Black for high readability on light bg */
+  --text-secondary: #374151;              /* Medium Dark Grey */
+  --text-muted: #6B7280;                  /* Muted Grey */
   --text-emerald: #025908;
-  --text-gold: #BFBFBF;
+  --text-gold: #014005;
 
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Effects */
   --glass-blur: blur(16px);
-  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 16px 40px -6px rgba(0, 0, 0, 0.8);
-  --shadow-emerald: 0 0 15px rgba(2, 89, 8, 0.2);
+  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 16px 40px -6px rgba(0, 0, 0, 0.14);
+  --shadow-emerald: 0 0 15px rgba(2, 89, 8, 0.1);
   --shadow-gold: 0 0 15px rgba(191, 191, 191, 0.2);
   
   --transition-fast: 0.15s ease;
@@ -474,10 +474,10 @@ p {
   top: 0;
   width: 100%;
   height: 70px;
-  background: rgba(17, 20, 28, 0.75);
+  background: rgba(240, 240, 240, 0.85); /* Clean light grey background */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -528,12 +528,12 @@ p {
 
 .player-navbar-nav .nav-link:hover {
   color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .player-navbar-nav .nav-link.active {
   color: var(--color-emerald);
-  background-color: rgba(16, 185, 129, 0.08);
+  background-color: rgba(2, 89, 8, 0.08);
   font-weight: 600;
 }
 
@@ -548,14 +548,14 @@ p {
   display: flex;
   align-items: center;
   gap: 6px;
-  background-color: rgba(251, 191, 36, 0.08);
-  border: 1px solid rgba(251, 191, 36, 0.25);
+  background-color: rgba(2, 89, 8, 0.05);
+  border: 1px solid rgba(2, 89, 8, 0.18);
   border-radius: 20px;
   padding: 6px 14px;
 }
 
 .navbar-earnings-badge .earnings-amount {
-  color: var(--color-gold);
+  color: var(--color-emerald);
   font-weight: 700;
   font-size: 0.95rem;
 }
@@ -566,7 +566,7 @@ p {
 }
 
 .btn-navbar-user {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   padding: 8px 16px;
@@ -582,8 +582,8 @@ p {
 }
 
 .btn-navbar-user:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
 }
 
 .btn-navbar-user .arrow-icon {
@@ -597,7 +597,7 @@ p {
 
 .btn-navbar-login {
   background-color: var(--color-emerald);
-  color: #052e16;
+  color: #FFFFFF;
   border: 1px solid transparent;
   padding: 8px 16px;
   border-radius: 10px;
@@ -612,7 +612,7 @@ p {
 }
 
 .btn-navbar-login:hover {
-  background-color: #34d399;
+  background-color: #03730b;
   box-shadow: var(--shadow-emerald);
 }
 
@@ -621,7 +621,7 @@ p {
   right: 0;
   top: calc(100% + 8px);
   width: 220px;
-  background-color: var(--bg-surface);
+  background-color: #FFFFFF;
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 6px;
@@ -651,16 +651,16 @@ p {
 
 .dropdown-item:hover {
   color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .dropdown-item.sim-switch:hover {
-  color: var(--color-gold);
-  background-color: rgba(251, 191, 36, 0.08);
+  color: var(--color-emerald);
+  background-color: rgba(2, 89, 8, 0.05);
 }
 
 .dropdown-item.admin-switch:hover {
-  background-color: rgba(16, 185, 129, 0.08);
+  background-color: rgba(2, 89, 8, 0.05);
 }
 
 .dropdown-item.logout-btn {
