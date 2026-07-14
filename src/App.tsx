@@ -22,7 +22,9 @@ import { useApp } from './context/AppContext';
 import type { Member } from './types';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { applyThemePalette } from './utils/theme';
 import { ShieldAlert } from 'lucide-react';
+
 
 function App() {
   // Admin tabs: dashboard, members, tournaments, standings, settings
@@ -118,6 +120,12 @@ function App() {
   const matchedPlayersLast = (!isGuestMode && typedLast.length >= 1)
     ? state.members.filter(m => !m.isDeleted && m.lastName.toLowerCase().startsWith(typedLast))
     : [];
+
+  useEffect(() => {
+    if (state.settings.colorPalette) {
+      applyThemePalette(state.settings.colorPalette);
+    }
+  }, [state.settings.colorPalette]);
 
   useEffect(() => {
     const handleLocationChange = () => {

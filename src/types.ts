@@ -105,6 +105,7 @@ export interface Settings {
   maxPlayersPerTable: number;
   adminPassword?: string;
   blinds?: BlindLevel[];
+  colorPalette?: string;
 }
 
 export interface PendingApproval {
