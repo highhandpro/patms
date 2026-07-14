@@ -720,9 +720,9 @@ function App() {
           >
             <div 
               style={{
-                backgroundColor: 'rgba(15, 15, 18, 0.9)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(16, 185, 129, 0.15)',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-lg)',
                 borderRadius: '20px',
                 width: '100%',
                 maxWidth: '440px',
@@ -901,11 +901,11 @@ function App() {
                       style={{ 
                         fontSize: '0.85rem', 
                         fontWeight: 700,
-                        backgroundColor: 'rgba(30, 64, 175, 0.3)', 
-                        border: '1px solid rgba(59, 130, 246, 0.4)',
+                        backgroundColor: 'rgba(0, 120, 212, 0.04)', 
+                        border: '1px solid rgba(0, 120, 212, 0.2)',
                         borderRadius: '8px',
                         padding: '8px 16px',
-                        color: '#d1d5db', 
+                        color: '#0078d4', 
                         cursor: 'pointer',
                         width: '100%',
                         textAlign: 'center'
@@ -923,11 +923,11 @@ function App() {
                       style={{ 
                         fontSize: '0.85rem', 
                         fontWeight: 700,
-                        backgroundColor: 'rgba(30, 64, 175, 0.3)', 
-                        border: '1px solid rgba(59, 130, 246, 0.4)',
+                        backgroundColor: 'rgba(0, 120, 212, 0.04)', 
+                        border: '1px solid rgba(0, 120, 212, 0.2)',
                         borderRadius: '8px',
                         padding: '8px 16px',
-                        color: '#d1d5db', 
+                        color: '#0078d4', 
                         cursor: 'pointer',
                         width: '100%',
                         textAlign: 'center'
@@ -963,9 +963,9 @@ function App() {
           >
             <div 
               style={{
-                backgroundColor: 'rgba(15, 15, 18, 0.9)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), 0 0 1px 2px rgba(212, 163, 89, 0.3)',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-lg)',
                 borderRadius: '24px',
                 width: '100%',
                 maxWidth: '460px',
@@ -981,13 +981,13 @@ function App() {
                   width: '216px',
                   height: '216px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(212, 163, 89, 0.1)',
-                  border: '2px solid var(--text-gold)',
+                  backgroundColor: 'rgba(0, 120, 212, 0.05)',
+                  border: '2px solid #0078d4',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 16px auto',
-                  color: 'var(--text-gold)',
+                  color: '#0078d4',
                   fontSize: '6rem',
                   fontWeight: 800,
                   overflow: 'hidden'
@@ -1007,9 +1007,9 @@ function App() {
                 style={{ 
                   display: 'inline-block',
                   fontSize: '0.85rem', 
-                  color: 'var(--text-gold)', 
+                  color: '#0078d4', 
                   fontWeight: 700, 
-                  backgroundColor: 'rgba(212, 163, 89, 0.1)',
+                  backgroundColor: 'rgba(0, 120, 212, 0.05)',
                   padding: '4px 12px',
                   borderRadius: '20px',
                   marginBottom: isAdminAuthenticated ? '16px' : '24px',
@@ -1106,8 +1106,8 @@ function App() {
                     fontSize: '0.95rem',
                     borderRadius: '12px',
                     width: '100%',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.01)'
+                    border: '1px solid var(--border-subtle)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
                   }}
                 >
                   {isNewMemberLogin ? 'CANCEL' : 'No, this is not me'}
@@ -1135,9 +1135,9 @@ function App() {
           >
             <div 
               style={{
-                backgroundColor: 'rgba(15, 15, 18, 0.9)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(16, 185, 129, 0.15)',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-lg)',
                 borderRadius: '20px',
                 width: '100%',
                 maxWidth: '400px',
@@ -1171,13 +1171,13 @@ function App() {
                   width: '56px',
                   height: '56px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                  border: '2px solid var(--color-emerald)',
+                  backgroundColor: 'rgba(0, 120, 212, 0.08)',
+                  border: '2px solid #0078d4',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 16px auto',
-                  color: 'var(--color-emerald)',
+                  color: '#0078d4',
                   fontSize: '1.5rem'
                 }}
               >
