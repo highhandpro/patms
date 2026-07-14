@@ -128,7 +128,7 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
               cursor: 'pointer'
             }}
           >
-            Enter Portal & Login
+            Login & Register
           </button>
           
           <button 
