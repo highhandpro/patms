@@ -28,7 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
   return (
     <aside className="sidebar">
       <div style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Trophy size={28} />
           <span>PATMS</span>
         </h2>
@@ -39,13 +39,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
 
       {activeSeason && (
         <div style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          backgroundColor: 'rgba(0, 0, 0, 0.02)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '8px',
           padding: '8px 12px',
           marginBottom: isSubAdmin ? '12px' : '24px'
         }}>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'rgba(255, 255, 255, 0.7)', display: 'block', fontWeight: 600 }}>
+          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', fontWeight: 600 }}>
             Active Season
           </span>
           <span style={{ fontSize: '0.9rem', color: '#D4AF37', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
@@ -57,8 +57,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
 
       {isChiefAdmin && (
         <div style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          backgroundColor: 'rgba(11, 107, 42, 0.04)',
+          border: '1px solid rgba(11, 107, 42, 0.15)',
           borderRadius: '8px',
           padding: '8px 12px',
           marginBottom: '24px',
@@ -67,10 +67,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
           gap: '6px'
         }}>
           <div>
-            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#5FCB72', fontWeight: 700, display: 'block' }}>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-emerald)', fontWeight: 700, display: 'block' }}>
               Chief Admin Mode
             </span>
-            <span style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.8)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               Full Authority
             </span>
           </div>
@@ -207,21 +207,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
         })}
       </nav>
 
-      <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.15)', paddingTop: '16px', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <button 
           onClick={onSwitchPortal}
-          className="btn btn-ghost"
+          className="btn btn-secondary"
           style={{
             width: '100%',
             justifyContent: 'center',
             fontSize: '0.85rem',
-            color: '#FFFFFF',
-            borderColor: 'rgba(255, 255, 255, 0.3)',
-            borderStyle: 'solid',
-            borderWidth: '1px',
-            borderRadius: '8px',
             padding: '8px 12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.08)'
+            borderRadius: '8px'
           }}
         >
           Switch to Player Portal
@@ -234,23 +229,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
               width: '100%',
               justifyContent: 'center',
               fontSize: '0.85rem',
-              color: '#FFA39E',
-              borderColor: 'rgba(217, 58, 47, 0.3)',
+              color: 'var(--color-danger)',
+              borderColor: 'rgba(217, 58, 47, 0.15)',
               borderStyle: 'solid',
               borderWidth: '1px',
               borderRadius: '8px',
               padding: '8px 12px',
-              backgroundColor: 'rgba(217, 58, 47, 0.1)'
+              backgroundColor: 'rgba(217, 58, 47, 0.03)'
             }}
           >
             Log Out Admin
           </button>
         )}
         <div>
-          <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
             Penny Ante Poker Club
           </p>
-          <p style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.4)', textAlign: 'center', marginTop: '2px' }}>
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '2px' }}>
             v1.0 (Local-First)
           </p>
         </div>

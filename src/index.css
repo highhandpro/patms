@@ -58,12 +58,10 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: #F5F7F5;              /* Fallback off-white */
-  background-image: url('/bg-cards.jpg'); /* Premium Light Card Deck Overlay Background */
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
-  background-position: center;
+  background-color: #012603;              /* Fallback Forest Green */
+  background-image: url('/bg-felt.png');  /* Restored Green Felt Background */
+  background-repeat: repeat;
+  background-size: 150px;
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
@@ -1880,31 +1878,29 @@ body.display-mode-active .main-content {
    SIDEBAR & NAVBAR NAVIGATION BRAND THEMING (#0B6B2A Background System)
    ========================================================================= */
 
-/* Sidebar Layout Theming */
-.sidebar,
-.sidebar h1,
-.sidebar h2,
-.sidebar h3,
-.sidebar h4,
-.sidebar h5,
-.sidebar h6,
-.sidebar span,
-.sidebar label,
-.sidebar div,
-.sidebar strong {
-  color: #FFFFFF !important;
+/* Sidebar Layout Theming (Light Card Deck Overlay Background) */
+.sidebar {
+  width: 260px;
+  background-color: #FFFFFF !important;
+  background-image: url('/bg-cards.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-right: 1px solid var(--border-subtle) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 24px 16px !important;
+  flex-shrink: 0 !important;
+  position: sticky !important;
+  top: 0 !important;
+  height: 100vh !important;
 }
 
-.sidebar p,
-.sidebar .text-muted {
-  color: #A3D9B1 !important;               /* Soft light green for muted descriptions */
-}
-
-/* Translucent outline buttons inside the green sidebar (Switch Portal, Log Out, Change Password) */
+/* Translucent outline buttons inside the sidebar (Switch Portal, Log Out, Change Password) */
 .sidebar .btn-ghost {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  color: #FFFFFF !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background-color: rgba(11, 107, 42, 0.03) !important;
+  color: var(--color-emerald) !important;
+  border: 1px solid rgba(11, 107, 42, 0.15) !important;
   border-radius: 8px !important;
   padding: 10px 16px !important;
   font-weight: 500 !important;
@@ -1912,21 +1908,21 @@ body.display-mode-active .main-content {
 }
 
 .sidebar .btn-ghost:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  color: #FFFFFF !important;
+  background-color: rgba(11, 107, 42, 0.08) !important;
+  border-color: rgba(11, 107, 42, 0.25) !important;
+  color: var(--color-emerald) !important;
 }
 
 .sidebar .btn-ghost * {
-  color: #FFFFFF !important;
+  color: inherit !important;
 }
 
-/* Sidebar navigation links matching brand spec: links white, active #5FCB72, hover #2E9B45 */
+/* Sidebar navigation links matching brand spec: links dark slate, active #0B6B2A, hover #2E9B45 */
 .sidebar-nav-item {
   width: 100% !important;
   justify-content: flex-start !important;
   background-color: transparent !important;
-  color: #FFFFFF !important;
+  color: var(--text-primary) !important;   /* Dark slate text */
   font-weight: 500 !important;
   border: none !important;
   border-left: 4px solid transparent !important;
@@ -1943,22 +1939,22 @@ body.display-mode-active .main-content {
 }
 
 .sidebar-nav-item:hover {
-  background-color: #2E9B45 !important;    /* Hover Accent Green background */
+  background-color: var(--color-success) !important;    /* Hover Accent Green background (#2E9B45) */
   color: #FFFFFF !important;
   border-left: 4px solid transparent !important;
 }
 
 .sidebar-nav-item.active {
-  background-color: rgba(95, 203, 114, 0.08) !important;
-  color: #5FCB72 !important;               /* Active text highlight */
+  background-color: rgba(11, 107, 42, 0.06) !important;  /* Soft green tint */
+  color: var(--color-emerald) !important;                 /* Active text primary green */
   font-weight: 700 !important;
-  border-left: 4px solid #5FCB72 !important; /* Left indicator bar */
+  border-left: 4px solid var(--color-emerald) !important; /* Left indicator bar */
 }
 
 .sidebar-nav-item.active:hover {
-  background-color: rgba(95, 203, 114, 0.12) !important;
-  color: #5FCB72 !important;
-  border-left: 4px solid #5FCB72 !important;
+  background-color: rgba(11, 107, 42, 0.1) !important;
+  color: var(--color-emerald) !important;
+  border-left: 4px solid var(--color-emerald) !important;
 }
 
 /* Player Navbar Layout Theming (Background #0B6B2A) */
@@ -2028,4 +2024,47 @@ body.display-mode-active .main-content {
 
 .btn-navbar-login * {
   color: inherit !important;
+}
+
+/* Page headers and text outside of cards should remain light/white on green felt background */
+.main-content h1,
+.main-content h2,
+.main-content h3,
+.main-content h4,
+.main-content h5,
+.main-content h6,
+.main-content p,
+.main-content label,
+.main-content span,
+.main-content strong,
+.main-content .text-muted,
+.main-content .text-secondary {
+  color: #FFFFFF !important;              /* Force white text on felt */
+}
+
+/* Page subtitle description paragraphs outside cards should be light silver/grey */
+.main-content > p,
+.main-content > div > p,
+.main-content > .page-header p,
+.main-content .page-subtitle {
+  color: #BFBFBF !important;
+}
+
+/* Restores dark contrast inside white cards */
+.glass-card h1, .glass-card h2, .glass-card h3, .glass-card h4, .glass-card h5, .glass-card h6,
+.glass-card p, .glass-card span, .glass-card label, .glass-card div, .glass-card strong,
+.glass-card .text-secondary, .glass-card .text-muted,
+.table-container h1, .table-container h2, .table-container p, .table-container span, .table-container strong,
+.table-container td, .table-container th, .table-container tr,
+.form-group label, .form-group span, .form-group p,
+select, option, input, textarea {
+  color: var(--text-primary) !important;
+}
+
+.glass-card .text-secondary, .table-container .text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.glass-card .text-muted, .table-container .text-muted {
+  color: var(--text-muted) !important;
 }
