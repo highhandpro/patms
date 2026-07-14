@@ -318,8 +318,8 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                   {blindsList.map((level, idx) => {
                     const isRound = level.type === 'round';
                     return (
-                      <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: !isRound ? 'rgba(16, 185, 129, 0.05)' : 'transparent' }}>
-                        <td style={{ padding: '8px 16px', fontWeight: 700, color: isRound ? '#ffffff' : 'var(--color-emerald)' }}>
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: !isRound ? 'rgba(11, 107, 42, 0.05)' : 'transparent' }}>
+                        <td style={{ padding: '8px 16px', fontWeight: 700, color: isRound ? 'var(--text-primary)' : 'var(--color-emerald)' }}>
                           {isRound ? `Level ${level.roundNumber}` : 'Break'}
                         </td>
                         <td style={{ padding: '8px 16px' }}>
