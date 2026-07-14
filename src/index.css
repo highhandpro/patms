@@ -759,7 +759,7 @@ textarea:focus,
 }
 
 .banner-alert-box .alert-content {
-  color: var(--color-gold);
+  color: var(--color-gold) !important;     /* High-contrast gold text */
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -793,13 +793,13 @@ textarea:focus,
 }
 
 .action-status-container .status-text {
-  color: var(--text-primary);
+  color: #FFFFFF !important;               /* High-contrast white text */
   font-weight: 600;
   font-size: 0.95rem;
 }
-
+ 
 .action-status-container .status-subtext {
-  color: var(--text-muted);
+  color: #BFBFBF !important;               /* High-contrast silver subtext */
   font-size: 0.8rem;
   width: 100%;
   text-align: center;
