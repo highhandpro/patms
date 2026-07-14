@@ -1970,28 +1970,27 @@ select, option, input, textarea {
   border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* Global button, badge, and icon span overrides to fix specificity bugs */
-.glass-card .btn span,
-.table-container .btn span,
-.translucent-banner .btn span,
-.btn span {
-  color: inherit !important;
-}
-
+/* Specific overrides to force white text on primary and danger buttons inside cards and tables */
+.glass-card .btn-primary,
+.glass-card .btn-primary *,
+.table-container .btn-primary,
+.table-container .btn-primary *,
 .btn-primary,
-.btn-primary span,
-.btn-primary svg {
+.btn-primary * {
   color: #FFFFFF !important;
-  fill: currentColor;
+  fill: #FFFFFF !important;
 }
 
+.glass-card .btn-danger,
+.glass-card .btn-danger *,
+.table-container .btn-danger,
+.table-container .btn-danger *,
 .btn-danger,
-.btn-danger span,
-.btn-danger svg {
+.btn-danger * {
   color: #FFFFFF !important;
+  fill: #FFFFFF !important;
 }
 
 .badge span {
   color: inherit !important;
 }
-
