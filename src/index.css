@@ -2117,3 +2117,30 @@ select, option, input, textarea {
   transform: translateY(-1px);
 }
 
+/* Restore player portal navbar dropdown menu colors (recovering from .player-navbar-container * overrides) */
+.navbar-dropdown-menu,
+.navbar-dropdown-menu * {
+  color: var(--text-secondary) !important;
+}
+
+.navbar-dropdown-menu .dropdown-item:hover,
+.navbar-dropdown-menu .dropdown-item:hover * {
+  color: var(--text-primary) !important;
+}
+
+.navbar-dropdown-menu .admin-switch span,
+.navbar-dropdown-menu .admin-switch svg {
+  color: inherit !important;
+}
+
+.navbar-dropdown-menu .logout-btn,
+.navbar-dropdown-menu .logout-btn * {
+  color: var(--color-danger) !important;
+}
+
+.navbar-dropdown-menu .logout-btn:hover,
+.navbar-dropdown-menu .logout-btn:hover * {
+  color: #b91c1c !important;
+}
+
+
