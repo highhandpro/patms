@@ -2169,5 +2169,37 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
   box-shadow: 0 4px 14px rgba(46, 155, 69, 0.3) !important;
 }
 
+/* Restore white/light text contrast inside modals styled with dark bg-surface backgrounds */
+.glass-card[style*="bg-surface"] h1,
+.glass-card[style*="bg-surface"] h2,
+.glass-card[style*="bg-surface"] h3,
+.glass-card[style*="bg-surface"] h4,
+.glass-card[style*="bg-surface"] h5,
+.glass-card[style*="bg-surface"] h6,
+.glass-card[style*="bg-surface"] p,
+.glass-card[style*="bg-surface"] span,
+.glass-card[style*="bg-surface"] label,
+.glass-card[style*="bg-surface"] div,
+.glass-card[style*="bg-surface"] strong {
+  color: #FFFFFF !important;
+}
+
+.glass-card[style*="bg-surface"] .text-secondary {
+  color: #BFBFBF !important;
+}
+
+.glass-card[style*="bg-surface"] .text-muted {
+  color: #8E8E93 !important;
+}
+
+.glass-card[style*="bg-surface"] button:not(.btn) {
+  color: #BFBFBF !important;
+}
+
+.glass-card[style*="bg-surface"] button:not(.btn):hover {
+  color: #FFFFFF !important;
+}
+
+
 
 
