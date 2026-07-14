@@ -44,7 +44,7 @@ COLOR_OVERRIDES = {
     "cody dempsey": (240, 170, 0),
     "cristina miller": (180, 5, 10),
     "dan grimani": (130, 0, 220),
-    "derek allen": (220, 190, 80)
+    "derek allen": (220, 220, 225)
 }
 
 def find_player_logo(full_name):
@@ -99,7 +99,11 @@ def get_player_theme_color(full_name, logo_path):
 def apply_color_tint(bg_img, color):
     h, s, v = colorsys.rgb_to_hsv(color[0]/255.0, color[1]/255.0, color[2]/255.0)
     if s < 0.1:
-        return bg_img.convert('RGBA')
+        # Steel grey metallic tint for silver/grey theme
+        tint_color = (130, 135, 145)
+        tint = Image.new('RGBA', bg_img.size, tint_color + (255,))
+        tinted = Image.blend(bg_img.convert('RGBA'), tint, 0.18)
+        return tinted
     r, g, b = colorsys.hsv_to_rgb(h, 0.4, 0.6)
     tint_color = (int(r * 255), int(g * 255), int(b * 255))
     tint = Image.new('RGBA', bg_img.size, tint_color + (255,))
@@ -421,8 +425,15 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     frame_img = tinted_bg
     draw = ImageDraw.Draw(frame_img)
     
-    plaque_text = f"MEMBER #{member_id}"
-    font_plaque = ImageFont.truetype(FONT_PATH_SERIF, 26)
+    if full_name.lower().strip() == "derek allen":
+        plaque_text = "TOURNAMENT DIRECTOR"
+        font_plaque = ImageFont.truetype(FONT_PATH_SERIF, 20)
+        text_color = (235, 235, 240, 255)
+    else:
+        plaque_text = f"MEMBER #{member_id}"
+        font_plaque = ImageFont.truetype(FONT_PATH_SERIF, 26)
+        text_color = (255, 230, 110, 255)
+        
     p_bbox = draw.textbbox((0, 0), plaque_text, font=font_plaque)
     p_w = p_bbox[2] - p_bbox[0]
     p_h = p_bbox[3] - p_bbox[1]
@@ -430,8 +441,8 @@ def generate_player_badge(full_name, member_id, bg_img, output_path, names_outpu
     tx = (frame_img.width - p_w) // 2
     ty = 916 + (72 - p_h) // 2 - p_bbox[1]
     
-    # Draw gold plaque text MEMBER #XXX
-    draw.text((tx, ty), plaque_text, font=font_plaque, fill=(255, 230, 110, 255))
+    # Draw plaque text
+    draw.text((tx, ty), plaque_text, font=font_plaque, fill=text_color)
     frame_img.save(frame_output_path)
     
     # Create full composite card
