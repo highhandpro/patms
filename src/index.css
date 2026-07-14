@@ -2094,3 +2094,26 @@ select, option, input, textarea {
 .standings-table th {
   color: #F5F7F5 !important;              /* Elegant off-white */
 }
+
+/* Button color inheritance & high-contrast adjustments on felt */
+.btn, .btn *, .btn span, .btn svg {
+  color: inherit !important;
+}
+
+/* Primary buttons outside cards (directly on felt) should use a rich Gold design to stand out */
+.main-content button.btn-primary:not(.glass-card button):not(.table-container button),
+.main-content .btn-primary:not(.glass-card *):not(.table-container *):not(.modal *):not(.form-group *) {
+  background-color: var(--color-gold) !important;
+  color: #1F2937 !important;
+  border-color: var(--color-gold) !important;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25) !important;
+}
+
+.main-content button.btn-primary:not(.glass-card button):not(.table-container button):hover,
+.main-content .btn-primary:not(.glass-card *):not(.table-container *):not(.modal *):not(.form-group *):hover {
+  background-color: #bfa132 !important;
+  border-color: #bfa132 !important;
+  color: #1F2937 !important;
+  transform: translateY(-1px);
+}
+
