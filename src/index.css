@@ -1,7 +1,7 @@
 :root {
   /* Colors */
   --bg-main: #F8F4F3;                     /* Warm Off-White Background */
-  --bg-surface: #0477BF;                  /* Primary Blue Navigation & Sidebar */
+  --bg-surface: #0F1926;                  /* Dark Slate Navigation & Sidebar */
   --bg-card: #FFFFFF;                     /* Card Background */
   --bg-card-hover: #E6EFFD;               /* Table Row Hover / Soft Blue */
   --bg-input: #FFFFFF;                    /* Pure White inputs */

@@ -7,10 +7,10 @@ export interface ThemePalette {
 export const COLOR_PALETTES: Record<string, ThemePalette> = {
   default: {
     name: 'Penny Ante Blue & Teal (Default)',
-    colors: ['#0477BF', '#77D0CB', '#F8F4F3', '#0F1926', '#E6EFFD'],
+    colors: ['#0F1926', '#0477BF', '#77D0CB', '#F8F4F3', '#E6EFFD'],
     variables: {
       '--bg-main': '#F8F4F3',
-      '--bg-surface': '#0477BF',
+      '--bg-surface': '#0F1926',
       '--border-focus': '#0477BF',
       '--color-emerald': '#0477BF',
       '--color-emerald-rgb': '4, 119, 191',
