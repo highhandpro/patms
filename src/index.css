@@ -1994,3 +1994,37 @@ select, option, input, textarea {
 .badge span {
   color: inherit !important;
 }
+
+/* Sidebar navigation item physical buttons layout */
+.sidebar-nav-item {
+  width: 100% !important;
+  justify-content: flex-start !important;
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  transition: all var(--transition-fast) ease !important;
+}
+
+.sidebar-nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-0.5px) !important;
+}
+
+.sidebar-nav-item.active {
+  background-color: rgba(0, 120, 212, 0.06) !important;
+  color: #0078d4 !important;
+  font-weight: 600 !important;
+  border: 1px solid #0078d4 !important;
+}
+
+.sidebar-nav-item.active:hover {
+  background-color: rgba(0, 120, 212, 0.1) !important;
+  border-color: #0078d4 !important;
+}

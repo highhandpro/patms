@@ -183,20 +183,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className="btn btn-ghost"
-              style={{
-                width: '100%',
-                justifyContent: 'flex-start',
-                backgroundColor: isActive ? 'rgba(0, 120, 212, 0.08)' : 'transparent',
-                color: isActive ? '#0078d4' : 'var(--text-secondary)',
-                fontWeight: isActive ? 600 : 400,
-                border: isActive ? '1px solid rgba(0, 120, 212, 0.2)' : '1px solid transparent',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}
+              className={`btn btn-ghost sidebar-nav-item ${isActive ? 'active' : ''}`}
             >
               <Icon size={20} />
               <span style={{ flexGrow: 1, textAlign: 'left' }}>{item.name}</span>
