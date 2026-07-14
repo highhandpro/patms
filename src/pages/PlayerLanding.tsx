@@ -91,11 +91,12 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
         {/* Premium Description */}
         <p 
           style={{
-            fontSize: '1rem',
-            color: 'var(--text-secondary)',
+            fontSize: '1.05rem',
+            color: 'rgba(255, 255, 255, 0.85)',
             lineHeight: 1.6,
             margin: '0 auto',
-            maxWidth: '460px'
+            maxWidth: '460px',
+            textShadow: '0 1px 2px rgba(0,0,0,0.2)'
           }}
         >
           Welcome to the club. Sign in to view upcoming schedules, check live results, track player standings, and reserve your seat at the next table.
@@ -119,9 +120,8 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
               width: '100%',
               padding: '14px 24px',
               fontSize: '1.05rem',
-              fontWeight: 600,
+              fontWeight: 700,
               borderRadius: '12px',
-              boxShadow: '0 8px 24px rgba(11, 107, 66, 0.15)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -138,11 +138,13 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
               width: '100%',
               padding: '12px 24px',
               fontSize: '0.95rem',
-              color: 'var(--text-primary)',
+              color: '#FFFFFF',
               borderRadius: '12px',
-              border: '1px solid var(--border-subtle)',
-              backgroundColor: 'rgba(0, 0, 0, 0.02)',
-              cursor: 'pointer'
+              border: '1.5px solid rgba(255, 255, 255, 0.3)',
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.2s ease'
             }}
           >
             Access Admin Dashboard
