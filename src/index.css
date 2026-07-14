@@ -1813,12 +1813,16 @@ body.display-mode-active .main-content {
 .main-content h1,
 .main-content h2,
 .main-content h3,
+.main-content h4,
+.main-content h5,
+.main-content h6,
 .main-content p,
 .main-content label,
 .main-content span,
+.main-content strong,
 .main-content .text-muted,
 .main-content .text-secondary {
-  color: #FFFFFF;
+  color: #FFFFFF !important;              /* Force white text to override inline color styles */
 }
 
 /* Page subtitle description paragraphs outside cards should be light silver/grey */
@@ -1829,7 +1833,7 @@ body.display-mode-active .main-content {
   color: #BFBFBF !important;
 }
 
-/* Secondary border buttons outside cards (e.g. + Create New Season) */
+/* Secondary border buttons outside cards (e.g. + Create New Season, Edit details) */
 .main-content .btn-secondary {
   background-color: rgba(255, 255, 255, 0.1) !important;
   color: #FFFFFF !important;
@@ -1841,6 +1845,21 @@ body.display-mode-active .main-content {
   border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
+/* Ghost Tab Navigation buttons outside of cards on felt background */
+.main-content .btn-ghost {
+  color: #BFBFBF !important;              /* Light grey for inactive subtabs */
+}
+
+.main-content .btn-ghost:hover {
+  color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.main-content .btn-ghost.active-subtab {
+  color: #FFFFFF !important;              /* White active subtab text */
+  border-bottom: 3px solid #FFFFFF !important; /* White active subtab underline */
+}
+
 /* Active season status badge outside cards */
 .main-content .badge-emerald {
   background-color: #FFFFFF !important;
@@ -1850,11 +1869,11 @@ body.display-mode-active .main-content {
 
 /* ==========================================================================
    RESTORE DARK CONTRAST INSIDE CARDS, TABLES, INPUTS, AND DROPDOWNS
-   ========================================================================== */
-.glass-card h1, .glass-card h2, .glass-card h3, .glass-card h4, .glass-card h5,
-.glass-card p, .glass-card span, .glass-card label, .glass-card div,
+   ========================================================================= */
+.glass-card h1, .glass-card h2, .glass-card h3, .glass-card h4, .glass-card h5, .glass-card h6,
+.glass-card p, .glass-card span, .glass-card label, .glass-card div, .glass-card strong,
 .glass-card .text-secondary, .glass-card .text-muted,
-.table-container h1, .table-container h2, .table-container p, .table-container span,
+.table-container h1, .table-container h2, .table-container p, .table-container span, .table-container strong,
 .table-container td, .table-container th, .table-container tr,
 .form-group label, .form-group span, .form-group p,
 select, option, input, textarea {
