@@ -1976,7 +1976,7 @@ body.display-mode-active .main-content {
 
 /* Player Navbar Layout Theming (Background #0B6B2A) */
 .player-navbar {
-  background-color: #0B6B2A !important;    /* Solid Primary Green */
+  background-color: var(--bg-surface) !important;    /* Dynamic surface color from active theme */
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: #FFFFFF !important;
 }
@@ -2027,20 +2027,28 @@ body.display-mode-active .main-content {
 /* Login button inside Player Navbar styled as premium secondary button (white pill) */
 .btn-navbar-login {
   background-color: #FFFFFF !important;
-  color: #0B6B2A !important;               /* Primary Green text */
+  color: var(--color-emerald) !important;
   border: 1px solid transparent !important;
   font-weight: 600 !important;
   transition: all var(--transition-fast) ease !important;
 }
 
 .btn-navbar-login:hover {
-  background-color: #F5F7F5 !important;
-  color: #095822 !important;
+  background-color: var(--bg-main) !important;
+  color: var(--border-focus) !important;
   box-shadow: var(--shadow-sm) !important;
 }
 
-.btn-navbar-login * {
-  color: inherit !important;
+.btn-navbar-login *,
+.btn-navbar-login span,
+.btn-navbar-login svg {
+  color: var(--color-emerald) !important;
+}
+
+.btn-navbar-login:hover *,
+.btn-navbar-login:hover span,
+.btn-navbar-login:hover svg {
+  color: var(--border-focus) !important;
 }
 
 /* Page headers and text outside of cards should remain light/white on green felt background */
