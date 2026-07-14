@@ -1809,21 +1809,79 @@ body.display-mode-active .main-content {
   }
 }
 
-/* Page headers outside of cards should remain light/white on green felt background */
-.main-content > h1,
-.main-content > h2,
-.main-content > p,
-.main-content > .page-header h1,
-.main-content > .page-header p,
-.main-content > div > h1,
-.main-content > div > p,
-.page-title,
-.page-subtitle {
-  color: #FFFFFF !important;
+/* Page headers and text outside of cards should remain light/white on green felt background */
+.main-content h1,
+.main-content h2,
+.main-content h3,
+.main-content p,
+.main-content label,
+.main-content span,
+.main-content .text-muted,
+.main-content .text-secondary {
+  color: #FFFFFF;
 }
 
+/* Page subtitle description paragraphs outside cards should be light silver/grey */
 .main-content > p,
 .main-content > div > p,
-.main-content > .page-header p {
-  color: #BFBFBF !important; /* light silver/grey */
+.main-content > .page-header p,
+.main-content .page-subtitle {
+  color: #BFBFBF !important;
+}
+
+/* Secondary border buttons outside cards (e.g. + Create New Season) */
+.main-content .btn-secondary {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.main-content .btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Active season status badge outside cards */
+.main-content .badge-emerald {
+  background-color: #FFFFFF !important;
+  color: #025908 !important;
+  border-color: rgba(2, 89, 8, 0.3) !important;
+}
+
+/* ==========================================================================
+   RESTORE DARK CONTRAST INSIDE CARDS, TABLES, INPUTS, AND DROPDOWNS
+   ========================================================================== */
+.glass-card h1, .glass-card h2, .glass-card h3, .glass-card h4, .glass-card h5,
+.glass-card p, .glass-card span, .glass-card label, .glass-card div,
+.glass-card .text-secondary, .glass-card .text-muted,
+.table-container h1, .table-container h2, .table-container p, .table-container span,
+.table-container td, .table-container th, .table-container tr,
+.form-group label, .form-group span, .form-group p,
+select, option, input, textarea {
+  color: var(--text-primary) !important;
+}
+
+.glass-card .text-secondary, .table-container .text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.glass-card .text-muted, .table-container .text-muted {
+  color: var(--text-muted) !important;
+}
+
+.glass-card .btn-secondary {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+.glass-card .btn-secondary:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+.glass-card .badge-emerald {
+  background-color: rgba(2, 89, 8, 0.08) !important;
+  color: #025908 !important;
+  border-color: rgba(2, 89, 8, 0.25) !important;
 }
