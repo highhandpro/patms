@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { calculateMemberStats } from '../utils/stats';
-import { Search, UserPlus, Phone, Mail, Calendar, Eye, Edit2, Trash2, X } from 'lucide-react';
+import { UserPlus, Phone, Mail, Calendar, Eye, Edit2, Trash2, X } from 'lucide-react';
 import type { Member } from '../types';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { initializeAuth, inMemoryPersistence, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -466,16 +466,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
         
         {/* Search Input */}
         <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
-          <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-            <Search size={18} />
-          </span>
           <input
             type="text"
             placeholder="Search by name, phone, or member ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="form-input"
-            style={{ paddingLeft: '48px' }}
           />
         </div>
 
@@ -497,7 +493,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   <tr key={m.id}>
                     <td style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{m.id}</td>
                     <td style={{ fontWeight: 600 }}>
-                      {m.firstName} {m.lastName}
+                      {m.firstName} {m.lastName} {m.cardUrl ? ' 🖼️' : ''}
                     </td>
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
