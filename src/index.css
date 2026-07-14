@@ -270,33 +270,39 @@ p {
 }
 
 .badge-emerald {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: var(--text-emerald);
-  border-color: rgba(16, 185, 129, 0.2);
+  background-color: #025908;
+  color: #FFFFFF;
+  border-color: #014005;
+}
+
+.badge-info {
+  background-color: #0078d4;
+  color: #FFFFFF;
+  border-color: #005a9e;
 }
 
 .badge-gold {
-  background-color: rgba(251, 191, 36, 0.1);
-  color: var(--text-gold);
-  border-color: rgba(251, 191, 36, 0.2);
+  background-color: rgba(2, 89, 8, 0.08);
+  color: #025908;
+  border-color: rgba(2, 89, 8, 0.2);
 }
 
 .badge-danger {
-  background-color: rgba(248, 113, 113, 0.1);
-  color: var(--color-danger);
-  border-color: rgba(248, 113, 113, 0.2);
+  background-color: #ef4444;
+  color: #FFFFFF;
+  border-color: #dc2626;
 }
 
 .badge-warning {
-  background-color: rgba(251, 146, 60, 0.1);
-  color: var(--color-warning);
-  border-color: rgba(251, 146, 60, 0.2);
+  background-color: #f97316;
+  color: #FFFFFF;
+  border-color: #ea580c;
 }
 
 .badge-secondary {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary);
-  border-color: var(--border-subtle);
+  background-color: #E5E7EB;
+  color: #374151;
+  border-color: #D1D5DB;
 }
 
 /* Tables */

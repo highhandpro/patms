@@ -135,7 +135,7 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
               Season ToC Pool: <strong style={{ color: 'var(--color-gold)' }}>${seasonToCPool}</strong>
             </span>
             {activeSeason.isActive ? (
-              <span className="badge badge-gold">Active Season</span>
+              <span className="badge badge-info">Active Season</span>
             ) : (
               isChiefAdmin && (
                 <button 

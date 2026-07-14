@@ -187,10 +187,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
               style={{
                 width: '100%',
                 justifyContent: 'flex-start',
-                backgroundColor: isActive ? 'rgba(16, 185, 129, 0.08)' : 'transparent',
-                color: isActive ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                backgroundColor: isActive ? 'rgba(0, 120, 212, 0.08)' : 'transparent',
+                color: isActive ? '#0078d4' : 'var(--text-secondary)',
                 fontWeight: isActive ? 600 : 400,
-                border: isActive ? '1px solid rgba(16, 185, 129, 0.15)' : '1px solid transparent',
+                border: isActive ? '1px solid rgba(0, 120, 212, 0.2)' : '1px solid transparent',
                 borderRadius: '8px',
                 padding: '12px 16px',
                 display: 'flex',
@@ -203,8 +203,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
               {item.id === 'members' && pendingApprovalsCount > 0 && (
                 <span 
                   style={{
-                    backgroundColor: 'var(--text-gold)',
-                    color: '#000',
+                    backgroundColor: '#E5E7EB',
+                    color: '#111827',
                     fontSize: '0.75rem',
                     fontWeight: 700,
                     borderRadius: '10px',
@@ -228,13 +228,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
             width: '100%',
             justifyContent: 'center',
             fontSize: '0.85rem',
-            color: 'var(--color-gold)',
-            borderColor: 'rgba(251, 191, 36, 0.25)',
+            color: '#0078d4',
+            borderColor: 'rgba(0, 120, 212, 0.3)',
             borderStyle: 'solid',
             borderWidth: '1px',
             borderRadius: '8px',
             padding: '8px 12px',
-            backgroundColor: 'rgba(251, 191, 36, 0.04)'
+            backgroundColor: 'rgba(0, 120, 212, 0.04)'
           }}
         >
           Switch to Player Portal

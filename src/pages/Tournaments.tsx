@@ -1420,8 +1420,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           <td style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{seasonName}</td>
                           <td style={{ textAlign: 'center' }}>
                             <span className={`badge ${
-                              t.status === 'completed' ? 'badge-secondary' :
-                              t.status === 'active' ? 'badge-emerald' : 'badge-warning'
+                              t.status === 'completed' ? 'badge-emerald' :
+                              t.status === 'active' ? 'badge-info' : 'badge-secondary'
                             }`}>
                               {t.status}
                             </span>
@@ -1700,8 +1700,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h2 style={{ fontSize: '1.8rem', fontWeight: 800 }}>{activeTournament.name}</h2>
             <span className={`badge ${
-              activeTournament.status === 'completed' ? 'badge-secondary' :
-              activeTournament.status === 'active' ? 'badge-emerald' : 'badge-warning'
+              activeTournament.status === 'completed' ? 'badge-emerald' :
+              activeTournament.status === 'active' ? 'badge-info' : 'badge-secondary'
             }`}>
               {activeTournament.status}
             </span>
