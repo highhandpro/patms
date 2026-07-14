@@ -96,10 +96,16 @@ function App() {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const [showFirstNameDropdown, setShowFirstNameDropdown] = useState(false);
+  const [showLastNameDropdown, setShowLastNameDropdown] = useState(false);
 
   const typedFirst = loginFirstName.trim().toLowerCase();
-  const matchedPlayers = (!isGuestMode && typedFirst.length >= 3)
+  const matchedPlayers = (!isGuestMode && typedFirst.length >= 1)
     ? state.members.filter(m => !m.isDeleted && m.firstName.toLowerCase().startsWith(typedFirst))
+    : [];
+
+  const typedLast = loginLastName.trim().toLowerCase();
+  const matchedPlayersLast = (!isGuestMode && typedLast.length >= 1)
+    ? state.members.filter(m => !m.isDeleted && m.lastName.toLowerCase().startsWith(typedLast))
     : [];
 
   useEffect(() => {
@@ -153,6 +159,7 @@ function App() {
     setLoginFirstName(m.firstName);
     setLoginLastName(m.lastName);
     setShowFirstNameDropdown(false);
+    setShowLastNameDropdown(false);
     performDirectLogin(m);
   };
 
@@ -826,16 +833,54 @@ function App() {
                       </div>
                     )}
                   </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
+                  <div className="form-group" style={{ marginBottom: 0, position: 'relative' }}>
                     <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>Last Name</label>
                     <input 
                       type="text" 
                       required
                       value={loginLastName}
                       onChange={e => setLoginLastName(e.target.value)}
+                      onFocus={() => setShowLastNameDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowLastNameDropdown(false), 200)}
                       className="form-input"
                       style={{ padding: '10px 14px', borderRadius: '10px' }}
                     />
+                    {showLastNameDropdown && matchedPlayersLast.length > 0 && (
+                      <div 
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          right: 0,
+                          backgroundColor: '#16161a',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          borderRadius: '10px',
+                          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)',
+                          zIndex: 10,
+                          maxHeight: '180px',
+                          overflowY: 'auto',
+                          marginTop: '4px'
+                        }}
+                      >
+                        {matchedPlayersLast.map(m => (
+                          <div
+                            key={m.id}
+                            onClick={() => handleSelectMatchedPlayer(m)}
+                            style={{
+                              padding: '10px 14px',
+                              cursor: 'pointer',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.9rem',
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.02)',
+                              textAlign: 'left'
+                            }}
+                            className="dropdown-item"
+                          >
+                            {m.firstName} {m.lastName}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
