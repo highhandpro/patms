@@ -33,6 +33,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [logoUrl, setLogoUrl] = useState('');
   const [cardUrl, setCardUrl] = useState('');
   const [tempPassword, setTempPassword] = useState('');
+  const [pin, setPin] = useState('');
 
   // Phone input formatting
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +58,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setLogoUrl('');
     setCardUrl('');
     setTempPassword('');
+    setPin('');
     setErrorMsg(null);
     setIsAddMemberOpen(true);
   };
@@ -73,6 +75,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setLogoUrl(m.logoUrl || '');
     setCardUrl(m.cardUrl || '');
     setTempPassword('');
+    setPin(m.pin || '');
     setErrorMsg(null);
   };
 
@@ -117,6 +120,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       }
     }
 
+    if (pin.trim() && !/^\d{4}$/.test(pin.trim())) {
+      setErrorMsg('PIN must be exactly 4 digits.');
+      return;
+    }
+
     try {
       if (editingMember) {
         await updateMember(editingMember.id, {
@@ -127,7 +135,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           notes,
           logoUrl,
           cardUrl,
-          role
+          role,
+          pin: pin.trim()
         });
         setEditingMember(null);
       } else {
@@ -138,7 +147,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
             return;
           }
         }
-        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl, cardUrl, role);
+        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl, cardUrl, role, pin.trim());
         setIsAddMemberOpen(false);
       }
 
@@ -153,6 +162,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       setCardUrl('');
       setMemberIdInput('');
       setTempPassword('');
+      setPin('');
       setErrorMsg(null);
     } catch (err) {
       console.error(err);
@@ -909,6 +919,19 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
               )}
 
               <div className="form-group" style={{ marginBottom: 0 }}>
+                <label htmlFor="member-pin">4-Digit Player PIN</label>
+                <input
+                  id="member-pin"
+                  type="text"
+                  maxLength={4}
+                  placeholder="e.g. 1234 (Players can use this to log in)"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label htmlFor="notes">Admin Notes</label>
                 <textarea
                   id="notes"
@@ -1082,6 +1105,9 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
               </p>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                 <strong>Email:</strong> {selectedMemberForProfile.email || 'No email recorded'}
+              </p>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                <strong>Player PIN:</strong> {selectedMemberForProfile.pin || 'Not Set'}
               </p>
               {selectedMemberForProfile.notes && (
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>

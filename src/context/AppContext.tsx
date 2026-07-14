@@ -14,7 +14,7 @@ import {
 interface AppContextProps {
   state: DatabaseState;
   activeSeason: Season | null;
-  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player') => void;
+  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player', pin?: string) => void;
   updateMember: (id: string, updated: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   addSeason: (name: string, startDate: string, endDate: string, isActive: boolean) => void;
@@ -59,7 +59,7 @@ interface AppContextProps {
   exportDatabase: () => string;
   resetDatabaseToDefault: () => void;
   submitMemberUpdate: (memberId: string, phone: string, email: string) => void;
-  registerGuestPlayer: (firstName: string, lastName: string, phone: string, email: string, logoUrl?: string) => string;
+  registerGuestPlayer: (firstName: string, lastName: string, phone: string, email: string, logoUrl?: string, pin?: string) => string;
   approveMemberUpdate: (approvalId: string) => void;
   rejectMemberUpdate: (approvalId: string) => void;
   submitPlayerInfoForm: (firstName: string, lastName: string, phone: string, email: string, textReminders: boolean, emailAnnouncements: boolean) => Promise<void>;
@@ -627,7 +627,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeSeason = state.seasons.find(s => s.isActive) || null;
 
   // Member Management
-  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player') => {
+  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player', pin?: string) => {
     let id = '';
     if (customId && customId.trim()) {
       id = customId.trim();
@@ -651,7 +651,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isDeleted: false,
       logoUrl: logoUrl || '',
       cardUrl: cardUrl || '',
-      role: role || 'player'
+      role: role || 'player',
+      pin: pin || ''
     };
     await setDoc(doc(db, 'members', id), newMember);
   };
@@ -1115,7 +1116,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await setDoc(doc(db, 'pendingApprovals', approvalId), newApproval);
   };
 
-  const registerGuestPlayer = (firstName: string, lastName: string, phone: string, email: string, logoUrl?: string): string => {
+  const registerGuestPlayer = (firstName: string, lastName: string, phone: string, email: string, logoUrl?: string, pin?: string): string => {
     const numbers = state.members.map(m => {
       const parsed = parseInt(m.id, 10);
       return isNaN(parsed) ? 0 : parsed;
@@ -1132,7 +1133,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       joinedDate: new Date().toISOString().split('T')[0],
       isDeleted: false,
       notes: 'Guest Player Registration',
-      logoUrl: logoUrl || ''
+      logoUrl: logoUrl || '',
+      pin: pin || ''
     };
 
     const approvalId = `ap-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -1170,6 +1172,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }, { merge: true });
       }
     } else if (approval.type === 'guest') {
+      const existingMember = state.members.find(m => m.id === approval.memberId);
       const newMember: Member = {
         id: approval.memberId,
         firstName: approval.firstName,
@@ -1180,7 +1183,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isDeleted: false,
         notes: 'Approved Member',
         textReminders: approval.textReminders !== undefined ? approval.textReminders : true,
-        emailAnnouncements: approval.emailAnnouncements !== undefined ? approval.emailAnnouncements : true
+        emailAnnouncements: approval.emailAnnouncements !== undefined ? approval.emailAnnouncements : true,
+        pin: existingMember?.pin || ''
       };
       await setDoc(doc(db, 'members', approval.memberId), newMember);
     }
