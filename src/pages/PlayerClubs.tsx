@@ -28,8 +28,15 @@ export const PlayerClubs: React.FC<PlayerClubsProps> = ({
               <h3 style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>Washougal Eagles Club</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '2px' }}>Primary Tournament Venue</p>
               <p style={{ marginTop: '12px', fontSize: '1rem', fontWeight: 600, color: 'var(--color-emerald)', lineHeight: '1.4' }}>
-                📍 1910 Main St,<br />
-                Washougal, WA 98671
+                <a 
+                  href="https://maps.google.com/?q=1910+Main+St,+Washougal,+WA+98671" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: 'inherit', textDecoration: 'underline' }}
+                >
+                  📍 1910 Main St,<br />
+                  Washougal, WA 98671
+                </a>
               </p>
             </div>
           </div>

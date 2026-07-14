@@ -306,7 +306,16 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                   <span className="metric-label">Location</span>
                   <span className="metric-value">{tournament.location || 'Washougal Eagles Club'}</span>
                   {(tournament.location === 'Washougal Eagles Club' || !tournament.location) && (
-                    <span className="metric-subtext">1910 Main St, Washougal, WA 98671</span>
+                    <span className="metric-subtext">
+                      <a 
+                        href="https://maps.google.com/?q=1910+Main+St,+Washougal,+WA+98671" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ color: 'inherit', textDecoration: 'underline' }}
+                      >
+                        1910 Main St, Washougal, WA 98671
+                      </a>
+                    </span>
                   )}
                 </div>
               </div>
