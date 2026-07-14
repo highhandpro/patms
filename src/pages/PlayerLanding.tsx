@@ -42,7 +42,7 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
           width: '350px',
           height: '350px',
           borderRadius: '50%',
-          backgroundColor: 'rgba(0, 120, 212, 0.02)',
+          backgroundColor: 'rgba(11, 107, 42, 0.02)',
           filter: 'blur(100px)',
           bottom: '15%',
           right: '10%',
@@ -68,12 +68,12 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
             maxWidth: '520px',
             borderRadius: '16px',
             overflow: 'hidden',
-            boxShadow: '0 24px 50px rgba(0, 0, 0, 0.6)',
-            backgroundColor: '#010101',
+            boxShadow: 'var(--shadow-lg)',
+            backgroundColor: 'transparent',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.04)',
+            border: '1px solid var(--border-subtle)',
             marginBottom: '8px'
           }}
         >
@@ -92,7 +92,7 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
         <p 
           style={{
             fontSize: '1rem',
-            color: 'rgba(255, 255, 255, 0.85)',
+            color: 'var(--text-secondary)',
             lineHeight: 1.6,
             margin: '0 auto',
             maxWidth: '460px'
@@ -121,7 +121,7 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
               fontSize: '1.05rem',
               fontWeight: 600,
               borderRadius: '12px',
-              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.25)',
+              boxShadow: '0 8px 24px rgba(11, 107, 66, 0.15)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -138,10 +138,10 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPo
               width: '100%',
               padding: '12px 24px',
               fontSize: '0.95rem',
-              color: '#FFFFFF',
+              color: 'var(--text-primary)',
               borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--border-subtle)',
+              backgroundColor: 'rgba(0, 0, 0, 0.02)',
               cursor: 'pointer'
             }}
           >

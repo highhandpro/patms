@@ -1,48 +1,48 @@
 :root {
   /* Colors */
-  --bg-main: #F8F9FA;                     /* Light Off-White Background */
-  --bg-surface: #BFBFBF;                  /* Light Silver/Grey Sidebar & Header Background */
-  --bg-card: #FFFFFF;                     /* Pure White Cards */
-  --bg-card-hover: #F3F4F6;               /* Off-White hover */
+  --bg-main: #F5F7F5;                     /* Light Background */
+  --bg-surface: #0B6B2A;                  /* Primary Green Navigation & Sidebar */
+  --bg-card: #FFFFFF;                     /* Card Background */
+  --bg-card-hover: #E8F5E9;               /* Table Row Hover */
   --bg-input: #FFFFFF;                    /* Pure White inputs */
   --bg-input-focus: #FFFFFF;
   
-  --border-subtle: #E5E7EB;               /* Crisp light grey borders for card dividers and tables */
-  --border-focus: #025908;                /* Vibrant Poker Green border on focus */
-  --border-focus-gold: #BFBFBF;
+  --border-subtle: #D7DDD7;               /* Light Gray Border */
+  --border-focus: #0B6B2A;                /* Primary Green focus border */
+  --border-focus-gold: #D4AF37;
   
-  --color-emerald: #025908;               /* Vibrant Poker Green */
-  --color-emerald-rgb: 2, 89, 8;
-  --color-emerald-glow: rgba(2, 89, 8, 0.1);
+  --color-emerald: #0B6B2A;               /* Primary Green */
+  --color-emerald-rgb: 11, 107, 42;
+  --color-emerald-glow: rgba(11, 107, 42, 0.1);
   
-  --color-gold: #0078d4;                  /* Microsoft Blue for high-contrast highlights */
-  --color-gold-rgb: 0, 120, 212;
-  --color-gold-glow: rgba(0, 120, 212, 0.1);
+  --color-gold: #D4AF37;                  /* Gold Accent for championships/TOC */
+  --color-gold-rgb: 212, 175, 55;
+  --color-gold-glow: rgba(212, 175, 55, 0.1);
   
-  --color-danger: #ef4444;                /* High contrast danger red */
-  --color-danger-rgb: 239, 68, 68;
-  --color-danger-glow: rgba(239, 68, 68, 0.1);
+  --color-danger: #D93A2F;                /* Danger Red */
+  --color-danger-rgb: 217, 58, 47;
+  --color-danger-glow: rgba(217, 58, 47, 0.1);
 
-  --color-warning: #f97316;
-  --color-info: #025908;
+  --color-warning: #D4AF37;               /* Warning Gold */
+  --color-info: #0B6B2A;
 
   /* Typography */
-  --text-primary: #111827;                /* Dark Slate / Black for high readability on light bg */
-  --text-secondary: #374151;              /* Medium Dark Grey */
-  --text-muted: #6B7280;                  /* Muted Grey */
-  --text-emerald: #025908;
-  --text-gold: #0078d4;
+  --text-primary: #1F2937;                /* Dark text */
+  --text-secondary: #6B7280;              /* Secondary Text */
+  --text-muted: #9CA3AF;                  /* Muted text */
+  --text-emerald: #0B6B2A;
+  --text-gold: #D4AF37;
 
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Effects */
-  --glass-blur: blur(16px);
-  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 16px 40px -6px rgba(0, 0, 0, 0.14);
-  --shadow-emerald: 0 0 15px rgba(2, 89, 8, 0.1);
-  --shadow-gold: 0 0 15px rgba(191, 191, 191, 0.2);
+  --glass-blur: blur(12px);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 16px -2px rgba(0, 0, 0, 0.05); /* Subtle shadow for premium look */
+  --shadow-lg: 0 12px 30px -4px rgba(0, 0, 0, 0.08);
+  --shadow-emerald: 0 0 10px rgba(11, 107, 42, 0.15);
+  --shadow-gold: 0 0 10px rgba(212, 175, 55, 0.2);
   
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -59,9 +59,6 @@
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-main);
-  background-image: url('/bg-felt.png');
-  background-repeat: repeat;
-  background-size: 150px;
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
@@ -139,12 +136,10 @@ p {
 /* Glass Card */
 .glass-card {
   background: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
+  border-radius: 10px;                     /* 10px border radius as per brand guide */
   padding: 24px;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md);            /* Subtle premium shadow */
   transition: transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
 }
 
@@ -185,15 +180,15 @@ p {
 }
 
 .btn-primary {
-  background-color: var(--color-emerald);
-  color: #FFFFFF;                         /* High contrast white text */
+  background-color: #0B6B2A;              /* Primary Green background */
+  color: #FFFFFF !important;
   font-weight: 600;
 }
 
 .btn-primary:hover {
-  background-color: #03730b;              /* Darker vibrant green on hover */
-  color: #FFFFFF;
-  box-shadow: var(--shadow-emerald);
+  background-color: #095822;              /* Darker green hover */
+  color: #FFFFFF !important;
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
@@ -202,26 +197,30 @@ p {
 }
 
 .btn-secondary {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  border-color: var(--border-subtle);
+  background-color: #FFFFFF !important;   /* White background */
+  color: #0B6B2A !important;              /* Primary Green text */
+  border: 1px solid #0B6B2A !important;   /* Primary Green border */
+  font-weight: 600;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: #F5F7F5 !important;   /* Light gray-green hover background */
+  color: #095822 !important;
+  border-color: #095822 !important;
+  transform: translateY(-1px);
 }
 
 .btn-danger {
-  background-color: rgba(248, 113, 113, 0.1);
-  color: var(--color-danger);
-  border-color: rgba(248, 113, 113, 0.2);
+  background-color: #D93A2F !important;   /* Success/Danger Red */
+  color: #FFFFFF !important;
+  border: 1px solid #c22f25 !important;
+  font-weight: 600;
 }
 
 .btn-danger:hover {
-  background-color: var(--color-danger);
-  color: #7f1d1d;
-  box-shadow: var(--shadow-sm);
+  background-color: #c22f25 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
 }
 
 .btn-gold {
@@ -270,39 +269,39 @@ p {
 }
 
 .badge-emerald {
-  background-color: #025908;
+  background-color: #2E9B45;              /* Registered / Success Green */
   color: #FFFFFF;
-  border-color: #014005;
+  border-color: #238036;
 }
 
 .badge-info {
-  background-color: #0078d4;
+  background-color: #0B6B2A;              /* Admin / Primary Green */
   color: #FFFFFF;
-  border-color: #005a9e;
+  border-color: #095822;
 }
 
 .badge-gold {
-  background-color: rgba(2, 89, 8, 0.08);
-  color: #025908;
-  border-color: rgba(2, 89, 8, 0.2);
+  background-color: #D4AF37;              /* Wait List / Gold */
+  color: #FFFFFF;
+  border-color: #bda032;
 }
 
 .badge-danger {
-  background-color: #ef4444;
+  background-color: #D93A2F;              /* Closed / Danger Red */
   color: #FFFFFF;
-  border-color: #dc2626;
+  border-color: #c22f25;
 }
 
 .badge-warning {
-  background-color: #f97316;
+  background-color: #D4AF37;              /* Pending / Gold Warning */
   color: #FFFFFF;
-  border-color: #ea580c;
+  border-color: #bda032;
 }
 
 .badge-secondary {
-  background-color: #E5E7EB;
-  color: #374151;
-  border-color: #D1D5DB;
+  background-color: #E5E7EB;              /* Draft / Silver grey */
+  color: #1F2937;
+  border-color: #D7DDD7;
 }
 
 /* Tables */
@@ -321,9 +320,9 @@ p {
 }
 
 .data-table th {
-  background-color: rgba(255, 255, 255, 0.02);
-  color: var(--text-secondary);
-  font-weight: 500;
+  background-color: #0B6B2A !important;   /* Primary Green background */
+  color: #FFFFFF !important;              /* White text */
+  font-weight: 600;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -339,8 +338,12 @@ p {
   border-bottom: none;
 }
 
+.data-table tr:nth-child(even) td {
+  background-color: #F5F7F5;              /* Alternate Row Background */
+}
+
 .data-table tr:hover td {
-  background-color: rgba(255, 255, 255, 0.015);
+  background-color: #E8F5E9 !important;   /* Light green hover */
 }
 
 /* Forms */
@@ -687,8 +690,7 @@ p {
 
 /* Card Suit Pattern Felt Background */
 .poker-pattern {
-  background-color: #012603;              /* Very Dark Forest Green */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='%23D9C3A9' fill-opacity='0.18'%3E%3Cpath d='M20 15 L30 5 L40 15 L30 25 Z'/%3E%3Ccircle cx='30' cy='60' r='5'/%3E%3Ccircle cx='23' cy='69' r='5'/%3E%3Ccircle cx='37' cy='69' r='5'/%3E%3Cpath d='M30 67 L30 75 L32 75 L32 67 Z'/%3E%3Cpath d='M100 20 C100 20 94 11 88 17 C82 23 88 32 100 44 C112 32 118 23 112 17 C106 11 100 20 100 20 Z'/%3E%3Cpath d='M100 64 C100 64 94 73 88 67 C82 61 88 52 100 40 C112 52 118 61 112 67 C106 73 100 64 100 64 Z M99 62 L99 70 L101 70 L101 62 Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-color: #0B6B2A;              /* Primary Green */
   border-bottom: 3px solid var(--color-gold);
 }
  
@@ -699,11 +701,7 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f3f4f6;
-  background-image: url('/upcoming-events-bg.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: #0B6B2A;              /* Primary Green */
   border-bottom: 3px solid var(--color-gold);
 }
  
@@ -1815,159 +1813,31 @@ body.display-mode-active .main-content {
   }
 }
 
-/* Page headers and text outside of cards should remain light/white on green felt background */
-.main-content h1,
-.main-content h2,
-.main-content h3,
-.main-content h4,
-.main-content h5,
-.main-content h6,
-.main-content p,
-.main-content label,
-.main-content span,
-.main-content strong,
-.main-content .text-muted,
-.main-content .text-secondary {
-  color: #FFFFFF !important;              /* Force white text to override inline color styles */
-}
-
-/* Page subtitle description paragraphs outside cards should be light silver/grey */
-.main-content > p,
-.main-content > div > p,
-.main-content > .page-header p,
-.main-content .page-subtitle {
-  color: #BFBFBF !important;
-}
-
-/* Secondary border buttons outside cards (e.g. + Create New Season, Edit details) */
-.main-content .btn-secondary {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: #FFFFFF !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-}
-
-.main-content .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.6) !important;
-}
-
-/* Ghost Tab Navigation buttons outside of cards on felt background styled as pill buttons */
+/* Ghost Tab Navigation subtab buttons styled as pill buttons */
 .main-content .btn-ghost {
-  background-color: #FFFFFF !important;    /* Solid white background for high contrast */
-  color: #374151 !important;               /* Dark grey text */
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
-  border-radius: 8px !important;           /* Rounded pill corners */
-  padding: 8px 16px !important;
+  background-color: #FFFFFF !important;    /* Solid white background */
+  color: #1F2937 !important;               /* Dark text */
+  border: 1px solid #D7DDD7 !important;    /* Light gray border */
+  border-radius: 20px !important;           /* Pill shape */
+  padding: 8px 18px !important;
   font-weight: 500 !important;
-  margin-right: 4px;
-  margin-bottom: 4px;
-  transition: all var(--transition-fast);
+  margin-right: 6px;
+  margin-bottom: 6px;
   box-shadow: var(--shadow-sm) !important;
+  transition: all var(--transition-fast) ease !important;
 }
 
 .main-content .btn-ghost:hover {
-  background-color: #F3F4F6 !important;
-  color: #111827 !important;
-  border-color: rgba(0, 0, 0, 0.18) !important;
+  background-color: #F5F7F5 !important;
+  color: #0B6B2A !important;               /* Hover Primary Green text */
+  border-color: #0B6B2A !important;
 }
 
 .main-content .btn-ghost.active-subtab {
-  background-color: #0078d4 !important;    /* Microsoft Blue active tab background */
-  color: #FFFFFF !important;               /* High contrast white text */
-  border-color: #005a9e !important;        /* Darker blue border */
-  border-bottom: 1px solid #005a9e !important; /* Override bottom border */
+  background-color: #0B6B2A !important;    /* Primary Green active tab */
+  color: #FFFFFF !important;               /* White text */
+  border-color: #095822 !important;
   font-weight: 600 !important;
-  box-shadow: 0 0 10px rgba(0, 120, 212, 0.3) !important; /* Premium subtle blue glow */
-}
-
-/* Maintain standard ghost styles for buttons inside white glass cards */
-.glass-card .btn-ghost {
-  background-color: transparent !important;
-  color: var(--text-secondary) !important;
-  border: none !important;
-  box-shadow: none !important;
-  margin: 0 !important;
-}
-
-.glass-card .btn-ghost:hover {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-  color: var(--text-primary) !important;
-}
-
-/* Active season status badge outside cards */
-.main-content .badge-emerald {
-  background-color: #FFFFFF !important;
-  color: #025908 !important;
-  border-color: rgba(2, 89, 8, 0.3) !important;
-}
-
-/* ==========================================================================
-   RESTORE DARK CONTRAST INSIDE CARDS, TABLES, INPUTS, AND DROPDOWNS
-   ========================================================================= */
-.glass-card h1, .glass-card h2, .glass-card h3, .glass-card h4, .glass-card h5, .glass-card h6,
-.glass-card p, .glass-card span, .glass-card label, .glass-card div, .glass-card strong,
-.glass-card .text-secondary, .glass-card .text-muted,
-.table-container h1, .table-container h2, .table-container p, .table-container span, .table-container strong,
-.table-container td, .table-container th, .table-container tr,
-.form-group label, .form-group span, .form-group p,
-select, option, input, textarea {
-  color: var(--text-primary) !important;
-}
-
-.glass-card .text-secondary, .table-container .text-secondary {
-  color: var(--text-secondary) !important;
-}
-
-.glass-card .text-muted, .table-container .text-muted {
-  color: var(--text-muted) !important;
-}
-
-.glass-card .btn-secondary {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-subtle) !important;
-}
-
-.glass-card .btn-secondary:hover {
-  background-color: rgba(0, 0, 0, 0.08) !important;
-  border-color: rgba(0, 0, 0, 0.15) !important;
-}
-
-.glass-card .badge-emerald {
-  background-color: rgba(2, 89, 8, 0.08) !important;
-  color: #025908 !important;
-  border-color: rgba(2, 89, 8, 0.25) !important;
-}
-
-/* Translucent warning/info banners sitting on green felt background */
-.main-content .translucent-banner,
-.main-content .translucent-banner h1,
-.main-content .translucent-banner h2,
-.main-content .translucent-banner h3,
-.main-content .translucent-banner h4,
-.main-content .translucent-banner h5,
-.main-content .translucent-banner h6,
-.main-content .translucent-banner p,
-.main-content .translucent-banner span,
-.main-content .translucent-banner strong,
-.main-content .translucent-banner label,
-.main-content .translucent-banner div {
-  color: #FFFFFF !important;              /* Force white text */
-}
-
-.main-content .translucent-banner p {
-  color: #BFBFBF !important;              /* Light grey subtitle text */
-}
-
-.main-content .translucent-banner .btn-secondary {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: #FFFFFF !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-}
-
-.main-content .translucent-banner .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* Specific overrides to force white text on primary and danger buttons inside cards and tables */
@@ -1995,12 +1865,63 @@ select, option, input, textarea {
   color: inherit !important;
 }
 
-/* Sidebar navigation item flat links with vertical indicator bar */
+/* Translucent banners redefined as clean white cards */
+.translucent-banner {
+  background: #FFFFFF !important;
+  border-color: #D7DDD7 !important;
+}
+
+/* ==========================================================================
+   SIDEBAR & NAVBAR NAVIGATION BRAND THEMING (#0B6B2A Background System)
+   ========================================================================= */
+
+/* Sidebar Layout Theming */
+.sidebar,
+.sidebar h1,
+.sidebar h2,
+.sidebar h3,
+.sidebar h4,
+.sidebar h5,
+.sidebar h6,
+.sidebar span,
+.sidebar label,
+.sidebar div,
+.sidebar strong {
+  color: #FFFFFF !important;
+}
+
+.sidebar p,
+.sidebar .text-muted {
+  color: #A3D9B1 !important;               /* Soft light green for muted descriptions */
+}
+
+/* Translucent outline buttons inside the green sidebar (Switch Portal, Log Out, Change Password) */
+.sidebar .btn-ghost {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  font-weight: 500 !important;
+  transition: all var(--transition-fast) ease !important;
+}
+
+.sidebar .btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #FFFFFF !important;
+}
+
+.sidebar .btn-ghost * {
+  color: #FFFFFF !important;
+}
+
+/* Sidebar navigation links matching brand spec: links white, active #5FCB72, hover #2E9B45 */
 .sidebar-nav-item {
   width: 100% !important;
   justify-content: flex-start !important;
   background-color: transparent !important;
-  color: var(--text-primary) !important;
+  color: #FFFFFF !important;
   font-weight: 500 !important;
   border: none !important;
   border-left: 4px solid transparent !important;
@@ -2012,18 +1933,94 @@ select, option, input, textarea {
   transition: all var(--transition-fast) ease !important;
 }
 
+.sidebar-nav-item * {
+  color: inherit !important;
+}
+
 .sidebar-nav-item:hover {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-  color: var(--text-primary) !important;
+  background-color: #2E9B45 !important;    /* Hover Accent Green background */
+  color: #FFFFFF !important;
+  border-left: 4px solid transparent !important;
 }
 
 .sidebar-nav-item.active {
-  background-color: rgba(0, 120, 212, 0.04) !important;
-  color: #0078d4 !important;
+  background-color: rgba(95, 203, 114, 0.08) !important;
+  color: #5FCB72 !important;               /* Active text highlight */
   font-weight: 700 !important;
-  border-left: 4px solid #0078d4 !important;
+  border-left: 4px solid #5FCB72 !important; /* Left indicator bar */
 }
 
 .sidebar-nav-item.active:hover {
-  background-color: rgba(0, 120, 212, 0.08) !important;
+  background-color: rgba(95, 203, 114, 0.12) !important;
+  color: #5FCB72 !important;
+  border-left: 4px solid #5FCB72 !important;
+}
+
+/* Player Navbar Layout Theming (Background #0B6B2A) */
+.player-navbar {
+  background-color: #0B6B2A !important;    /* Solid Primary Green */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+}
+
+.player-navbar-container *,
+.player-navbar-brand,
+.player-navbar-brand .brand-icon {
+  color: #FFFFFF !important;
+}
+
+.player-navbar-nav .nav-link {
+  background-color: transparent !important;
+  border: none !important;
+  color: #FFFFFF !important;               /* White link text */
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  transition: all var(--transition-fast) ease !important;
+}
+
+.player-navbar-nav .nav-link:hover {
+  background-color: #2E9B45 !important;    /* Hover Accent Green background */
+  color: #FFFFFF !important;
+}
+
+.player-navbar-nav .nav-link.active {
+  color: #5FCB72 !important;               /* Active page highlight */
+  background-color: rgba(95, 203, 114, 0.08) !important;
+  font-weight: 600 !important;
+}
+
+/* Dropdown trigger user button inside Player Navbar */
+.btn-navbar-user {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-navbar-user:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.btn-navbar-user * {
+  color: #FFFFFF !important;
+}
+
+/* Login button inside Player Navbar styled as premium secondary button (white pill) */
+.btn-navbar-login {
+  background-color: #FFFFFF !important;
+  color: #0B6B2A !important;               /* Primary Green text */
+  border: 1px solid transparent !important;
+  font-weight: 600 !important;
+  transition: all var(--transition-fast) ease !important;
+}
+
+.btn-navbar-login:hover {
+  background-color: #F5F7F5 !important;
+  color: #095822 !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.btn-navbar-login * {
+  color: inherit !important;
 }
