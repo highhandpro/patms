@@ -186,12 +186,13 @@ p {
 
 .btn-primary {
   background-color: var(--color-emerald);
-  color: #052e16;
+  color: #FFFFFF;                         /* High contrast white text */
   font-weight: 600;
 }
 
 .btn-primary:hover {
-  background-color: #34d399;
+  background-color: #03730b;              /* Darker vibrant green on hover */
+  color: #FFFFFF;
   box-shadow: var(--shadow-emerald);
   transform: translateY(-1px);
 }
@@ -225,12 +226,13 @@ p {
 
 .btn-gold {
   background-color: var(--color-gold);
-  color: #78350f;
+  color: #FFFFFF;                         /* High contrast white text */
   font-weight: 600;
 }
 
 .btn-gold:hover {
-  background-color: #fde047;
+  background-color: #025908;              /* Vibrant poker green on hover */
+  color: #FFFFFF;
   box-shadow: var(--shadow-gold);
   transform: translateY(-1px);
 }
@@ -1807,5 +1809,21 @@ body.display-mode-active .main-content {
   }
 }
 
+/* Page headers outside of cards should remain light/white on green felt background */
+.main-content > h1,
+.main-content > h2,
+.main-content > p,
+.main-content > .page-header h1,
+.main-content > .page-header p,
+.main-content > div > h1,
+.main-content > div > p,
+.page-title,
+.page-subtitle {
+  color: #FFFFFF !important;
+}
 
-
+.main-content > p,
+.main-content > div > p,
+.main-content > .page-header p {
+  color: #BFBFBF !important; /* light silver/grey */
+}
