@@ -366,7 +366,7 @@ p {
 .form-input {
   width: 100%;
   background-color: var(--bg-input);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid #A3AFA3;            /* Darker, visible outline border */
   border-radius: 10px;
   padding: 12px 16px;
   font-family: var(--font-sans);
@@ -378,8 +378,8 @@ p {
 .form-input:focus {
   outline: none;
   background-color: var(--bg-input-focus);
-  border-color: var(--color-emerald);
-  box-shadow: 0 0 0 2px var(--color-emerald-glow);
+  border-color: #0B6B2A !important;       /* Dark Green when active */
+  box-shadow: 0 0 0 3px rgba(11, 107, 42, 0.15) !important; /* Soft green glow ring */
 }
 
 .form-input::placeholder {

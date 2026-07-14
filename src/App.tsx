@@ -781,6 +781,7 @@ function App() {
                     <input 
                       type="text" 
                       required
+                      autoFocus
                       value={loginFirstName}
                       onChange={e => setLoginFirstName(e.target.value)}
                       onFocus={() => setShowFirstNameDropdown(true)}
