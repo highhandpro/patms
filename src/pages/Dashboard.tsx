@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { calculateStandings, formatDate } from '../utils/stats';
-import { Users, Trophy, Coins, Plus, Play, ChevronRight, Calendar, ArrowUpRight } from 'lucide-react';
+import { Users, Trophy, Coins, Plus, Play, ChevronRight, Calendar, ArrowUpRight, Construction } from 'lucide-react';
 import type { Tournament } from '../types';
 
 interface DashboardProps {
@@ -69,6 +69,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
           Welcome back, Tournament Director. Here is the club status for today.
         </p>
+      </div>
+
+      {/* Under Construction Banner */}
+      <div className="glass-card translucent-banner animate-pulse" style={{
+        borderLeft: '4px solid var(--color-gold)',
+        background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.02) 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        padding: '16px 20px'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(212, 175, 55, 0.08)',
+          borderRadius: '8px',
+          padding: '8px',
+          color: 'var(--color-gold)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Construction size={24} />
+        </div>
+        <div>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-gold)', margin: 0 }}>
+            Dashboard Under Construction
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px', margin: 0 }}>
+            Some metrics, live status, and real-time updates are currently undergoing active development and database migrations.
+          </p>
+        </div>
       </div>
 
       {/* Active Tournament Alert / Notification */}
