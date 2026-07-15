@@ -497,17 +497,17 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                 </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0' }}>
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '12px', margin: '20px 0', cursor: 'pointer' }}>
                 <input
                   id="under-construction"
                   type="checkbox"
                   checked={underConstruction}
                   onChange={(e) => setUnderConstruction(e.target.checked)}
-                  style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}
                 />
-                <label htmlFor="under-construction" style={{ cursor: 'pointer', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '2px', margin: 0 }}>
-                  <span>🚧 Enable "Under Construction" Mode</span>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 400 }}>
+                <label htmlFor="under-construction" style={{ cursor: 'pointer', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '4px', margin: 0 }}>
+                  <span style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>🚧 Enable "Under Construction" Mode</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 400, lineHeight: 1.4 }}>
                     When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
                   </span>
                 </label>
