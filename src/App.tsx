@@ -131,49 +131,55 @@ function App() {
     const subject = isReset 
       ? "Reset Your Security PIN - Penny Ante Poker Club" 
       : "Your Temporary Security PIN - Penny Ante Poker Club";
-      
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #ffffff; color: #111827;">
-        <h2 style="color: #0b6b2a; text-align: center; margin-bottom: 24px;">Penny Ante Poker Club</h2>
-        <p>Hello <strong>${firstName}</strong>,</p>
-        <p>You requested a temporary PIN to ${isReset ? 'reset your security PIN' : 'log in to the tournament registration site'}.</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <span style="font-size: 2.2rem; font-weight: bold; letter-spacing: 4px; padding: 12px 30px; background-color: #f3f4f6; border-radius: 8px; color: #111827; display: inline-block;">
-            ${code}
-          </span>
-        </div>
-        <p style="color: #4b5563; font-size: 0.9rem; text-align: center;">This temporary PIN is valid for <strong>15 minutes</strong> and can only be used once.</p>
-        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-        <p style="font-size: 0.8rem; color: #9ca3af; text-align: center; margin: 0;">This email was sent automatically. Please do not reply directly.</p>
-      </div>
-    `;
 
     // Local host debugging check (prevent sending live API calls during dev unless configured)
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log("[LOCAL DEV MOCK EMAIL SENT]", {
+      console.log("[LOCAL DEV MOCK EMAIL SENT - EMAILJS]", {
         To: toEmail,
         Subject: subject,
         Code: code,
-        HTML: htmlContent
+        ServiceId: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        TemplateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        PublicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       });
       return;
     }
 
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+    if (!serviceId || !templateId || !publicKey) {
+      console.error('EmailJS is not fully configured in your environment variables.');
+      return;
+    }
+
     try {
-      const response = await fetch('/api/send-email', {
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ to: toEmail, subject, html: htmlContent })
+        body: JSON.stringify({
+          service_id: serviceId,
+          template_id: templateId,
+          user_id: publicKey,
+          template_params: {
+            to_email: toEmail,
+            first_name: firstName,
+            code: code,
+            subject: subject
+          }
+        })
       });
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to send email via serverless proxy');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to dispatch email via EmailJS');
       }
-      console.log('Email sent successfully via Resend API.');
+      console.log('Email sent successfully via EmailJS API.');
     } catch (err: any) {
-      console.error('Email service failed to dispatch email:', err);
+      console.error('EmailJS dispatch failed:', err);
     }
   };
 
