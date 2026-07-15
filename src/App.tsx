@@ -117,8 +117,6 @@ function App() {
   const [tempCodeError, setTempCodeError] = useState<string | null>(null);
   const [memberForTempCode, setMemberForTempCode] = useState<Member | null>(null);
   const [isNoEmailAlertOpen, setIsNoEmailAlertOpen] = useState(false);
-  const [isEmailSentNotificationOpen, setIsEmailSentNotificationOpen] = useState(false);
-  const [simulatedSentCode, setSimulatedSentCode] = useState('');
   const [tempCodeNotice, setTempCodeNotice] = useState<string | null>(null);
 
   const generateTempCode = () => {
@@ -218,18 +216,17 @@ function App() {
 
     // Generate 4-digit temporary access code
     const code = generateTempCode();
+    console.log("Generated Temporary PIN for player:", code);
     const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
     try {
       await updateMember(m.id, { tempPassword: code, tempPasswordExpires: expires });
       setMemberForTempCode(m);
-      setSimulatedSentCode(code);
       setTempCodeInput('');
       setTempCodeError(null);
       setTempCodeNotice(null);
       setIsLoginModalOpen(false);
       setIsTempCodePromptOpen(true);
-      setIsEmailSentNotificationOpen(true);
     } catch (err: any) {
       setLoginError('Failed to generate temporary PIN: ' + err.message);
     }
@@ -405,7 +402,6 @@ function App() {
       setIsTempCodePromptOpen(false);
       setMemberForTempCode(null);
       setTempCodeInput('');
-      setIsEmailSentNotificationOpen(false);
 
       // Open the create PIN modal
       setSetupPin('');
@@ -421,15 +417,17 @@ function App() {
     if (!memberForTempCode) return;
     setTempCodeError(null);
     const code = generateTempCode();
+    console.log("Resent Temporary PIN for player:", code);
     const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
     try {
       await updateMember(memberForTempCode.id, { tempPassword: code, tempPasswordExpires: expires });
-      setSimulatedSentCode(code);
       setTempCodeNotice('A new access code has been sent to your email.');
     } catch (err: any) {
       setTempCodeError('Failed to resend code: ' + err.message);
     }
-  };  const handleForgotPin = async () => {
+  };
+
+  const handleForgotPin = async () => {
     if (!memberForPin) return;
     setPinError(null);
 
@@ -440,12 +438,12 @@ function App() {
     }
 
     const code = generateTempCode();
+    console.log("Generated Forgot PIN reset temporary code:", code);
     const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
     try {
       await updateMember(memberForPin.id, { tempPassword: code, tempPasswordExpires: expires });
       setMemberForTempCode(memberForPin);
-      setSimulatedSentCode(code);
       setTempCodeInput('');
       setTempCodeError(null);
       setTempCodeNotice('A temporary code has been sent to your email to verify identity and reset your PIN.');
@@ -454,7 +452,6 @@ function App() {
       setMemberForPin(null);
       setPinInput('');
       setIsTempCodePromptOpen(true);
-      setIsEmailSentNotificationOpen(true);
     } catch (err: any) {
       setPinError('Failed to generate reset code: ' + err.message);
     }
@@ -1640,7 +1637,6 @@ function App() {
               setIsTempCodePromptOpen(false);
               setMemberForTempCode(null);
               setTempCodeInput('');
-              setIsEmailSentNotificationOpen(false);
               setIsLoginModalOpen(true);
             }}
           >
@@ -1664,7 +1660,6 @@ function App() {
                   setIsTempCodePromptOpen(false);
                   setMemberForTempCode(null);
                   setTempCodeInput('');
-                  setIsEmailSentNotificationOpen(false);
                   setIsLoginModalOpen(true);
                 }}
                 style={{
@@ -1796,7 +1791,6 @@ function App() {
                     setIsTempCodePromptOpen(false);
                     setMemberForTempCode(null);
                     setTempCodeInput('');
-                    setIsEmailSentNotificationOpen(false);
                     setIsLoginModalOpen(true);
                   }}
                   className="btn btn-ghost"
@@ -1813,43 +1807,6 @@ function App() {
                 </button>
               </div>
             </div>
-
-            {/* Centered Email Simulation Dispatch Card (Under the Modal Card!) */}
-            {isEmailSentNotificationOpen && (
-              <div 
-                style={{
-                  backgroundColor: '#0F1926',
-                  border: '1px solid var(--border-focus)',
-                  borderRadius: '12px',
-                  padding: '16px 20px',
-                  color: '#FFFFFF',
-                  maxWidth: '440px',
-                  width: '100%',
-                  boxShadow: 'var(--shadow-lg)',
-                  position: 'relative'
-                }}
-                onClick={e => e.stopPropagation()}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <strong style={{ color: 'var(--text-gold)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    Access Code
-                  </strong>
-                  <button 
-                    onClick={() => setIsEmailSentNotificationOpen(false)}
-                    style={{ background: 'none', border: 'none', color: '#BFBFBF', cursor: 'pointer', fontSize: '1.2rem', padding: 0, lineHeight: 1 }}
-                  >
-                    ×
-                  </button>
-                </div>
-                
-                <div style={{ marginTop: '12px', padding: '10px 16px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>Enter Code</span>
-                  <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: '2px' }}>
-                    {simulatedSentCode}
-                  </h3>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
