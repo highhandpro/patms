@@ -392,35 +392,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         )}
                       </div>
 
-                      {/* SMS Reminders */}
-                      <div>
-                        <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>SMS Reminds: </span>
-                        {isGuest ? (
-                          <span style={{ color: approval.textReminders ? 'var(--color-emerald)' : 'var(--text-muted)' }}>
-                            {approval.textReminders ? 'YES' : 'NO'}
-                          </span>
-                        ) : (
-                          <>
-                            <span style={{ textDecoration: 'line-through', marginRight: '6px' }}>{originalMember?.textReminders ? 'YES' : 'NO'}</span>
-                            <span style={{ color: 'var(--color-emerald)', fontWeight: 600 }}>→ {approval.textReminders ? 'YES' : 'NO'}</span>
-                          </>
-                        )}
-                      </div>
 
-                      {/* Email Announcements */}
-                      <div>
-                        <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Email Announce: </span>
-                        {isGuest ? (
-                          <span style={{ color: approval.emailAnnouncements ? 'var(--color-emerald)' : 'var(--text-muted)' }}>
-                            {approval.emailAnnouncements ? 'YES' : 'NO'}
-                          </span>
-                        ) : (
-                          <>
-                            <span style={{ textDecoration: 'line-through', marginRight: '6px' }}>{originalMember?.emailAnnouncements ? 'YES' : 'NO'}</span>
-                            <span style={{ color: 'var(--color-emerald)', fontWeight: 600 }}>→ {approval.emailAnnouncements ? 'YES' : 'NO'}</span>
-                          </>
-                        )}
-                      </div>
                     </div>
                   </div>
 
