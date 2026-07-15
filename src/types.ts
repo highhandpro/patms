@@ -106,6 +106,7 @@ export interface Settings {
   adminPassword?: string;
   blinds?: BlindLevel[];
   colorPalette?: string;
+  isUnderConstruction?: boolean;
 }
 
 export interface PendingApproval {

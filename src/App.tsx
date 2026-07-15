@@ -742,6 +742,235 @@ function App() {
   };
 
   if (portalMode === 'player') {
+    if (state.settings.isUnderConstruction) {
+      return (
+        <div className="app-container player-portal-layout animate-fade-in" style={{
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '40px 20px',
+          textAlign: 'center',
+          background: 'url("/bg-felt.png")',
+          minHeight: '100vh',
+          color: '#FFFFFF'
+        }}>
+          <div className="glass-card animate-slide-up" style={{
+            maxWidth: '550px',
+            width: '100%',
+            padding: '48px 32px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '24px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+            borderRadius: '24px',
+            backgroundColor: 'var(--bg-surface)'
+          }}>
+            <div style={{
+              backgroundColor: 'rgba(212, 175, 55, 0.1)',
+              borderRadius: '50%',
+              padding: '24px',
+              color: 'var(--color-gold)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1.5px dashed var(--color-gold)'
+            }}>
+              <ShieldAlert size={48} />
+            </div>
+
+            <div>
+              <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-gold)', margin: 0, letterSpacing: '-0.02em' }}>
+                Penny Ante Poker Club
+              </h1>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#FFFFFF', marginTop: '12px', margin: '12px 0 0 0' }}>
+                Site Under Construction
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '16px', lineHeight: 1.6, margin: '16px 0 0 0' }}>
+                We are currently performing scheduled maintenance, database optimizations, and system migrations. We'll be back shortly with a fully updated experience!
+              </p>
+            </div>
+
+            <div style={{ width: '100%', borderTop: '1px solid var(--border-subtle)', margin: '12px 0' }} />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', alignItems: 'center' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+                Tournament Director or Administrator?
+              </p>
+              <button
+                onClick={() => handleSwitchPortalMode('admin')}
+                className="btn btn-ghost"
+                style={{
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#FFFFFF',
+                  padding: '10px 24px',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  borderRadius: '10px',
+                  width: 'auto'
+                }}
+              >
+                Access Admin Dashboard
+              </button>
+            </div>
+          </div>
+
+          {/* Glassmorphic Admin Password Modal */}
+          {isAdminPasswordModalOpen && (
+            <div 
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                backdropFilter: 'blur(10px)',
+                zIndex: 1000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '20px'
+              }}
+              onClick={() => setIsAdminPasswordModalOpen(false)}
+            >
+              <div 
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid var(--border-subtle)',
+                  boxShadow: 'var(--shadow-lg)',
+                  borderRadius: '20px',
+                  width: '100%',
+                  maxWidth: '400px',
+                  padding: '32px',
+                  position: 'relative',
+                  textAlign: 'center'
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                {/* Close Button */}
+                <button 
+                  onClick={() => setIsAdminPasswordModalOpen(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '20px',
+                    right: '20px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer',
+                    lineHeight: 1
+                  }}
+                >
+                  ×
+                </button>
+
+                {/* Password Icon */}
+                <div 
+                  style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(11, 107, 42, 0.08)',
+                    border: '2px solid #0B6B2A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px auto',
+                    color: '#0B6B2A',
+                    fontSize: '1.5rem'
+                  }}
+                >
+                  🔒
+                </div>
+
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
+                  Admin Authentication
+                </h2>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 20px 0', lineHeight: 1.4 }}>
+                  Please log in using your administrator credentials.
+                </p>
+
+                {adminPasswordError && (
+                  <div style={{
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    borderRadius: '8px',
+                    color: 'var(--color-pomegranate)',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    marginBottom: '16px',
+                    textAlign: 'left'
+                  }}>
+                    {adminPasswordError}
+                  </div>
+                )}
+
+                <form onSubmit={handleAdminPasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div className="form-group" style={{ marginBottom: 0, textAlign: 'left' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>Email Address</label>
+                    <input 
+                      type="email" 
+                      required
+                      placeholder="admin@pennyantepoker.com"
+                      value={adminEmailInput}
+                      onChange={e => setAdminEmailInput(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '10px 14px', borderRadius: '10px' }}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0, textAlign: 'left' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>Password</label>
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--color-gold)',
+                          fontSize: '0.8rem',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          padding: 0
+                        }}
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                    <input 
+                      type="password" 
+                      required
+                      placeholder="Enter password"
+                      value={adminPasswordInput}
+                      onChange={e => setAdminPasswordInput(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '10px 14px', borderRadius: '10px' }}
+                    />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{
+                      padding: '12px 20px',
+                      fontSize: '0.95rem',
+                      fontWeight: 600,
+                      borderRadius: '10px',
+                      marginTop: '4px'
+                    }}
+                  >
+                    Sign In & Enter
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="app-container player-portal-layout" style={{ flexDirection: 'column' }}>
         <PlayerNavbar 

@@ -49,6 +49,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const [attendancePoints, setAttendancePoints] = useState(state.settings.pointsBaseAttendance);
   const [maxPlayers, setMaxPlayers] = useState(state.settings.maxPlayersPerTable);
   const [colorPalette, setColorPalette] = useState(state.settings.colorPalette || 'default');
+  const [underConstruction, setUnderConstruction] = useState(!!state.settings.isUnderConstruction);
 
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -137,7 +138,8 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
       pointsBaseAttendance: attendancePoints,
       maxPlayersPerTable: maxPlayers,
       blinds: blindsList,
-      colorPalette: colorPalette
+      colorPalette: colorPalette,
+      isUnderConstruction: underConstruction
     };
 
     updateSettings(updated);
@@ -157,7 +159,8 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
       pointsBaseAttendance: attendancePoints,
       maxPlayersPerTable: maxPlayers,
       blinds: blindsList,
-      colorPalette: key
+      colorPalette: key,
+      isUnderConstruction: underConstruction
     };
     updateSettings(updated);
   };
@@ -256,6 +259,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
             setDealerApp(parsed.settings.defaultDealerAppreciation);
             setAttendancePoints(parsed.settings.pointsBaseAttendance);
             setMaxPlayers(parsed.settings.maxPlayersPerTable);
+            setUnderConstruction(!!parsed.settings.isUnderConstruction);
           }
         } else {
           setImportStatus('error');
@@ -491,6 +495,22 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                     className="form-input"
                   />
                 </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0' }}>
+                <input
+                  id="under-construction"
+                  type="checkbox"
+                  checked={underConstruction}
+                  onChange={(e) => setUnderConstruction(e.target.checked)}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                />
+                <label htmlFor="under-construction" style={{ cursor: 'pointer', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '2px', margin: 0 }}>
+                  <span>🚧 Enable "Under Construction" Mode</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 400 }}>
+                    When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
+                  </span>
+                </label>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '12px' }}>
