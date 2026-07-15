@@ -14,6 +14,8 @@ export interface Member {
   cardUrl?: string;
   role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player';
   pin?: string;
+  tempPassword?: string;
+  tempPasswordExpires?: string; // ISO string
 }
 
 export interface TournamentEntry {

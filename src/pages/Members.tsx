@@ -914,18 +914,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 </div>
               )}
 
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label htmlFor="member-pin">4-Digit Player PIN</label>
-                <input
-                  id="member-pin"
-                  type="text"
-                  maxLength={4}
-                  placeholder="e.g. 1234 (Players can use this to log in)"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                  className="form-input"
-                />
-              </div>
+              {role === 'player' && (
+                <div style={{ padding: '12px 16px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid var(--border-subtle)', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                  💡 <strong>Player Authentication</strong>: Normal players log in securely using a 6-character access code sent to their registered email address each time they access the portal. No manual PIN setup is required.
+                </div>
+              )}
 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label htmlFor="notes">Admin Notes</label>
@@ -1103,7 +1096,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 <strong>Email:</strong> {selectedMemberForProfile.email || 'No email recorded'}
               </p>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                <strong>Player PIN:</strong> {selectedMemberForProfile.pin || 'Not Set'}
+                <strong>Auth Status:</strong> {selectedMemberForProfile.email ? '📧 Email Authentication Active' : '⚠️ No Email (Login Blocked)'}
               </p>
               {selectedMemberForProfile.notes && (
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>

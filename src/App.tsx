@@ -100,16 +100,30 @@ function App() {
   const [showFirstNameDropdown, setShowFirstNameDropdown] = useState(false);
   const [showLastNameDropdown, setShowLastNameDropdown] = useState(false);
 
-  // Player PIN states
-  const [isPinPromptOpen, setIsPinPromptOpen] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState<string | null>(null);
-  const [memberForPin, setMemberForPin] = useState<Member | null>(null);
+
 
   const [isPinSetupOpen, setIsPinSetupOpen] = useState(false);
   const [setupPin, setSetupPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [pinSetupError, setPinSetupError] = useState<string | null>(null);
+
+  // Temporary Password authentication states
+  const [isTempCodePromptOpen, setIsTempCodePromptOpen] = useState(false);
+  const [tempCodeInput, setTempCodeInput] = useState('');
+  const [tempCodeError, setTempCodeError] = useState<string | null>(null);
+  const [memberForTempCode, setMemberForTempCode] = useState<Member | null>(null);
+  const [isNoEmailAlertOpen, setIsNoEmailAlertOpen] = useState(false);
+  const [isEmailSentNotificationOpen, setIsEmailSentNotificationOpen] = useState(false);
+  const [simulatedSentCode, setSimulatedSentCode] = useState('');
+
+  const generateTempCode = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
 
   const typedFirst = loginFirstName.trim().toLowerCase();
   const matchedPlayers = (!isGuestMode && typedFirst.length >= 1)
@@ -166,19 +180,32 @@ function App() {
 
 
 
-  const performDirectLogin = (m: Member) => {
-    if (m.pin) {
-      setMemberForPin(m);
-      setPinInput('');
-      setPinError(null);
-      setIsLoginModalOpen(false);
-      setIsPinPromptOpen(true);
-    } else {
+  const performDirectLogin = async (m: Member) => {
+    setLoginError(null);
+    
+    // Check if player has email on file
+    if (!m.email || !m.email.includes('@')) {
       setMatchedMember(m);
-      setPlayerCardPhone(m.phone);
-      setPlayerCardEmail(m.email);
       setIsLoginModalOpen(false);
-      setIsPlayerCardOpen(true);
+      setIsNoEmailAlertOpen(true);
+      return;
+    }
+
+    // Generate and update Firestore with temporary code
+    const code = generateTempCode();
+    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+    try {
+      await updateMember(m.id, { tempPassword: code, tempPasswordExpires: expires });
+      setMemberForTempCode(m);
+      setSimulatedSentCode(code);
+      setTempCodeInput('');
+      setTempCodeError(null);
+      setIsLoginModalOpen(false);
+      setIsTempCodePromptOpen(true);
+      setIsEmailSentNotificationOpen(true);
+    } catch (err: any) {
+      setLoginError('Failed to generate authentication code: ' + err.message);
     }
   };
 
@@ -278,7 +305,7 @@ function App() {
     setActivePlayerTab('events');
   };
 
-  const handlePlayerCardConfirm = () => {
+  const handlePlayerCardConfirm = async () => {
     if (!matchedMember) return;
 
     setPlayerCardError(null);
@@ -297,12 +324,79 @@ function App() {
       return;
     }
 
-    // Transition directly to PIN setup step
-    setSetupPin('');
-    setConfirmPin('');
-    setPinSetupError(null);
-    setIsPlayerCardOpen(false);
-    setIsPinSetupOpen(true);
+    try {
+      if (isNewMemberLogin) {
+        // Register guest player directly (we set their email and phone!)
+        const guestId = registerGuestPlayer(
+          matchedMember.firstName,
+          matchedMember.lastName,
+          playerCardPhone.trim(),
+          playerCardEmail.trim().toLowerCase(),
+          matchedMember.logoUrl
+        );
+
+        setLoggedInMemberId(guestId);
+      } else {
+        // Update existing member record
+        await updateMember(matchedMember.id, {
+          phone: playerCardPhone.trim(),
+          email: playerCardEmail.trim().toLowerCase()
+        });
+
+        // Submit pending approval if phone/email was edited
+        submitMemberUpdate(matchedMember.id, playerCardPhone.trim(), playerCardEmail.trim());
+
+        setLoggedInMemberId(matchedMember.id);
+      }
+
+      // Close modal and clear states
+      setIsPlayerCardOpen(false);
+      setMatchedMember(null);
+      setLoginFirstName('');
+      setLoginLastName('');
+      setIsNewMemberLogin(false);
+      setActivePlayerTab('events');
+    } catch (err: any) {
+      setPlayerCardError('Failed to save profile: ' + err.message);
+    }
+  };
+
+  const handleTempCodeVerify = () => {
+    if (!memberForTempCode) return;
+    setTempCodeError(null);
+
+    // Get current record of member from Firestore state
+    const member = state.members.find(m => m.id === memberForTempCode.id);
+    if (!member) {
+      setTempCodeError('Player profile not found.');
+      return;
+    }
+
+    if (!member.tempPassword || !member.tempPasswordExpires) {
+      setTempCodeError('No active access code found. Please try logging in again.');
+      return;
+    }
+
+    // Check expiry
+    const isExpired = new Date().getTime() > new Date(member.tempPasswordExpires).getTime();
+    if (isExpired) {
+      setTempCodeError('Access code has expired. Please try logging in again.');
+      return;
+    }
+
+    // Check code match (case-insensitive)
+    if (tempCodeInput.trim().toUpperCase() === member.tempPassword.toUpperCase()) {
+      setLoggedInMemberId(member.id);
+      setIsTempCodePromptOpen(false);
+      setMemberForTempCode(null);
+      setTempCodeInput('');
+      setLoginFirstName('');
+      setLoginLastName('');
+      setIsEmailSentNotificationOpen(false);
+      setActivePlayerTab('events');
+    } else {
+      setTempCodeError('Incorrect code. Please try again.');
+    }
   };
 
   const handlePinSetupConfirm = async () => {
@@ -360,22 +454,7 @@ function App() {
     }
   };
 
-  const handlePinVerify = () => {
-    if (!memberForPin) return;
-    setPinError(null);
 
-    if (pinInput === memberForPin.pin) {
-      setLoggedInMemberId(memberForPin.id);
-      setIsPinPromptOpen(false);
-      setMemberForPin(null);
-      setPinInput('');
-      setLoginFirstName('');
-      setLoginLastName('');
-      setActivePlayerTab('events');
-    } else {
-      setPinError('Incorrect PIN. Please try again.');
-    }
-  };
 
   // Listen to Firebase Auth state changes
   useEffect(() => {
@@ -1443,8 +1522,8 @@ function App() {
           </div>
         )}
 
-        {/* Glassmorphic PIN Verification Modal */}
-        {isPinPromptOpen && memberForPin && (
+        {/* Glassmorphic Temporary Code Verification Modal */}
+        {isTempCodePromptOpen && memberForTempCode && (
           <div
             style={{
               position: 'fixed',
@@ -1458,9 +1537,10 @@ function App() {
               padding: '20px'
             }}
             onClick={() => {
-              setIsPinPromptOpen(false);
-              setMemberForPin(null);
-              setPinInput('');
+              setIsTempCodePromptOpen(false);
+              setMemberForTempCode(null);
+              setTempCodeInput('');
+              setIsEmailSentNotificationOpen(false);
               setIsLoginModalOpen(true);
             }}
           >
@@ -1478,14 +1558,56 @@ function App() {
               }}
               onClick={e => e.stopPropagation()}
             >
+              {/* Close Button */}
+              <button 
+                onClick={() => {
+                  setIsTempCodePromptOpen(false);
+                  setMemberForTempCode(null);
+                  setTempCodeInput('');
+                  setIsEmailSentNotificationOpen(false);
+                  setIsLoginModalOpen(true);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  lineHeight: 1
+                }}
+              >
+                ×
+              </button>
+
+              <div 
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                  border: '2px solid var(--color-gold)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px auto',
+                  color: 'var(--color-gold)',
+                  fontSize: '1.5rem'
+                }}
+              >
+                ✉️
+              </div>
+
               <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
-                Enter Your PIN
+                Enter Access Code
               </h2>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
-                Welcome back, {memberForPin.firstName}! Please enter your 4-digit PIN to secure your session.
+                Please enter the 6-character temporary access code sent to your email.
               </p>
 
-              {pinError && (
+              {tempCodeError && (
                 <div style={{
                   color: 'var(--color-danger)',
                   fontSize: '0.85rem',
@@ -1495,51 +1617,30 @@ function App() {
                   borderRadius: '8px',
                   marginBottom: '16px'
                 }}>
-                  {pinError}
+                  {tempCodeError}
                 </div>
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', marginBottom: '28px' }}>
                 <div style={{ width: '100%', textAlign: 'left' }}>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-                    4-Digit PIN
+                    Access Code
                   </label>
                   <input
-                    type="password"
-                    pattern="[0-9]*"
-                    inputMode="numeric"
-                    maxLength={4}
+                    type="text"
                     autoFocus
-                    placeholder="Enter PIN"
-                    value={pinInput}
-                    onChange={e => {
-                      const val = e.target.value.replace(/\D/g, '');
-                      setPinInput(val);
-                      if (val.length === 4) {
-                        setTimeout(() => {
-                          if (val === memberForPin.pin) {
-                            setLoggedInMemberId(memberForPin.id);
-                            setIsPinPromptOpen(false);
-                            setMemberForPin(null);
-                            setPinInput('');
-                            setLoginFirstName('');
-                            setLoginLastName('');
-                            setActivePlayerTab('events');
-                          } else {
-                            setPinError('Incorrect PIN. Please try again.');
-                          }
-                        }, 100);
-                      }
-                    }}
+                    placeholder="Enter Code"
+                    value={tempCodeInput}
+                    onChange={e => setTempCodeInput(e.target.value)}
                     className="form-input"
-                    style={{ padding: '12px 16px', borderRadius: '12px', fontSize: '1.25rem', textAlign: 'center', letterSpacing: '0.5em', fontWeight: 'bold' }}
+                    style={{ padding: '12px 16px', borderRadius: '12px', fontSize: '1.25rem', textAlign: 'center', letterSpacing: '0.25em', fontWeight: 'bold' }}
                   />
                 </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button
-                  onClick={handlePinVerify}
+                  onClick={handleTempCodeVerify}
                   className="btn btn-primary"
                   style={{
                     padding: '14px 20px',
@@ -1554,9 +1655,10 @@ function App() {
                 </button>
                 <button
                   onClick={() => {
-                    setIsPinPromptOpen(false);
-                    setMemberForPin(null);
-                    setPinInput('');
+                    setIsTempCodePromptOpen(false);
+                    setMemberForTempCode(null);
+                    setTempCodeInput('');
+                    setIsEmailSentNotificationOpen(false);
                     setIsLoginModalOpen(true);
                   }}
                   className="btn btn-ghost"
@@ -1572,10 +1674,150 @@ function App() {
                   CANCEL
                 </button>
               </div>
+            </div>
+          </div>
+        )}
 
-              <div style={{ marginTop: '20px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Forgot PIN? Contact Admin.
+        {/* Support Alert Modal (No Email) */}
+        {isNoEmailAlertOpen && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px'
+            }}
+            onClick={() => {
+              setIsNoEmailAlertOpen(false);
+              setMatchedMember(null);
+              setIsLoginModalOpen(true);
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '24px',
+                padding: '36px',
+                maxWidth: '440px',
+                width: '100%',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                position: 'relative',
+                border: '1px solid var(--border-subtle)',
+                textAlign: 'center'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button 
+                onClick={() => {
+                  setIsNoEmailAlertOpen(false);
+                  setMatchedMember(null);
+                  setIsLoginModalOpen(true);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  lineHeight: 1
+                }}
+              >
+                ×
+              </button>
+
+              <div 
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                  border: '2px solid var(--color-danger)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px auto',
+                  color: 'var(--color-danger)',
+                  fontSize: '1.5rem'
+                }}
+              >
+                ⚠️
               </div>
+
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
+                Email Required
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 600, margin: '0 0 12px 0', lineHeight: 1.4 }}>
+                No email address on file.
+              </p>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0 0 28px 0', lineHeight: 1.5 }}>
+                Please send a text to <strong>Tim Hufler, Website Support</strong> to add an email address to your profile.
+              </p>
+
+              <button
+                onClick={() => {
+                  setIsNoEmailAlertOpen(false);
+                  setMatchedMember(null);
+                  setIsLoginModalOpen(true);
+                }}
+                className="btn btn-primary"
+                style={{
+                  padding: '14px 20px',
+                  fontSize: '1.05rem',
+                  fontWeight: 700,
+                  borderRadius: '12px',
+                  width: '100%',
+                  boxShadow: '0 8px 20px rgba(16, 185, 129, 0.2)'
+                }}
+              >
+                BACK TO LOGIN
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Floating Simulated Email Toast */}
+        {isEmailSentNotificationOpen && (
+          <div style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            backgroundColor: '#0F1926',
+            border: '1px solid var(--border-focus)',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            color: '#FFFFFF',
+            zIndex: 1100,
+            maxWidth: '350px',
+            boxShadow: 'var(--shadow-lg)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <strong style={{ color: 'var(--text-gold)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                ✉️ Email Simulated Dispatch
+              </strong>
+              <button 
+                onClick={() => setIsEmailSentNotificationOpen(false)}
+                style={{ background: 'none', border: 'none', color: '#BFBFBF', cursor: 'pointer', fontSize: '1.2rem', padding: 0, lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: '#BFBFBF', margin: '4px 0 0 0', lineHeight: 1.4, textAlign: 'left' }}>
+              A temporary password email has been sent to <strong>{memberForTempCode?.email}</strong>.
+            </p>
+            <div style={{ marginTop: '12px', padding: '8px 12px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '6px', textAlign: 'center' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Temporary Code:</span>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', margin: '4px 0 0 0', letterSpacing: '2px' }}>
+                {simulatedSentCode}
+              </h3>
             </div>
           </div>
         )}
