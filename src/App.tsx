@@ -132,25 +132,13 @@ function App() {
       ? "Reset Your Security PIN - Penny Ante Poker Club" 
       : "Your Temporary Security PIN - Penny Ante Poker Club";
 
-    // Local host debugging check (prevent sending live API calls during dev unless configured)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log("[LOCAL DEV MOCK EMAIL SENT - EMAILJS]", {
-        To: toEmail,
-        Subject: subject,
-        Code: code,
-        ServiceId: import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        TemplateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-        PublicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-      });
-      return;
-    }
-
     const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     if (!serviceId || !templateId || !publicKey) {
-      console.error('EmailJS is not fully configured in your environment variables.');
+      console.warn('EmailJS environment variables are missing. Falling back to console log:');
+      console.log("[MOCK EMAIL LOG]", { toEmail, subject, code });
       return;
     }
 
