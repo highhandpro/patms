@@ -1531,10 +1531,12 @@ function App() {
               backgroundColor: 'rgba(0, 0, 0, 0.75)',
               backdropFilter: 'blur(10px)',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
-              padding: '20px'
+              padding: '20px',
+              gap: '16px'
             }}
             onClick={() => {
               setIsTempCodePromptOpen(false);
@@ -1675,6 +1677,43 @@ function App() {
                 </button>
               </div>
             </div>
+
+            {/* Centered Email Simulation Dispatch Card (Under the Modal Card!) */}
+            {isEmailSentNotificationOpen && (
+              <div 
+                style={{
+                  backgroundColor: '#0F1926',
+                  border: '1px solid var(--border-focus)',
+                  borderRadius: '12px',
+                  padding: '16px 20px',
+                  color: '#FFFFFF',
+                  maxWidth: '440px',
+                  width: '100%',
+                  boxShadow: 'var(--shadow-lg)',
+                  position: 'relative'
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <strong style={{ color: 'var(--text-gold)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    Access Code
+                  </strong>
+                  <button 
+                    onClick={() => setIsEmailSentNotificationOpen(false)}
+                    style={{ background: 'none', border: 'none', color: '#BFBFBF', cursor: 'pointer', fontSize: '1.2rem', padding: 0, lineHeight: 1 }}
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div style={{ marginTop: '12px', padding: '10px 16px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>Enter Code</span>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: '2px' }}>
+                    {simulatedSentCode}
+                  </h3>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1784,43 +1823,7 @@ function App() {
           </div>
         )}
 
-        {/* Floating Simulated Email Toast */}
-        {isEmailSentNotificationOpen && (
-          <div style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            backgroundColor: '#0F1926',
-            border: '1px solid var(--border-focus)',
-            borderRadius: '12px',
-            padding: '16px 20px',
-            color: '#FFFFFF',
-            zIndex: 1100,
-            maxWidth: '350px',
-            boxShadow: 'var(--shadow-lg)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <strong style={{ color: 'var(--text-gold)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                ✉️ Email Simulated Dispatch
-              </strong>
-              <button 
-                onClick={() => setIsEmailSentNotificationOpen(false)}
-                style={{ background: 'none', border: 'none', color: '#BFBFBF', cursor: 'pointer', fontSize: '1.2rem', padding: 0, lineHeight: 1 }}
-              >
-                ×
-              </button>
-            </div>
-            <p style={{ fontSize: '0.85rem', color: '#BFBFBF', margin: '4px 0 0 0', lineHeight: 1.4, textAlign: 'left' }}>
-              A temporary password email has been sent to <strong>{memberForTempCode?.email}</strong>.
-            </p>
-            <div style={{ marginTop: '12px', padding: '8px 12px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '6px', textAlign: 'center' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Temporary Code:</span>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', margin: '4px 0 0 0', letterSpacing: '2px' }}>
-                {simulatedSentCode}
-              </h3>
-            </div>
-          </div>
-        )}
+
 
         {/* Glassmorphic PIN Setup Modal */}
         {isPinSetupOpen && matchedMember && (
