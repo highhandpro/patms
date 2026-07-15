@@ -429,6 +429,35 @@ function App() {
     } catch (err: any) {
       setTempCodeError('Failed to resend code: ' + err.message);
     }
+  };  const handleForgotPin = async () => {
+    if (!memberForPin) return;
+    setPinError(null);
+
+    // If player does not have an email, they cannot use self-service forgot PIN
+    if (!memberForPin.email || !memberForPin.email.includes('@')) {
+      setPinError('No email on file. Please contact Tim Hufler for PIN reset support.');
+      return;
+    }
+
+    const code = generateTempCode();
+    const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+
+    try {
+      await updateMember(memberForPin.id, { tempPassword: code, tempPasswordExpires: expires });
+      setMemberForTempCode(memberForPin);
+      setSimulatedSentCode(code);
+      setTempCodeInput('');
+      setTempCodeError(null);
+      setTempCodeNotice('A temporary code has been sent to your email to verify identity and reset your PIN.');
+      
+      setIsPinPromptOpen(false);
+      setMemberForPin(null);
+      setPinInput('');
+      setIsTempCodePromptOpen(true);
+      setIsEmailSentNotificationOpen(true);
+    } catch (err: any) {
+      setPinError('Failed to generate reset code: ' + err.message);
+    }
   };
 
   const handlePinSetupConfirm = async () => {
@@ -2073,6 +2102,26 @@ function App() {
                 >
                   VERIFY & LOGIN
                 </button>
+                
+                <div style={{ marginTop: '4px', marginBottom: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={handleForgotPin}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-gold)',
+                      fontWeight: 600,
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      padding: '4px 8px'
+                    }}
+                  >
+                    Forgot your PIN?
+                  </button>
+                </div>
+
                 <button
                   onClick={() => {
                     setIsPinPromptOpen(false);
