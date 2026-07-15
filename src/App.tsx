@@ -100,7 +100,16 @@ function App() {
   const [showFirstNameDropdown, setShowFirstNameDropdown] = useState(false);
   const [showLastNameDropdown, setShowLastNameDropdown] = useState(false);
 
+  // Player PIN states
+  const [isPinPromptOpen, setIsPinPromptOpen] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [memberForPin, setMemberForPin] = useState<Member | null>(null);
 
+  const [isPinSetupOpen, setIsPinSetupOpen] = useState(false);
+  const [setupPin, setSetupPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [pinSetupError, setPinSetupError] = useState<string | null>(null);
 
   // Temporary Password authentication states
   const [isTempCodePromptOpen, setIsTempCodePromptOpen] = useState(false);
@@ -178,7 +187,17 @@ function App() {
   const performDirectLogin = async (m: Member) => {
     setLoginError(null);
     
-    // Check if player has email on file. If not, treat them as a guest
+    // 1. If player already has a permanent PIN set on file, ask for their permanent PIN
+    if (m.pin && m.pin.trim()) {
+      setMemberForPin(m);
+      setPinInput('');
+      setPinError(null);
+      setIsLoginModalOpen(false);
+      setIsPinPromptOpen(true);
+      return;
+    }
+
+    // 2. If player has no PIN, check if player has email on file. If not, treat them as a guest
     if (!m.email || !m.email.includes('@')) {
       setMatchedMember({
         id: m.id,
@@ -199,7 +218,7 @@ function App() {
 
     // Generate 4-digit temporary access code
     const code = generateTempCode();
-    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+    const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
     try {
       await updateMember(m.id, { tempPassword: code, tempPasswordExpires: expires });
@@ -212,7 +231,7 @@ function App() {
       setIsTempCodePromptOpen(true);
       setIsEmailSentNotificationOpen(true);
     } catch (err: any) {
-      setLoginError('Failed to generate temporary access code: ' + err.message);
+      setLoginError('Failed to generate temporary PIN: ' + err.message);
     }
   };
 
@@ -380,23 +399,19 @@ function App() {
 
     // Check code match (case-insensitive)
     if (tempCodeInput.trim().toUpperCase() === member.tempPassword.toUpperCase()) {
-      try {
-        // Clear code on successful verify (valid for one use only)
-        await updateMember(member.id, {
-          tempPassword: '',
-          tempPasswordExpires: ''
-        });
-        setLoggedInMemberId(member.id);
-        setIsTempCodePromptOpen(false);
-        setMemberForTempCode(null);
-        setTempCodeInput('');
-        setLoginFirstName('');
-        setLoginLastName('');
-        setIsEmailSentNotificationOpen(false);
-        setActivePlayerTab('events');
-      } catch (err: any) {
-        setTempCodeError('Verification error: ' + err.message);
-      }
+      // Transition to PIN setup
+      setMatchedMember(member);
+      setIsNewMemberLogin(false);
+      setIsTempCodePromptOpen(false);
+      setMemberForTempCode(null);
+      setTempCodeInput('');
+      setIsEmailSentNotificationOpen(false);
+
+      // Open the create PIN modal
+      setSetupPin('');
+      setConfirmPin('');
+      setPinSetupError(null);
+      setIsPinSetupOpen(true);
     } else {
       setTempCodeError('Incorrect code. Please try again.');
     }
@@ -406,13 +421,52 @@ function App() {
     if (!memberForTempCode) return;
     setTempCodeError(null);
     const code = generateTempCode();
-    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
     try {
       await updateMember(memberForTempCode.id, { tempPassword: code, tempPasswordExpires: expires });
       setSimulatedSentCode(code);
       setTempCodeNotice('A new access code has been sent to your email.');
     } catch (err: any) {
       setTempCodeError('Failed to resend code: ' + err.message);
+    }
+  };
+
+  const handlePinSetupConfirm = async () => {
+    if (!matchedMember) return;
+    setPinSetupError(null);
+
+    // Validate 4-digit PIN
+    if (!/^\d{4}$/.test(setupPin)) {
+      setPinSetupError('PIN must be exactly 4 digits.');
+      return;
+    }
+
+    if (setupPin !== confirmPin) {
+      setPinSetupError('PIN confirmation does not match.');
+      return;
+    }
+
+    try {
+      // Save new permanent PIN, clear temporary PIN fields
+      await updateMember(matchedMember.id, {
+        pin: setupPin,
+        tempPassword: '',
+        tempPasswordExpires: ''
+      });
+
+      setLoggedInMemberId(matchedMember.id);
+
+      // Close setup modal and clear states
+      setIsPinSetupOpen(false);
+      setMatchedMember(null);
+      setLoginFirstName('');
+      setLoginLastName('');
+      setIsNewMemberLogin(false);
+      setSetupPin('');
+      setConfirmPin('');
+      setActivePlayerTab('events');
+    } catch (err: any) {
+      setPinSetupError('Failed to save PIN: ' + err.message);
     }
   };
 
@@ -1875,6 +1929,305 @@ function App() {
             </div>
           </div>
         )}
+        {/* Glassmorphic PIN Verification Modal */}
+        {isPinPromptOpen && memberForPin && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px'
+            }}
+            onClick={() => {
+              setIsPinPromptOpen(false);
+              setMemberForPin(null);
+              setPinInput('');
+              setIsLoginModalOpen(true);
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '24px',
+                padding: '36px',
+                maxWidth: '440px',
+                width: '100%',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                position: 'relative',
+                border: '1px solid var(--border-subtle)',
+                textAlign: 'center'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button 
+                onClick={() => {
+                  setIsPinPromptOpen(false);
+                  setMemberForPin(null);
+                  setPinInput('');
+                  setIsLoginModalOpen(true);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  lineHeight: 1
+                }}
+              >
+                ×
+              </button>
+
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
+                Enter Your PIN
+              </h2>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
+                Welcome back, {memberForPin.firstName}! Please enter your 4-digit PIN to secure your session.
+              </p>
+
+              {pinError && (
+                <div style={{
+                  color: 'var(--color-danger)',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  marginBottom: '16px'
+                }}>
+                  {pinError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', marginBottom: '28px' }}>
+                <div style={{ width: '100%', textAlign: 'left' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                    4-Digit PIN
+                  </label>
+                  <input
+                    type="password"
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    maxLength={4}
+                    autoFocus
+                    placeholder="Enter PIN"
+                    value={pinInput}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setPinInput(val);
+                      if (val.length === 4) {
+                        setTimeout(() => {
+                          if (val === memberForPin.pin) {
+                            setLoggedInMemberId(memberForPin.id);
+                            setIsPinPromptOpen(false);
+                            setMemberForPin(null);
+                            setPinInput('');
+                            setLoginFirstName('');
+                            setLoginLastName('');
+                            setActivePlayerTab('events');
+                          } else {
+                            setPinError('Incorrect PIN. Please try again.');
+                          }
+                        }, 100);
+                      }
+                    }}
+                    className="form-input"
+                    style={{ padding: '12px 16px', borderRadius: '12px', fontSize: '1.25rem', textAlign: 'center', letterSpacing: '0.5em', fontWeight: 'bold' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button
+                  onClick={() => {
+                    if (pinInput === memberForPin.pin) {
+                      setLoggedInMemberId(memberForPin.id);
+                      setIsPinPromptOpen(false);
+                      setMemberForPin(null);
+                      setPinInput('');
+                      setLoginFirstName('');
+                      setLoginLastName('');
+                      setActivePlayerTab('events');
+                    } else {
+                      setPinError('Incorrect PIN. Please try again.');
+                    }
+                  }}
+                  className="btn btn-primary"
+                  style={{
+                    padding: '14px 20px',
+                    fontSize: '1.05rem',
+                    fontWeight: 700,
+                    borderRadius: '12px',
+                    width: '100%',
+                    boxShadow: '0 8px 20px rgba(16, 185, 129, 0.2)'
+                  }}
+                >
+                  VERIFY & LOGIN
+                </button>
+                <button
+                  onClick={() => {
+                    setIsPinPromptOpen(false);
+                    setMemberForPin(null);
+                    setPinInput('');
+                    setIsLoginModalOpen(true);
+                  }}
+                  className="btn btn-ghost"
+                  style={{
+                    padding: '12px 20px',
+                    fontSize: '0.95rem',
+                    borderRadius: '12px',
+                    width: '100%',
+                    border: '1px solid var(--border-subtle)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                  }}
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Glassmorphic PIN Setup Modal */}
+        {isPinSetupOpen && matchedMember && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px'
+            }}
+            onClick={() => {
+              setIsPinSetupOpen(false);
+              setMatchedMember(null);
+              setIsNewMemberLogin(false);
+              setIsLoginModalOpen(true);
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '24px',
+                padding: '36px',
+                maxWidth: '440px',
+                width: '100%',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                position: 'relative',
+                border: '1px solid var(--border-subtle)',
+                textAlign: 'center'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
+                Create a 4-Digit PIN
+              </h2>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
+                Please assign a secure 4-digit PIN for future logins to secure your profile.
+              </p>
+
+              {pinSetupError && (
+                <div style={{
+                  color: 'var(--color-danger)',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  marginBottom: '16px'
+                }}>
+                  {pinSetupError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', marginBottom: '28px' }}>
+                <div style={{ width: '100%', textAlign: 'left' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                    Enter 4-Digit PIN
+                  </label>
+                  <input
+                    type="password"
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    maxLength={4}
+                    autoFocus
+                    placeholder="Enter PIN"
+                    value={setupPin}
+                    onChange={e => setSetupPin(e.target.value.replace(/\D/g, ''))}
+                    className="form-input"
+                    style={{ padding: '12px 16px', borderRadius: '12px', fontSize: '1.25rem', textAlign: 'center', letterSpacing: '0.5em', fontWeight: 'bold' }}
+                  />
+                </div>
+                <div style={{ width: '100%', textAlign: 'left' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                    Confirm 4-Digit PIN
+                  </label>
+                  <input
+                    type="password"
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    maxLength={4}
+                    placeholder="Confirm PIN"
+                    value={confirmPin}
+                    onChange={e => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                    className="form-input"
+                    style={{ padding: '12px 16px', borderRadius: '12px', fontSize: '1.25rem', textAlign: 'center', letterSpacing: '0.5em', fontWeight: 'bold' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button
+                  onClick={handlePinSetupConfirm}
+                  className="btn btn-primary"
+                  style={{
+                    padding: '14px 20px',
+                    fontSize: '1.05rem',
+                    fontWeight: 700,
+                    borderRadius: '12px',
+                    width: '100%',
+                    boxShadow: '0 8px 20px rgba(16, 185, 129, 0.2)'
+                  }}
+                >
+                  SAVE & LOGIN
+                </button>
+                <button
+                  onClick={() => {
+                    setIsPinSetupOpen(false);
+                    setMatchedMember(null);
+                    setIsNewMemberLogin(false);
+                    setIsLoginModalOpen(true);
+                  }}
+                  className="btn btn-ghost"
+                  style={{
+                    padding: '12px 20px',
+                    fontSize: '0.95rem',
+                    borderRadius: '12px',
+                    width: '100%',
+                    border: '1px solid var(--border-subtle)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                  }}
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Glassmorphic Admin Password Modal */}
         {isAdminPasswordModalOpen && (
           <div 
