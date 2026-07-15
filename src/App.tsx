@@ -117,10 +117,9 @@ function App() {
   const [simulatedSentCode, setSimulatedSentCode] = useState('');
 
   const generateTempCode = () => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    for (let i = 0; i < 4; i++) {
+      code += Math.floor(Math.random() * 10).toString();
     }
     return code;
   };
@@ -1606,7 +1605,7 @@ function App() {
                 Enter Access Code
               </h2>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
-                Please enter the 6-character temporary access code sent to your email.
+                Please enter the 4-digit temporary access code sent to your email.
               </p>
 
               {tempCodeError && (
@@ -1630,12 +1629,15 @@ function App() {
                   </label>
                   <input
                     type="text"
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    maxLength={4}
                     autoFocus
                     placeholder="Enter Code"
                     value={tempCodeInput}
-                    onChange={e => setTempCodeInput(e.target.value)}
+                    onChange={e => setTempCodeInput(e.target.value.replace(/\D/g, ''))}
                     className="form-input"
-                    style={{ padding: '12px 16px', borderRadius: '12px', fontSize: '1.25rem', textAlign: 'center', letterSpacing: '0.25em', fontWeight: 'bold' }}
+                    style={{ padding: '12px 16px', borderRadius: '12px', fontSize: '1.25rem', textAlign: 'center', letterSpacing: '0.5em', fontWeight: 'bold' }}
                   />
                 </div>
               </div>
