@@ -100,7 +100,11 @@ function App() {
   const [showFirstNameDropdown, setShowFirstNameDropdown] = useState(false);
   const [showLastNameDropdown, setShowLastNameDropdown] = useState(false);
 
-
+  // Player PIN states
+  const [isPinPromptOpen, setIsPinPromptOpen] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [memberForPin, setMemberForPin] = useState<Member | null>(null);
 
   const [isPinSetupOpen, setIsPinSetupOpen] = useState(false);
   const [setupPin, setSetupPin] = useState('');
@@ -115,6 +119,7 @@ function App() {
   const [isNoEmailAlertOpen, setIsNoEmailAlertOpen] = useState(false);
   const [isEmailSentNotificationOpen, setIsEmailSentNotificationOpen] = useState(false);
   const [simulatedSentCode, setSimulatedSentCode] = useState('');
+  const [tempCodeNotice, setTempCodeNotice] = useState<string | null>(null);
 
   const generateTempCode = () => {
     let code = '';
@@ -182,15 +187,31 @@ function App() {
   const performDirectLogin = async (m: Member) => {
     setLoginError(null);
     
-    // Check if player has email on file
-    if (!m.email || !m.email.includes('@')) {
-      setMatchedMember(m);
+    // 1. If player has a permanent PIN set on file, ask for their permanent PIN
+    if (m.pin && m.pin.trim()) {
+      setMemberForPin(m);
+      setPinInput('');
+      setPinError(null);
       setIsLoginModalOpen(false);
-      setIsNoEmailAlertOpen(true);
+      setIsPinPromptOpen(true);
       return;
     }
 
-    // Generate and update Firestore with temporary code
+    // 2. If player has no PIN set, they must log in using a temporary PIN sent to their email
+    // Check if player has email on file
+    if (!m.email || !m.email.includes('@')) {
+      // If no email on file, display contact info collection modal (using isPlayerCardOpen)
+      setMatchedMember(m);
+      setPlayerCardPhone(m.phone || '');
+      setPlayerCardEmail('');
+      setPlayerCardError(null);
+      setIsNewMemberLogin(false); // Updating an existing profile
+      setIsLoginModalOpen(false);
+      setIsPlayerCardOpen(true);
+      return;
+    }
+
+    // Generate 4-digit temporary PIN
     const code = generateTempCode();
     const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
@@ -200,11 +221,12 @@ function App() {
       setSimulatedSentCode(code);
       setTempCodeInput('');
       setTempCodeError(null);
+      setTempCodeNotice(null);
       setIsLoginModalOpen(false);
       setIsTempCodePromptOpen(true);
       setIsEmailSentNotificationOpen(true);
     } catch (err: any) {
-      setLoginError('Failed to generate authentication code: ' + err.message);
+      setLoginError('Failed to generate temporary PIN: ' + err.message);
     }
   };
 
@@ -336,25 +358,34 @@ function App() {
 
         setLoggedInMemberId(guestId);
       } else {
-        // Update existing member record
+        // Submit player contact updates to admin review queue
+        submitMemberUpdate(matchedMember.id, playerCardPhone.trim(), playerCardEmail.trim().toLowerCase());
+
+        // Generate temporary PIN
+        const code = generateTempCode();
+        const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+        // Save temporary PIN to member document so they can log in immediately
         await updateMember(matchedMember.id, {
-          phone: playerCardPhone.trim(),
-          email: playerCardEmail.trim().toLowerCase()
+          tempPassword: code,
+          tempPasswordExpires: expires
         });
 
-        // Submit pending approval if phone/email was edited
-        submitMemberUpdate(matchedMember.id, playerCardPhone.trim(), playerCardEmail.trim());
-
-        setLoggedInMemberId(matchedMember.id);
+        // Set state for temporary code prompt modal
+        setMemberForTempCode(matchedMember);
+        setSimulatedSentCode(code);
+        setTempCodeInput('');
+        setTempCodeError(null);
+        setTempCodeNotice('Contact updates submitted for admin review. Please check your email for the temporary PIN.');
+        
+        setIsPlayerCardOpen(false);
+        setMatchedMember(null);
+        setLoginFirstName('');
+        setLoginLastName('');
+        setIsNewMemberLogin(false);
+        setIsTempCodePromptOpen(true);
+        setIsEmailSentNotificationOpen(true);
       }
-
-      // Close modal and clear states
-      setIsPlayerCardOpen(false);
-      setMatchedMember(null);
-      setLoginFirstName('');
-      setLoginLastName('');
-      setIsNewMemberLogin(false);
-      setActivePlayerTab('events');
     } catch (err: any) {
       setPlayerCardError('Failed to save profile: ' + err.message);
     }
@@ -385,14 +416,19 @@ function App() {
 
     // Check code match (case-insensitive)
     if (tempCodeInput.trim().toUpperCase() === member.tempPassword.toUpperCase()) {
-      setLoggedInMemberId(member.id);
+      // Match successful! Transition directly to PIN setup before continuing
+      setMatchedMember(member);
+      setIsNewMemberLogin(false);
       setIsTempCodePromptOpen(false);
       setMemberForTempCode(null);
       setTempCodeInput('');
-      setLoginFirstName('');
-      setLoginLastName('');
       setIsEmailSentNotificationOpen(false);
-      setActivePlayerTab('events');
+
+      // Open the create PIN modal
+      setSetupPin('');
+      setConfirmPin('');
+      setPinSetupError(null);
+      setIsPinSetupOpen(true);
     } else {
       setTempCodeError('Incorrect code. Please try again.');
     }
@@ -427,11 +463,15 @@ function App() {
 
         setLoggedInMemberId(guestId);
       } else {
-        // Update existing member record with PIN
-        await updateMember(matchedMember.id, { pin: setupPin });
+        // Update existing member record with PIN and clear temporary code
+        await updateMember(matchedMember.id, { 
+          pin: setupPin,
+          tempPassword: '',
+          tempPasswordExpires: ''
+        });
 
-        // Submit pending approval if phone/email was edited
-        const hasEdits = playerCardPhone.trim() !== matchedMember.phone || playerCardEmail.trim() !== matchedMember.email;
+        // Submit pending approval if phone/email was edited (e.g. from previous edit flow)
+        const hasEdits = playerCardPhone.trim() && playerCardEmail.trim() && (playerCardPhone.trim() !== matchedMember.phone || playerCardEmail.trim() !== matchedMember.email);
         if (hasEdits) {
           submitMemberUpdate(matchedMember.id, playerCardPhone.trim(), playerCardEmail.trim());
         }
@@ -1426,7 +1466,11 @@ function App() {
 
  
               <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
-                {isNewMemberLogin ? 'Enter your contact details below.' : 'Please review your contact details below. You can correct them if they are outdated.'}
+                {isNewMemberLogin 
+                  ? 'Enter your contact details below.' 
+                  : (!matchedMember.email 
+                      ? 'An email address is required for secure authentication. Please enter your email and phone number to request a temporary access PIN.' 
+                      : 'Please review your contact details below. You can correct them if they are outdated.')}
               </p>
 
               {playerCardError && (
@@ -1494,7 +1538,9 @@ function App() {
                     boxShadow: '0 8px 20px rgba(16, 185, 129, 0.2)'
                   }}
                 >
-                  {isNewMemberLogin ? 'CONFIRM AND LOGIN' : 'Yes, this is me!'}
+                  {isNewMemberLogin 
+                    ? 'CONFIRM AND LOGIN' 
+                    : (!matchedMember.email ? 'SUBMIT & REQUEST PIN' : 'Yes, this is me!')}
                 </button>
                 <button 
                   onClick={() => {
@@ -1607,6 +1653,22 @@ function App() {
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
                 Please enter the 4-digit temporary access code sent to your email.
               </p>
+
+              {tempCodeNotice && (
+                <div style={{
+                  color: 'var(--color-success)',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  marginBottom: '20px',
+                  lineHeight: 1.4,
+                  textAlign: 'left'
+                }}>
+                  ✨ {tempCodeNotice}
+                </div>
+              )}
 
               {tempCodeError && (
                 <div style={{
@@ -1824,8 +1886,173 @@ function App() {
             </div>
           </div>
         )}
+        {/* Glassmorphic PIN Verification Modal */}
+        {isPinPromptOpen && memberForPin && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px'
+            }}
+            onClick={() => {
+              setIsPinPromptOpen(false);
+              setMemberForPin(null);
+              setPinInput('');
+              setIsLoginModalOpen(true);
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '24px',
+                padding: '36px',
+                maxWidth: '440px',
+                width: '100%',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                position: 'relative',
+                border: '1px solid var(--border-subtle)',
+                textAlign: 'center'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button 
+                onClick={() => {
+                  setIsPinPromptOpen(false);
+                  setMemberForPin(null);
+                  setPinInput('');
+                  setIsLoginModalOpen(true);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  lineHeight: 1
+                }}
+              >
+                ×
+              </button>
 
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
+                Enter Your PIN
+              </h2>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0 0 24px 0', lineHeight: 1.4 }}>
+                Welcome back, {memberForPin.firstName}! Please enter your 4-digit PIN to secure your session.
+              </p>
 
+              {pinError && (
+                <div style={{
+                  color: 'var(--color-danger)',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  marginBottom: '16px'
+                }}>
+                  {pinError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', marginBottom: '28px' }}>
+                <div style={{ width: '100%', textAlign: 'left' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                    4-Digit PIN
+                  </label>
+                  <input
+                    type="password"
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    maxLength={4}
+                    autoFocus
+                    placeholder="Enter PIN"
+                    value={pinInput}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setPinInput(val);
+                      if (val.length === 4) {
+                        setTimeout(() => {
+                          if (val === memberForPin.pin) {
+                            setLoggedInMemberId(memberForPin.id);
+                            setIsPinPromptOpen(false);
+                            setMemberForPin(null);
+                            setPinInput('');
+                            setLoginFirstName('');
+                            setLoginLastName('');
+                            setActivePlayerTab('events');
+                          } else {
+                            setPinError('Incorrect PIN. Please try again.');
+                          }
+                        }, 100);
+                      }
+                    }}
+                    className="form-input"
+                    style={{ padding: '12px 16px', borderRadius: '12px', fontSize: '1.25rem', textAlign: 'center', letterSpacing: '0.5em', fontWeight: 'bold' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button
+                  onClick={() => {
+                    if (pinInput === memberForPin.pin) {
+                      setLoggedInMemberId(memberForPin.id);
+                      setIsPinPromptOpen(false);
+                      setMemberForPin(null);
+                      setPinInput('');
+                      setLoginFirstName('');
+                      setLoginLastName('');
+                      setActivePlayerTab('events');
+                    } else {
+                      setPinError('Incorrect PIN. Please try again.');
+                    }
+                  }}
+                  className="btn btn-primary"
+                  style={{
+                    padding: '14px 20px',
+                    fontSize: '1.05rem',
+                    fontWeight: 700,
+                    borderRadius: '12px',
+                    width: '100%',
+                    boxShadow: '0 8px 20px rgba(16, 185, 129, 0.2)'
+                  }}
+                >
+                  VERIFY & LOGIN
+                </button>
+                <button
+                  onClick={() => {
+                    setIsPinPromptOpen(false);
+                    setMemberForPin(null);
+                    setPinInput('');
+                    setIsLoginModalOpen(true);
+                  }}
+                  className="btn btn-ghost"
+                  style={{
+                    padding: '12px 20px',
+                    fontSize: '0.95rem',
+                    borderRadius: '12px',
+                    width: '100%',
+                    border: '1px solid var(--border-subtle)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                  }}
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Glassmorphic PIN Setup Modal */}
         {isPinSetupOpen && matchedMember && (
