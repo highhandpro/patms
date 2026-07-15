@@ -1173,21 +1173,74 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }, { merge: true });
       }
     } else if (approval.type === 'guest') {
-      const existingMember = state.members.find(m => m.id === approval.memberId);
-      const newMember: Member = {
-        id: approval.memberId,
-        firstName: approval.firstName,
-        lastName: approval.lastName,
-        phone: approval.phone || '',
-        email: approval.email || '',
-        joinedDate: new Date().toISOString().split('T')[0],
-        isDeleted: false,
-        notes: 'Approved Member',
-        textReminders: approval.textReminders !== undefined ? approval.textReminders : true,
-        emailAnnouncements: approval.emailAnnouncements !== undefined ? approval.emailAnnouncements : true,
-        pin: existingMember?.pin || ''
-      };
-      await setDoc(doc(db, 'members', approval.memberId), newMember);
+      // 1. Check for possible matches to prevent duplicates
+      const cleanPhone = (approval.phone || '').replace(/\D/g, '');
+      const cleanEmail = (approval.email || '').trim().toLowerCase();
+      const first = (approval.firstName || '').trim().toLowerCase();
+      const last = (approval.lastName || '').trim().toLowerCase();
+
+      // Find any existing approved member who is NOT the temporary guest member itself
+      const matched = state.members.find(m => 
+        !m.isDeleted && 
+        m.id !== approval.memberId && // Must not be the temporary guest record
+        (
+          (m.firstName.toLowerCase() === first && m.lastName.toLowerCase() === last) ||
+          (cleanEmail && m.email.trim().toLowerCase() === cleanEmail) ||
+          (cleanPhone && m.phone.replace(/\D/g, '') === cleanPhone)
+        )
+      );
+
+      if (matched) {
+        console.log(`Matching member found: ${matched.firstName} ${matched.lastName} (ID: ${matched.id}). Merging guest registration...`);
+        
+        // Merge guest details into the existing member record
+        await setDoc(doc(db, 'members', matched.id), {
+          phone: approval.phone || matched.phone,
+          email: approval.email || matched.email,
+          notes: (matched.notes || '') + '\n[Approved & merged guest updates]'
+        }, { merge: true });
+
+        // Update any tournament entries to use the matched member's ID
+        for (const t of state.tournaments) {
+          const entryIndex = t.entries.findIndex(e => e.memberId === approval.memberId);
+          if (entryIndex !== -1) {
+            // Check if matched member already has an entry in this tournament
+            const matchedEntryExists = t.entries.some(e => e.memberId === matched.id);
+            let updatedEntries = [...t.entries];
+            if (matchedEntryExists) {
+              // Remove the temporary guest entry since they are already entered
+              updatedEntries.splice(entryIndex, 1);
+            } else {
+              // Replace temporary guest memberId with the matched memberId
+              updatedEntries[entryIndex] = {
+                ...updatedEntries[entryIndex],
+                memberId: matched.id
+              };
+            }
+            await updateDoc(doc(db, 'tournaments', t.id), { entries: updatedEntries });
+          }
+        }
+
+        // Delete the temporary guest member record
+        await deleteDoc(doc(db, 'members', approval.memberId));
+      } else {
+        // No match found, approve the temporary guest member as a new permanent player
+        const existingMember = state.members.find(m => m.id === approval.memberId);
+        const newMember: Member = {
+          id: approval.memberId,
+          firstName: approval.firstName,
+          lastName: approval.lastName,
+          phone: approval.phone || '',
+          email: approval.email || '',
+          joinedDate: new Date().toISOString().split('T')[0],
+          isDeleted: false,
+          notes: 'Approved Member',
+          textReminders: approval.textReminders !== undefined ? approval.textReminders : true,
+          emailAnnouncements: approval.emailAnnouncements !== undefined ? approval.emailAnnouncements : true,
+          pin: existingMember?.pin || ''
+        };
+        await setDoc(doc(db, 'members', approval.memberId), newMember);
+      }
     }
 
     await deleteDoc(doc(db, 'pendingApprovals', approvalId));

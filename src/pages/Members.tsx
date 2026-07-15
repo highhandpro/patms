@@ -914,25 +914,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 </div>
               )}
 
-              {role === 'player' && (
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label htmlFor="player-pin">4-Digit Security PIN (Optional)</label>
-                  <input
-                    type="password"
-                    pattern="[0-9]*"
-                    inputMode="numeric"
-                    maxLength={4}
-                    id="player-pin"
-                    placeholder="Enter 4-digit PIN (leave blank to clear PIN)"
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                    className="form-input"
-                  />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block', lineHeight: 1.3 }}>
-                    If left blank, the player will be required to log in via a temporary PIN emailed to their registered address.
-                  </span>
-                </div>
-              )}
+
 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label htmlFor="notes">Admin Notes</label>
