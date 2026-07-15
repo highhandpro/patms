@@ -784,7 +784,7 @@ function App() {
   };
 
   if (portalMode === 'player') {
-    if (state.settings.isUnderConstruction) {
+    if (state.settings.isUnderConstruction && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       return (
         <div className="app-container player-portal-layout animate-fade-in" style={{
           flexDirection: 'column',
