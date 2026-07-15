@@ -361,30 +361,15 @@ function App() {
         // Submit player contact updates to admin review queue
         submitMemberUpdate(matchedMember.id, playerCardPhone.trim(), playerCardEmail.trim().toLowerCase());
 
-        // Generate temporary PIN
-        const code = generateTempCode();
-        const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+        // Open the site (log the player in)
+        setLoggedInMemberId(matchedMember.id);
 
-        // Save temporary PIN to member document so they can log in immediately
-        await updateMember(matchedMember.id, {
-          tempPassword: code,
-          tempPasswordExpires: expires
-        });
-
-        // Set state for temporary code prompt modal
-        setMemberForTempCode(matchedMember);
-        setSimulatedSentCode(code);
-        setTempCodeInput('');
-        setTempCodeError(null);
-        setTempCodeNotice('Contact updates submitted for admin review. Please check your email for the temporary PIN.');
-        
         setIsPlayerCardOpen(false);
         setMatchedMember(null);
         setLoginFirstName('');
         setLoginLastName('');
         setIsNewMemberLogin(false);
-        setIsTempCodePromptOpen(true);
-        setIsEmailSentNotificationOpen(true);
+        setActivePlayerTab('events');
       }
     } catch (err: any) {
       setPlayerCardError('Failed to save profile: ' + err.message);
@@ -1469,7 +1454,7 @@ function App() {
                 {isNewMemberLogin 
                   ? 'Enter your contact details below.' 
                   : (!matchedMember.email 
-                      ? 'An email address is required for secure authentication. Please enter your email and phone number to request a temporary access PIN.' 
+                      ? 'An email address is required for secure authentication. Please enter your email and phone number to access the site. Your updates will be sent to the administrator for review.' 
                       : 'Please review your contact details below. You can correct them if they are outdated.')}
               </p>
 
@@ -1540,7 +1525,7 @@ function App() {
                 >
                   {isNewMemberLogin 
                     ? 'CONFIRM AND LOGIN' 
-                    : (!matchedMember.email ? 'SUBMIT & REQUEST PIN' : 'Yes, this is me!')}
+                    : (!matchedMember.email ? 'SUBMIT & OPEN SITE' : 'Yes, this is me!')}
                 </button>
                 <button 
                   onClick={() => {
