@@ -98,6 +98,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [eliminatingPlayerId, setEliminatingPlayerId] = useState<string | null>(null);
   const [bountiesWon, setBountiesWon] = useState<number>(0);
   const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+  const [showGameOverModal, setShowGameOverModal] = useState(false);
   const [payoutPcts, setPayoutPcts] = useState<number[]>([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
 
   // Payout and Add-ons configuration states
@@ -3207,6 +3208,171 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             initialBounties={activeTournament?.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}
           />
 
+          {/* Game Over Announcement Modal */}
+          {showGameOverModal && activeTournament && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1000002,
+              padding: '20px'
+            }}>
+              <div className="glass-card animate-slide-up" style={{
+                width: '100%',
+                maxWidth: '550px',
+                backgroundColor: '#0c192c',
+                color: '#ffffff',
+                border: '2px solid var(--color-gold)',
+                borderRadius: '20px',
+                padding: '32px',
+                textAlign: 'center',
+                boxShadow: '0 0 30px rgba(119, 208, 203, 0.2)'
+              }}>
+                <h2 style={{
+                  fontSize: 'clamp(2rem, 5vw, 3rem)',
+                  fontWeight: 950,
+                  color: 'var(--color-gold)',
+                  margin: '0 0 4px 0',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  textShadow: '0 0 20px rgba(119,208,203,0.3)'
+                }}>
+                  GAME OVER
+                </h2>
+                <p style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.95rem',
+                  marginBottom: '24px',
+                  fontWeight: 600
+                }}>
+                  Final Winners & Prize Distribution
+                </p>
+
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  maxHeight: '350px',
+                  overflowY: 'auto',
+                  marginBottom: '28px',
+                  paddingRight: '4px'
+                }}>
+                  {(() => {
+                    const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
+                    const addonCount = activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length;
+                    const rawPrizePool = (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
+                    const currentPrizePool = rawPrizePool - (buyInCount * (activeTournament.dealerAppreciationAmount || 0)) - (buyInCount * (activeTournament.foodAmount || 0));
+                    const calculatedPrizePool = currentPrizePool - (activeTournament.bubbleAmount || 0) - (activeTournament.highHandAmount || 0);
+                    
+                    const pctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+                    const payouts = pctList.map(pct => Math.round(calculatedPrizePool * (pct / 100)));
+
+                    const winners = activeTournament.entries
+                      .map(e => {
+                        const pos = e.finishPosition || activeTournament.entries.length;
+                        let payout = payouts[pos - 1] || 0;
+                        if (pos === 9) {
+                          payout = activeTournament.bubbleAmount || 0;
+                        }
+                        const bountiesCash = (e.bountiesCollected || 0) * (activeTournament.bountyAmount || 0);
+                        return {
+                          ...e,
+                          pos,
+                          payout,
+                          bountiesCash,
+                          totalCash: payout + bountiesCash
+                        };
+                      })
+                      .filter(e => e.payout > 0 || e.bountiesCash > 0 || (e.pos !== undefined && e.pos <= 3))
+                      .sort((a, b) => a.pos - b.pos);
+
+                    return winners.map(e => {
+                      const m = state.members.find(member => member.id === e.memberId);
+                      const name = m ? `${m.firstName} ${m.lastName}` : 'Unknown';
+                      const pos = e.pos;
+                      const payout = e.payout;
+                      const bountiesCount = e.bountiesCollected || 0;
+                      const bountiesCash = e.bountiesCash;
+                      const totalCash = e.totalCash;
+
+                      return (
+                        <div 
+                          key={e.memberId}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '12px 16px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                            borderRadius: '10px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left' }}>
+                            <span style={{
+                              fontWeight: 900,
+                              fontSize: '1.2rem',
+                              color: pos === 1 ? '#facc15' : pos === 2 ? '#94a3b8' : pos === 3 ? '#b45309' : 'var(--text-secondary)',
+                              width: '32px'
+                            }}>
+                              #{pos || '-'}
+                            </span>
+                            <div>
+                              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#ffffff' }}>
+                                {name}
+                              </div>
+                              {bountiesCount > 0 && activeTournament.bountyAmount > 0 && (
+                                <div style={{ fontSize: '0.75rem', color: '#34d399' }}>
+                                  {bountiesCount} bounty/bounties (+${bountiesCash})
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-emerald)' }}>
+                              ${totalCash}
+                            </div>
+                            {payout > 0 && bountiesCash > 0 && (
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                                (${payout} + ${bountiesCash})
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+
+                <button
+                  onClick={() => setShowGameOverModal(false)}
+                  className="btn btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    fontWeight: 800,
+                    fontSize: '1rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    borderRadius: '8px',
+                    backgroundColor: 'var(--color-emerald)',
+                    borderColor: 'var(--color-emerald)',
+                    color: '#ffffff'
+                  }}
+                >
+                  Close Summary
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Finalize Payouts Modal */}
           {showFinalizeModal && activeTournament && (
             <div style={{
@@ -3299,6 +3465,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     onClick={() => {
                       finalizeTournament(activeTournament.id);
                       setShowFinalizeModal(false);
+                      setShowGameOverModal(true);
                       setSubTab('results');
                     }}
                     className="btn btn-primary"
