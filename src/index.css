@@ -2261,11 +2261,12 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
 .bounty-number-input {
   padding: 0 !important;
   text-align: center !important;
-  color: var(--text-primary) !important;
-  background-color: rgba(0, 0, 0, 0.03) !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
   border: 1px solid var(--border-subtle) !important;
   border-radius: 4px !important;
-  font-size: 0.75rem !important;
+  font-size: 0.85rem !important;
+  line-height: 1 !important;
   -moz-appearance: textfield !important;
 }
 
