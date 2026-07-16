@@ -2266,4 +2266,11 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
   border: 1px solid var(--border-subtle) !important;
   border-radius: 4px !important;
   font-size: 0.75rem !important;
+  -moz-appearance: textfield !important;
+}
+
+.bounty-number-input::-webkit-outer-spin-button,
+.bounty-number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
 }

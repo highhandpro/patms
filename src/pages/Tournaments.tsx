@@ -2950,7 +2950,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     <input
                                       type="number"
                                       min={0}
-                                      value={entry.bountiesCollected}
+                                      value={entry.bountiesCollected ?? 0}
                                       onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
                                       disabled={isSubAdmin}
                                       className="bounty-number-input"
@@ -3114,7 +3114,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             <input
                               type="number"
                               min={0}
-                              value={entry.bountiesCollected}
+                              value={entry.bountiesCollected ?? 0}
                               onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
                               className="bounty-number-input"
                               style={{
