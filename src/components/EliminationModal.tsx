@@ -6,7 +6,7 @@ interface EliminationModalProps {
   bountiesWon: number;
   setBountiesWon: (n: number) => void;
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: (bounties?: number) => void;
   isAbsolute?: boolean;
   initialBounties?: number;
 }
@@ -72,7 +72,10 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
               <button
                 key={num}
                 type="button"
-                onClick={() => setBountiesWon(num)}
+                onClick={() => {
+                  setBountiesWon(num);
+                  onConfirm(num);
+                }}
                 className={`btn ${bountiesWon === num ? 'btn-primary' : 'btn-secondary'}`}
                 style={{
                   width: '45px',
@@ -109,7 +112,7 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
           <button onClick={onCancel} className="btn btn-secondary">
             Cancel
           </button>
-          <button onClick={onConfirm} className="btn btn-danger">
+          <button onClick={() => onConfirm()} className="btn btn-danger">
             Confirm Elimination
           </button>
         </div>

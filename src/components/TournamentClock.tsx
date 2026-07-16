@@ -1950,10 +1950,19 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           bountiesWon={bountiesWon}
           setBountiesWon={setBountiesWon}
           onCancel={() => setEliminatingPlayerId(null)}
-          onConfirm={() => {
-            eliminatePlayer(tournament.id, eliminatingPlayerId, bountiesWon);
+          onConfirm={(bounties) => {
+            const finalBounties = bounties !== undefined ? bounties : bountiesWon;
+            eliminatePlayer(tournament.id, eliminatingPlayerId, finalBounties);
             setEliminatingPlayerId(null);
             setBountiesWon(0);
+
+            // Re-request fullscreen on confirmation to ensure full screen tournament clock
+            const clockEl = document.getElementById('tournament-clock-container');
+            if (clockEl && !document.fullscreenElement) {
+              clockEl.requestFullscreen().catch(err => {
+                console.warn('Failed to restore fullscreen clock:', err);
+              });
+            }
           }}
           isAbsolute={true}
           initialBounties={tournament.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}

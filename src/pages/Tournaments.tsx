@@ -994,14 +994,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     </div>
   );
 
-  // Elimination submit
-  const submitElimination = () => {
-    if (activeTournament && eliminatingPlayerId) {
-      eliminatePlayer(activeTournament.id, eliminatingPlayerId, bountiesWon);
-      setEliminatingPlayerId(null);
-      setBountiesWon(0);
-    }
-  };
 
   const handleUpdateBounties = async (playerId: string, newCount: number) => {
     if (!activeTournament) return;
@@ -3188,7 +3180,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             bountiesWon={bountiesWon}
             setBountiesWon={setBountiesWon}
             onCancel={() => setEliminatingPlayerId(null)}
-            onConfirm={submitElimination}
+            onConfirm={(bounties) => {
+              const finalBounties = bounties !== undefined ? bounties : bountiesWon;
+              if (activeTournament && eliminatingPlayerId) {
+                eliminatePlayer(activeTournament.id, eliminatingPlayerId, finalBounties);
+                setEliminatingPlayerId(null);
+                setBountiesWon(0);
+              }
+            }}
             initialBounties={activeTournament?.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}
           />
 
