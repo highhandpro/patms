@@ -2820,8 +2820,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     {!isSubAdmin && (
                       <button 
                         onClick={() => {
+                          const entry = activeTournament.entries.find(e => e.memberId === p.id);
+                          const existingBounties = entry ? entry.bountiesCollected || 0 : 0;
                           setEliminatingPlayerId(p.id);
-                          setBountiesWon(0);
+                          setBountiesWon(existingBounties);
                         }}
                         className="btn btn-danger"
                         style={{ padding: '2px 8px', fontSize: '0.75rem', minHeight: 'auto', height: '24px', flexShrink: 0 }}
@@ -3162,6 +3164,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             setBountiesWon={setBountiesWon}
             onCancel={() => setEliminatingPlayerId(null)}
             onConfirm={submitElimination}
+            initialBounties={activeTournament?.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}
           />
 
           {/* Finalize Payouts Modal */}
@@ -4057,8 +4060,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           members={state.members}
           activeTournament={activeTournament}
           onEliminatePlayer={(playerId) => {
+            const entry = activeTournament.entries.find(e => e.memberId === playerId);
+            const existingBounties = entry ? entry.bountiesCollected || 0 : 0;
             setEliminatingPlayerId(playerId);
-            setBountiesWon(0);
+            setBountiesWon(existingBounties);
           }}
         />
       )}

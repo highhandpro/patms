@@ -1031,8 +1031,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                     <div 
                       key={p.memberId}
                       onClick={() => {
+                        const existingBounties = p.bountiesCollected || 0;
                         setEliminatingPlayerId(p.memberId);
-                        setBountiesWon(0);
+                        setBountiesWon(existingBounties);
                       }}
                       onMouseEnter={e => {
                         e.currentTarget.style.backgroundColor = '#7f1d1d';
@@ -1955,6 +1956,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             setBountiesWon(0);
           }}
           isAbsolute={true}
+          initialBounties={tournament.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}
         />
       )}
 

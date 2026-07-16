@@ -8,6 +8,7 @@ interface EliminationModalProps {
   onCancel: () => void;
   onConfirm: () => void;
   isAbsolute?: boolean;
+  initialBounties?: number;
 }
 
 export const EliminationModal: React.FC<EliminationModalProps> = ({
@@ -17,7 +18,8 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
   setBountiesWon,
   onCancel,
   onConfirm,
-  isAbsolute
+  isAbsolute,
+  initialBounties
 }) => {
   if (!isOpen) return null;
 
@@ -40,6 +42,28 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '20px' }}>
           Eliminate {playerName}
         </h3>
+
+        {initialBounties !== undefined && initialBounties > 0 && (
+          <div style={{
+            backgroundColor: 'rgba(217, 119, 6, 0.1)',
+            border: '1px solid #d97706',
+            borderRadius: '8px',
+            padding: '12px',
+            marginBottom: '20px',
+            fontSize: '0.85rem',
+            color: '#b45309',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            textAlign: 'left'
+          }}>
+            <span>⚠️</span>
+            <span>
+              This player already has <strong>{initialBounties}</strong> bounty/bounties recorded. Please update and confirm the total number of bounties they collected.
+            </span>
+          </div>
+        )}
 
         <div className="form-group">
           <label style={{ display: 'block', marginBottom: '12px', fontWeight: 600 }}>Number of Bounties Won</label>
