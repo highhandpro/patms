@@ -1761,9 +1761,21 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
       {/* MODAL 4: FINAL TABLE ANNOUNCEMENT */}
       {isFinalTableOpen && (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(12px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1001, padding: '24px' }}>
-          <div className="glass-card animate-slide-up" style={{ width: '95%', maxWidth: '1150px', backgroundColor: 'rgba(8,10,15,0.98)', border: '3px solid var(--color-gold)', borderRadius: '24px', padding: '40px', textAlign: 'center', boxShadow: '0 30px 60px rgba(0,0,0,0.8)' }}>
-            <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, color: 'var(--color-gold)', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.15em', textShadow: '0 0 30px rgba(251,191,36,0.4)' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(12px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1001, padding: '24px' }}>
+          <div 
+            style={{ 
+              width: '95%', 
+              maxWidth: '1150px', 
+              backgroundColor: '#FFFFFF', 
+              color: '#1A202C',
+              border: '1px solid var(--border-subtle)', 
+              borderRadius: '24px', 
+              padding: '40px', 
+              textAlign: 'center', 
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' 
+            }}
+          >
+            <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, color: 'var(--color-emerald)', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
               FINAL TABLE
             </h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(1rem, 2vw, 1.3rem)', marginBottom: '32px', fontWeight: 600 }}>
@@ -1774,11 +1786,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               display: 'grid', 
               gridTemplateColumns: 'repeat(2, 1fr)', 
               gap: '20px 32px', 
-              backgroundColor: 'rgba(0,0,0,0.5)', 
+              backgroundColor: '#F8FAFC', 
               borderRadius: '16px', 
               padding: '28px', 
               marginBottom: '32px', 
-              border: '1px solid rgba(255,255,255,0.06)' 
+              border: '1px solid #E2E8F0' 
             }}>
               {finalTablePlayers.map((p, idx) => {
                 const mem = members.find(m => m.id === p.memberId);
@@ -1791,15 +1803,16 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                     alignItems: 'center', 
                     justifyContent: 'space-between',
                     padding: '12px 24px', 
-                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                    border: '1px solid rgba(255,255,255,0.04)',
-                    borderRadius: '10px'
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '10px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                   }}>
-                    <span style={{ fontWeight: 800, color: 'var(--color-gold)', opacity: 0.9, fontSize: 'clamp(1.1rem, 2.2vw, 1.6rem)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <span style={{ fontWeight: 800, color: 'var(--color-emerald)', fontSize: 'clamp(1.1rem, 2.2vw, 1.6rem)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Seat {idx + 1}
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center' }}>
-                      <span style={{ fontWeight: 900, color: '#ffffff', fontSize: 'clamp(1.5rem, 3.2vw, 2.5rem)', letterSpacing: '0.02em', textShadow: '0 2px 8px rgba(0,0,0,0.5)', lineHeight: 1.1 }}>
+                      <span style={{ fontWeight: 900, color: '#1A202C', fontSize: 'clamp(1.5rem, 3.2vw, 2.5rem)', letterSpacing: '0.02em', lineHeight: 1.1 }}>
                         {firstName}
                       </span>
                       {lastName && (
@@ -1816,7 +1829,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             <button 
               onClick={() => setIsFinalTableOpen(false)}
               className="btn btn-primary"
-              style={{ width: '100%', padding: '16px', fontWeight: 800, fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderRadius: '12px' }}
+              style={{ width: '100%', padding: '16px', fontWeight: 800, fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderRadius: '12px', backgroundColor: 'var(--color-emerald)', borderColor: 'var(--color-emerald)' }}
             >
               Continue to Final Table
             </button>
