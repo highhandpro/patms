@@ -364,34 +364,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     if (isRunning) {
       interval = setInterval(() => {
         setTimeRemaining(prev => {
-          if (prev <= 1) {
-            playCustomSound('levelChange');
-            if (currentLevelIndex < levels.length - 1) {
-              const nextIndex = currentLevelIndex + 1;
-              setCurrentLevelIndex(nextIndex);
-              const nextTime = levels[nextIndex].duration * 60;
-              // Admin writes level transition to Firestore
-              updateTournament(tournament.id, {
-                clockState: {
-                  currentLevelIndex: nextIndex,
-                  timeRemainingSeconds: nextTime,
-                  isRunning: true,
-                  lastUpdated: new Date().toISOString()
-                }
-              });
-              return nextTime;
-            } else {
-              setIsRunning(false);
-              updateTournament(tournament.id, {
-                clockState: {
-                  currentLevelIndex,
-                  timeRemainingSeconds: 0,
-                  isRunning: false,
-                  lastUpdated: new Date().toISOString()
-                }
-              });
-              return 0;
-            }
+          if (prev <= 0) {
+            return 0;
           }
           return prev - 1;
         });
@@ -401,7 +375,39 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, currentLevelIndex]);
+  }, [isRunning]);
+
+  // Handle level transitions and audio alerts when time reaches 0
+  useEffect(() => {
+    if (timeRemaining === 0 && isRunning) {
+      playCustomSound('levelChange');
+      
+      if (currentLevelIndex < levels.length - 1) {
+        const nextIndex = currentLevelIndex + 1;
+        setCurrentLevelIndex(nextIndex);
+        const nextTime = levels[nextIndex].duration * 60;
+        setTimeRemaining(nextTime);
+        updateTournament(tournament.id, {
+          clockState: {
+            currentLevelIndex: nextIndex,
+            timeRemainingSeconds: nextTime,
+            isRunning: true,
+            lastUpdated: new Date().toISOString()
+          }
+        });
+      } else {
+        setIsRunning(false);
+        updateTournament(tournament.id, {
+          clockState: {
+            currentLevelIndex,
+            timeRemainingSeconds: 0,
+            isRunning: false,
+            lastUpdated: new Date().toISOString()
+          }
+        });
+      }
+    }
+  }, [timeRemaining, isRunning, currentLevelIndex, levels, tournament.id]);
 
   // Robust sound triggers effect (handles browser lag, skips, and tab background throttling)
   useEffect(() => {
