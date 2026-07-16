@@ -7,6 +7,7 @@ interface EliminationModalProps {
   setBountiesWon: (n: number) => void;
   onCancel: () => void;
   onConfirm: () => void;
+  isAbsolute?: boolean;
 }
 
 export const EliminationModal: React.FC<EliminationModalProps> = ({
@@ -15,13 +16,14 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
   bountiesWon,
   setBountiesWon,
   onCancel,
-  onConfirm
+  onConfirm,
+  isAbsolute
 }) => {
   if (!isOpen) return null;
 
   return (
     <div style={{
-      position: 'fixed',
+      position: isAbsolute ? 'absolute' : 'fixed',
       top: 0,
       left: 0,
       right: 0,

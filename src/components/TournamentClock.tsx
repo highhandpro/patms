@@ -805,6 +805,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     <div 
       ref={containerRef}
       style={{
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -1411,7 +1412,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         <div 
           onClick={() => setIsRightClickModalOpen(false)}
           style={{
-            position: 'fixed',
+            position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
@@ -1627,7 +1628,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
       {/* MODAL 2: ADD-ON DIRECT TD COUNT */}
       {isAddonOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
           <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', backgroundColor: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--color-gold)' }}>Record Tournament Add-ons</h3>
@@ -1666,7 +1667,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
       {/* MODAL 3: CHOP CALCULATOR */}
       {isChopOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
           <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '650px', backgroundColor: 'var(--bg-surface)', overflowY: 'auto', maxHeight: '90vh' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--color-gold)' }}>Chop Split Calculator</h3>
@@ -1753,7 +1754,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
       {/* MODAL 4: FINAL TABLE ANNOUNCEMENT */}
       {isFinalTableOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(12px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1001, padding: '24px' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(12px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1001, padding: '24px' }}>
           <div className="glass-card animate-slide-up" style={{ width: '95%', maxWidth: '1150px', backgroundColor: 'rgba(8,10,15,0.98)', border: '3px solid var(--color-gold)', borderRadius: '24px', padding: '40px', textAlign: 'center', boxShadow: '0 30px 60px rgba(0,0,0,0.8)' }}>
             <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, color: 'var(--color-gold)', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.15em', textShadow: '0 0 30px rgba(251,191,36,0.4)' }}>
               FINAL TABLE
@@ -1819,7 +1820,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
       {/* MODAL 5: FULLSCREEN BUST-OUT ANNOUNCEMENT OVERLAY */}
       {bustOutOverlay && (
         <div style={{ 
-          position: 'fixed', 
+          position: 'absolute', 
           top: 0, 
           left: 0, 
           right: 0, 
@@ -1933,6 +1934,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             setEliminatingPlayerId(null);
             setBountiesWon(0);
           }}
+          isAbsolute={true}
         />
       )}
 
