@@ -958,13 +958,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const updatedEntries = t.entries.map(e => {
       if (e.memberId === memberId) {
-        return {
-          ...e,
-          eliminatedAt: undefined,
-          eliminatedBy: undefined,
-          finishPosition: undefined,
-          bountiesCollected: 0
-        };
+        const { eliminatedAt, eliminatedBy, finishPosition, ...rest } = e;
+        return rest;
       }
       return e;
     });
