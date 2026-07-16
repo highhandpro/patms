@@ -2948,10 +2948,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                       -
                                     </button>
                                     <input
-                                      type="number"
-                                      min={0}
+                                      type="text"
+                                      inputMode="numeric"
+                                      pattern="[0-9]*"
                                       value={entry.bountiesCollected ?? 0}
-                                      onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
+                                      onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value.replace(/\D/g, '')) || 0))}
                                       disabled={isSubAdmin}
                                       className="bounty-number-input"
                                       style={{
@@ -3110,10 +3111,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               -
                             </button>
                             <input
-                              type="number"
-                              min={0}
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               value={entry.bountiesCollected ?? 0}
-                              onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
+                              onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value.replace(/\D/g, '')) || 0))}
                               className="bounty-number-input"
                             />
                             <button
