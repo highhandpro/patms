@@ -101,13 +101,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{member.phone || 'No phone registered'}</span>
                 </div>
               </div>
-              <div className="contact-item" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <Calendar size={18} style={{ color: 'var(--text-secondary)' }} />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Joined Date</span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{member.joinedDate}</span>
-                </div>
-              </div>
+
             </div>
           </div>
 

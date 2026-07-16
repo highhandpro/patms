@@ -61,7 +61,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [buyIn, setBuyIn] = useState(state.settings.defaultBuyIn);
   const [addon, setAddon] = useState(state.settings.defaultAddon);
   const [bounty, setBounty] = useState(state.settings.defaultBounty);
-  const [dealerApp, setDealerApp] = useState(state.settings.defaultDealerAppreciation);
+  const [dealerApp, setDealerApp] = useState(5);
 
   // Active Sub-tab inside Selected Tournament
   // draft: 'checkin' | 'seating'
@@ -119,27 +119,27 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editAddon, setEditAddon] = useState(15);
   const [editBounty, setEditBounty] = useState(20);
   const [editDealerApp, setEditDealerApp] = useState(5);
-  const [editTime, setEditTime] = useState('7:00 PM');
+  const [editTime, setEditTime] = useState('11:45 AM');
   const [editLocation, setEditLocation] = useState('Wasougal Eagles Club');
   const [editStartingStack, setEditStartingStack] = useState('20,000 Starting Chips');
   const [editRoundLength, setEditRoundLength] = useState(15);
-  const [editRebuys, setEditRebuys] = useState('None');
-  const [editLateEntry, setEditLateEntry] = useState('Allowed');
+  const [editRebuys, setEditRebuys] = useState('Freeze out - no rebuys');
+  const [editLateEntry, setEditLateEntry] = useState('Late Registration Closes at the End of Level 1');
   const [editAddonChips, setEditAddonChips] = useState(10000);
-  const [editMaxPlayers, setEditMaxPlayers] = useState(24);
+  const [editMaxPlayers, setEditMaxPlayers] = useState(50);
   const [editHighHand, setEditHighHand] = useState(100);
   const [editFlyerUrl, setEditFlyerUrl] = useState('');
   const [editFlyerType, setEditFlyerType] = useState<'pdf' | 'image' | null>(null);
 
   // Create Tournament states
-  const [tourTime, setTourTime] = useState('7:00 PM');
+  const [tourTime, setTourTime] = useState('11:45 AM');
   const [tourLocation, setTourLocation] = useState('Wasougal Eagles Club');
   const [tourStartingStack, setTourStartingStack] = useState('20,000 Starting Chips');
   const [tourRoundLength, setTourRoundLength] = useState(15);
-  const [tourRebuys, setTourRebuys] = useState('None');
-  const [tourLateEntry, setTourLateEntry] = useState('Allowed');
+  const [tourRebuys, setTourRebuys] = useState('Freeze out - no rebuys');
+  const [tourLateEntry, setTourLateEntry] = useState('Late Registration Closes at the End of Level 1');
   const [tourAddonChips, setTourAddonChips] = useState(10000);
-  const [tourMaxPlayers, setTourMaxPlayers] = useState(24);
+  const [tourMaxPlayers, setTourMaxPlayers] = useState(50);
   const [tourHighHand, setTourHighHand] = useState(100);
 
   useEffect(() => {
@@ -147,7 +147,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       setBuyIn(state.settings.defaultBuyIn || 50);
       setAddon(state.settings.defaultAddon || 15);
       setBounty(state.settings.defaultBounty || 20);
-      setDealerApp(state.settings.defaultDealerAppreciation || 5);
+      setDealerApp(5);
     }
   }, [state.settings, isCreateTourOpen]);
 
@@ -1056,8 +1056,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Tournament Settings</h3>
             <button 
               onClick={() => setIsCreateTourOpen(false)}
-              className="btn btn-secondary"
-              style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+              className="btn"
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.85rem',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '8px',
+                color: 'var(--text-primary)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
             >
               Back to Registry
             </button>
@@ -1336,8 +1346,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsCreateTourOpen(false)}
-                  className="btn btn-secondary"
-                  style={{ padding: '10px 20px' }}
+                  className="btn"
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '8px',
+                    color: 'var(--text-primary)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
                 >
                   Cancel
                 </button>
