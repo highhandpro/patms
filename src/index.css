@@ -2279,3 +2279,19 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
   -webkit-appearance: none !important;
   margin: 0 !important;
 }
+
+/* Ensure label elements styled as buttons (.btn) inherit correct text colors and borders */
+.main-content label.btn {
+  color: inherit !important;
+}
+.main-content label.btn-secondary {
+  color: #0B6B2A !important;
+  border-color: #0B6B2A !important;
+  background-color: #FFFFFF !important;
+}
+.main-content label.btn-secondary:hover {
+  color: #095822 !important;
+  border-color: #095822 !important;
+  background-color: #F5F7F5 !important;
+}
+
