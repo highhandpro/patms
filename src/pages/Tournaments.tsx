@@ -1591,9 +1591,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             backdropFilter: 'blur(4px)',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             zIndex: 1000001,
-            padding: '20px'
+            padding: '40px 20px',
+            overflowY: 'auto'
           }}>
             <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '700px', backgroundColor: 'var(--bg-surface)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -4296,9 +4297,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           backdropFilter: 'blur(4px)',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           zIndex: 1000001,
-          padding: '20px',
+          padding: '40px 20px',
           overflowY: 'auto'
         }}>
           <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '1100px', backgroundColor: 'var(--bg-surface)', padding: '24px' }}>
