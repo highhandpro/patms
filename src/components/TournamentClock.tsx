@@ -88,6 +88,10 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   const [played10sSound, setPlayed10sSound] = useState(false);
   const [audioSuspended, setAudioSuspended] = useState(false);
 
+  // Winnings modal Complete overlay states
+  const [showWinningsModal, setShowWinningsModal] = useState(false);
+  const [hasShownWinnings, setHasShownWinnings] = useState(false);
+
   // Bust-out overlay and sound trigger references
   const isFirstRender = useRef(true);
   const eliminatedIdsRef = useRef<string[]>([]);
@@ -501,6 +505,19 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
       });
     }
   }, [activePlayers.length, isRunning, currentLevelIndex, timeRemaining, tournament.id, updateTournament]);
+
+  // Automatically trigger the cashing/winnings summary popup when the tournament is over (1 or 0 active players left)
+  useEffect(() => {
+    if (checkedInPlayers.length > 1 && activePlayers.length <= 1) {
+      if (!hasShownWinnings) {
+        setShowWinningsModal(true);
+        setHasShownWinnings(true);
+      }
+    } else {
+      setHasShownWinnings(false);
+      setShowWinningsModal(false);
+    }
+  }, [activePlayers.length, checkedInPlayers.length]);
 
   // Synchronize eliminated players to trigger sound and fullscreen bust-out overlay
   useEffect(() => {
@@ -1968,6 +1985,168 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           initialBounties={tournament.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}
         />
       )}
+
+      {showWinningsModal && (() => {
+        const buyInCount = tournament.entries.filter(e => e.hasBuyIn).length;
+        const netBuyIn = tournament.buyInAmount - tournament.bountyAmount - tournament.dealerAppreciationAmount;
+        const rawCalculatedPrizePool = (buyInCount * netBuyIn) + ((tournament.totalAddons || 0) * tournament.addonAmount);
+        const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - (tournament.highHandAmount || 0) - (tournament.bubbleAmount || 0));
+
+        const pctList = tournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+        const payouts = pctList.map(pct => Math.round(calculatedPrizePool * (pct / 100)));
+
+        const moneyPlayers = tournament.entries
+          .map(e => {
+            let pos = e.finishPosition;
+            if (!e.eliminatedAt && activePlayers.length === 1 && e.memberId === activePlayers[0].memberId) {
+              pos = 1;
+            }
+            
+            let payout = 0;
+            if (pos) {
+              if (pos === 9) {
+                payout = tournament.bubbleAmount || 0;
+              } else {
+                payout = payouts[pos - 1] || 0;
+              }
+            }
+            
+            const bountiesCash = (e.bountiesCollected || 0) * (tournament.bountyAmount || 0);
+            const totalCash = payout + bountiesCash;
+            
+            const mem = members.find(m => m.id === e.memberId);
+            const name = mem ? `${mem.firstName} ${mem.lastName}` : 'Unknown Player';
+
+            return {
+              memberId: e.memberId,
+              name,
+              position: pos,
+              payout,
+              bountiesCollected: e.bountiesCollected || 0,
+              bountiesCash,
+              totalCash
+            };
+          })
+          .filter(p => p.totalCash > 0)
+          .sort((a, b) => {
+            const aPos = a.position || 999;
+            const bPos = b.position || 999;
+            return aPos - bPos;
+          });
+
+        return (
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000002,
+            padding: '24px'
+          }}>
+            <div className="glass-card animate-slide-up" style={{
+              width: '100%',
+              maxWidth: '550px',
+              backgroundColor: '#0F1926',
+              border: '2px solid #D4AF37',
+              borderRadius: '16px',
+              padding: '28px',
+              textAlign: 'center',
+              boxShadow: '0 0 30px rgba(212, 175, 55, 0.25)'
+            }}>
+              <h2 style={{
+                fontSize: '2rem',
+                fontWeight: 900,
+                color: '#D4AF37',
+                margin: '0 0 8px 0',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase'
+              }}>
+                🏆 Tournament Complete
+              </h2>
+              <p style={{
+                fontSize: '0.95rem',
+                color: 'rgba(255,255,255,0.7)',
+                margin: '0 0 24px 0'
+              }}>
+                Winnings & Payouts Summary (In The Money)
+              </p>
+
+              <div style={{
+                maxHeight: '300px',
+                overflowY: 'auto',
+                marginBottom: '24px',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(0,0,0,0.2)'
+              }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#D4AF37' }}>
+                      <th style={{ padding: '10px', textAlign: 'center' }}>Rank</th>
+                      <th style={{ padding: '10px', textAlign: 'left' }}>Player</th>
+                      <th style={{ padding: '10px', textAlign: 'center' }}>Bounties</th>
+                      <th style={{ padding: '10px', textAlign: 'right' }}>Payout</th>
+                      <th style={{ padding: '10px', textAlign: 'right' }}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {moneyPlayers.map((p) => {
+                      const place = p.position || 0;
+                      const medal = place === 1 ? '🥇' : place === 2 ? '🥈' : place === 3 ? '🥉' : '🎖️';
+                      return (
+                        <tr key={p.memberId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '12px 10px', textAlign: 'center', fontWeight: 700 }}>
+                            {medal} {place ? `${place}${place === 1 ? 'st' : place === 2 ? 'nd' : place === 3 ? 'rd' : 'th'}` : '-'}
+                          </td>
+                          <td style={{ padding: '12px 10px', textAlign: 'left', fontWeight: 600, color: '#FFFFFF' }}>
+                            {p.name}
+                          </td>
+                          <td style={{ padding: '12px 10px', textAlign: 'center', color: 'rgba(255,255,255,0.8)' }}>
+                            {p.bountiesCollected}
+                          </td>
+                          <td style={{ padding: '12px 10px', textAlign: 'right', color: 'rgba(255,255,255,0.8)' }}>
+                            {p.payout > 0 ? `$${p.payout}` : '-'}
+                          </td>
+                          <td style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 700, color: '#34d399' }}>
+                            ${p.totalCash}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {moneyPlayers.length === 0 && (
+                      <tr>
+                        <td colSpan={5} style={{ padding: '20px', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>
+                          No players finished in the money.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <button
+                onClick={() => setShowWinningsModal(false)}
+                className="btn btn-primary"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  fontWeight: 800,
+                  backgroundColor: 'var(--color-emerald)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#FFFFFF',
+                  cursor: 'pointer'
+                }}
+              >
+                Close Summary
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );
