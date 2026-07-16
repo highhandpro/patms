@@ -2953,16 +2953,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                       value={entry.bountiesCollected}
                                       onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
                                       disabled={isSubAdmin}
+                                      className="bounty-number-input"
                                       style={{
                                         width: '36px',
                                         height: '22px',
-                                        textAlign: 'center',
-                                        backgroundColor: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid var(--border-subtle)',
-                                        color: 'var(--text-primary)',
-                                        borderRadius: '4px',
-                                        fontSize: '0.75rem',
-                                        padding: 0,
                                         cursor: isSubAdmin ? 'not-allowed' : 'text'
                                       }}
                                     />
@@ -3122,16 +3116,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               min={0}
                               value={entry.bountiesCollected}
                               onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
+                              className="bounty-number-input"
                               style={{
                                 width: '32px',
-                                height: '20px',
-                                textAlign: 'center',
-                                backgroundColor: 'rgba(255,255,255,0.03)',
-                                border: '1px solid var(--border-subtle)',
-                                color: 'var(--text-primary)',
-                                borderRadius: '4px',
-                                fontSize: '0.75rem',
-                                padding: 0
+                                height: '20px'
                               }}
                             />
                             <button

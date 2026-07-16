@@ -2256,3 +2256,14 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
 .final-table-card .player-lastname {
   color: #4A5568 !important;
 }
+
+/* Fixes unreadable bounty input text due to excessive padding clipping */
+.bounty-number-input {
+  padding: 0 !important;
+  text-align: center !important;
+  color: var(--text-primary) !important;
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 4px !important;
+  font-size: 0.75rem !important;
+}
