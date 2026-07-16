@@ -2619,7 +2619,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           </div>
 
           {Object.keys(seating).length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
               {Object.entries(seating)
                 .sort((a, b) => {
                   const tableOrder = ['red table', 'blue table', 'gold table', 'gray table', 'purple table'];
@@ -2628,13 +2628,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 .map(([tableName, players]) => {
                   const seatedCount = players.filter(id => id !== "").length;
                 return (
-                  <div key={tableName} className="glass-card accent-emerald" style={{ padding: '20px' }}>
+                  <div key={tableName} className="glass-card accent-emerald" style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize' }}>{tableName}</h4>
-                      <span className="badge badge-emerald">{seatedCount}/10 Seated</span>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize', margin: 0 }}>{tableName}</h4>
+                      <span className="badge badge-emerald" style={{ fontSize: '0.75rem', padding: '2px 6px' }}>{seatedCount}/10</span>
                     </div>
 
-                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', padding: 0, margin: 0 }}>
                       {players.map((playerId, idx) => {
                         if (!playerId) {
                           return (
@@ -2644,15 +2644,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 display: 'flex', 
                                 justifyContent: 'space-between', 
                                 alignItems: 'center',
-                                fontSize: '0.9rem',
+                                fontSize: '1.05rem',
                                 color: 'var(--text-muted)',
                                 borderBottom: '1px dashed rgba(255,255,255,0.05)',
                                 paddingBottom: '4px'
                               }}
                             >
                               <span style={{ fontWeight: 400 }}>
-                                <span style={{ color: 'var(--text-muted)', marginRight: '8px' }}>Seat {idx + 1}:</span>
-                                [Empty Seat]
+                                <span style={{ color: 'var(--text-muted)', marginRight: '6px', fontSize: '0.95rem' }}>{idx + 1}:</span>
+                                <span style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.25)' }}>[Empty]</span>
                               </span>
                             </li>
                           );
@@ -2669,7 +2669,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               display: 'flex', 
                               justifyContent: 'space-between', 
                               alignItems: 'center',
-                              fontSize: '0.9rem',
+                              fontSize: '1.05rem',
                               opacity: isEliminated ? 0.4 : 1,
                               textDecoration: isEliminated ? 'line-through' : 'none',
                               borderBottom: '1px solid rgba(255,255,255,0.05)',
@@ -2680,13 +2680,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               style={{ 
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '6px',
-                                fontWeight: 500,
+                                gap: '4px',
+                                fontWeight: 600,
                                 color: isDealer ? 'var(--color-gold)' : 'inherit',
-                                userSelect: 'none'
+                                userSelect: 'none',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '140px'
                               }}
+                              title={getMemberName(playerId)}
                             >
-                              <span style={{ color: 'var(--text-muted)', marginRight: '2px' }}>Seat {idx + 1}:</span>
+                              <span style={{ color: 'var(--text-muted)', marginRight: '4px', fontWeight: 400, fontSize: '0.95rem' }}>{idx + 1}:</span>
                               <button
                                 type="button"
                                 onClick={() => toggleDealerStatus(playerId, tableName)}
@@ -2694,7 +2699,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   background: 'none',
                                   border: 'none',
                                   cursor: isSubAdmin ? 'not-allowed' : 'pointer',
-                                  fontSize: '1rem',
+                                  fontSize: '0.95rem',
                                   opacity: isDealer ? 1 : 0.2,
                                   filter: isDealer ? 'grayscale(0)' : 'grayscale(100%)',
                                   transition: 'all 0.15s ease',
