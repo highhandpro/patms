@@ -18,6 +18,7 @@ import { PlayerClubs } from './pages/PlayerClubs';
 import { PlayerProfile } from './pages/PlayerProfile';
 import { PlayerLanding } from './pages/PlayerLanding';
 import { PlayerUpdateInfo } from './pages/PlayerUpdateInfo';
+import { PlayerWrapUp } from './pages/PlayerWrapUp';
 import { useApp } from './context/AppContext';
 import type { Member } from './types';
 import { auth } from './firebase';
@@ -875,6 +876,13 @@ function App() {
     }
 
     switch (activePlayerTab) {
+      case 'summary':
+        return (
+          <PlayerWrapUp 
+            setActiveTab={setActivePlayerTab} 
+            setSelectedTournamentId={setSelectedTournamentId} 
+          />
+        );
       case 'events':
         return (
           <PlayerEvents 
