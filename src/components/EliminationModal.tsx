@@ -34,7 +34,7 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
       padding: '20px',
       zIndex: 1000001
     }}>
-      <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', padding: '24px' }}>
+      <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', color: '#1A202C', padding: '24px' }}>
         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '20px' }}>
           Eliminate {playerName}
         </h3>

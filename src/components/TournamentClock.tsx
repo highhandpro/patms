@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Maximize, Minimize, Play, Pause, RotateCcw, ShieldAlert, Award, Shuffle } from 'lucide-react';
 import type { Tournament, Member, BlindLevel, TournamentEntry } from '../types';
 import { useApp } from '../context/AppContext';
+import { EliminationModal } from './EliminationModal';
 
 interface TournamentClockProps {
   tournament: Tournament;
   members: Member[];
   onAddLateEntry: () => void;
-  eliminatePlayer: (tournamentId: string, memberId: string) => void;
+  eliminatePlayer: (tournamentId: string, memberId: string, bountiesCollected: number) => void;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
 }
 
@@ -53,6 +54,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [eliminatingPlayerId, setEliminatingPlayerId] = useState<string | null>(null);
+  const [bountiesWon, setBountiesWon] = useState<number>(0);
   const [realTime, setRealTime] = useState(new Date());
 
   const storageKey = `toc_clock_${tournament.id}`;
@@ -1020,7 +1023,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                     <div 
                       key={p.memberId}
                       onClick={() => {
-                        eliminatePlayer(tournament.id, p.memberId);
+                        setEliminatingPlayerId(p.memberId);
+                        setBountiesWon(0);
                       }}
                       onMouseEnter={e => {
                         e.currentTarget.style.backgroundColor = '#7f1d1d';
@@ -1912,6 +1916,24 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             </p>
           </div>
         </div>
+      )}
+
+      {eliminatingPlayerId && (
+        <EliminationModal
+          isOpen={!!eliminatingPlayerId}
+          playerName={(() => {
+            const m = members.find(member => member.id === eliminatingPlayerId);
+            return m ? `${m.firstName} ${m.lastName}` : 'Unknown Player';
+          })()}
+          bountiesWon={bountiesWon}
+          setBountiesWon={setBountiesWon}
+          onCancel={() => setEliminatingPlayerId(null)}
+          onConfirm={() => {
+            eliminatePlayer(tournament.id, eliminatingPlayerId, bountiesWon);
+            setEliminatingPlayerId(null);
+            setBountiesWon(0);
+          }}
+        />
       )}
 
     </div>
