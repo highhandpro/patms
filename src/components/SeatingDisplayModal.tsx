@@ -133,7 +133,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
             {payoutRows.map((row: any) => (
               <div key={row.place} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', padding: '6px 0', borderBottom: '1px dashed rgba(255,255,255,0.04)' }}>
                 <span>{row.place === 1 ? '1st' : row.place === 2 ? '2nd' : row.place === 3 ? '3rd' : `${row.place}th`} Place:</span>
-                <strong style={{ color: '#ffffff' }}>${row.amount} ({row.percent}%)</strong>
+                <strong style={{ color: '#ffffff' }}>${row.amount}</strong>
               </div>
             ))}
             {payoutRows.length === 0 && (
