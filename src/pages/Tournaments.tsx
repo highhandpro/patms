@@ -253,6 +253,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     activeTournament?.preassignedDealers
   ]);
 
+  // Return to tabs screen when escaping/exiting fullscreen on the Clock tab
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && subTab === 'clock') {
+        setSubTab(activeTournament?.status === 'completed' ? 'results' : 'players');
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [subTab, activeTournament?.status]);
+
+
   // Seating Algorithm based on seatingChart.xlsx rules
   const getTableConfigurations = (n: number) => {
     let numTables = 1;
@@ -1990,7 +2002,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'clock' ? 'active-subtab' : ''}`}
-              onClick={() => setSubTab('clock')}
+              onClick={() => {
+                setSubTab('clock');
+                setTimeout(() => {
+                  const clockEl = document.getElementById('tournament-clock-container');
+                  if (clockEl) {
+                    clockEl.requestFullscreen().catch(err => {
+                      console.warn('Fullscreen request failed:', err);
+                    });
+                  }
+                }, 50);
+              }}
               style={{
                 borderRadius: '8px 8px 0 0',
                 borderBottom: subTab === 'clock' ? '3px solid var(--color-emerald)' : 'none',

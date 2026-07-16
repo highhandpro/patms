@@ -804,6 +804,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   return (
     <div 
       ref={containerRef}
+      id="tournament-clock-container"
       style={{
         position: 'relative',
         display: 'flex',
