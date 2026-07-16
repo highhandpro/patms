@@ -3101,8 +3101,48 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       <td style={{ padding: '10px 10px', fontWeight: 700, textAlign: 'center', color: 'var(--color-gold)' }}>
                         {pointsEarned} pts
                       </td>
-                      <td style={{ padding: '10px 10px', fontWeight: 600, textAlign: 'center', color: entry.bountiesCollected > 0 ? '#34d399' : 'var(--text-secondary)' }}>
-                        {entry.bountiesCollected > 0 ? `${entry.bountiesCollected} bounty` + (entry.bountiesCollected > 1 ? 's' : '') : '0'}
+                      <td style={{ padding: '6px 10px', textAlign: 'center' }}>
+                        {isSubAdmin ? (
+                          <span style={{ fontWeight: 600, color: entry.bountiesCollected > 0 ? '#34d399' : 'var(--text-secondary)' }}>
+                            {entry.bountiesCollected > 0 ? `${entry.bountiesCollected} bounty` + (entry.bountiesCollected > 1 ? 's' : '') : '0'}
+                          </span>
+                        ) : (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateBounties(entry.memberId, Math.max(0, entry.bountiesCollected - 1))}
+                              className="btn btn-secondary"
+                              style={{ width: '20px', height: '20px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              min={0}
+                              value={entry.bountiesCollected}
+                              onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
+                              style={{
+                                width: '32px',
+                                height: '20px',
+                                textAlign: 'center',
+                                backgroundColor: 'rgba(255,255,255,0.03)',
+                                border: '1px solid var(--border-subtle)',
+                                color: '#ffffff',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                padding: 0
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateBounties(entry.memberId, entry.bountiesCollected + 1)}
+                              className="btn btn-secondary"
+                              style={{ width: '20px', height: '20px', padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}
+                            >
+                              +
+                            </button>
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: '10px 10px', fontWeight: 700, textAlign: 'right', color: 'var(--color-emerald)' }}>
                         ${moneyReceived}
