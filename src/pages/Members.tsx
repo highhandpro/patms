@@ -16,7 +16,7 @@ interface MembersProps {
 }
 
 export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMemberOpen, isSubAdmin, isChiefAdmin }) => {
-  const { state, addMember, updateMember, deleteMember, approveMemberUpdate, rejectMemberUpdate } = useApp();
+  const { state, addMember, updateMember, deleteMember, approveMemberUpdate, rejectMemberUpdate, updateTournament } = useApp();
   const [search, setSearch] = useState('');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMemberForProfile, setSelectedMemberForProfile] = useState<Member | null>(null);
@@ -34,6 +34,173 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [cardUrl, setCardUrl] = useState('');
   const [tempPassword, setTempPassword] = useState('');
   const [pin, setPin] = useState('');
+
+  const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
+  const [playerAId, setPlayerAId] = useState('');
+  const [playerBId, setPlayerBId] = useState('');
+  const [isMerging, setIsMerging] = useState(false);
+  const [mergeErrorMsg, setMergeErrorMsg] = useState<string | null>(null);
+  const [mergeSuccessMsg, setMergeSuccessMsg] = useState<string | null>(null);
+
+  const activeMembers = state.members.filter(m => !m.isDeleted);
+
+  const getPotentialDuplicates = () => {
+    const dups: Array<{ playerA: Member; playerB: Member; reason: string }> = [];
+    const seen = new Set<string>();
+
+    for (let i = 0; i < activeMembers.length; i++) {
+      for (let j = i + 1; j < activeMembers.length; j++) {
+        const m1 = activeMembers[i];
+        const m2 = activeMembers[j];
+
+        const name1 = `${m1.firstName.trim()} ${m1.lastName.trim()}`.toLowerCase();
+        const name2 = `${m2.firstName.trim()} ${m2.lastName.trim()}`.toLowerCase();
+
+        const email1 = m1.email?.trim().toLowerCase();
+        const email2 = m2.email?.trim().toLowerCase();
+
+        const phone1 = m1.phone?.replace(/\D/g, '');
+        const phone2 = m2.phone?.replace(/\D/g, '');
+
+        let matchReason = '';
+        if (name1 === name2) {
+          matchReason = 'Identical Names';
+        } else if (email1 && email2 && email1 === email2) {
+          matchReason = `Matching Email (${m1.email})`;
+        } else if (phone1 && phone2 && phone1 === phone2) {
+          matchReason = `Matching Phone (${m1.phone})`;
+        }
+
+        if (matchReason) {
+          const key = [m1.id, m2.id].sort().join('-');
+          if (!seen.has(key)) {
+            seen.add(key);
+            dups.push({ playerA: m1, playerB: m2, reason: matchReason });
+          }
+        }
+      }
+    }
+    return dups;
+  };
+
+  const handleExecuteMerge = async () => {
+    if (!playerAId || !playerBId) {
+      setMergeErrorMsg('Please select both players.');
+      return;
+    }
+    if (playerAId === playerBId) {
+      setMergeErrorMsg('Cannot merge a player into themselves.');
+      return;
+    }
+
+    const playerA = activeMembers.find(m => m.id === playerAId);
+    const playerB = activeMembers.find(m => m.id === playerBId);
+
+    if (!playerA || !playerB) {
+      setMergeErrorMsg('Selected players not found.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to merge ${playerB.firstName} ${playerB.lastName} into ${playerA.firstName} ${playerA.lastName}? This will combine all tournament records/points and soft-delete ${playerB.firstName}'s profile.`)) {
+      return;
+    }
+
+    setIsMerging(true);
+    setMergeErrorMsg(null);
+    setMergeSuccessMsg(null);
+
+    try {
+      const combinedNotes = [playerA.notes, playerB.notes].filter(Boolean).join('\n');
+      const updatedFields: Partial<Member> = {};
+
+      if (!playerA.email && playerB.email) updatedFields.email = playerB.email;
+      if (!playerA.phone && playerB.phone) updatedFields.phone = playerB.phone;
+      if (!playerA.nickname && playerB.nickname) updatedFields.nickname = playerB.nickname;
+      if (!playerA.pin && playerB.pin) updatedFields.pin = playerB.pin;
+      if (combinedNotes !== playerA.notes) updatedFields.notes = combinedNotes;
+
+      const tournamentsToUpdate = state.tournaments.filter(t => 
+        t.entries.some(e => e.memberId === playerA.id || e.memberId === playerB.id)
+      );
+
+      for (const t of tournamentsToUpdate) {
+        const entryA = t.entries.find(e => e.memberId === playerA.id);
+        const entryB = t.entries.find(e => e.memberId === playerB.id);
+
+        let updatedEntries = [...t.entries];
+
+        if (entryB) {
+          if (entryA) {
+            const combinedBounties = (entryA.bountiesCollected || 0) + (entryB.bountiesCollected || 0);
+            const combinedPayout = (entryA.payoutEarned || 0) + (entryB.payoutEarned || 0);
+            
+            const betterFinish = Math.min(entryA.finishPosition || 999, entryB.finishPosition || 999);
+            const finalFinish = betterFinish === 999 ? undefined : betterFinish;
+            
+            const betterPoints = Math.max(entryA.pointsEarned || 0, entryB.pointsEarned || 0);
+
+            let finalEliminatedBy = entryA.eliminatedBy;
+            if (entryA.finishPosition && entryB.finishPosition) {
+              if ((entryA.finishPosition || 999) < (entryB.finishPosition || 999)) {
+                finalEliminatedBy = entryA.eliminatedBy;
+              } else {
+                finalEliminatedBy = entryB.eliminatedBy;
+              }
+            }
+            if (finalEliminatedBy === playerA.id || finalEliminatedBy === playerB.id) {
+              finalEliminatedBy = undefined;
+            }
+
+            const updatedEntryA = {
+              ...entryA,
+              bountiesCollected: combinedBounties,
+              payoutEarned: combinedPayout,
+              finishPosition: finalFinish,
+              pointsEarned: betterPoints,
+              hasBuyIn: entryA.hasBuyIn || entryB.hasBuyIn,
+              hasAddon: entryA.hasAddon || entryB.hasAddon,
+              hasDealerAppreciation: entryA.hasDealerAppreciation || entryB.hasDealerAppreciation,
+              eliminatedAt: (entryA.finishPosition || 999) < (entryB.finishPosition || 999) ? entryA.eliminatedAt : entryB.eliminatedAt,
+              eliminatedBy: finalEliminatedBy
+            };
+
+            updatedEntries = updatedEntries
+              .filter(e => e.memberId !== playerB.id)
+              .map(e => e.memberId === playerA.id ? updatedEntryA : e);
+          } else {
+            updatedEntries = updatedEntries.map(e => {
+              if (e.memberId === playerB.id) {
+                return {
+                  ...e,
+                  memberId: playerA.id,
+                  eliminatedBy: e.eliminatedBy === playerB.id || e.eliminatedBy === playerA.id ? undefined : e.eliminatedBy
+                };
+              }
+              return e;
+            });
+          }
+
+          await updateTournament(t.id, { entries: updatedEntries });
+        }
+      }
+
+      if (Object.keys(updatedFields).length > 0) {
+        await updateMember(playerA.id, updatedFields);
+      }
+
+      await deleteMember(playerB.id);
+
+      setMergeSuccessMsg(`Successfully merged ${playerB.firstName} ${playerB.lastName} into ${playerA.firstName} ${playerA.lastName}!`);
+      setPlayerAId('');
+      setPlayerBId('');
+    } catch (err: any) {
+      console.error(err);
+      setMergeErrorMsg(err.message || 'An error occurred during merging.');
+    } finally {
+      setIsMerging(false);
+    }
+  };
+
 
   // Phone input formatting
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,7 +426,6 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   };
 
   // Filter members (only non-deleted ones, searchable by name, phone, email, memberId)
-  const activeMembers = state.members.filter(m => !m.isDeleted);
   const filteredMembers = activeMembers
     .filter(m => {
       const q = search.toLowerCase();
@@ -290,6 +456,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           </p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
+          {!isSubAdmin && (
+            <button className="btn btn-secondary" onClick={() => { setIsMergeModalOpen(true); setMergeErrorMsg(null); setMergeSuccessMsg(null); }}>
+              <span>Merge Duplicates</span>
+            </button>
+          )}
           <button className="btn btn-secondary" onClick={exportMembersCSV}>
             <span>Export CSV</span>
           </button>
@@ -1118,6 +1289,263 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 Close Profile
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {isMergeModalOpen && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 99999,
+          padding: '20px'
+        }}>
+          <div 
+            style={{
+              width: '100%',
+              maxWidth: '850px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '16px',
+              padding: '28px',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+              color: '#1A202C',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #E2E8F0', paddingBottom: '14px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: '#1A202C' }}>
+                Merge Duplicate Players
+              </h2>
+              <button 
+                onClick={() => setIsMergeModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: '#718096', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Error and Success Alerts */}
+            {mergeErrorMsg && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#FFF5F5', border: '1px solid #FED7D7', borderRadius: '8px', color: '#C53030', fontSize: '0.9rem', fontWeight: 500 }}>
+                {mergeErrorMsg}
+              </div>
+            )}
+            {mergeSuccessMsg && (
+              <div style={{ padding: '12px 16px', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', color: '#15803d', fontSize: '0.9rem', fontWeight: 500 }}>
+                {mergeSuccessMsg}
+              </div>
+            )}
+
+            {/* Suggestions Scan Panel */}
+            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '16px' }}>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 10px 0', color: '#4A5568', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                System Scan Suggestions
+              </h3>
+              {(() => {
+                const dups = getPotentialDuplicates();
+                if (dups.length === 0) {
+                  return (
+                    <span style={{ fontSize: '0.85rem', color: '#718096', fontStyle: 'italic' }}>
+                      No potential duplicates detected by name, email, or phone.
+                    </span>
+                  );
+                }
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '150px', overflowY: 'auto' }}>
+                    {dups.map((d, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFFFFF', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1A202C' }}>
+                            {d.playerA.firstName} {d.playerA.lastName} & {d.playerB.firstName} {d.playerB.lastName}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#718096' }}>
+                            Reason: {d.reason} • IDs: {d.playerA.id} & {d.playerB.id}
+                          </span>
+                        </div>
+                        <button 
+                          className="btn btn-secondary" 
+                          style={{ fontSize: '0.75rem', padding: '4px 10px', height: 'auto' }}
+                          onClick={() => {
+                            setPlayerAId(d.playerA.id);
+                            setPlayerBId(d.playerB.id);
+                            setMergeErrorMsg(null);
+                            setMergeSuccessMsg(null);
+                          }}
+                        >
+                          Review & Merge
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Selector Workspace */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+              {/* Selector A */}
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#4A5568', display: 'block', marginBottom: '6px' }}>
+                  Player A (Saved Player - Profile to Keep)
+                </label>
+                <select
+                  value={playerAId}
+                  onChange={(e) => { setPlayerAId(e.target.value); setMergeErrorMsg(null); setMergeSuccessMsg(null); }}
+                  style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #CBD5E0', borderRadius: '8px', fontSize: '0.9rem', backgroundColor: '#FFFFFF', color: '#1A202C' }}
+                >
+                  <option value="">Select a player...</option>
+                  {activeMembers
+                    .sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`))
+                    .map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.firstName} {m.lastName} (ID: {m.id})
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              {/* Selector B */}
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#4A5568', display: 'block', marginBottom: '6px' }}>
+                  Player B (Merged Player - Profile to Merge & Delete)
+                </label>
+                <select
+                  value={playerBId}
+                  onChange={(e) => { setPlayerBId(e.target.value); setMergeErrorMsg(null); setMergeSuccessMsg(null); }}
+                  style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #CBD5E0', borderRadius: '8px', fontSize: '0.9rem', backgroundColor: '#FFFFFF', color: '#1A202C' }}
+                >
+                  <option value="">Select a player to merge...</option>
+                  {activeMembers
+                    .sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`))
+                    .map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.firstName} {m.lastName} (ID: {m.id})
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Comparison Workspace (Only shown if both selected) */}
+            {(() => {
+              const pA = activeMembers.find(m => m.id === playerAId);
+              const pB = activeMembers.find(m => m.id === playerBId);
+
+              if (!pA || !pB) return null;
+
+              const willFillEmail = !pA.email && pB.email;
+              const willFillPhone = !pA.phone && pB.phone;
+              const willFillNickname = !pA.nickname && pB.nickname;
+              const willFillPin = !pA.pin && pB.pin;
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px solid #E2E8F0', paddingTop: '20px' }}>
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: '#4A5568', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Profile Comparison & Updates
+                  </h3>
+                  
+                  <div style={{ border: '1px solid #E2E8F0', borderRadius: '8px', overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                          <th style={{ padding: '8px 12px', fontWeight: 700, color: '#4A5568', width: '20%' }}>Field</th>
+                          <th style={{ padding: '8px 12px', fontWeight: 700, color: '#4A5568', width: '40%' }}>Player A (Saved)</th>
+                          <th style={{ padding: '8px 12px', fontWeight: 700, color: '#4A5568', width: '40%' }}>Player B (Deleted)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid #EDF2F7' }}>
+                          <td style={{ padding: '8px 12px', fontWeight: 600, color: '#718096' }}>Member ID</td>
+                          <td style={{ padding: '8px 12px' }}>{pA.id}</td>
+                          <td style={{ padding: '8px 12px', color: '#A0AEC0' }}>{pB.id} (will be removed)</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #EDF2F7' }}>
+                          <td style={{ padding: '8px 12px', fontWeight: 600, color: '#718096' }}>Full Name</td>
+                          <td style={{ padding: '8px 12px', fontWeight: 600 }}>{pA.firstName} {pA.lastName}</td>
+                          <td style={{ padding: '8px 12px' }}>{pB.firstName} {pB.lastName}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #EDF2F7' }}>
+                          <td style={{ padding: '8px 12px', fontWeight: 600, color: '#718096' }}>Nickname</td>
+                          <td style={{ padding: '8px 12px', backgroundColor: willFillNickname ? '#F0FDF4' : 'transparent', color: willFillNickname ? '#15803D' : 'inherit', fontWeight: willFillNickname ? 600 : 400 }}>
+                            {pA.nickname || (willFillNickname ? pB.nickname : 'None')}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>{pB.nickname || 'None'}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #EDF2F7' }}>
+                          <td style={{ padding: '8px 12px', fontWeight: 600, color: '#718096' }}>Phone</td>
+                          <td style={{ padding: '8px 12px', backgroundColor: willFillPhone ? '#F0FDF4' : 'transparent', color: willFillPhone ? '#15803D' : 'inherit', fontWeight: willFillPhone ? 600 : 400 }}>
+                            {pA.phone || (willFillPhone ? pB.phone : 'None')}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>{pB.phone || 'None'}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #EDF2F7' }}>
+                          <td style={{ padding: '8px 12px', fontWeight: 600, color: '#718096' }}>Email</td>
+                          <td style={{ padding: '8px 12px', backgroundColor: willFillEmail ? '#F0FDF4' : 'transparent', color: willFillEmail ? '#15803D' : 'inherit', fontWeight: willFillEmail ? 600 : 400 }}>
+                            {pA.email || (willFillEmail ? pB.email : 'None')}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>{pB.email || 'None'}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #EDF2F7' }}>
+                          <td style={{ padding: '8px 12px', fontWeight: 600, color: '#718096' }}>Security PIN</td>
+                          <td style={{ padding: '8px 12px', backgroundColor: willFillPin ? '#F0FDF4' : 'transparent', color: willFillPin ? '#15803D' : 'inherit', fontWeight: willFillPin ? 600 : 400 }}>
+                            {pA.pin ? '✓ Set' : (willFillPin ? '✓ Set (transferred)' : 'Not set')}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>{pB.pin ? '✓ Set' : 'Not set'}</td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '8px 12px', fontWeight: 600, color: '#718096' }}>Profile Notes</td>
+                          <td style={{ padding: '8px 12px', whiteSpace: 'pre-wrap' }}>
+                            {[pA.notes, pB.notes].filter(Boolean).join('\n') || 'None'}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>{pB.notes || 'None'}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style={{ backgroundColor: '#FFFDF5', border: '1px solid #FEF08A', borderRadius: '8px', padding: '12px 14px', fontSize: '0.825rem', color: '#854D0E', lineHeight: '1.4' }}>
+                    <strong>Note:</strong> Tournament results, payouts, bounties, and points from both profiles will be combined. Any matching entries in the same tournament will combine bounties/cash and keep the higher place/points.
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => { setPlayerAId(''); setPlayerBId(''); }}
+                      className="btn btn-secondary"
+                      disabled={isMerging}
+                      style={{ color: '#4A5568' }}
+                    >
+                      Clear Selection
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExecuteMerge}
+                      className="btn btn-primary"
+                      disabled={isMerging}
+                      style={{ backgroundColor: '#3182CE', borderColor: '#3182CE' }}
+                    >
+                      {isMerging ? 'Merging Players...' : 'Merge Profiles & Combine Points'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>,
         document.body
