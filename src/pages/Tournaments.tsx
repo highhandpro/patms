@@ -2959,7 +2959,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                         textAlign: 'center',
                                         backgroundColor: 'rgba(255,255,255,0.03)',
                                         border: '1px solid var(--border-subtle)',
-                                        color: '#ffffff',
+                                        color: 'var(--text-primary)',
                                         borderRadius: '4px',
                                         fontSize: '0.75rem',
                                         padding: 0,
@@ -3128,7 +3128,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 textAlign: 'center',
                                 backgroundColor: 'rgba(255,255,255,0.03)',
                                 border: '1px solid var(--border-subtle)',
-                                color: '#ffffff',
+                                color: 'var(--text-primary)',
                                 borderRadius: '4px',
                                 fontSize: '0.75rem',
                                 padding: 0
