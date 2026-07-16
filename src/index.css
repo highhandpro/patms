@@ -2259,6 +2259,10 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
 
 /* Fixes unreadable bounty input text due to excessive padding clipping */
 .bounty-number-input {
+  width: 36px !important;
+  height: 22px !important;
+  min-width: 36px !important;
+  flex-shrink: 0 !important;
   padding: 0 !important;
   text-align: center !important;
   color: #000000 !important;

@@ -2955,8 +2955,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                       disabled={isSubAdmin}
                                       className="bounty-number-input"
                                       style={{
-                                        width: '36px',
-                                        height: '22px',
                                         cursor: isSubAdmin ? 'not-allowed' : 'text'
                                       }}
                                     />
@@ -3117,10 +3115,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               value={entry.bountiesCollected ?? 0}
                               onChange={(e) => handleUpdateBounties(entry.memberId, Math.max(0, parseInt(e.target.value) || 0))}
                               className="bounty-number-input"
-                              style={{
-                                width: '32px',
-                                height: '20px'
-                              }}
                             />
                             <button
                               type="button"
