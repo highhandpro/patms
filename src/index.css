@@ -2105,7 +2105,7 @@ select, option, input, textarea {
 }
 
 /* Button color inheritance & high-contrast adjustments on felt */
-.btn, .btn *, .btn span, .btn svg {
+.btn *, .btn span, .btn svg {
   color: inherit !important;
 }
 
