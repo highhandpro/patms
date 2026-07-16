@@ -16,6 +16,7 @@ import { PlayerRankings } from './pages/PlayerRankings';
 import { PlayerAbout } from './pages/PlayerAbout';
 import { PlayerClubs } from './pages/PlayerClubs';
 import { PlayerProfile } from './pages/PlayerProfile';
+import { PlayerLanding } from './pages/PlayerLanding';
 import { PlayerUpdateInfo } from './pages/PlayerUpdateInfo';
 import { PlayerWrapUp } from './pages/PlayerWrapUp';
 import { useApp } from './context/AppContext';
@@ -859,15 +860,24 @@ function App() {
   };
 
   const renderPlayerContent = () => {
-    const resolvedTab = (!loggedInMemberId && (activePlayerTab === 'profile' || activePlayerTab === 'update-info'))
-      ? 'events'
-      : activePlayerTab;
-
-    if (resolvedTab === 'update-info') {
+    if (activePlayerTab === 'update-info') {
       return <PlayerUpdateInfo setActiveTab={setActivePlayerTab} />;
     }
 
-    switch (resolvedTab) {
+    if (!loggedInMemberId) {
+      return (
+        <PlayerLanding 
+          onOpenLogin={() => {
+            setIsGuestMode(false);
+            setLoginError(null);
+            setIsLoginModalOpen(true);
+          }} 
+          setPortalMode={handleSwitchPortalMode} 
+        />
+      );
+    }
+
+    switch (activePlayerTab) {
       case 'summary':
         return (
           <PlayerWrapUp 
