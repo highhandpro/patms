@@ -74,60 +74,60 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
         {/* Left: Brand/Logo */}
         <div 
           className="player-navbar-brand" 
-          onClick={() => loggedInMemberId ? handleTabClick('events') : undefined}
-          style={{ cursor: loggedInMemberId ? 'pointer' : 'default' }}
+          onClick={() => handleTabClick('events')}
+          style={{ cursor: 'pointer' }}
         >
           <Trophy className="brand-icon" size={24} />
           <span>Penny Ante Club</span>
         </div>
 
-        {/* Center: Navigation Links (Only shown when logged in) */}
-        {loggedInMemberId && (
-          <nav className="player-navbar-nav">
-            <button 
-              className={`nav-link ${activeTab === 'events' || activeTab === 'event-details' ? 'active' : ''}`}
-              onClick={() => handleTabClick('events')}
-            >
-              Events
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'summary' ? 'active' : ''}`}
-              onClick={() => handleTabClick('summary')}
-            >
-              Summary
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'results' ? 'active' : ''}`}
-              onClick={() => handleTabClick('results')}
-            >
-              Results
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'rankings' ? 'active' : ''}`}
-              onClick={() => handleTabClick('rankings')}
-            >
-              Rankings
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'about' ? 'active' : ''}`}
-              onClick={() => handleTabClick('about')}
-            >
-              About
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'clubs' ? 'active' : ''}`}
-              onClick={() => handleTabClick('clubs')}
-            >
-              Clubs
-            </button>
+        {/* Center: Navigation Links */}
+        <nav className="player-navbar-nav">
+          <button 
+            className={`nav-link ${activeTab === 'events' || activeTab === 'event-details' ? 'active' : ''}`}
+            onClick={() => handleTabClick('events')}
+          >
+            Events
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'summary' ? 'active' : ''}`}
+            onClick={() => handleTabClick('summary')}
+          >
+            Summary
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'results' ? 'active' : ''}`}
+            onClick={() => handleTabClick('results')}
+          >
+            Results
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'rankings' ? 'active' : ''}`}
+            onClick={() => handleTabClick('rankings')}
+          >
+            Rankings
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'about' ? 'active' : ''}`}
+            onClick={() => handleTabClick('about')}
+          >
+            About
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'clubs' ? 'active' : ''}`}
+            onClick={() => handleTabClick('clubs')}
+          >
+            Clubs
+          </button>
+          {loggedInMemberId && (
             <button 
               className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}
               onClick={() => handleTabClick('profile')}
             >
               My Profile
             </button>
-          </nav>
-        )}
+          )}
+        </nav>
 
         {/* Right: User menu & Trophy Balance */}
         <div className="player-navbar-actions">
