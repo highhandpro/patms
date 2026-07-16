@@ -363,14 +363,14 @@ p {
   color: var(--text-secondary);
 }
 
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="tel"],
-input[type="number"],
-select,
-textarea,
-.form-input {
+input[type="text"]:not(.bounty-number-input),
+input[type="password"]:not(.bounty-number-input),
+input[type="email"]:not(.bounty-number-input),
+input[type="tel"]:not(.bounty-number-input),
+input[type="number"]:not(.bounty-number-input),
+select:not(.bounty-number-input),
+textarea:not(.bounty-number-input),
+.form-input:not(.bounty-number-input) {
   width: 100%;
   background-color: var(--bg-input) !important;
   border: 1.5px solid #A3AFA3 !important;   /* Darker, visible outline border */
@@ -382,14 +382,14 @@ textarea,
   transition: all var(--transition-fast) !important;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="email"]:focus,
-input[type="tel"]:focus,
-input[type="number"]:focus,
-select:focus,
-textarea:focus,
-.form-input:focus {
+input[type="text"]:not(.bounty-number-input):focus,
+input[type="password"]:not(.bounty-number-input):focus,
+input[type="email"]:not(.bounty-number-input):focus,
+input[type="tel"]:not(.bounty-number-input):focus,
+input[type="number"]:not(.bounty-number-input):focus,
+select:not(.bounty-number-input):focus,
+textarea:not(.bounty-number-input):focus,
+.form-input:not(.bounty-number-input):focus {
   outline: none !important;
   background-color: var(--bg-input-focus) !important;
   border-color: #0B6B2A !important;       /* Dark Green when active */
