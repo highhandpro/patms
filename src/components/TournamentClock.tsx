@@ -1764,6 +1764,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
       {isFinalTableOpen && (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(12px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1001, padding: '24px' }}>
           <div 
+            className="final-table-card animate-slide-up"
             style={{ 
               width: '95%', 
               maxWidth: '1150px', 
@@ -1772,14 +1773,13 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               border: '1px solid var(--border-subtle)', 
               borderRadius: '24px', 
               padding: '40px', 
-              textAlign: 'center', 
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' 
+              textAlign: 'center'
             }}
           >
-            <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, color: 'var(--color-emerald)', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+            <h2 className="final-table-title" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, color: 'var(--color-emerald)', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
               FINAL TABLE
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(1rem, 2vw, 1.3rem)', marginBottom: '32px', fontWeight: 600 }}>
+            <p className="final-table-subtitle" style={{ color: 'var(--text-secondary)', fontSize: 'clamp(1rem, 2vw, 1.3rem)', marginBottom: '32px', fontWeight: 600 }}>
               The field is down to {finalTablePlayers.length} players! Clock has been stopped.
             </p>
             
@@ -1809,15 +1809,15 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                     borderRadius: '10px',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                   }}>
-                    <span style={{ fontWeight: 800, color: 'var(--color-emerald)', fontSize: 'clamp(1.1rem, 2.2vw, 1.6rem)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <span className="seat-number" style={{ fontWeight: 800, color: 'var(--color-emerald)', fontSize: 'clamp(1.1rem, 2.2vw, 1.6rem)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Seat {idx + 1}
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center' }}>
-                      <span style={{ fontWeight: 900, color: '#1A202C', fontSize: 'clamp(1.5rem, 3.2vw, 2.5rem)', letterSpacing: '0.02em', lineHeight: 1.1 }}>
+                      <span className="player-name" style={{ fontWeight: 900, color: '#1A202C', fontSize: 'clamp(1.5rem, 3.2vw, 2.5rem)', letterSpacing: '0.02em', lineHeight: 1.1 }}>
                         {firstName}
                       </span>
                       {lastName && (
-                        <span style={{ fontWeight: 700, color: 'var(--text-secondary)', fontSize: 'clamp(0.9rem, 1.8vw, 1.3rem)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px', lineHeight: 1 }}>
+                        <span className="player-lastname" style={{ fontWeight: 700, color: 'var(--text-secondary)', fontSize: 'clamp(0.9rem, 1.8vw, 1.3rem)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px', lineHeight: 1 }}>
                           {lastName}
                         </span>
                       )}

@@ -2236,3 +2236,23 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
 .player-lookup-item .player-lookup-info {
   color: var(--text-secondary) !important;
 }
+
+/* Final Table modal card styling overrides */
+.final-table-card {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+.final-table-card .final-table-title {
+  color: #06260B !important;
+}
+.final-table-card .final-table-subtitle {
+  color: #4A5568 !important;
+}
+.final-table-card .seat-number {
+  color: #0c4a16 !important;
+}
+.final-table-card .player-name {
+  color: #06260B !important;
+}
+.final-table-card .player-lastname {
+  color: #4A5568 !important;
+}
