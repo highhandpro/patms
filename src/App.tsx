@@ -728,7 +728,9 @@ function App() {
           return;
         } catch (createErr: any) {
           console.error('Firebase Auth error during auto-registration:', createErr);
-          if (createErr.code === 'auth/weak-password') {
+          if (createErr.code === 'auth/email-already-in-use') {
+            setAdminPasswordError('Invalid email or password. Please try again.');
+          } else if (createErr.code === 'auth/weak-password') {
             setAdminPasswordError('Password should be at least 6 characters.');
           } else if (createErr.code === 'auth/invalid-email') {
             setAdminPasswordError('Please enter a valid email address.');
