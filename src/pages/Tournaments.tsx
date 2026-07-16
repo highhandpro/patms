@@ -958,35 +958,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         />
 
         {showDropdown && searchQuery.trim() !== '' && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: '0 0 10px 10px',
-            maxHeight: '200px',
-            overflowY: 'auto',
-            zIndex: 10,
-            boxShadow: 'var(--shadow-md)'
-          }}>
+          <div className="player-lookup-dropdown">
             {matchedMembers.length > 0 ? (
               matchedMembers.map(m => (
                 <div
                   key={m.id}
                   onClick={() => handlePlayerSelect(m)}
-                  style={{
-                    padding: '12px 16px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid var(--border-subtle)'
-                  }}
-                  className="interactive"
+                  className="player-lookup-item"
                 >
                   <span style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</span>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{m.id} • {m.phone || 'No phone'}</span>
+                  <span className="player-lookup-info" style={{ fontSize: '0.85rem' }}>{m.id} • {m.phone || 'No phone'}</span>
                 </div>
               ))
             ) : (
