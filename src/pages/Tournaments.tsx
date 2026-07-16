@@ -3831,7 +3831,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         <TournamentClock 
           tournament={activeTournament}
           members={state.members}
-          eliminatePlayer={(tId, mId) => eliminatePlayer(tId, mId, 0)}
+          eliminatePlayer={(_, mId) => {
+            setEliminatingPlayerId(mId);
+            setBountiesWon(0);
+          }}
           updateTournament={updateTournament}
           onAddLateEntry={() => setSubTab('checkin')}
         />
