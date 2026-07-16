@@ -52,7 +52,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     eliminatePlayer,
     undoElimination,
     finalizeTournament,
-    reopenTournament
+    reopenTournament,
+    updateSettings
   } = useApp();
 
   // Create Form State
@@ -141,6 +142,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [tourAddonChips, setTourAddonChips] = useState(10000);
   const [tourMaxPlayers, setTourMaxPlayers] = useState(50);
   const [tourHighHand, setTourHighHand] = useState(100);
+  const [tourUnderConstruction, setTourUnderConstruction] = useState(state.settings?.isUnderConstruction === true);
+  const [editUnderConstruction, setEditUnderConstruction] = useState(state.settings?.isUnderConstruction === true);
 
   useEffect(() => {
     if (state.settings && isCreateTourOpen) {
@@ -148,6 +151,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       setAddon(state.settings.defaultAddon || 15);
       setBounty(state.settings.defaultBounty || 20);
       setDealerApp(5);
+      setTourUnderConstruction(state.settings.isUnderConstruction === true);
     }
   }, [state.settings, isCreateTourOpen]);
 
@@ -711,9 +715,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     });
   };
 
-  const handleCreateTournament = (e: React.FormEvent) => {
+  const handleCreateTournament = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tourName.trim()) return;
+
+    try {
+      await updateSettings({ ...state.settings, isUnderConstruction: tourUnderConstruction });
+    } catch (err) {
+      console.warn("Failed to update underConstruction settings during tournament creation:", err);
+    }
 
     const newId = createTournament(
       tourName, 
@@ -763,12 +773,19 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditHighHand(activeTournament.highHandAmount !== undefined ? activeTournament.highHandAmount : 100);
     setEditFlyerUrl(activeTournament.flyerUrl || '');
     setEditFlyerType(activeTournament.flyerType || null);
+    setEditUnderConstruction(state.settings?.isUnderConstruction === true);
     setIsEditTourDetailsOpen(true);
   };
 
   const handleSaveTourDetails = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeTournament) return;
+    
+    try {
+      await updateSettings({ ...state.settings, isUnderConstruction: editUnderConstruction });
+    } catch (err) {
+      console.warn("Failed to update underConstruction settings during tournament update:", err);
+    }
     
     await updateTournament(activeTournament.id, {
       name: editTourName,
@@ -1308,6 +1325,41 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </select>
                 </div>
               </div>
+
+              {/* Under Construction Banner Toggle */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'start',
+                gap: '12px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginTop: '12px',
+                color: '#ffffff'
+              }}>
+                <input
+                  type="checkbox"
+                  id="tourUnderConstruction"
+                  checked={tourUnderConstruction}
+                  onChange={(e) => setTourUnderConstruction(e.target.checked)}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    marginTop: '3px',
+                    cursor: 'pointer',
+                    accentColor: 'var(--color-gold)'
+                  }}
+                />
+                <label htmlFor="tourUnderConstruction" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🚧</span> Enable "Under Construction" Mode
+                  </span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
+                  </span>
+                </label>
+              </div>
             </div>
 
             {/* Column 3: Payout Structure & Actions */}
@@ -1657,6 +1709,41 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       <option value="pdf">PDF Document</option>
                       <option value="image">Image (PNG, JPG)</option>
                     </select>
+                  </div>
+
+                  {/* Under Construction Banner Toggle */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'start',
+                    gap: '12px',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.2)',
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    marginTop: '4px',
+                    color: '#ffffff'
+                  }}>
+                    <input
+                      type="checkbox"
+                      id="editUnderConstruction"
+                      checked={editUnderConstruction}
+                      onChange={(e) => setEditUnderConstruction(e.target.checked)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        marginTop: '3px',
+                        cursor: 'pointer',
+                        accentColor: 'var(--color-gold)'
+                      }}
+                    />
+                    <label htmlFor="editUnderConstruction" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>🚧</span> Enable "Under Construction" Mode
+                      </span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
+                      </span>
+                    </label>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '12px' }}>
@@ -2488,6 +2575,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </select>
                 </div>
               </div>
+
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
                 <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Payout Structure (% per place paid)</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
@@ -4247,6 +4335,41 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       <option value="image">Image</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Under Construction Banner Toggle */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'start',
+                  gap: '12px',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  marginTop: '12px',
+                  color: '#ffffff'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="editUnderConstructionActive"
+                    checked={editUnderConstruction}
+                    onChange={(e) => setEditUnderConstruction(e.target.checked)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      marginTop: '3px',
+                      cursor: 'pointer',
+                      accentColor: 'var(--color-gold)'
+                    }}
+                  />
+                  <label htmlFor="editUnderConstructionActive" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>🚧</span> Enable "Under Construction" Mode
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
+                    </span>
+                  </label>
                 </div>
               </div>
 

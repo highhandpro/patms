@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { PlayerBanner } from '../components/PlayerBanner';
 import { calculateMemberStats } from '../utils/stats';
-import { User, Mail, Phone, Calendar, Trophy, Award, Hash } from 'lucide-react';
+import { User, Mail, Phone, Trophy, Award, Hash } from 'lucide-react';
 
 interface PlayerProfileProps {
   setActiveTab: (tab: string) => void;
