@@ -1414,6 +1414,89 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   }
   // Render Section 1: Tournament Selector List
   if (!activeTournament) {
+    const renderTournamentsTable = (tournamentsList: typeof state.tournaments, emptyMessage: string) => {
+      return (
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Tournament Name</th>
+                <th>Date</th>
+                <th>Season</th>
+                <th style={{ textAlign: 'center' }}>Status</th>
+                <th style={{ textAlign: 'center' }}>Players</th>
+                <th style={{ textAlign: 'right' }}>Prize Pool</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tournamentsList.length > 0 ? (
+                tournamentsList.map((t) => {
+                  const seasonName = state.seasons.find(s => s.id === t.seasonId)?.name || 'Unassigned';
+                  const addonsNum = t.totalAddons !== undefined ? t.totalAddons : t.entries.filter(e => e.hasAddon).length;
+                  const prizePool = t.status === 'completed' 
+                    ? t.totalPrizePool 
+                    : (t.entries.filter(e => e.hasBuyIn).length * t.buyInAmount) + 
+                      (addonsNum * t.addonAmount);
+
+                  return (
+                    <tr key={t.id}>
+                      <td style={{ fontWeight: 600 }}>{t.name}</td>
+                      <td>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
+                          {formatDate(t.date)}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{seasonName}</td>
+                      <td style={{ textAlign: 'center' }}>
+                        <span className={`badge ${
+                          t.status === 'completed' ? 'badge-emerald' :
+                          t.status === 'active' ? 'badge-info' : 'badge-secondary'
+                        }`}>
+                          {t.status}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{t.entries.length}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--color-emerald)' }}>
+                        ${prizePool}
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '8px' }}>
+                          <button
+                            onClick={() => setSelectedTournamentId(t.id)}
+                            className="btn btn-primary"
+                            style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                          >
+                            {isSubAdmin ? 'View' : 'Manage'}
+                          </button>
+                          {isChiefAdmin && (
+                            <button
+                              onClick={() => handleDeleteTour(t.id, t.name)}
+                              className="btn btn-ghost"
+                              style={{ padding: '6px', color: 'var(--color-danger)' }}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                    {emptyMessage}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+
     return (
       <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
         
@@ -1462,100 +1545,34 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
         {/* List of Tournaments */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0px' }}>
             {viewCompletedOnly ? 'Completed Tournaments Registry' : 'Tournaments Registry'}
           </h3>
           
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Tournament Name</th>
-                  <th>Date</th>
-                  <th>Season</th>
-                  <th style={{ textAlign: 'center' }}>Status</th>
-                  <th style={{ textAlign: 'center' }}>Players</th>
-                  <th style={{ textAlign: 'right' }}>Prize Pool</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(() => {
-                  const displayedTournaments = [...state.tournaments]
-                    .filter(t => viewCompletedOnly ? t.status === 'completed' : t.status !== 'completed')
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          {(() => {
+            const displayedTournaments = [...state.tournaments]
+              .filter(t => (viewCompletedOnly ? t.status === 'completed' : t.status !== 'completed') && !t.name.toUpperCase().includes('BETA'))
+              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-                  if (displayedTournaments.length > 0) {
-                    return displayedTournaments.map((t) => {
-                      const seasonName = state.seasons.find(s => s.id === t.seasonId)?.name || 'Unassigned';
-                      
-                      // Calculate dynamic values for drafts
-                      const addonsNum = t.totalAddons !== undefined ? t.totalAddons : t.entries.filter(e => e.hasAddon).length;
-                      const prizePool = t.status === 'completed' 
-                        ? t.totalPrizePool 
-                        : (t.entries.filter(e => e.hasBuyIn).length * t.buyInAmount) + 
-                          (addonsNum * t.addonAmount);
+            return renderTournamentsTable(
+              displayedTournaments,
+              viewCompletedOnly 
+                ? 'No completed tournaments found.' 
+                : 'No active or draft tournament records found. Create one using the button above.'
+            );
+          })()}
 
-                      return (
-                        <tr key={t.id}>
-                          <td style={{ fontWeight: 600 }}>{t.name}</td>
-                          <td>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
-                              {formatDate(t.date)}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{seasonName}</td>
-                          <td style={{ textAlign: 'center' }}>
-                            <span className={`badge ${
-                              t.status === 'completed' ? 'badge-emerald' :
-                              t.status === 'active' ? 'badge-info' : 'badge-secondary'
-                            }`}>
-                              {t.status}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'center', fontWeight: 600 }}>{t.entries.length}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--color-emerald)' }}>
-                            ${prizePool}
-                          </td>
-                          <td style={{ textAlign: 'right' }}>
-                            <div style={{ display: 'inline-flex', gap: '8px' }}>
-                              <button
-                                onClick={() => setSelectedTournamentId(t.id)}
-                                className="btn btn-primary"
-                                style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                              >
-                                {isSubAdmin ? 'View' : 'Manage'}
-                              </button>
-                              {isChiefAdmin && (
-                                <button
-                                  onClick={() => handleDeleteTour(t.id, t.name)}
-                                  className="btn btn-ghost"
-                                  style={{ padding: '6px', color: 'var(--color-danger)' }}
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    });
-                  }
+          <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '20px 0 0 0' }}>BETA GAMES</h4>
+          {(() => {
+            const betaTournaments = [...state.tournaments]
+              .filter(t => t.name.toUpperCase().includes('BETA'))
+              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-                  return (
-                    <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                        {viewCompletedOnly 
-                          ? 'No completed tournaments found.' 
-                          : 'No active or draft tournament records found. Create one using the button above.'}
-                      </td>
-                    </tr>
-                  );
-                })()}
-              </tbody>
-            </table>
-          </div>
+            return renderTournamentsTable(
+              betaTournaments,
+              'No beta games.'
+            );
+          })()}
         </div>
 
         {/* Edit Tournament Details Modal */}
