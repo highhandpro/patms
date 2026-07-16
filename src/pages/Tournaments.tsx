@@ -1562,17 +1562,21 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             );
           })()}
 
-          <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '20px 0 0 0' }}>BETA GAMES</h4>
-          {(() => {
-            const betaTournaments = [...state.tournaments]
-              .filter(t => t.name.toUpperCase().includes('BETA'))
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          {(isSubAdmin || isChiefAdmin) && (
+            <>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '20px 0 0 0' }}>BETA GAMES</h4>
+              {(() => {
+                const betaTournaments = [...state.tournaments]
+                  .filter(t => t.name.toUpperCase().includes('BETA'))
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-            return renderTournamentsTable(
-              betaTournaments,
-              'No beta games.'
-            );
-          })()}
+                return renderTournamentsTable(
+                  betaTournaments,
+                  'No beta games.'
+                );
+              })()}
+            </>
+          )}
         </div>
 
         {/* Edit Tournament Details Modal */}
