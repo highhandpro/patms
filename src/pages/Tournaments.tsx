@@ -3717,7 +3717,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           ? activeTournament.totalDealerAppreciation
           : (dealerCount * (activeTournament.dealerAppreciationAmount || 0));
 
-        const foodCollected = buyInCount * (activeTournament.foodAmount || 0);
         const totalCollected = (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
 
         const payouts = (activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0])
@@ -3765,19 +3764,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                   {buyInCount} players checked in @ ${activeTournament.dealerAppreciationAmount || 0}
-                </span>
-              </div>
-
-              {/* Card 4: Food Collected */}
-              <div className="glass-card" style={{ padding: '20px', border: '1px solid rgba(251,191,36,0.15)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em' }}>
-                  FOOD COLLECTED
-                </span>
-                <h3 style={{ fontSize: '1.8rem', color: 'var(--text-primary)', fontWeight: 800, margin: 0 }}>
-                  ${foodCollected.toLocaleString()}
-                </h3>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  {buyInCount} buy-ins @ ${activeTournament.foodAmount || 0}
                 </span>
               </div>
 
