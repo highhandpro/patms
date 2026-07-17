@@ -2070,18 +2070,64 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             </button>
           </>
         ) : (
-          <button 
-            className={`btn btn-ghost active-subtab`}
-            onClick={() => setSubTab('results')}
-            style={{
-              borderRadius: '8px 8px 0 0',
-              borderBottom: '3px solid var(--color-emerald)',
-              color: 'var(--color-emerald)',
-              fontWeight: 600
-            }}
-          >
-            Standings & Results
-          </button>
+          <>
+            <button 
+              className={`btn btn-ghost ${subTab === 'results' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('results')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'results' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'results' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'results' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              Standings & Results
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'players' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('players')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'players' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'players' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'players' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              PLAYERS
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'accounting' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('accounting')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'accounting' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'accounting' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'accounting' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              ACCOUNTING
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'facebook' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('facebook')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'facebook' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'facebook' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'facebook' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              Results Flyer
+            </button>
+          </>
         )}
       </div>
       </div>
