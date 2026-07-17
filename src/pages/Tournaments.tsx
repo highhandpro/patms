@@ -3178,6 +3178,22 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           <div className="glass-card animate-slide-up" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Tournament Elimination Summary</h3>
+              <button
+                onClick={() => window.print()}
+                className="btn btn-secondary no-print"
+                style={{
+                  padding: '6px 14px',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Print Summary
+              </button>
               <span style={{ fontSize: '0.85rem', padding: '4px 10px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', fontWeight: 600 }}>
                 {bustedEntries.length} of {N} Players Busted
               </span>
