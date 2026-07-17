@@ -3055,11 +3055,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           return { pos, entry };
         });
 
-        const midpoint = Math.ceil(allPositions.length / 2);
-        const leftColumnEntries = allPositions.slice(0, midpoint);
-        const rightColumnEntries = allPositions.slice(midpoint);
+        const third = Math.ceil(allPositions.length / 3);
+        const col1Entries = allPositions.slice(0, third);
+        const col2Entries = allPositions.slice(third, third * 2);
+        const col3Entries = allPositions.slice(third * 2);
 
-        const renderSummaryTable = (positions: typeof leftColumnEntries) => (
+        const renderSummaryTable = (positions: typeof col1Entries) => (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
@@ -3207,10 +3208,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 flexWrap: 'wrap'
               }} className="summary-columns-container">
                 <div style={{ flex: 1 }}>
-                  {renderSummaryTable(leftColumnEntries)}
+                  {renderSummaryTable(col1Entries)}
                 </div>
                 <div style={{ flex: 1 }}>
-                  {rightColumnEntries.length > 0 ? renderSummaryTable(rightColumnEntries) : (
+                  {col2Entries.length > 0 ? renderSummaryTable(col2Entries) : (
+                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem', border: '1px dashed var(--border-subtle)', borderRadius: '8px' }}>
+                      Remaining players not yet knocked out.
+                    </div>
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  {col3Entries.length > 0 ? renderSummaryTable(col3Entries) : (
                     <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem', border: '1px dashed var(--border-subtle)', borderRadius: '8px' }}>
                       Remaining players not yet knocked out.
                     </div>
