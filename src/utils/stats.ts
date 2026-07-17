@@ -142,3 +142,25 @@ export const formatDate = (dateStr: string) => {
   }
   return dateStr;
 };
+
+export function getAutoPayoutPercentages(playerCount: number): number[] {
+  let pcts: number[] = [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+  if (playerCount < 6) {
+    pcts = [100, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  } else if (playerCount >= 6 && playerCount <= 9) {
+    pcts = [60, 40, 0, 0, 0, 0, 0, 0, 0, 0];
+  } else if (playerCount >= 10 && playerCount <= 15) {
+    pcts = [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+  } else if (playerCount >= 16 && playerCount <= 24) {
+    pcts = [40, 30, 20, 10, 0, 0, 0, 0, 0, 0];
+  } else if (playerCount >= 25 && playerCount <= 30) {
+    pcts = [35, 25, 18, 12, 10, 0, 0, 0, 0, 0];
+  } else if (playerCount >= 31 && playerCount <= 34) {
+    pcts = [30, 22, 17, 13, 10, 8, 0, 0, 0, 0];
+  } else if (playerCount >= 35 && playerCount <= 40) {
+    pcts = [28, 20, 16, 12, 10, 8, 6, 0, 0, 0];
+  } else if (playerCount >= 41) {
+    pcts = [26, 19, 15, 12, 10, 8, 6, 4, 0, 0];
+  }
+  return pcts;
+}

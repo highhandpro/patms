@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Maximize, Minimize, Play, Pause, RotateCcw, ShieldAlert, Award, Shuffle } from 'lucide-react';
+import { Maximize, Minimize, Play, Pause, RotateCcw, ShieldAlert, Award, Shuffle, DollarSign } from 'lucide-react';
 import type { Tournament, Member, BlindLevel, TournamentEntry } from '../types';
 import { useApp } from '../context/AppContext';
+import { getAutoPayoutPercentages } from '../utils/stats';
 import { EliminationModal } from './EliminationModal';
 
 interface TournamentClockProps {
@@ -73,6 +74,10 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
   // Add-on input state (direct TD count entry)
   const [addonsCountInput, setAddonsCountInput] = useState<number>(tournament.totalAddons || 0);
+
+  // Bubble states
+  const [isBubbleModalOpen, setIsBubbleModalOpen] = useState(false);
+  const [bubbleInputAmount, setBubbleInputAmount] = useState(tournament.bubbleAmount || 0);
 
   // Chop Calculator States
   const [chopStacks, setChopStacks] = useState<Record<string, number>>({});
@@ -167,6 +172,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   useEffect(() => {
     setAddonsCountInput(tournament.totalAddons || 0);
   }, [tournament.totalAddons]);
+
+  // Synchronize dynamic input changes when bubbleAmount changes
+  useEffect(() => {
+    setBubbleInputAmount(tournament.bubbleAmount || 0);
+  }, [tournament.bubbleAmount]);
 
   // Highlight active players panel briefly when clicking the bottom Bust Out button
   useEffect(() => {
@@ -683,7 +693,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     return num.toString();
   };
 
-  // Dynamic Payout List - Always displays payouts falling back to 50/30/20 standard if unconfigured
+  // Dynamic Payout List - Always displays payouts falling back to auto-calculated standard if unconfigured
   const buyInCount = checkedInPlayers.length;
   const netBuyInContribution = (tournament.buyInAmount || 40) - (tournament.dealerAppreciationAmount || 0) - (tournament.foodAmount || 0);
   const netAddonContribution = tournament.addonAmount || 0;
@@ -691,12 +701,17 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   const prizePool = tournament.overridePrizePool !== undefined && tournament.overridePrizePool > 0
     ? tournament.overridePrizePool
     : calculatedPrizePool;
+  const bubbleAmount = tournament.bubbleAmount || 0;
+  const highHandAmount = tournament.highHandAmount || 0;
+  const prizePoolAfterBubble = Math.max(0, prizePool - bubbleAmount - highHandAmount);
+  
   const pctSource = tournament.payoutPercentages && tournament.payoutPercentages.reduce((a, b) => a + b, 0) > 0
     ? tournament.payoutPercentages
-    : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+    : getAutoPayoutPercentages(buyInCount);
+
   const payoutsList = pctSource
-    .map((pct, idx) => ({ place: idx + 1, pct, amount: (pct / 100) * prizePool }))
-    .filter(p => p.pct > 0);
+    .map((pct: number, idx: number) => ({ place: idx + 1, pct, amount: (pct / 100) * prizePoolAfterBubble }))
+    .filter((p: { place: number; pct: number; amount: number }) => p.pct > 0);
 
   const getPlayerAtPlace = (place: number) => {
     // 1. Check if a player has this finishPosition assigned
@@ -773,7 +788,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     const totalChopChips = stacks.reduce((a, b) => a + b, 0);
     if (totalChopChips === 0) return;
 
-    const sortedPayouts = payoutsList.map(p => p.amount).sort((a, b) => b - a);
+    const sortedPayouts = payoutsList.map((p: any) => p.amount).sort((a: number, b: number) => b - a);
     const chipChops = stacks.map(stack => (stack / totalChopChips) * prizePool);
     
     // Calculate permutations: P(n, k) = n! / (n-k)!
@@ -822,6 +837,13 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     e.preventDefault();
     updateTournament(tournament.id, { totalAddons: addonsCountInput });
     setIsAddonOpen(false);
+  };
+
+  // Submit Bubble Payout entered by TD
+  const handleSaveBubbleAmount = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateTournament(tournament.id, { bubbleAmount: bubbleInputAmount });
+    setIsBubbleModalOpen(false);
   };
 
   return (
@@ -1115,51 +1137,67 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             {/* Places Paid Horizontal Marquee Ticker */}
             <div style={{ width: '100%' }}>
 
-              {payoutsList.length > 0 ? (
-                <div style={{ 
-                  overflow: 'hidden', 
-                  width: '100%', 
-                  position: 'relative', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  height: isFullscreen ? '36px' : '30px', 
-                  backgroundColor: 'rgba(255,255,255,0.02)', 
-                  borderRadius: '6px', 
-                  border: '1px solid rgba(255,255,255,0.05)', 
-                  padding: '0 12px' 
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    gap: '40px',
-                    whiteSpace: 'nowrap',
-                    animation: 'marquee 25s linear infinite',
-                    width: 'max-content'
-                  }}>
-                    {/* Render the payouts list twice for infinite seamless loop */}
-                    {[...payoutsList, ...payoutsList].map((p, idx) => {
-                      const playerNameAtPlace = getPlayerAtPlace(p.place);
-                      const displayLabel = playerNameAtPlace 
-                        ? `${p.place === 1 ? '🥇' : p.place === 2 ? '🥈' : p.place === 3 ? '🥉' : `${p.place}th`} ${playerNameAtPlace}`
-                        : (p.place === 1 ? '🥇 1st Place' : p.place === 2 ? '🥈 2nd Place' : p.place === 3 ? '🥉 3rd Place' : `${p.place}th Place`);
+                {(() => {
+                  const bubblePosition = payoutsList.length + 1;
+                  const tickerList = [...payoutsList];
+                  if (bubbleAmount > 0) {
+                    tickerList.push({
+                      place: bubblePosition,
+                      pct: 0,
+                      amount: bubbleAmount,
+                      isBubble: true
+                    } as any);
+                  }
+                  if (tickerList.length === 0) {
+                    return (
+                      <div style={{ color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', fontSize: '0.9rem', textAlign: 'center', padding: '6px' }}>
+                        Setup place payout percentages to display dynamic awards.
+                      </div>
+                    );
+                  }
+                  return (
+                    <div style={{ 
+                      overflow: 'hidden', 
+                      width: '100%', 
+                      position: 'relative', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      height: isFullscreen ? '36px' : '30px', 
+                      backgroundColor: 'rgba(255,255,255,0.02)', 
+                      borderRadius: '6px', 
+                      border: '1px solid rgba(255,255,255,0.05)', 
+                      padding: '0 12px' 
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        gap: '40px',
+                        whiteSpace: 'nowrap',
+                        animation: 'marquee 25s linear infinite',
+                        width: 'max-content'
+                      }}>
+                        {[...tickerList, ...tickerList].map((p: any, idx) => {
+                          const playerNameAtPlace = getPlayerAtPlace(p.place);
+                          const displayLabel = p.isBubble
+                            ? (playerNameAtPlace ? `Bubble (${p.place}th) ${playerNameAtPlace}` : `Bubble (${p.place}th)`)
+                            : (playerNameAtPlace 
+                              ? `${p.place === 1 ? '🥇' : p.place === 2 ? '🥈' : p.place === 3 ? '🥉' : `${p.place}th`} ${playerNameAtPlace}`
+                              : (p.place === 1 ? '🥇 1st Place' : p.place === 2 ? '🥈 2nd Place' : p.place === 3 ? '🥉 3rd Place' : `${p.place}th Place`));
 
-                      return (
-                        <div key={`${p.place}-${idx}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: isFullscreen ? '1.25rem' : '1rem' }}>
-                          <span style={{ color: playerNameAtPlace ? '#ffffff' : 'rgba(255,255,255,0.7)', fontWeight: 800 }}>
-                            {displayLabel}:
-                          </span>
-                          <span style={{ color: 'var(--color-emerald)', fontWeight: 900, fontFamily: '"Outfit", sans-serif' }}>
-                            ${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <div style={{ color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', fontSize: '0.9rem', textAlign: 'center', padding: '6px' }}>
-                  Setup place payout percentages to display dynamic awards.
-                </div>
-              )}
+                          return (
+                            <div key={`${p.place}-${idx}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: isFullscreen ? '1.25rem' : '1rem' }}>
+                              <span style={{ color: playerNameAtPlace ? '#ffffff' : 'rgba(255,255,255,0.7)', fontWeight: 800 }}>
+                                {displayLabel}:
+                              </span>
+                              <span style={{ color: 'var(--color-emerald)', fontWeight: 900, fontFamily: '"Outfit", sans-serif' }}>
+                                ${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
             </div>
             {/* Administration Actions shortcuts (excluding Buy-in and Bust Out) */}
             <div style={{ 
@@ -1420,6 +1458,38 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 >
                   <Shuffle size={16} />
                   <span>Reshuffle Seats</span>
+                </button>
+              )}
+              
+              {/* Pay the Bubble (Only show if <= 10 players alive) */}
+              {activePlayers.length <= 10 && (
+                <button 
+                  onClick={() => setIsBubbleModalOpen(true)}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = '#0D4014';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
+                  }}
+                  style={{ 
+                    backgroundColor: '#0D4014', 
+                    color: 'var(--color-gold)', 
+                    border: '1px solid var(--color-gold)', 
+                    padding: isFullscreen ? '8px 14px' : '6px 10px', 
+                    fontSize: isFullscreen ? '1rem' : '0.85rem', 
+                    fontWeight: 700,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.15s ease-in-out'
+                  }}
+                >
+                  <DollarSign size={16} />
+                  <span>PAY THE BUBBLE</span>
                 </button>
               )}
               </div>
@@ -1994,6 +2064,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
         const pctList = tournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
         const payouts = pctList.map(pct => Math.round(calculatedPrizePool * (pct / 100)));
+        const placesPaidCount = pctList.filter(pct => pct > 0).length;
+        const bubblePosition = placesPaidCount + 1;
 
         const moneyPlayers = tournament.entries
           .map(e => {
@@ -2004,7 +2076,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             
             let payout = 0;
             if (pos) {
-              if (pos === 9) {
+              if (pos === bubblePosition) {
                 payout = tournament.bubbleAmount || 0;
               } else {
                 payout = payouts[pos - 1] || 0;
@@ -2147,6 +2219,45 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           </div>
         );
       })()}
+
+      {/* MODAL: PAY THE BUBBLE */}
+      {isBubbleModalOpen && (
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', backgroundColor: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--color-gold)' }}>Pay the Bubble</h3>
+              <button onClick={() => setIsBubbleModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+            </div>
+
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '16px' }}>
+              Enter the bubble payout amount. This will be deducted from the prize pool and awarded to the player finishing exactly 1 place outside the money.
+            </p>
+
+            <form onSubmit={handleSaveBubbleAmount} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Bubble Payout Amount ($)</label>
+                <input
+                  type="number"
+                  min={0}
+                  required
+                  value={bubbleInputAmount}
+                  onChange={(e) => setBubbleInputAmount(Number(e.target.value))}
+                  className="form-input"
+                  style={{ padding: '8px 12px' }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{ width: '100%', padding: '10px', fontWeight: 700 }}
+              >
+                Save Bubble Payout
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

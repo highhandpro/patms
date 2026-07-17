@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Member, Tournament, Season, Settings, DatabaseState, TournamentEntry, PendingApproval } from '../types';
 import { db } from '../firebase';
+import { getAutoPayoutPercentages } from '../utils/stats';
 import { 
   collection, 
   doc, 
@@ -994,24 +995,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const bountyCount = updatedEntries.filter(e => e.hasBuyIn).length;
     const dealerCount = updatedEntries.filter(e => e.hasDealerAppreciation).length;
 
+    const bubbleAmount = t.bubbleAmount || 0;
+    const highHandAmount = t.highHandAmount || 0;
     const netBuyInContribution = t.buyInAmount - t.bountyAmount - t.dealerAppreciationAmount;
-    const totalPrizePool = Math.max(0, (buyInCount * netBuyInContribution) + (addonCount * t.addonAmount) - (t.highHandAmount || 0) - (t.bubbleAmount || 0));
+    const rawPrizePool = (buyInCount * netBuyInContribution) + (addonCount * t.addonAmount);
     const totalBountyPool = bountyCount * t.bountyAmount;
     const totalDealerAppreciation = dealerCount * t.dealerAppreciationAmount;
 
     const payoutPrizePool = t.overridePrizePool !== undefined && t.overridePrizePool > 0
       ? t.overridePrizePool
-      : totalPrizePool;
+      : rawPrizePool;
 
-    const pctList = t.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
-    const payouts = pctList.map(pct => Math.round(payoutPrizePool * (pct / 100)));
+    const prizePoolAfterDeductions = Math.max(0, payoutPrizePool - highHandAmount - bubbleAmount);
+    const pctList = t.payoutPercentages || getAutoPayoutPercentages(buyInCount);
+    const payouts = pctList.map((pct: number) => Math.round(prizePoolAfterDeductions * (pct / 100)));
+    const placesPaidCount = pctList.filter((pct: number) => pct > 0).length;
+    const bubblePosition = placesPaidCount + 1;
 
     const N = buyInCount;
     const attendancePoints = state.settings.pointsBaseAttendance;
 
     updatedEntries = updatedEntries.map(e => {
       const pos = e.finishPosition || N;
-      const payoutEarned = payouts[pos - 1] || 0;
+      let payoutEarned = payouts[pos - 1] || 0;
+      if (pos === bubblePosition) {
+        payoutEarned = bubbleAmount;
+      }
 
       const basePositionPoints = N - pos + 1;
       let multiplier = 1;
@@ -1031,7 +1040,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     await setDoc(doc(db, 'tournaments', tournamentId), {
       status: 'completed',
-      totalPrizePool: payoutPrizePool,
+      totalPrizePool: prizePoolAfterDeductions,
       totalBountyPool,
       totalDealerAppreciation,
       entries: updatedEntries

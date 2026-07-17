@@ -3994,14 +3994,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                     {/* Pay-the-Bubble Row */}
                     {(activeTournament.bubbleAmount || 0) > 0 && (() => {
-                      const placingPlayer = activeTournament.entries.find(e => e.eliminatedAt && e.finishPosition === 9); // Bubble is 9th position
+                      const bubblePosition = payouts.length + 1;
+                      const placingPlayer = activeTournament.entries.find(e => e.eliminatedAt && e.finishPosition === bubblePosition);
                       const recipientName = placingPlayer 
                         ? getMemberName(placingPlayer.memberId) 
                         : (activeTournament.status === 'completed' ? 'Unplaced' : 'TBD (Bubble Player)');
                       return (
                         <tr style={{ borderBottom: '1px solid var(--border-subtle)', backgroundColor: 'rgba(212, 175, 55, 0.06)' }}>
                           <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 700, color: 'var(--color-gold)' }}>
-                            Bubble
+                            Bubble ({bubblePosition === 1 ? '1st' : bubblePosition === 2 ? '2nd' : bubblePosition === 3 ? '3rd' : `${bubblePosition}th`})
                           </td>
                           <td style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 600, color: 'var(--text-secondary)' }}>
                             Fixed
