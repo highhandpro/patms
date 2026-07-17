@@ -8,6 +8,7 @@ import { SeatingDisplayModal } from '../components/SeatingDisplayModal';
 import { EliminationModal } from '../components/EliminationModal';
 import { LateEntryModal } from '../components/LateEntryModal';
 import { TournamentClock } from '../components/TournamentClock';
+import { GameResultsFacebook } from '../components/GameResultsFacebook';
 import { 
   Trophy, Play, RotateCcw, Plus, Trash2, 
   UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award
@@ -68,7 +69,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting'>('rsvp');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting' | 'facebook'>('rsvp');
   const [viewCompletedOnly, setViewCompletedOnly] = useState(false);
   const [printType, setPrintType] = useState<'signin' | 'scoresheet'>('signin');
 
@@ -2000,6 +2001,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               }}
             >
               Summary ({activeTournament.status === 'draft' ? 0 : activeTournament.entries.filter(e => e.eliminatedAt).length} busted)
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'facebook' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('facebook')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'facebook' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'facebook' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'facebook' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              Results Flyer
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'accounting' ? 'active-subtab' : ''}`}
@@ -4050,6 +4065,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           </div>
         );
       })()}
+
+      {subTab === 'facebook' && (
+        <GameResultsFacebook 
+          tournament={activeTournament} 
+          members={state.members} 
+        />
+      )}
 
       {subTab === 'clock' && (
         <TournamentClock 
