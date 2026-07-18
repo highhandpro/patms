@@ -2344,7 +2344,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   Check In
                                 </button>
                               </td>
-                              <td style={{ fontWeight: 600 }}>
+                              <td className="player-name-cell" style={{ fontWeight: 600 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <input
                                     type="checkbox"
@@ -2458,7 +2458,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   Check In
                                 </button>
                               </td>
-                              <td style={{ fontWeight: 600 }}>
+                              <td className="player-name-cell" style={{ fontWeight: 600 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <input
                                     type="checkbox"
@@ -2572,7 +2572,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   Check In
                                 </button>
                               </td>
-                              <td style={{ fontWeight: 600 }}>
+                              <td className="player-name-cell" style={{ fontWeight: 600 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <input
                                     type="checkbox"
