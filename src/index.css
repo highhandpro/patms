@@ -2316,3 +2316,40 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
   background-color: #F5F7F5 !important;
 }
 
+/* Ensure all modals and cards in the Tournament Clock retain their dark-theme colors */
+#tournament-clock-container .glass-card h1,
+#tournament-clock-container .glass-card h2,
+#tournament-clock-container .glass-card h3,
+#tournament-clock-container .glass-card h4,
+#tournament-clock-container .glass-card h5,
+#tournament-clock-container .glass-card h6,
+#tournament-clock-container .glass-card p,
+#tournament-clock-container .glass-card span,
+#tournament-clock-container .glass-card label,
+#tournament-clock-container .glass-card div,
+#tournament-clock-container .glass-card strong,
+#tournament-clock-container .glass-card th,
+#tournament-clock-container .glass-card td,
+#tournament-clock-container .glass-card select,
+#tournament-clock-container .glass-card input {
+  color: #ffffff !important;
+}
+
+#tournament-clock-container .glass-card h1,
+#tournament-clock-container .glass-card h2,
+#tournament-clock-container .glass-card h3,
+#tournament-clock-container .glass-card h4,
+#tournament-clock-container .glass-card h5,
+#tournament-clock-container .glass-card h6 {
+  color: var(--color-gold) !important;
+}
+
+#tournament-clock-container .glass-card p,
+#tournament-clock-container .glass-card .text-secondary {
+  color: #BFBFBF !important;
+}
+
+#tournament-clock-container .glass-card .text-muted {
+  color: #8E8E93 !important;
+}
+

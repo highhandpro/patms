@@ -2911,7 +2911,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.9rem', width: '100%' }}>
+              <div style={{ textAlign: 'center', padding: '24px', color: 'rgba(255, 255, 255, 0.7)', fontStyle: 'italic', fontSize: '0.9rem', width: '100%' }}>
                 No active players remaining.
               </div>
             )}
