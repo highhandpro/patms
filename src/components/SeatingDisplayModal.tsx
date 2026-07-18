@@ -55,7 +55,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
 
   const activeTables = tableColors.filter(t => {
     const players = seating[t.key] || [];
-    return players.filter(p => p !== "").length > 0;
+    return players.filter(p => p && typeof p === 'string' && p.trim() !== "").length > 0;
   });
 
   // Calculate live prize pool statistics
@@ -212,7 +212,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
         >
           {activeTables.map((t) => {
             const players = seating[t.key] || [];
-            const hasPlayers = players.some(p => p !== "");
+            const hasPlayers = players.some(p => p && typeof p === 'string' && p.trim() !== "");
 
             // Always generate exactly 10 slots
             const seatSlots = Array(10).fill("");
@@ -251,7 +251,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                   </h2>
                   {hasPlayers && (
                     <span style={{ fontSize: '0.7rem', color: '#a0aec0', fontWeight: 600 }}>
-                      {players.filter(p => p !== "").length} Players Seated
+                      {players.filter(p => p && typeof p === 'string' && p.trim() !== "").length} Players Seated
                     </span>
                   )}
                 </div>

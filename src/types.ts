@@ -40,6 +40,7 @@ export interface Tournament {
   name: string;
   status: 'draft' | 'active' | 'completed';
   isArchived?: boolean;
+  isBetaTest?: boolean;
   
   // Financial Rules
   buyInAmount: number;

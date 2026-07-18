@@ -40,7 +40,8 @@ interface AppContextProps {
     addonChips?: number,
     flyerUrl?: string,
     flyerType?: 'pdf' | 'image' | null,
-    highHandAmount?: number
+    highHandAmount?: number,
+    isBetaTest?: boolean
   ) => string;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
   archiveTournament: (id: string) => void;
@@ -726,7 +727,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addonChips?: number,
     flyerUrl?: string,
     flyerType?: 'pdf' | 'image' | null,
-    highHandAmount?: number
+    highHandAmount?: number,
+    isBetaTest?: boolean
   ) => {
     const id = `tour-${Date.now()}`;
     const newTour: Tournament = {
@@ -754,7 +756,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       maxPlayers: maxPlayers || 24,
       highHandAmount: highHandAmount || 0,
       flyerUrl: flyerUrl || '',
-      flyerType: flyerType || null
+      flyerType: flyerType || null,
+      isBetaTest: isBetaTest || false
     };
 
     setDoc(doc(db, 'tournaments', id), newTour);

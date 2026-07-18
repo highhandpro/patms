@@ -147,6 +147,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [tourHighHand, setTourHighHand] = useState(100);
   const [tourUnderConstruction, setTourUnderConstruction] = useState(state.settings?.isUnderConstruction === true);
   const [editUnderConstruction, setEditUnderConstruction] = useState(state.settings?.isUnderConstruction === true);
+  const [tourIsBetaTest, setTourIsBetaTest] = useState(false);
+  const [editTourIsBetaTest, setEditTourIsBetaTest] = useState(false);
 
   useEffect(() => {
     if (state.settings && isCreateTourOpen) {
@@ -758,7 +760,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       tourAddonChips,
       tourFlyerUrl,
       tourFlyerType,
-      tourHighHand
+      tourHighHand,
+      tourIsBetaTest
     );
     setIsCreateTourOpen(false);
     setSelectedTournamentId(newId);
@@ -767,6 +770,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setTourName('');
     setTourFlyerUrl('');
     setTourFlyerType(null);
+    setTourIsBetaTest(false);
   };
 
   const openEditTourDetails = () => {
@@ -788,6 +792,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditHighHand(activeTournament.highHandAmount !== undefined ? activeTournament.highHandAmount : 100);
     setEditFlyerUrl(activeTournament.flyerUrl || '');
     setEditFlyerType(activeTournament.flyerType || null);
+    setEditTourIsBetaTest(activeTournament.isBetaTest || false);
     setEditUnderConstruction(state.settings?.isUnderConstruction === true);
     setIsEditTourDetailsOpen(true);
   };
@@ -819,7 +824,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       maxPlayers: editMaxPlayers,
       highHandAmount: editHighHand,
       flyerUrl: editFlyerUrl,
-      flyerType: editFlyerType
+      flyerType: editFlyerType,
+      isBetaTest: editTourIsBetaTest
     });
     
     setIsEditTourDetailsOpen(false);
@@ -1354,6 +1360,40 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </span>
                 </label>
               </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'flex-start',
+                backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginTop: '12px',
+                color: '#ffffff'
+              }}>
+                <input
+                  type="checkbox"
+                  id="tourIsBetaTest"
+                  checked={tourIsBetaTest}
+                  onChange={(e) => setTourIsBetaTest(e.target.checked)}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    marginTop: '3px',
+                    cursor: 'pointer',
+                    accentColor: 'var(--color-gold)'
+                  }}
+                />
+                <label htmlFor="tourIsBetaTest" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🧪</span> Disable Emails / BETA Testing
+                  </span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    When enabled, email notifications are disabled and the game is classified under BETA GAMES (only visible to admins).
+                  </span>
+                </label>
+              </div>
             </div>
 
             {/* Column 3: Payout Structure & Actions */}
@@ -1560,7 +1600,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           
           {(() => {
             const displayedTournaments = [...state.tournaments]
-              .filter(t => (viewCompletedOnly ? t.status === 'completed' : t.status !== 'completed') && !t.name.toUpperCase().includes('BETA') && !t.isArchived)
+              .filter(t => (viewCompletedOnly ? t.status === 'completed' : t.status !== 'completed') && !t.name.toUpperCase().includes('BETA') && !t.isBetaTest && !t.isArchived)
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
             return renderTournamentsTable(
@@ -1576,7 +1616,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '20px 0 0 0' }}>BETA GAMES</h4>
               {(() => {
                 const betaTournaments = [...state.tournaments]
-                  .filter(t => t.name.toUpperCase().includes('BETA') && !t.isArchived)
+                  .filter(t => (t.name.toUpperCase().includes('BETA') || t.isBetaTest) && !t.isArchived)
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
                 return renderTournamentsTable(
@@ -1775,6 +1815,40 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       </span>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
+                      </span>
+                    </label>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'start',
+                    gap: '12px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    marginTop: '12px',
+                    color: '#ffffff'
+                  }}>
+                    <input
+                      type="checkbox"
+                      id="editTourIsBetaTest"
+                      checked={editTourIsBetaTest}
+                      onChange={(e) => setEditTourIsBetaTest(e.target.checked)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        marginTop: '3px',
+                        cursor: 'pointer',
+                        accentColor: 'var(--color-gold)'
+                      }}
+                    />
+                    <label htmlFor="editTourIsBetaTest" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>🧪</span> Disable Emails / BETA Testing
+                      </span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        When enabled, email notifications are disabled and the game is classified under BETA GAMES (only visible to admins).
                       </span>
                     </label>
                   </div>
