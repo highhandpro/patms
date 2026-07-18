@@ -2298,7 +2298,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <table className="data-table">
                       <thead>
                         <tr>
-                          <th style={{ width: '80px' }}></th>
+                          <th style={{ width: '130px' }}></th>
                           <th>Player Name</th>
                           <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
                           <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
@@ -2311,28 +2311,60 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                           return (
                             <tr key={entry.memberId}>
-                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
-                                <button
-                                  onClick={() => {
-                                    triggerCheckInFlow(entry.memberId, async (phone) => {
-                                      if (phone) {
-                                        await updateMember(entry.memberId, { phone });
-                                      }
-                                      await updateTournament(activeTournament.id, {
-                                        entries: activeTournament.entries.map(e => 
-                                          e.memberId === entry.memberId 
-                                            ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
-                                            : e
-                                        )
+                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '130px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <button
+                                    onClick={() => {
+                                      triggerCheckInFlow(entry.memberId, async (phone) => {
+                                        if (phone) {
+                                          await updateMember(entry.memberId, { phone });
+                                        }
+                                        await updateTournament(activeTournament.id, {
+                                          entries: activeTournament.entries.map(e => 
+                                            e.memberId === entry.memberId 
+                                              ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                              : e
+                                          )
+                                        });
                                       });
-                                    });
-                                  }}
-                                  className="btn btn-primary"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px', opacity: isSubAdmin ? 0.5 : 1, cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
-                                  disabled={isSubAdmin}
-                                >
-                                  Check In
-                                </button>
+                                    }}
+                                    className={entry.isLate ? "btn" : "btn btn-primary"}
+                                    style={{
+                                      padding: '4px 10px',
+                                      fontSize: '0.8rem',
+                                      minHeight: 'auto',
+                                      borderRadius: '6px',
+                                      opacity: isSubAdmin ? 0.5 : 1,
+                                      cursor: isSubAdmin ? 'not-allowed' : 'pointer',
+                                      backgroundColor: entry.isLate ? '#D4AF37' : undefined,
+                                      color: entry.isLate ? '#000000' : undefined,
+                                      border: entry.isLate ? '1px solid #bda032' : undefined
+                                    }}
+                                    disabled={isSubAdmin}
+                                  >
+                                    Check In
+                                  </button>
+                                  <input
+                                    type="checkbox"
+                                    checked={entry.isLate || false}
+                                    onChange={async () => {
+                                      if (isSubAdmin) return;
+                                      const updatedEntries = activeTournament.entries.map(e =>
+                                        e.memberId === entry.memberId ? { ...e, isLate: !e.isLate } : e
+                                      );
+                                      await updateTournament(activeTournament.id, { entries: updatedEntries });
+                                    }}
+                                    style={{
+                                      width: '20px',
+                                      height: '20px',
+                                      cursor: isSubAdmin ? 'not-allowed' : 'pointer',
+                                      opacity: 0,
+                                      margin: 0
+                                    }}
+                                    disabled={isSubAdmin}
+                                    title="Mark Player as Late"
+                                  />
+                                </div>
                               </td>
                               <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
                               <td style={{ textAlign: 'center' }}>
@@ -2378,7 +2410,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <table className="data-table">
                       <thead>
                         <tr>
-                          <th style={{ width: '80px' }}></th>
+                          <th style={{ width: '130px' }}></th>
                           <th>Player Name</th>
                           <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
                           <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
@@ -2391,28 +2423,60 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                           return (
                             <tr key={entry.memberId}>
-                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
-                                <button
-                                  onClick={() => {
-                                    triggerCheckInFlow(entry.memberId, async (phone) => {
-                                      if (phone) {
-                                        await updateMember(entry.memberId, { phone });
-                                      }
-                                      await updateTournament(activeTournament.id, {
-                                        entries: activeTournament.entries.map(e => 
-                                          e.memberId === entry.memberId 
-                                            ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
-                                            : e
-                                        )
+                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '130px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <button
+                                    onClick={() => {
+                                      triggerCheckInFlow(entry.memberId, async (phone) => {
+                                        if (phone) {
+                                          await updateMember(entry.memberId, { phone });
+                                        }
+                                        await updateTournament(activeTournament.id, {
+                                          entries: activeTournament.entries.map(e => 
+                                            e.memberId === entry.memberId 
+                                              ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                              : e
+                                          )
+                                        });
                                       });
-                                    });
-                                  }}
-                                  className="btn btn-primary"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px', opacity: isSubAdmin ? 0.5 : 1, cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
-                                  disabled={isSubAdmin}
-                                >
-                                  Check In
-                                </button>
+                                    }}
+                                    className={entry.isLate ? "btn" : "btn btn-primary"}
+                                    style={{
+                                      padding: '4px 10px',
+                                      fontSize: '0.8rem',
+                                      minHeight: 'auto',
+                                      borderRadius: '6px',
+                                      opacity: isSubAdmin ? 0.5 : 1,
+                                      cursor: isSubAdmin ? 'not-allowed' : 'pointer',
+                                      backgroundColor: entry.isLate ? '#D4AF37' : undefined,
+                                      color: entry.isLate ? '#000000' : undefined,
+                                      border: entry.isLate ? '1px solid #bda032' : undefined
+                                    }}
+                                    disabled={isSubAdmin}
+                                  >
+                                    Check In
+                                  </button>
+                                  <input
+                                    type="checkbox"
+                                    checked={entry.isLate || false}
+                                    onChange={async () => {
+                                      if (isSubAdmin) return;
+                                      const updatedEntries = activeTournament.entries.map(e =>
+                                        e.memberId === entry.memberId ? { ...e, isLate: !e.isLate } : e
+                                      );
+                                      await updateTournament(activeTournament.id, { entries: updatedEntries });
+                                    }}
+                                    style={{
+                                      width: '20px',
+                                      height: '20px',
+                                      cursor: isSubAdmin ? 'not-allowed' : 'pointer',
+                                      opacity: 0,
+                                      margin: 0
+                                    }}
+                                    disabled={isSubAdmin}
+                                    title="Mark Player as Late"
+                                  />
+                                </div>
                               </td>
                               <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
                               <td style={{ textAlign: 'center' }}>
@@ -2458,7 +2522,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <table className="data-table">
                       <thead>
                         <tr>
-                          <th style={{ width: '80px' }}></th>
+                          <th style={{ width: '130px' }}></th>
                           <th>Player Name</th>
                           <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
                           <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
@@ -2471,28 +2535,60 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                           return (
                             <tr key={entry.memberId}>
-                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '80px' }}>
-                                <button
-                                  onClick={() => {
-                                    triggerCheckInFlow(entry.memberId, async (phone) => {
-                                      if (phone) {
-                                        await updateMember(entry.memberId, { phone });
-                                      }
-                                      await updateTournament(activeTournament.id, {
-                                        entries: activeTournament.entries.map(e => 
-                                          e.memberId === entry.memberId 
-                                            ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
-                                            : e
-                                        )
+                              <td style={{ paddingLeft: '8px', paddingRight: '8px', width: '130px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <button
+                                    onClick={() => {
+                                      triggerCheckInFlow(entry.memberId, async (phone) => {
+                                        if (phone) {
+                                          await updateMember(entry.memberId, { phone });
+                                        }
+                                        await updateTournament(activeTournament.id, {
+                                          entries: activeTournament.entries.map(e => 
+                                            e.memberId === entry.memberId 
+                                              ? { ...e, hasBuyIn: true, hasDealerAppreciation: true } 
+                                              : e
+                                          )
+                                        });
                                       });
-                                    });
-                                  }}
-                                  className="btn btn-primary"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: 'auto', borderRadius: '6px', opacity: isSubAdmin ? 0.5 : 1, cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
-                                  disabled={isSubAdmin}
-                                >
-                                  Check In
-                                </button>
+                                    }}
+                                    className={entry.isLate ? "btn" : "btn btn-primary"}
+                                    style={{
+                                      padding: '4px 10px',
+                                      fontSize: '0.8rem',
+                                      minHeight: 'auto',
+                                      borderRadius: '6px',
+                                      opacity: isSubAdmin ? 0.5 : 1,
+                                      cursor: isSubAdmin ? 'not-allowed' : 'pointer',
+                                      backgroundColor: entry.isLate ? '#D4AF37' : undefined,
+                                      color: entry.isLate ? '#000000' : undefined,
+                                      border: entry.isLate ? '1px solid #bda032' : undefined
+                                    }}
+                                    disabled={isSubAdmin}
+                                  >
+                                    Check In
+                                  </button>
+                                  <input
+                                    type="checkbox"
+                                    checked={entry.isLate || false}
+                                    onChange={async () => {
+                                      if (isSubAdmin) return;
+                                      const updatedEntries = activeTournament.entries.map(e =>
+                                        e.memberId === entry.memberId ? { ...e, isLate: !e.isLate } : e
+                                      );
+                                      await updateTournament(activeTournament.id, { entries: updatedEntries });
+                                    }}
+                                    style={{
+                                      width: '20px',
+                                      height: '20px',
+                                      cursor: isSubAdmin ? 'not-allowed' : 'pointer',
+                                      opacity: 0,
+                                      margin: 0
+                                    }}
+                                    disabled={isSubAdmin}
+                                    title="Mark Player as Late"
+                                  />
+                                </div>
                               </td>
                               <td style={{ fontWeight: 600 }}>{m.firstName} {m.lastName}</td>
                               <td style={{ textAlign: 'center' }}>

@@ -31,6 +31,7 @@ export interface TournamentEntry {
   pointsEarned: number;
   rebuys?: number;
   createdAt?: string;       // ISO timestamp for waitlist sorting
+  isLate?: boolean;
 }
 
 export interface Tournament {
