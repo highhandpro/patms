@@ -4,15 +4,18 @@ import { PlayerBanner } from '../components/PlayerBanner';
 import { calculateStandings } from '../utils/stats';
 import { Calendar, MapPin, ChevronRight, Coins, Clock, DollarSign, PlusCircle, Hourglass, RefreshCw, Award } from 'lucide-react';
 import type { Member } from '../types';
+import { GameResultsFacebook } from '../components/GameResultsFacebook';
 
 interface PlayerWrapUpProps {
   setActiveTab: (tab: string) => void;
   setSelectedTournamentId: (id: string | null) => void;
+  loggedInMemberId: string | null;
 }
 
 export const PlayerWrapUp: React.FC<PlayerWrapUpProps> = ({
   setActiveTab,
-  setSelectedTournamentId
+  setSelectedTournamentId,
+  loggedInMemberId
 }) => {
   const { state, activeSeason } = useApp();
 
@@ -206,6 +209,14 @@ export const PlayerWrapUp: React.FC<PlayerWrapUpProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Facebook Results Graphic (Only shown to authenticated players when a tournament is completed) */}
+            {lastTournament && loggedInMemberId && (
+              <GameResultsFacebook 
+                tournament={lastTournament} 
+                members={state.members} 
+              />
+            )}
 
             {/* 2. Next Event Details */}
             <div className="glass-card" style={{ padding: '24px' }}>

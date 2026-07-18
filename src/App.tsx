@@ -883,6 +883,7 @@ function App() {
           <PlayerWrapUp 
             setActiveTab={setActivePlayerTab} 
             setSelectedTournamentId={setSelectedTournamentId} 
+            loggedInMemberId={loggedInMemberId}
           />
         );
       case 'events':
