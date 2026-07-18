@@ -1249,6 +1249,7 @@ function App() {
                       type="text" 
                       required
                       autoFocus
+                      placeholder="First name"
                       value={loginFirstName}
                       onChange={e => setLoginFirstName(e.target.value)}
                       onFocus={() => setShowFirstNameDropdown(true)}
@@ -1263,7 +1264,7 @@ function App() {
                           top: '100%',
                           left: 0,
                           right: 0,
-                          backgroundColor: '#FFFFFF',
+                          backgroundColor: 'var(--bg-card)',
                           border: '1px solid var(--border-subtle)',
                           borderRadius: '10px',
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
@@ -1298,6 +1299,7 @@ function App() {
                     <input 
                       type="text" 
                       required
+                      placeholder="Last name"
                       value={loginLastName}
                       onChange={e => setLoginLastName(e.target.value)}
                       onFocus={() => setShowLastNameDropdown(true)}
@@ -1312,7 +1314,7 @@ function App() {
                           top: '100%',
                           left: 0,
                           right: 0,
-                          backgroundColor: '#FFFFFF',
+                          backgroundColor: 'var(--bg-card)',
                           border: '1px solid var(--border-subtle)',
                           borderRadius: '10px',
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
