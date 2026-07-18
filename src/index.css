@@ -349,13 +349,12 @@ p {
   background-color: #E8F5E9 !important;   /* Light green hover */
 }
 
-.data-table td.player-name-cell {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+.data-table tr:has(td.player-name-cell:hover) td {
+  background-color: #C8E6C9 !important;   /* 20% darker green */
 }
 
-.data-table td.player-name-cell:hover {
-  background-color: #C8E6C9 !important;   /* 20% darker green */
+.data-table td.player-name-cell {
+  cursor: pointer;
 }
 
 /* Forms */
