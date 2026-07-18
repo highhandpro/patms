@@ -1982,7 +1982,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 fontSize: '0.85rem'
               }}
             >
-              CHECKED-IN
+              PAID
             </button>
             <button 
               className={`btn btn-ghost ${subTab === 'seating' ? 'active-subtab' : ''}`}
