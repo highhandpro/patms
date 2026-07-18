@@ -53,6 +53,11 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
     { key: 'purple table', name: 'Purple Table', color: '#a855f7', gradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(109, 40, 217, 0.05) 100%)', border: 'rgba(168, 85, 247, 0.3)' }
   ];
 
+  const activeTables = tableColors.filter(t => {
+    const players = seating[t.key] || [];
+    return players.filter(p => p !== "").length > 0;
+  });
+
   // Calculate live prize pool statistics
   const buyInCount = activeTournament ? activeTournament.entries.filter((e: any) => e.hasBuyIn).length : 0;
   const addonsNum = activeTournament ? (activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter((e: any) => e.hasAddon).length) : 0;
@@ -194,18 +199,18 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
           <span>Exit Display</span>
         </button>
 
-        {/* 5 Columns Layout Grid */}
+        {/* Columns Layout Grid */}
         <div 
           style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(5, 1fr)', 
+            gridTemplateColumns: `repeat(${activeTables.length || 1}, 1fr)`, 
             gap: '10px',
             flex: 1,
             alignItems: 'stretch',
             marginTop: '45px'
           }}
         >
-          {tableColors.map((t) => {
+          {activeTables.map((t) => {
             const players = seating[t.key] || [];
             const hasPlayers = players.some(p => p !== "");
 
@@ -268,15 +273,15 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                             backgroundColor: 'rgba(255, 255, 255, 0.001)',
                             border: '1px dashed rgba(255, 255, 255, 0.015)',
                             borderRadius: '10px',
-                            color: '#3f4b5b',
+                            color: '#718096',
                             height: '44px',
                             boxSizing: 'border-box'
                           }}
                         >
-                          <span style={{ fontWeight: 900, color: '#ffffff', marginRight: '6px', minWidth: '35px', fontSize: '1.15rem', letterSpacing: '-0.02em' }}>
+                          <span style={{ fontWeight: 900, color: '#718096', marginRight: '6px', minWidth: '35px', fontSize: '1.15rem', letterSpacing: '-0.02em' }}>
                             #{idx + 1}
                           </span>
-                          <span style={{ fontStyle: 'italic', fontSize: '0.8rem' }}>Empty Seat</span>
+                          <span style={{ fontStyle: 'italic', fontSize: '0.8rem', color: '#718096' }}>Empty Seat</span>
                         </li>
                       );
                     }
