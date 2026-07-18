@@ -43,7 +43,7 @@ interface AppContextProps {
     highHandAmount?: number
   ) => string;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
-  deleteTournament: (id: string) => void;
+  archiveTournament: (id: string) => void;
   registerPlayer: (tournamentId: string, memberId: string) => void;
   publicRegisterPlayer: (tournamentId: string, player: { firstName: string; lastName: string; phone: string; email: string; memberId?: string }) => void;
   unregisterPlayer: (tournamentId: string, memberId: string) => void;
@@ -765,8 +765,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await updateDoc(doc(db, 'tournaments', id), updated);
   };
 
-  const deleteTournament = async (id: string) => {
-    await deleteDoc(doc(db, 'tournaments', id));
+  const archiveTournament = async (id: string) => {
+    await updateDoc(doc(db, 'tournaments', id), { isArchived: true });
   };
 
   const registerPlayer = async (tournamentId: string, memberId: string) => {
@@ -1353,7 +1353,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteSeason,
         createTournament,
         updateTournament,
-        deleteTournament,
+        archiveTournament,
         registerPlayer,
         publicRegisterPlayer,
         unregisterPlayer,

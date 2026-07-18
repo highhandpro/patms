@@ -39,6 +39,7 @@ export interface Tournament {
   date: string;         // YYYY-MM-DD
   name: string;
   status: 'draft' | 'active' | 'completed';
+  isArchived?: boolean;
   
   // Financial Rules
   buyInAmount: number;

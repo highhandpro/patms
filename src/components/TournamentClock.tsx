@@ -54,7 +54,26 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const targetWidth = 1920;
+      const targetHeight = 1080;
+      const viewWidth = window.innerWidth;
+      const viewHeight = window.innerHeight;
+      
+      const scaleX = viewWidth / targetWidth;
+      const scaleY = viewHeight / targetHeight;
+      const fitScale = Math.min(scaleX, scaleY);
+      setScale(fitScale);
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [eliminatingPlayerId, setEliminatingPlayerId] = useState<string | null>(null);
   const [bountiesWon, setBountiesWon] = useState<number>(0);
   const [realTime, setRealTime] = useState(new Date());
@@ -92,6 +111,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   const [played1MinSound, setPlayed1MinSound] = useState(false);
   const [played10sSound, setPlayed10sSound] = useState(false);
   const [audioSuspended, setAudioSuspended] = useState(false);
+  const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
 
   // Winnings modal Complete overlay states
   const [showWinningsModal, setShowWinningsModal] = useState(false);
@@ -125,6 +145,30 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
   const resumeAudio = async () => {
     try {
+      const sounds = {
+        '1min': '/sounds/1_minute_bingo_bango_bongo.wav',
+        '10s': '/sounds/10_second_warning.mp3',
+        'levelChange': '/sounds/level_change.wav',
+        'startStop': '/sounds/clock_sound.wav',
+        'bustOut': '/sounds/bust_out.mp3',
+        'finalTable': '/sounds/final_table.mp3'
+      };
+
+      Object.entries(sounds).forEach(([key, path]) => {
+        try {
+          const audio = new Audio(path);
+          audio.volume = 0;
+          audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.volume = 1;
+          }).catch(() => {});
+          audioRefs.current[key] = audio;
+        } catch (err) {
+          console.warn('Audio preloader failed for', key, err);
+        }
+      });
+
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
         const testCtx = new AudioContextClass();
@@ -252,6 +296,20 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   };
 
   const playCustomSound = (soundType: '1min' | '10s' | 'levelChange' | 'startStop' | 'bustOut' | 'finalTable') => {
+    const audio = audioRefs.current[soundType];
+    if (audio) {
+      audio.currentTime = 0;
+      audio.volume = 1;
+      audio.play().catch(err => {
+        console.warn(`Failed to play preloaded sound ${soundType}:`, err);
+        playOnTheFly(soundType);
+      });
+    } else {
+      playOnTheFly(soundType);
+    }
+  };
+
+  const playOnTheFly = (soundType: string) => {
     let filePath = '';
     switch (soundType) {
       case '1min':
@@ -277,7 +335,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     if (filePath) {
       const audio = new Audio(filePath);
       audio.play().catch(err => {
-        console.warn(`Failed to play custom sound ${soundType}:`, err);
+        console.warn(`Failed to play custom sound ${soundType} on-the-fly:`, err);
         if (soundType === 'levelChange') {
           playBuzzer();
         }
@@ -286,7 +344,10 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   };
 
   // Synced state handlers
-  const handleTogglePlay = () => {
+  const handleTogglePlay = async () => {
+    if (audioSuspended) {
+      await resumeAudio();
+    }
     playCustomSound('startStop');
     const nextRunning = !isRunning;
     setIsRunning(nextRunning);
@@ -847,30 +908,45 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   };
 
   return (
-    <div 
-      ref={containerRef}
-      id="tournament-clock-container"
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        backgroundColor: '#06260B',
-        color: '#ffffff',
-        fontFamily: '"Outfit", -apple-system, sans-serif',
-        padding: isFullscreen ? '24px 40px 12px 40px' : '24px',
-        borderRadius: isFullscreen ? '0' : '16px',
-        border: isFullscreen ? 'none' : '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-        minHeight: isFullscreen ? '100vh' : '650px',
-        transition: 'all 0.3s ease'
-      }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        setIsRightClickModalOpen(true);
-        setIsEditingCustomTime(false);
-      }}
-    >
+    <div style={{
+      width: '100%',
+      height: '100%',
+      minHeight: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#031205',
+      overflow: 'hidden'
+    }}>
+      <div 
+        ref={containerRef}
+        id="tournament-clock-container"
+        style={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          backgroundColor: '#06260B',
+          color: '#ffffff',
+          fontFamily: '"Outfit", -apple-system, sans-serif',
+          padding: '24px 40px',
+          borderRadius: isFullscreen ? '0' : '16px',
+          border: isFullscreen ? 'none' : '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+          width: '1920px',
+          height: '1080px',
+          transform: `scale(${scale})`,
+          transformOrigin: 'center center',
+          flexShrink: 0,
+          transition: 'transform 0.1s ease',
+          boxSizing: 'border-box'
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setIsRightClickModalOpen(true);
+          setIsEditingCustomTime(false);
+        }}
+      >
       {/* Autoplay blocker notification banner */}
       {audioSuspended && (
         <div 
@@ -910,51 +986,51 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
       }}>
         
         {/* Left Column: Stats Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isFullscreen ? '10px' : '6px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isFullscreen ? '6px' : '6px' }}>
           {/* Card 1: Level */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
-            <span style={{ fontSize: isFullscreen ? '3.5rem' : '2.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '2.8rem' : '2.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {currentLevel.type === 'round' ? currentLevel.roundNumber : 'BREAK'}
             </span>
           </div>
 
           {/* Card 2: Current Time */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CURRENT TIME</span>
-            <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {realTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toLowerCase()}
             </span>
           </div>
 
           {/* Card 3: Next Break */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NEXT BREAK IN</span>
-            <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#F2C166', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#F2C166', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {formatHoursMinsSecs(getNextBreakInSeconds())}
             </span>
           </div>
 
           {/* Card 4: Players In */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PLAYERS IN / ALIVE</span>
-            <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {activePlayers.length} / {checkedInPlayers.length}
             </span>
           </div>
 
           {/* Card 5: Average Stack */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AVERAGE STACK</span>
-            <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(avgStack)}
             </span>
           </div>
 
           {/* Card 6: Chips In Play */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '14px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CHIPS IN PLAY</span>
-            <span style={{ fontSize: isFullscreen ? '3rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(totalChips)}
             </span>
           </div>
@@ -1057,7 +1133,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 </span>
               </div>
               <div style={{ 
-                columnCount: 4,
+                columnCount: activePlayers.length <= 15 ? 3 : 4,
                 columnGap: '20px',
                 overflowY: 'auto',
                 paddingRight: '4px',
@@ -1114,20 +1190,19 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               </div>
             </div>
 
-            {/* If 10 or fewer players are active, render the payouts stack here inside Card A, aligned right */}
+            {/* If 10 or fewer players are active, render the payouts stack here inside Card A, in 3 columns */}
             {activePlayers.length <= 10 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', marginTop: '16px' }}>
-                <div></div>
+              <div style={{ width: '100%', marginTop: '16px' }}>
                 <div style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  gap: '8px', 
-                  alignItems: 'flex-end', 
-                  minWidth: '260px',
+                  display: 'grid', 
+                  gridTemplateRows: 'repeat(3, auto)',
+                  gridAutoFlow: 'column',
+                  gap: '8px 24px', 
                   backgroundColor: 'rgba(255,255,255,0.02)',
                   border: '1px solid rgba(255,255,255,0.05)',
                   borderRadius: '8px',
-                  padding: '10px 14px'
+                  padding: '10px 14px',
+                  width: '100%'
                 }}>
                   {(() => {
                     const bubblePosition = payoutsList.length + 1;
@@ -1149,7 +1224,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                           : (p.place === 1 ? '🥇 1st Place' : p.place === 2 ? '🥈 2nd Place' : p.place === 3 ? '🥉 3rd Place' : `${p.place}th Place`));
 
                       return (
-                        <div key={`stack-${p.place}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: isFullscreen ? '1.25rem' : '1.05rem', width: '100%', justifyContent: 'space-between' }}>
+                        <div key={`stack-${p.place}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: isFullscreen ? '1.15rem' : '0.95rem', justifyContent: 'space-between' }}>
                           <span style={{ color: playerNameAtPlace ? '#34d399' : 'rgba(255,255,255,0.85)', fontWeight: 800 }}>
                             {displayLabel}
                           </span>
@@ -2318,6 +2393,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         </div>
       )}
 
+    </div>
     </div>
   );
 };

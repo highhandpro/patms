@@ -10,8 +10,9 @@ import { LateEntryModal } from '../components/LateEntryModal';
 import { TournamentClock } from '../components/TournamentClock';
 import { GameResultsFacebook } from '../components/GameResultsFacebook';
 import { 
-  Trophy, Play, RotateCcw, Plus, Trash2, 
-  UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award
+  Trophy, Play, RotateCcw, Plus, 
+  UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award,
+  Archive
 } from 'lucide-react';
 
 interface TournamentsProps {
@@ -44,7 +45,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     activeSeason,
     createTournament, 
     updateTournament, 
-    deleteTournament,
+    archiveTournament,
     registerPlayer,
     updateMember,
     unregisterPlayer,
@@ -824,18 +825,24 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setIsEditTourDetailsOpen(false);
   };
 
-  const handleDeleteTour = (id: string, name: string) => {
+  const handleArchiveTour = (id: string, name: string) => {
     const t = state.tournaments.find(tour => tour.id === id);
     if (!t) return;
 
-    let confirmMsg = `Are you sure you want to permanently delete tournament "${name}"? This cannot be undone.`;
+    let confirmMsg = `Are you sure you want to archive tournament "${name}"? It will be moved to the tournament archive.`;
     if (t.status === 'completed') {
-      confirmMsg = `WARNING: Tournament "${name}" is completed and finalized. Deleting it will permanently remove its points/payouts and instantly recalculate the seasonal standings. Do you want to proceed?`;
+      confirmMsg = `WARNING: Tournament "${name}" is completed and finalized. Archiving it will move it to the archive and hide it from standings calculations or active listings. Do you want to proceed?`;
     }
 
     if (confirm(confirmMsg)) {
-      deleteTournament(id);
+      archiveTournament(id);
       setSelectedTournamentId(null);
+    }
+  };
+
+  const handleUnarchiveTour = (id: string, name: string) => {
+    if (confirm(`Are you sure you want to restore/unarchive tournament "${name}"?`)) {
+      updateTournament(id, { isArchived: false });
     }
   };
 
@@ -1473,11 +1480,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           </button>
                           {isChiefAdmin && (
                             <button
-                              onClick={() => handleDeleteTour(t.id, t.name)}
+                              onClick={() => t.isArchived ? handleUnarchiveTour(t.id, t.name) : handleArchiveTour(t.id, t.name)}
                               className="btn btn-ghost"
-                              style={{ padding: '6px', color: 'var(--color-danger)' }}
+                              style={{ padding: '6px', color: t.isArchived ? 'var(--color-gold)' : 'var(--color-danger)' }}
+                              title={t.isArchived ? "Restore Tournament" : "Archive Tournament"}
                             >
-                              <Trash2 size={16} />
+                              {t.isArchived ? <RotateCcw size={16} /> : <Archive size={16} />}
                             </button>
                           )}
                         </div>
@@ -1552,7 +1560,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           
           {(() => {
             const displayedTournaments = [...state.tournaments]
-              .filter(t => (viewCompletedOnly ? t.status === 'completed' : t.status !== 'completed') && !t.name.toUpperCase().includes('BETA'))
+              .filter(t => (viewCompletedOnly ? t.status === 'completed' : t.status !== 'completed') && !t.name.toUpperCase().includes('BETA') && !t.isArchived)
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
             return renderTournamentsTable(
@@ -1568,12 +1576,28 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '20px 0 0 0' }}>BETA GAMES</h4>
               {(() => {
                 const betaTournaments = [...state.tournaments]
-                  .filter(t => t.name.toUpperCase().includes('BETA'))
+                  .filter(t => t.name.toUpperCase().includes('BETA') && !t.isArchived)
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
                 return renderTournamentsTable(
                   betaTournaments,
                   'No beta games.'
+                );
+              })()}
+            </>
+          )}
+
+          {isChiefAdmin && (
+            <>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '20px 0 0 0' }}>ARCHIVE</h4>
+              {(() => {
+                const archivedTournaments = [...state.tournaments]
+                  .filter(t => t.isArchived)
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+                return renderTournamentsTable(
+                  archivedTournaments,
+                  'No archived tournaments.'
                 );
               })()}
             </>
