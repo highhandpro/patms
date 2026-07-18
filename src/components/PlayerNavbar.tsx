@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Trophy, ChevronDown, User, LogOut, LogIn, Settings } from 'lucide-react';
+import { Trophy, ChevronDown, User, LogOut, LogIn, Settings, Menu, X } from 'lucide-react';
 
 interface PlayerNavbarProps {
   activeTab: string;
@@ -22,6 +22,7 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
   const { state } = useApp();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showSimModal, setShowSimModal] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Find the currently logged in member details
   const loggedInMember = state.members.find(m => m.id === loggedInMemberId);
@@ -50,6 +51,7 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
     setShowUserDropdown(false);
+    setIsMenuOpen(false);
   };
 
   const handleSimSelect = (memberId: string) => {
@@ -81,9 +83,20 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
           <span>Penny Ante Club</span>
         </div>
 
+        {/* Mobile Hamburger Toggle */}
+        {loggedInMemberId && (
+          <button 
+            className="player-navbar-toggle"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle Navigation Menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        )}
+
         {/* Center: Navigation Links (Only shown when logged in) */}
         {loggedInMemberId && (
-          <nav className="player-navbar-nav">
+          <nav className={`player-navbar-nav ${isMenuOpen ? 'menu-open' : ''}`}>
             <button 
               className={`nav-link ${activeTab === 'events' || activeTab === 'event-details' ? 'active' : ''}`}
               onClick={() => handleTabClick('events')}

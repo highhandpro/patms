@@ -377,7 +377,7 @@ textarea:not(.bounty-number-input),
   border-radius: 10px !important;
   padding: 12px 16px !important;
   font-family: var(--font-sans) !important;
-  color: var(--text-primary) !important;
+  color: #1A202C !important;
   font-size: 0.95rem !important;
   transition: all var(--transition-fast) !important;
 }
@@ -2351,5 +2351,280 @@ button.btn-primary:not(.glass-card button):not(.table-container button):not(.mod
 
 #tournament-clock-container .glass-card .text-muted {
   color: #8E8E93 !important;
+}
+
+#tournament-clock-container .theme-aware-clock-modal input:not([style*="rgba(255,255,255,0.05)"]):not([style*="rgba(255, 255, 255, 0.05)"]),
+#tournament-clock-container .theme-aware-clock-modal select,
+#tournament-clock-container .theme-aware-clock-modal textarea {
+  background-color: var(--bg-input) !important;
+  border-color: var(--border-subtle) !important;
+  color: #1A202C !important;
+}
+
+#tournament-clock-container .glass-card input:not([style*="rgba(255,255,255,0.05)"]):not([style*="rgba(255, 255, 255, 0.05)"]),
+#tournament-clock-container .glass-card select,
+#tournament-clock-container .glass-card textarea {
+  color: #1A202C !important;
+}
+
+.clock-options-time-input {
+  background-color: #FFFFFF !important;
+  color: #1A202C !important;
+}
+
+/* Autocomplete suggestion dropdowns and select option elements should always have dark text */
+.player-lookup-dropdown,
+.player-lookup-dropdown *,
+.autocomplete-dropdown,
+.autocomplete-dropdown *,
+select option {
+  color: #1A202C !important;
+}
+
+/* Overrides to ensure final table announcement card text remains legible (dark text on white card) */
+#tournament-clock-container .final-table-card,
+#tournament-clock-container .final-table-card div,
+#tournament-clock-container .final-table-card span,
+#tournament-clock-container .final-table-card p,
+#tournament-clock-container .final-table-card strong {
+  color: #1A202C !important;
+}
+
+#tournament-clock-container .final-table-card .player-name {
+  color: #1A202C !important;
+}
+
+#tournament-clock-container .final-table-card button,
+#tournament-clock-container .final-table-card button * {
+  color: #ffffff !important;
+}
+
+@media (max-width: 1280px) and (orientation: portrait) {
+  #tournament-clock-container {
+    padding: 12px !important;
+    min-height: 480px !important;
+  }
+
+  .clock-stats-sidebar {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .clock-stats-sidebar > div {
+    flex: 1 1 calc(33.333% - 8px) !important;
+    padding: 8px !important;
+  }
+
+  /* Active players panel height restriction */
+  .clock-active-players-panel {
+    max-height: none !important;
+  }
+  
+  .clock-active-players-grid {
+    column-count: 3 !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+
+  .clock-bottom-actions {
+    gap: 6px !important;
+  }
+}
+
+@media (max-width: 1280px) and (orientation: landscape) {
+  #tournament-clock-container {
+    padding: 12px !important;
+    min-height: auto !important;
+  }
+
+  .clock-stats-sidebar {
+    width: 100% !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .clock-stats-sidebar > div {
+    flex: 1 1 calc(16.666% - 8px) !important;
+    padding: 6px !important;
+  }
+
+  .clock-active-players-panel {
+    max-height: none !important;
+  }
+
+  .clock-active-players-grid {
+    column-count: 3 !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+@media (max-width: 960px) and (orientation: landscape) {
+  #tournament-clock-container {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .clock-stats-sidebar {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .clock-stats-sidebar > div {
+    flex: 1 1 calc(33.333% - 8px) !important;
+    padding: 6px !important;
+  }
+
+  /* Active players container */
+  .clock-active-players-panel {
+    max-height: none !important;
+    padding: 6px 12px !important;
+  }
+
+  .clock-active-players-grid {
+    column-count: 4 !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+
+  /* Bottom actions button bar layout */
+  .clock-bottom-actions {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .clock-bottom-actions button {
+    flex: 1 1 calc(25% - 6px) !important;
+    padding: 6px 8px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Hide scrolling prizes marquee in responsive modes */
+@media (max-width: 1280px), (max-height: 600px), (pointer: coarse) {
+  .clock-prizes-marquee {
+    display: none !important;
+  }
+  
+  .clock-bottom-actions {
+    margin-top: 10px !important;
+  }
+}
+
+/* Mobile Hamburger styles for PlayerNavbar */
+.player-navbar-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-primary, #333333);
+  cursor: pointer;
+  padding: 8px;
+  display: none; /* hidden on desktop */
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .player-navbar-toggle {
+    display: flex !important; /* show on mobile */
+  }
+
+  .player-navbar-container {
+    position: relative;
+  }
+
+  .player-navbar-nav {
+    display: none !important; /* hide by default */
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-card) !important; /* matching navbar bg */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    flex-direction: column !important;
+    padding: 16px 24px !important;
+    gap: 8px !important;
+    z-index: 99;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+  }
+
+  .player-navbar-nav.menu-open {
+    display: flex !important; /* show when open */
+  }
+
+  .player-navbar-nav .nav-link {
+    width: 100% !important;
+    text-align: left !important;
+    padding: 10px 16px !important;
+  }
+}
+
+/* Mobile Hamburger styles for Admin Sidebar */
+.sidebar-toggle,
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 8px;
+  display: none; /* hidden on desktop */
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+}
+
+@media (max-width: 1024px) {
+  .sidebar-toggle,
+  .sidebar-toggle-btn {
+    display: flex !important; /* show toggle on mobile/tablet admin */
+  }
+
+  .sidebar {
+    position: relative;
+    padding: 16px 20px !important;
+  }
+
+  .sidebar > div:first-child {
+    display: flex !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    align-items: center !important;
+    margin-bottom: 16px !important;
+  }
+
+  .sidebar nav,
+  .sidebar > div:nth-child(4), /* Active Season */
+  .sidebar > div:nth-child(5), /* Chief Admin / Director / Admin view */
+  .sidebar > div:last-child {  /* Switch Portal & Logout Section */
+    display: none !important; /* hide menu sections by default */
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .sidebar.menu-open nav,
+  .sidebar.menu-open > div:nth-child(4),
+  .sidebar.menu-open > div:nth-child(5),
+  .sidebar.menu-open > div:last-child {
+    display: flex !important; /* show when menu is open */
+  }
+
+  .sidebar nav {
+    margin-top: 12px !important;
+    gap: 6px !important;
+  }
+
+  .sidebar-nav-item {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding: 10px 16px !important;
+  }
 }
 

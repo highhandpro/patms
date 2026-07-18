@@ -1113,6 +1113,56 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 )}
               </div>
             </div>
+
+            {/* If 10 or fewer players are active, render the payouts stack here inside Card A, aligned right */}
+            {activePlayers.length <= 10 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', marginTop: '16px' }}>
+                <div></div>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px', 
+                  alignItems: 'flex-end', 
+                  minWidth: '260px',
+                  backgroundColor: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  borderRadius: '8px',
+                  padding: '10px 14px'
+                }}>
+                  {(() => {
+                    const bubblePosition = payoutsList.length + 1;
+                    const tickerList = [...payoutsList];
+                    if (bubbleAmount > 0) {
+                      tickerList.push({
+                        place: bubblePosition,
+                        pct: 0,
+                        amount: bubbleAmount,
+                        isBubble: true
+                      } as any);
+                    }
+                    return tickerList.map((p: any, idx) => {
+                      const playerNameAtPlace = getPlayerAtPlace(p.place);
+                      const displayLabel = p.isBubble
+                        ? (playerNameAtPlace ? `Bubble (${playerNameAtPlace})` : 'Bubble')
+                        : (playerNameAtPlace 
+                          ? `${p.place === 1 ? '🥇' : p.place === 2 ? '🥈' : p.place === 3 ? '🥉' : `${p.place}th`} ${playerNameAtPlace}`
+                          : (p.place === 1 ? '🥇 1st Place' : p.place === 2 ? '🥈 2nd Place' : p.place === 3 ? '🥉 3rd Place' : `${p.place}th Place`));
+
+                      return (
+                        <div key={`stack-${p.place}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: isFullscreen ? '1.25rem' : '1.05rem', width: '100%', justifyContent: 'space-between' }}>
+                          <span style={{ color: playerNameAtPlace ? '#34d399' : 'rgba(255,255,255,0.85)', fontWeight: 800 }}>
+                            {displayLabel}
+                          </span>
+                          <span style={{ color: '#ffffff', fontWeight: 900, fontFamily: '"Outfit", sans-serif' }}>
+                            ${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Card B: Places Paid & Controls Stack (Wide layout at the bottom, logo removed) */}
@@ -1155,6 +1205,13 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                       </div>
                     );
                   }
+
+                  const showVerticalStack = activePlayers.length <= 10;
+
+                  if (showVerticalStack) {
+                    return null;
+                  }
+
                   return (
                     <div style={{ 
                       overflow: 'hidden', 
@@ -1570,15 +1627,17 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   value={customTimeInput}
                   onChange={e => setCustomTimeInput(e.target.value)}
                   placeholder="MM:SS"
+                  className="clock-options-time-input"
                   style={{
                     flex: 1,
-                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    backgroundColor: '#FFFFFF',
                     border: '1px solid rgba(255,255,255,0.2)',
                     borderRadius: '6px',
-                    color: '#ffffff',
+                    color: '#1A202C',
                     padding: '6px 10px',
                     fontSize: '0.95rem',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    fontWeight: 700
                   }}
                   autoFocus
                 />

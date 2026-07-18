@@ -1,5 +1,5 @@
-import React from 'react';
-import { LayoutDashboard, Users, Trophy, Award, Settings as SettingsIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { LayoutDashboard, Users, Trophy, Award, Settings as SettingsIcon, Menu, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 interface SidebarProps {
@@ -16,6 +16,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwitchPortal, onLogoutAdmin, isSubAdmin, isChiefAdmin, isTournamentDirector, onChangePassword }) => {
   const { activeSeason, state } = useApp();
   const pendingApprovalsCount = state.pendingApprovals?.length || 0;
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
@@ -26,16 +27,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
   ];
 
   return (
-    <aside className="sidebar">
-      <div style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Trophy size={28} />
-          <span>PATMS</span>
-        </h2>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-          Tournament Manager
-        </p>
-      </div>
+    <>
+      {/* Mobile Hamburger Toggle for Admin Sidebar */}
+      <button 
+        className="sidebar-toggle-btn"
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        aria-label="Toggle Navigation Menu"
+      >
+        {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+      </button>
+
+      <aside className={`sidebar ${isMenuOpen ? 'menu-open' : ''}`}>
+        <div style={{ marginBottom: '32px' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-emerald)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Trophy size={28} />
+            <span>PATMS</span>
+          </h2>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+            Tournament Manager
+          </p>
+        </div>
 
       {activeSeason && (
         <div style={{
@@ -180,9 +191,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
-            <button
+            <button 
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                setIsMenuOpen(false);
+              }}
               className={`btn btn-ghost sidebar-nav-item ${isActive ? 'active' : ''}`}
             >
               <Icon size={20} />
@@ -209,7 +223,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
 
       <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <button 
-          onClick={onSwitchPortal}
+          onClick={() => {
+            if (onSwitchPortal) onSwitchPortal();
+            setIsMenuOpen(false);
+          }}
           className="btn btn-secondary"
           style={{
             width: '100%',
@@ -223,7 +240,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
         </button>
         {onLogoutAdmin && (
           <button 
-            onClick={onLogoutAdmin}
+            onClick={() => {
+              if (onLogoutAdmin) onLogoutAdmin();
+              setIsMenuOpen(false);
+            }}
             className="btn btn-ghost"
             style={{
               width: '100%',
@@ -251,5 +271,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
         </div>
       </div>
     </aside>
+  </>
   );
 };
