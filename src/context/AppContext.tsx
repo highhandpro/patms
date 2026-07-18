@@ -45,6 +45,7 @@ interface AppContextProps {
   ) => string;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
   archiveTournament: (id: string) => void;
+  deleteTournament: (id: string) => void;
   registerPlayer: (tournamentId: string, memberId: string) => void;
   publicRegisterPlayer: (tournamentId: string, player: { firstName: string; lastName: string; phone: string; email: string; memberId?: string }) => void;
   unregisterPlayer: (tournamentId: string, memberId: string) => void;
@@ -772,6 +773,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await updateDoc(doc(db, 'tournaments', id), { isArchived: true });
   };
 
+  const deleteTournament = async (id: string) => {
+    await deleteDoc(doc(db, 'tournaments', id));
+  };
+
   const registerPlayer = async (tournamentId: string, memberId: string) => {
     const t = state.tournaments.find(tour => tour.id === tournamentId);
     if (!t) return;
@@ -1357,6 +1362,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createTournament,
         updateTournament,
         archiveTournament,
+        deleteTournament,
         registerPlayer,
         publicRegisterPlayer,
         unregisterPlayer,

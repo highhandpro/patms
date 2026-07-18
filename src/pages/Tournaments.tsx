@@ -12,7 +12,7 @@ import { GameResultsFacebook } from '../components/GameResultsFacebook';
 import { 
   Trophy, Play, RotateCcw, Plus, 
   UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award,
-  Archive
+  Archive, Trash2
 } from 'lucide-react';
 
 interface TournamentsProps {
@@ -46,6 +46,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     createTournament, 
     updateTournament, 
     archiveTournament,
+    deleteTournament,
     registerPlayer,
     updateMember,
     unregisterPlayer,
@@ -852,6 +853,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     }
   };
 
+  const handleDeleteTour = (id: string, name: string) => {
+    if (confirm(`WARNING: Are you sure you want to PERMANENTLY delete tournament "${name}"? This action cannot be undone and will delete all records of this tournament.`)) {
+      deleteTournament(id);
+      setSelectedTournamentId(null);
+    }
+  };
+
   const handleStartTournament = () => {
     if (!activeTournament) return;
     if (activeTournament.entries.length < 2) {
@@ -1519,14 +1527,26 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             {isSubAdmin ? 'View' : 'Manage'}
                           </button>
                           {isChiefAdmin && (
-                            <button
-                              onClick={() => t.isArchived ? handleUnarchiveTour(t.id, t.name) : handleArchiveTour(t.id, t.name)}
-                              className="btn btn-ghost"
-                              style={{ padding: '6px', color: t.isArchived ? 'var(--color-gold)' : 'var(--color-danger)' }}
-                              title={t.isArchived ? "Restore Tournament" : "Archive Tournament"}
-                            >
-                              {t.isArchived ? <RotateCcw size={16} /> : <Archive size={16} />}
-                            </button>
+                            <>
+                              <button
+                                onClick={() => t.isArchived ? handleUnarchiveTour(t.id, t.name) : handleArchiveTour(t.id, t.name)}
+                                className="btn btn-ghost"
+                                style={{ padding: '6px', color: t.isArchived ? 'var(--color-gold)' : 'var(--color-danger)' }}
+                                title={t.isArchived ? "Restore Tournament" : "Archive Tournament"}
+                              >
+                                {t.isArchived ? <RotateCcw size={16} /> : <Archive size={16} />}
+                              </button>
+                              {t.isArchived && (
+                                <button
+                                  onClick={() => handleDeleteTour(t.id, t.name)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: '6px', color: 'var(--color-danger)' }}
+                                  title="Permanently Delete Tournament"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>
