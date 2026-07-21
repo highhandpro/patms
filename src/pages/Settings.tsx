@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { Settings as SettingsType, BlindLevel } from '../types';
-import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, X } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { calculateStandings } from '../utils/stats';
 import { COLOR_PALETTES, applyThemePalette } from '../utils/theme';
 import * as XLSX from 'xlsx';
@@ -84,6 +84,46 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const handleRemoveLevel = (index: number) => {
     const updated = blindsList.filter((_, idx) => idx !== index);
     
+    let roundCounter = 1;
+    const finalLevels = updated.map(level => {
+      if (level.type === 'round') {
+        const nextRound = { ...level, roundNumber: roundCounter };
+        roundCounter++;
+        return nextRound;
+      }
+      return level;
+    });
+
+    setBlindsList(finalLevels);
+  };
+
+  const handleMoveLevelUp = (index: number) => {
+    if (index === 0) return;
+    const updated = [...blindsList];
+    const temp = updated[index];
+    updated[index] = updated[index - 1];
+    updated[index - 1] = temp;
+
+    let roundCounter = 1;
+    const finalLevels = updated.map(level => {
+      if (level.type === 'round') {
+        const nextRound = { ...level, roundNumber: roundCounter };
+        roundCounter++;
+        return nextRound;
+      }
+      return level;
+    });
+
+    setBlindsList(finalLevels);
+  };
+
+  const handleMoveLevelDown = (index: number) => {
+    if (index === blindsList.length - 1) return;
+    const updated = [...blindsList];
+    const temp = updated[index];
+    updated[index] = updated[index + 1];
+    updated[index + 1] = temp;
+
     let roundCounter = 1;
     const finalLevels = updated.map(level => {
       if (level.type === 'round') {
@@ -394,15 +434,40 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                           />
                         </td>
                         <td style={{ padding: '8px 16px', textAlign: 'center' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveLevel(idx)}
-                            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                            onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                          >
-                            <X size={16} />
-                          </button>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveLevelUp(idx)}
+                              disabled={idx === 0}
+                              style={{ background: 'none', border: 'none', color: idx === 0 ? 'rgba(255,255,255,0.15)' : 'var(--text-muted)', cursor: idx === 0 ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', padding: '2px' }}
+                              onMouseEnter={e => { if (idx > 0) e.currentTarget.style.color = 'var(--color-emerald)'; }}
+                              onMouseLeave={e => { if (idx > 0) e.currentTarget.style.color = 'var(--text-muted)'; }}
+                              title="Move Level Up"
+                            >
+                              <ArrowUp size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveLevelDown(idx)}
+                              disabled={idx === blindsList.length - 1}
+                              style={{ background: 'none', border: 'none', color: idx === blindsList.length - 1 ? 'rgba(255,255,255,0.15)' : 'var(--text-muted)', cursor: idx === blindsList.length - 1 ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', padding: '2px' }}
+                              onMouseEnter={e => { if (idx < blindsList.length - 1) e.currentTarget.style.color = 'var(--color-emerald)'; }}
+                              onMouseLeave={e => { if (idx < blindsList.length - 1) e.currentTarget.style.color = 'var(--text-muted)'; }}
+                              title="Move Level Down"
+                            >
+                              <ArrowDown size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveLevel(idx)}
+                              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', padding: '2px' }}
+                              onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                              title="Remove Level"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
