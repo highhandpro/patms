@@ -21,7 +21,6 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
 }) => {
   const { state } = useApp();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showSimModal, setShowSimModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Find the currently logged in member details
@@ -54,20 +53,6 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
     setIsMenuOpen(false);
   };
 
-  const handleSimSelect = (memberId: string) => {
-    setLoggedInMemberId(memberId);
-    setShowSimModal(false);
-    setShowUserDropdown(false);
-  };
-
-  // Filter members list to active ones for the simulator selector
-  const activeMembersList = state.members
-    .filter(m => !m.isDeleted)
-    .sort((a, b) => {
-      const nameA = `${a.firstName} ${a.lastName}`;
-      const nameB = `${b.firstName} ${b.lastName}`;
-      return nameA.localeCompare(nameB);
-    });
 
   return (
     <header className="player-navbar">
@@ -187,10 +172,7 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
                     )}
                     <span>My Profile</span>
                   </button>
-                  <button onClick={() => setShowSimModal(true)} className="dropdown-item sim-switch">
-                    <Settings size={16} />
-                    <span>Switch Player (Sim)</span>
-                  </button>
+
                   {loggedInMember?.role === 'admin' && (
                     <button onClick={() => setPortalMode('admin')} className="dropdown-item admin-switch">
                       <Settings size={16} style={{ color: 'var(--color-gold)' }} />
@@ -236,41 +218,6 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
         </div>
       </div>
 
-      {/* Simulator / Login Modal */}
-      {showSimModal && (
-        <div className="sim-modal-overlay" onClick={() => setShowSimModal(false)}>
-          <div className="sim-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="sim-modal-header">
-              <h3>Simulate Player Login</h3>
-              <button className="btn-close-modal" onClick={() => setShowSimModal(false)}>×</button>
-            </div>
-            <p className="sim-modal-description">
-              Select a player to log in as. This lets you simulate different member accounts, view their balances, and test registration sign-ups.
-            </p>
-            <div className="sim-members-grid">
-              {activeMembersList.map(member => {
-                const name = `${member.firstName} ${member.lastName}`;
-                const isSelected = member.id === loggedInMemberId;
-                return (
-                  <button
-                    key={member.id}
-                    className={`sim-member-card ${isSelected ? 'selected' : ''}`}
-                    onClick={() => handleSimSelect(member.id)}
-                  >
-                    <span className="sim-member-name">{name}</span>
-                    <span className="sim-member-id">{member.id}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="sim-modal-footer">
-              <button className="btn btn-secondary" onClick={() => setShowSimModal(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
