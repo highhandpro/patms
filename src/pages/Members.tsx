@@ -34,6 +34,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [cardUrl, setCardUrl] = useState('');
   const [tempPassword, setTempPassword] = useState('');
   const [pin, setPin] = useState('');
+  const [isDealer, setIsDealer] = useState(false);
 
   const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
   const [playerAId, setPlayerAId] = useState('');
@@ -226,6 +227,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setCardUrl('');
     setTempPassword('');
     setPin('');
+    setIsDealer(false);
     setErrorMsg(null);
     setIsAddMemberOpen(true);
   };
@@ -243,6 +245,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setCardUrl(m.cardUrl || '');
     setTempPassword('');
     setPin(m.pin || '');
+    setIsDealer(!!m.isDealer);
     setErrorMsg(null);
   };
 
@@ -303,7 +306,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           logoUrl,
           cardUrl,
           role,
-          pin: pin.trim()
+          pin: pin.trim(),
+          isDealer: isDealer
         });
         setEditingMember(null);
       } else {
@@ -314,7 +318,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
             return;
           }
         }
-        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl, cardUrl, role, pin.trim());
+        await addMember(firstName, lastName, phone, email, notes, memberIdInput.trim(), logoUrl, cardUrl, role, pin.trim(), isDealer);
         setIsAddMemberOpen(false);
       }
 
@@ -330,6 +334,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       setMemberIdInput('');
       setTempPassword('');
       setPin('');
+      setIsDealer(false);
       setErrorMsg(null);
     } catch (err) {
       console.error(err);
@@ -627,6 +632,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 <th>Name</th>
                 <th>Contact</th>
                 <th>Joined</th>
+                <th style={{ width: '80px', textAlign: 'center' }}>Dealer</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
@@ -655,6 +661,15 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         <Calendar size={12} style={{ color: 'var(--text-muted)' }} />
                         {m.joinedDate}
                       </span>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={!!m.isDealer}
+                        onChange={(e) => updateMember(m.id, { isDealer: e.target.checked })}
+                        style={{ width: '18px', height: '18px', cursor: isSubAdmin ? 'not-allowed' : 'pointer' }}
+                        disabled={isSubAdmin}
+                      />
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', gap: '8px' }}>
@@ -1017,6 +1032,19 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   onChange={(e) => setEmail(e.target.value)}
                   className="form-input"
                 />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
+                <input
+                  id="admin-dealer-checkbox"
+                  type="checkbox"
+                  checked={isDealer}
+                  onChange={(e) => setIsDealer(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <label htmlFor="admin-dealer-checkbox" style={{ fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', margin: 0, color: 'var(--text-primary)' }}>
+                  Available/Willing to Deal (Dealer Status)
+                </label>
               </div>
 
               {!isSubAdmin && (

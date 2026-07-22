@@ -24,6 +24,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [isDealer, setIsDealer] = useState(false);
   const [memberFound, setMemberFound] = useState<Member | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
         setEmail(member.email);
         setPhone(member.phone);
         setMemberIdInput(member.id);
+        setIsDealer(!!member.isDealer);
       }
     }
   }, [loggedInMemberId, state.members]);
@@ -139,6 +141,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
         setLastName(member.lastName);
         setEmail(member.email);
         setMemberIdInput(member.id);
+        setIsDealer(!!member.isDealer);
         setErrorMessage(null);
       } else {
         setMemberFound(null);
@@ -151,6 +154,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
         setLastName('');
         setEmail('');
         setMemberIdInput('');
+        setIsDealer(false);
       }
     }
   };
@@ -168,6 +172,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
         setLastName(member.lastName);
         setEmail(member.email);
         setPhone(formatPhoneNumber(member.phone));
+        setIsDealer(!!member.isDealer);
         setErrorMessage(null);
       } else {
         if (memberFound) {
@@ -176,6 +181,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
           setLastName('');
           setEmail('');
           setPhone('');
+          setIsDealer(false);
         }
       }
     } else {
@@ -185,6 +191,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
         setLastName('');
         setEmail('');
         setPhone('');
+        setIsDealer(false);
       }
     }
   };
@@ -220,7 +227,8 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
       lastName: lastName.trim(),
       phone: phone.trim(),
       email: email.trim().toLowerCase(),
-      memberId: memberIdInput.trim() || undefined
+      memberId: memberIdInput.trim() || undefined,
+      isDealer: isDealer
     });
 
     setSubmitSuccess(true);
@@ -232,6 +240,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
     setFirstName('');
     setLastName('');
     setEmail('');
+    setIsDealer(false);
     setMemberFound(null);
   };
 
@@ -504,18 +513,29 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
                     </div>
                   </div>
 
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      disabled={!!memberFound}
-                      placeholder="email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="form-input"
-                      style={{ padding: '8px 12px', backgroundColor: memberFound ? 'rgba(255, 255, 255, 0.05)' : '', color: memberFound ? 'var(--text-secondary)' : 'var(--text-primary)' }}
-                    />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '16px', alignItems: 'end' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Email Address</label>
+                      <input
+                        type="email"
+                        required
+                        disabled={!!memberFound}
+                        placeholder="email@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="form-input"
+                        style={{ padding: '8px 12px', backgroundColor: memberFound ? 'rgba(255, 255, 255, 0.05)' : '', color: memberFound ? 'var(--text-secondary)' : 'var(--text-primary)' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Dealer</label>
+                      <input
+                        type="checkbox"
+                        checked={isDealer}
+                        onChange={(e) => setIsDealer(e.target.checked)}
+                        style={{ width: '38px', height: '38px', cursor: 'pointer' }}
+                      />
+                    </div>
                   </div>
 
                   <button type="submit" className="btn btn-primary" style={{ marginTop: '6px', padding: '10px' }}>

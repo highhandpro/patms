@@ -15,7 +15,7 @@ import {
 interface AppContextProps {
   state: DatabaseState;
   activeSeason: Season | null;
-  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player', pin?: string) => void;
+  addMember: (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player', pin?: string, isDealer?: boolean) => void;
   updateMember: (id: string, updated: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   addSeason: (name: string, startDate: string, endDate: string, isActive: boolean) => void;
@@ -47,7 +47,7 @@ interface AppContextProps {
   archiveTournament: (id: string) => void;
   deleteTournament: (id: string) => void;
   registerPlayer: (tournamentId: string, memberId: string) => void;
-  publicRegisterPlayer: (tournamentId: string, player: { firstName: string; lastName: string; phone: string; email: string; memberId?: string }) => void;
+  publicRegisterPlayer: (tournamentId: string, player: { firstName: string; lastName: string; phone: string; email: string; memberId?: string; isDealer?: boolean }) => void;
   unregisterPlayer: (tournamentId: string, memberId: string) => void;
   togglePlayerCheckIn: (tournamentId: string, memberId: string) => void;
   toggleEntryBuyIn: (tournamentId: string, memberId: string) => void;
@@ -631,7 +631,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeSeason = state.seasons.find(s => s.isActive) || null;
 
   // Member Management
-  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player', pin?: string) => {
+  const addMember = async (firstName: string, lastName: string, phone: string, email: string, notes?: string, customId?: string, logoUrl?: string, cardUrl?: string, role?: 'chief-admin' | 'tournament-director' | 'admin' | 'player', pin?: string, isDealer?: boolean) => {
     let id = '';
     if (customId && customId.trim()) {
       id = customId.trim();
@@ -656,7 +656,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       logoUrl: logoUrl || '',
       cardUrl: cardUrl || '',
       role: role || 'player',
-      pin: pin || ''
+      pin: pin || '',
+      isDealer: isDealer || false
     };
     await setDoc(doc(db, 'members', id), newMember);
   };
@@ -800,7 +801,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const publicRegisterPlayer = async (
     tournamentId: string,
-    player: { firstName: string; lastName: string; phone: string; email: string; memberId?: string }
+    player: { firstName: string; lastName: string; phone: string; email: string; memberId?: string; isDealer?: boolean }
   ) => {
     const cleanPhone = player.phone.replace(/\D/g, '');
     let member = player.memberId
@@ -818,7 +819,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         firstName: player.firstName,
         lastName: player.lastName,
         email: player.email,
-        phone: player.phone || member.phone
+        phone: player.phone || member.phone,
+        isDealer: player.isDealer !== undefined ? player.isDealer : (member.isDealer || false)
       }, { merge: true });
     } else {
       if (player.memberId) {
@@ -839,7 +841,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         phone: player.phone,
         email: player.email,
         joinedDate: new Date().toISOString().split('T')[0],
-        isDeleted: false
+        isDeleted: false,
+        isDealer: player.isDealer || false
       };
       await setDoc(doc(db, 'members', memberId), newMember);
     }

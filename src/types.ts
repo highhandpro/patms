@@ -16,6 +16,7 @@ export interface Member {
   pin?: string;
   tempPassword?: string;
   tempPasswordExpires?: string; // ISO string
+  isDealer?: boolean;
 }
 
 export interface TournamentEntry {
