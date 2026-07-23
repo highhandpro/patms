@@ -17,6 +17,15 @@ export interface Member {
   tempPassword?: string;
   tempPasswordExpires?: string; // ISO string
   isDealer?: boolean;
+  drawingTickets?: DrawingTicket[];
+}
+
+export interface DrawingTicket {
+  id: string;          // Unique ID
+  seasonId: string;    // Season associated with
+  reason: 'setup' | 'teardown' | 'dealing' | 'other';
+  note?: string;
+  createdAt: string;   // ISO Date string
 }
 
 export interface TournamentEntry {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { calculateStandings, formatDate } from '../utils/stats';
-import { Plus, Award, Calendar, AlertCircle } from 'lucide-react';
+import { Plus, Award, Calendar, AlertCircle, X } from 'lucide-react';
 
 interface StandingsProps {
   isChiefAdmin?: boolean;
@@ -27,6 +27,43 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isActive, setIsActive] = useState(true);
+
+  // Drawing Simulator States
+  const [isDrawingModalOpen, setIsDrawingModalOpen] = useState(false);
+  const [isDrawingInProgress, setIsDrawingInProgress] = useState(false);
+  const [drawingWinner, setDrawingWinner] = useState<{ playerName: string; ticket: any } | null>(null);
+  const [currentDisplayPlayer, setCurrentDisplayPlayer] = useState<string>('');
+
+  const runRaffleDrawing = (tickets: any[]) => {
+    if (tickets.length === 0) return;
+    
+    setIsDrawingInProgress(true);
+    setDrawingWinner(null);
+    
+    let currentIteration = 0;
+    const totalIterations = 35;
+    
+    const tick = () => {
+      const randomTicket = tickets[Math.floor(Math.random() * tickets.length)];
+      setCurrentDisplayPlayer(randomTicket.playerName);
+      currentIteration++;
+      
+      if (currentIteration < totalIterations) {
+        const nextDelay = 50 + Math.pow(currentIteration / totalIterations, 2) * 400;
+        setTimeout(tick, nextDelay);
+      } else {
+        const finalWinner = tickets[Math.floor(Math.random() * tickets.length)];
+        setCurrentDisplayPlayer(finalWinner.playerName);
+        setDrawingWinner({
+          playerName: finalWinner.playerName,
+          ticket: finalWinner
+        });
+        setIsDrawingInProgress(false);
+      }
+    };
+    
+    setTimeout(tick, 50);
+  };
 
   // Find active season
   const activeSeason = state.seasons.find(s => s.id === selectedSeasonId) || null;
@@ -93,10 +130,18 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
             Track leaderboards, points, cash winnings, and manage club seasons.
           </p>
         </div>
-        <button className="btn btn-secondary" onClick={() => setIsAddingSeason(true)}>
-          <Plus size={18} />
-          <span>Create New Season</span>
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {isChiefAdmin && (
+            <button className="btn btn-secondary" onClick={() => setIsDrawingModalOpen(true)} style={{ backgroundColor: 'var(--color-emerald)', color: '#052e16' }}>
+              <Award size={18} />
+              <span>Raffle Drawing</span>
+            </button>
+          )}
+          <button className="btn btn-secondary" onClick={() => setIsAddingSeason(true)}>
+            <Plus size={18} />
+            <span>Create New Season</span>
+          </button>
+        </div>
       </div>
 
       {/* Season Select & Configuration */}
@@ -372,6 +417,178 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Drawing Simulator Modal */}
+      {isDrawingModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 99999,
+          padding: '20px'
+        }}>
+          <div className="glass-card animate-slide-up" style={{ width: '100%', maxWidth: '500px', backgroundColor: 'var(--bg-surface)', padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Season End Raffle Drawing</h3>
+              <button 
+                onClick={() => {
+                  if (!isDrawingInProgress) {
+                    setIsDrawingModalOpen(false);
+                    setDrawingWinner(null);
+                  }
+                }}
+                disabled={isDrawingInProgress}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              Prize: <strong>Free game for the following season!</strong> Every ticket represents one entry.
+            </p>
+            
+            {(() => {
+              const tickets = state.members
+                .filter(m => !m.isDeleted)
+                .flatMap(m => (m.drawingTickets || [])
+                  .filter(t => t.seasonId === selectedSeasonId)
+                  .map(t => ({
+                    ticketId: t.id,
+                    memberId: m.id,
+                    playerName: `${m.firstName} ${m.lastName}`,
+                    reason: t.reason,
+                    note: t.note
+                  }))
+                );
+                
+              const playerCounts = tickets.reduce((acc, t) => {
+                acc[t.playerName] = (acc[t.playerName] || 0) + 1;
+                return acc;
+              }, {} as Record<string, number>);
+              
+              const sortedParticipants = Object.entries(playerCounts).sort((a, b) => b[1] - a[1]);
+              
+              if (tickets.length === 0) {
+                return (
+                  <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', margin: '40px 0' }}>
+                    No tickets found for this season.
+                  </p>
+                );
+              }
+              
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Wheel/Spinning Display */}
+                  <div style={{ 
+                    backgroundColor: 'rgba(255,255,255,0.02)', 
+                    border: '1px solid var(--border-subtle)', 
+                    borderRadius: '12px', 
+                    padding: '30px 20px', 
+                    textAlign: 'center',
+                    minHeight: '120px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    {isDrawingInProgress ? (
+                      <div>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-gold)', animation: 'pulse 0.5s infinite' }}>
+                          {currentDisplayPlayer}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                          Shuffling entries...
+                        </div>
+                      </div>
+                    ) : drawingWinner ? (
+                      <div className="animate-scale-in">
+                        <div style={{ fontSize: '1rem', color: 'var(--text-emerald)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                          🎉 Winner Drawn! 🎉
+                        </div>
+                        <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--color-emerald)', marginTop: '4px' }}>
+                          {drawingWinner.playerName}
+                        </div>
+                        <div style={{ 
+                          fontSize: '0.85rem', 
+                          color: 'var(--text-secondary)', 
+                          marginTop: '12px',
+                          display: 'inline-block',
+                          padding: '6px 12px',
+                          backgroundColor: 'rgba(255,255,255,0.04)',
+                          borderRadius: '8px',
+                          border: '1px dashed var(--border-subtle)'
+                        }}>
+                          Winning Ticket: <span style={{ textTransform: 'capitalize', fontWeight: 700 }}>{drawingWinner.ticket.reason}</span>
+                          {drawingWinner.ticket.note && ` (${drawingWinner.ticket.note})`}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ fontSize: '1.2rem', color: 'var(--text-secondary)' }}>
+                          Ready to draw from <strong>{tickets.length}</strong> total entries!
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={() => runRaffleDrawing(tickets)}
+                      disabled={isDrawingInProgress}
+                      className="btn btn-primary"
+                      style={{ flex: 1, padding: '12px', fontSize: '1.1rem', fontWeight: 700 }}
+                    >
+                      {drawingWinner ? 'Draw Again' : 'Draw Winner!'}
+                    </button>
+                  </div>
+                  
+                  {/* Participant List */}
+                  <div>
+                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                      Entries breakdown ({sortedParticipants.length} players)
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px' }}>
+                      {sortedParticipants.map(([name, count]) => {
+                        const winPct = ((count / tickets.length) * 100).toFixed(1);
+                        return (
+                          <div 
+                            key={name} 
+                            style={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center', 
+                              padding: '8px 12px', 
+                              backgroundColor: 'rgba(255,255,255,0.01)', 
+                              borderRadius: '8px', 
+                              border: '1px solid var(--border-subtle)' 
+                            }}
+                          >
+                            <span style={{ fontWeight: 600 }}>{name}</span>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{count} ticket{count > 1 ? 's' : ''}</span>
+                              <span className="badge badge-ghost" style={{ fontSize: '0.8rem' }}>{winPct}%</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

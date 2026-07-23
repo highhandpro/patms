@@ -16,10 +16,63 @@ interface MembersProps {
 }
 
 export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMemberOpen, isSubAdmin, isChiefAdmin }) => {
-  const { state, addMember, updateMember, deleteMember, approveMemberUpdate, rejectMemberUpdate, updateTournament } = useApp();
+  const { state, addMember, updateMember, deleteMember, approveMemberUpdate, rejectMemberUpdate, updateTournament, activeSeason } = useApp();
   const [search, setSearch] = useState('');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMemberForProfile, setSelectedMemberForProfile] = useState<Member | null>(null);
+
+  // Ticket states
+  const [ticketReason, setTicketReason] = useState<'setup' | 'teardown' | 'dealing' | 'other'>('setup');
+  const [ticketNote, setTicketNote] = useState('');
+
+  const handleAwardTicket = () => {
+    if (!selectedMemberForProfile || !activeSeason) return;
+    
+    const currentMember = state.members.find(m => m.id === selectedMemberForProfile.id);
+    if (!currentMember) return;
+    
+    const newTicket = {
+      id: `ticket-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      seasonId: activeSeason.id,
+      reason: ticketReason,
+      note: ticketNote.trim(),
+      createdAt: new Date().toISOString()
+    };
+    
+    const existingTickets = currentMember.drawingTickets || [];
+    const updatedTickets = [...existingTickets, newTicket];
+    
+    updateMember(currentMember.id, { drawingTickets: updatedTickets });
+    setSelectedMemberForProfile(prev => prev ? { ...prev, drawingTickets: updatedTickets } : null);
+    setTicketNote('');
+  };
+
+  const handleDeleteTicket = (ticketId: string) => {
+    if (!selectedMemberForProfile) return;
+    
+    const currentMember = state.members.find(m => m.id === selectedMemberForProfile.id);
+    if (!currentMember) return;
+    
+    const existingTickets = currentMember.drawingTickets || [];
+    const updatedTickets = existingTickets.filter(t => t.id !== ticketId);
+    
+    updateMember(currentMember.id, { drawingTickets: updatedTickets });
+    setSelectedMemberForProfile(prev => prev ? { ...prev, drawingTickets: updatedTickets } : null);
+  };
+
+  const handleClearSeasonTickets = () => {
+    if (!selectedMemberForProfile || !activeSeason) return;
+    if (!confirm(`Are you sure you want to clear all tickets for this season (${activeSeason.name})?`)) return;
+    
+    const currentMember = state.members.find(m => m.id === selectedMemberForProfile.id);
+    if (!currentMember) return;
+    
+    const existingTickets = currentMember.drawingTickets || [];
+    const updatedTickets = existingTickets.filter(t => t.seasonId !== activeSeason.id);
+    
+    updateMember(currentMember.id, { drawingTickets: updatedTickets });
+    setSelectedMemberForProfile(prev => prev ? { ...prev, drawingTickets: updatedTickets } : null);
+  };
 
   // Form states
   const [firstName, setFirstName] = useState('');
@@ -1268,6 +1321,157 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* Season Drawing Tickets Section */}
+            {activeSeason ? (
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', marginBottom: '24px' }}>
+                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                  Season Drawing Tickets ({activeSeason.name})
+                </h4>
+                
+                {(() => {
+                  const currentMember = state.members.find(m => m.id === selectedMemberForProfile.id);
+                  const seasonTickets = (currentMember?.drawingTickets || []).filter(t => t.seasonId === activeSeason.id);
+                  
+                  return (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                        <span style={{ fontSize: '1rem', fontWeight: 700 }}>Total Tickets:</span>
+                        <span className="badge badge-primary" style={{ fontSize: '1rem', padding: '4px 10px', backgroundColor: 'var(--color-emerald)', color: '#052e16' }}>{seasonTickets.length}</span>
+                      </div>
+                      
+                      {seasonTickets.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '160px', overflowY: 'auto', marginBottom: '16px', paddingRight: '4px' }}>
+                          {seasonTickets.map(t => (
+                            <div 
+                              key={t.id} 
+                              style={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center', 
+                                padding: '8px 12px', 
+                                backgroundColor: 'rgba(255,255,255,0.02)', 
+                                borderRadius: '8px', 
+                                border: '1px solid var(--border-subtle)' 
+                              }}
+                            >
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{ 
+                                    fontSize: '0.75rem', 
+                                    fontWeight: 700, 
+                                    textTransform: 'uppercase', 
+                                    padding: '2px 6px', 
+                                    borderRadius: '4px',
+                                    backgroundColor: t.reason === 'setup' ? 'rgba(59,130,246,0.15)' : 
+                                                     t.reason === 'teardown' ? 'rgba(139,92,246,0.15)' : 
+                                                     t.reason === 'dealing' ? 'rgba(16,185,129,0.15)' : 'rgba(107,114,128,0.15)',
+                                    color: t.reason === 'setup' ? '#60a5fa' : 
+                                           t.reason === 'teardown' ? '#a78bfa' : 
+                                           t.reason === 'dealing' ? '#34d399' : '#9ca3af'
+                                  }}>
+                                    {t.reason}
+                                  </span>
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                    {new Date(t.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                {t.note && (
+                                  <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginTop: '2px' }}>{t.note}</span>
+                                )}
+                              </div>
+                              <button 
+                                onClick={() => handleDeleteTicket(t.id)}
+                                style={{ background: 'none', border: 'none', color: 'var(--color-rose)', cursor: 'pointer', padding: '4px' }}
+                                title="Remove Ticket"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '16px' }}>
+                          No tickets earned this season yet.
+                        </p>
+                      )}
+                      
+                      {/* Award Ticket Form */}
+                      <div style={{ backgroundColor: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border-subtle)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>AWARD DRAWING TICKET</span>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <select 
+                            value={ticketReason} 
+                            onChange={e => setTicketReason(e.target.value as any)}
+                            style={{ 
+                              padding: '6px 10px', 
+                              borderRadius: '6px', 
+                              backgroundColor: 'var(--bg-card)', 
+                              border: '1px solid var(--border-subtle)', 
+                              color: 'var(--text-primary)',
+                              fontSize: '0.85rem',
+                              flex: 1
+                            }}
+                          >
+                            <option value="setup">Setup</option>
+                            <option value="teardown">Teardown</option>
+                            <option value="dealing">Dealing</option>
+                            <option value="other">Other / Bonus</option>
+                          </select>
+                          <input 
+                            type="text" 
+                            placeholder="Optional note..." 
+                            value={ticketNote}
+                            onChange={e => setTicketNote(e.target.value)}
+                            style={{ 
+                              padding: '6px 10px', 
+                              borderRadius: '6px', 
+                              backgroundColor: 'var(--bg-card)', 
+                              border: '1px solid var(--border-subtle)', 
+                              color: 'var(--text-primary)',
+                              fontSize: '0.85rem',
+                              flex: 2
+                            }}
+                          />
+                          <button 
+                            onClick={handleAwardTicket}
+                            className="btn btn-primary"
+                            style={{ padding: '6px 14px', fontSize: '0.85rem' }}
+                          >
+                            Award
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {seasonTickets.length > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '12px' }}>
+                          <button 
+                            onClick={handleClearSeasonTickets}
+                            style={{ 
+                              background: 'none', 
+                              border: 'none', 
+                              color: 'var(--color-rose)', 
+                              fontSize: '0.8rem', 
+                              cursor: 'pointer', 
+                              textDecoration: 'underline',
+                              padding: 0
+                            }}
+                          >
+                            Clear All Current Season Tickets
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', marginBottom: '24px' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                  No active season found. Please create/activate a season first to award drawing tickets.
+                </p>
               </div>
             )}
 

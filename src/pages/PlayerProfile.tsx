@@ -13,7 +13,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
   setActiveTab,
   loggedInMemberId
 }) => {
-  const { state } = useApp();
+  const { state, activeSeason } = useApp();
 
   if (!loggedInMemberId) {
     return (
@@ -83,26 +83,92 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
         {/* Profile Details & Stats */}
         <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
           
-          {/* Left Column: Contact details */}
-          <div className="contact-details-panel glass-card" style={{ height: 'fit-content' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '20px' }}>Contact Details</h3>
-            <div className="contact-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="contact-item" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <Mail size={18} style={{ color: 'var(--text-secondary)' }} />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Email</span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{member.email || 'No email registered'}</span>
+          {/* Left Column: Contact details & Tickets */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: 'fit-content' }}>
+            <div className="contact-details-panel glass-card" style={{ height: 'fit-content' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '20px' }}>Contact Details</h3>
+              <div className="contact-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="contact-item" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <Mail size={18} style={{ color: 'var(--text-secondary)' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Email</span>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{member.email || 'No email registered'}</span>
+                  </div>
+                </div>
+                <div className="contact-item" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <Phone size={18} style={{ color: 'var(--text-secondary)' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Phone</span>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{member.phone || 'No phone registered'}</span>
+                  </div>
                 </div>
               </div>
-              <div className="contact-item" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <Phone size={18} style={{ color: 'var(--text-secondary)' }} />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Phone</span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{member.phone || 'No phone registered'}</span>
-                </div>
-              </div>
-
             </div>
+
+            {/* Season Drawing Tickets Section */}
+            {activeSeason && (
+              <div className="glass-card" style={{ height: 'fit-content' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '16px' }}>Season Drawing Tickets</h3>
+                {(() => {
+                  const seasonTickets = (member.drawingTickets || []).filter(t => t.seasonId === activeSeason.id);
+                  return (
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Tickets Earned ({activeSeason.name}):</span>
+                        <strong style={{ fontSize: '1.2rem', color: 'var(--color-emerald)' }}>{seasonTickets.length}</strong>
+                      </div>
+                      
+                      {seasonTickets.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '160px', overflowY: 'auto' }}>
+                          {seasonTickets.map(t => (
+                            <div 
+                              key={t.id} 
+                              style={{ 
+                                padding: '8px 10px', 
+                                backgroundColor: 'rgba(255,255,255,0.01)', 
+                                borderRadius: '8px', 
+                                border: '1px solid var(--border-subtle)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '2px'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ 
+                                  fontSize: '0.7rem', 
+                                  fontWeight: 700, 
+                                  textTransform: 'uppercase', 
+                                  padding: '2px 6px', 
+                                  borderRadius: '4px',
+                                  backgroundColor: t.reason === 'setup' ? 'rgba(59,130,246,0.15)' : 
+                                                   t.reason === 'teardown' ? 'rgba(139,92,246,0.15)' : 
+                                                   t.reason === 'dealing' ? 'rgba(16,185,129,0.15)' : 'rgba(107,114,128,0.15)',
+                                  color: t.reason === 'setup' ? '#60a5fa' : 
+                                         t.reason === 'teardown' ? '#a78bfa' : 
+                                         t.reason === 'dealing' ? '#34d399' : '#9ca3af'
+                                }}>
+                                  {t.reason}
+                                </span>
+                                <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                                  {new Date(t.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                              {t.note && (
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{t.note}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic', margin: 0 }}>
+                          No tickets earned this season yet.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
 
           {/* Right Column: Statistics Grid & Recent Finishes */}
