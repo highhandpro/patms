@@ -1,0 +1,1398 @@
+{
+  "members": [
+    {
+      "id": "101",
+      "lastName": "Karr",
+      "notes": "",
+      "role": "player",
+      "cardUrl": "",
+      "isDeleted": false,
+      "logoUrl": "",
+      "isDealer": false,
+      "pin": "",
+      "joinedDate": "2026-07-28",
+      "phone": "",
+      "email": "",
+      "firstName": "Matteo"
+    },
+    {
+      "id": "PA-001",
+      "firstName": "Tim",
+      "pin": "1247",
+      "tempPassword": "",
+      "email": "thufler@gmail.com",
+      "joinedDate": "2026-01-01",
+      "phone": "(360) 869-2538",
+      "isDealer": true,
+      "notes": "",
+      "lastName": "Hufler",
+      "isDeleted": false,
+      "tempPasswordExpires": ""
+    },
+    {
+      "id": "PA-002",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "phone": "(425) 286-4544",
+      "notes": "",
+      "lastName": "Pennebaker",
+      "isDealer": true,
+      "email": "pennebd@gmail.com",
+      "firstName": "Brian"
+    },
+    {
+      "id": "PA-003",
+      "isDeleted": false,
+      "email": "steerbully777@gmail.com",
+      "isDealer": true,
+      "lastName": "Allen",
+      "joinedDate": "2026-01-01",
+      "phone": "(360) 772-9768",
+      "firstName": "Derek",
+      "notes": ""
+    },
+    {
+      "id": "PA-004",
+      "email": "gabelliott@gmail.com",
+      "isDeleted": false,
+      "lastName": "Elliott",
+      "joinedDate": "2026-01-01",
+      "firstName": "Gabe",
+      "phone": "(503) 516-1643",
+      "notes": ""
+    },
+    {
+      "id": "PA-005",
+      "firstName": "Tony",
+      "email": "arskaven@gmail.com",
+      "joinedDate": "2026-01-01",
+      "isDeleted": false,
+      "lastName": "Slaven",
+      "notes": "",
+      "phone": "(360) 607-8596"
+    },
+    {
+      "id": "PA-006",
+      "joinedDate": "2026-01-01",
+      "isDeleted": false,
+      "email": "lvillemyer@gmail.coml",
+      "lastName": "Villemyer",
+      "phone": "(360) 713-3806",
+      "firstName": "Lynn",
+      "notes": ""
+    },
+    {
+      "id": "PA-007",
+      "isDeleted": false,
+      "lastName": "Larsen",
+      "email": "chadelarsen@gmail.com",
+      "firstName": "Chad",
+      "phone": "(503) 804-2066",
+      "notes": "",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-008",
+      "email": "kerrilind70@gmail.com",
+      "isDeleted": false,
+      "notes": "",
+      "joinedDate": "2026-01-01",
+      "phone": "(360) 433-5524",
+      "firstName": "Kerri",
+      "lastName": "Lind"
+    },
+    {
+      "id": "PA-009",
+      "lastName": "Miller",
+      "email": "cristinammiller@icloud.com",
+      "joinedDate": "2026-01-01",
+      "firstName": "Cristina",
+      "isDeleted": false,
+      "phone": "(480) 688-2757",
+      "notes": ""
+    },
+    {
+      "id": "PA-010",
+      "email": "zagsfan78@gmail.com",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "lastName": "Hofbauer",
+      "notes": "",
+      "isDealer": true,
+      "firstName": "Jason",
+      "phone": "(360) 521-7129"
+    },
+    {
+      "id": "PA-011",
+      "lastName": "Berg",
+      "isDeleted": false,
+      "email": "dmberg2@comcast.net",
+      "joinedDate": "2026-01-01",
+      "phone": "(360) 910-6884",
+      "notes": "",
+      "firstName": "Doug"
+    },
+    {
+      "id": "PA-012",
+      "joinedDate": "2026-01-01",
+      "firstName": "Christopher",
+      "email": "chriswoody1968@gmail.com",
+      "phone": "(503) 757-1693",
+      "lastName": "Woody",
+      "notes": "",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-013",
+      "tempPasswordExpires": "",
+      "pin": "6015",
+      "firstName": "Guy",
+      "tempPassword": "",
+      "email": "guy@guyvider.com",
+      "isDeleted": false,
+      "phone": "(408) 550-6489",
+      "isDealer": false,
+      "notes": "",
+      "lastName": "Vider",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-014",
+      "phone": "(360) 609-6724",
+      "notes": "",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "email": "d.morales23@yahoo.com",
+      "lastName": "Morales",
+      "firstName": "Dave"
+    },
+    {
+      "id": "PA-015",
+      "email": "raeallenbooks@gmail.com",
+      "firstName": "Rachelle",
+      "lastName": "Allen",
+      "notes": "",
+      "phone": "(360) 980-3548",
+      "joinedDate": "2026-01-01",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-016",
+      "isDealer": true,
+      "lastName": "Hawkins",
+      "email": "hawkster101@hotmail.com",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "notes": "",
+      "firstName": "Ron",
+      "phone": "(360) 910-1831"
+    },
+    {
+      "id": "PA-017",
+      "joinedDate": "2026-01-01",
+      "firstName": "Brian",
+      "email": "briansyfrett@gmail.com",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "(360) 989-5638",
+      "isDealer": true,
+      "lastName": "Syfrett"
+    },
+    {
+      "id": "PA-018",
+      "email": "terter59@gmail.com",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "lastName": "Angell",
+      "phone": "(360) 901-5768",
+      "notes": "",
+      "firstName": "Terri"
+    },
+    {
+      "id": "PA-019",
+      "lastName": "Scharf",
+      "isDeleted": false,
+      "email": "",
+      "joinedDate": "2026-01-01",
+      "firstName": "Thomas",
+      "notes": "",
+      "phone": "(360) 989-7370"
+    },
+    {
+      "id": "PA-020",
+      "phone": "(917) 573-4785",
+      "notes": "",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "lastName": "Hirsh",
+      "email": "christopher.hirsh@gmail.com",
+      "firstName": "Christopher"
+    },
+    {
+      "id": "PA-021",
+      "isDeleted": false,
+      "email": "chugluglug@yahoo.com",
+      "lastName": "Imai",
+      "phone": "(360) 910-3462",
+      "joinedDate": "2026-01-01",
+      "notes": "",
+      "firstName": "Chris"
+    },
+    {
+      "id": "PA-022",
+      "joinedDate": "2026-01-01",
+      "notes": "",
+      "lastName": "Yentsch",
+      "phone": "",
+      "isDeleted": false,
+      "email": "",
+      "firstName": "Bill"
+    },
+    {
+      "id": "PA-023",
+      "joinedDate": "2026-01-01",
+      "isDeleted": false,
+      "email": "",
+      "lastName": "Knutson",
+      "phone": "(858) 761-8830",
+      "firstName": "Bruce",
+      "notes": ""
+    },
+    {
+      "id": "PA-024",
+      "isDeleted": false,
+      "lastName": "Grimani",
+      "email": "",
+      "joinedDate": "2026-01-01",
+      "firstName": "Dan",
+      "notes": "",
+      "phone": "(777) 777-7777"
+    },
+    {
+      "id": "PA-025",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "",
+      "lastName": "Marcy",
+      "joinedDate": "2026-01-01",
+      "firstName": "James",
+      "email": "cjmary@gmail.com"
+    },
+    {
+      "id": "PA-026",
+      "email": "",
+      "isDeleted": false,
+      "notes": "",
+      "firstName": "Evan",
+      "phone": "(360) 726-8122",
+      "joinedDate": "2026-01-01",
+      "isDealer": true,
+      "lastName": "Elliott"
+    },
+    {
+      "id": "PA-027",
+      "notes": "",
+      "isDeleted": false,
+      "phone": "(360) 947-0933",
+      "lastName": "Sweet",
+      "email": "abbigaler@yahoo.com",
+      "firstName": "Abbi",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-028",
+      "notes": "",
+      "phone": "",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "email": "",
+      "lastName": "Hawkins",
+      "firstName": "Zac"
+    },
+    {
+      "id": "PA-029",
+      "firstName": "Dennis",
+      "email": "dennislmccord@duck.com",
+      "joinedDate": "2026-01-01",
+      "phone": "(360) 921-2486",
+      "notes": "",
+      "isDeleted": false,
+      "lastName": "Mccord"
+    },
+    {
+      "id": "PA-030",
+      "email": "dpcountry46@gmail.com",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "phone": "(360) 991-4837",
+      "notes": "",
+      "lastName": "Philossof",
+      "firstName": "David"
+    },
+    {
+      "id": "PA-031",
+      "email": "phhollo@aol.com",
+      "firstName": "Paul",
+      "joinedDate": "2026-01-01",
+      "phone": "(575) 644-1408",
+      "lastName": "Hollomon",
+      "notes": "",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-032",
+      "notes": "",
+      "lastName": "Jamito",
+      "joinedDate": "2026-01-01",
+      "phone": "(360) 719-8906",
+      "firstName": "Albert",
+      "email": "albertjh2k@msn.com",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-033",
+      "isDeleted": false,
+      "phone": "",
+      "lastName": "Koontz",
+      "notes": "",
+      "email": "",
+      "firstName": "Angela",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-034",
+      "isDeleted": false,
+      "email": "bertadog@gmail.com",
+      "lastName": "Allen",
+      "joinedDate": "2026-01-01",
+      "notes": "",
+      "phone": "(360) 450-1438",
+      "firstName": "Berta"
+    },
+    {
+      "id": "PA-035",
+      "email": "",
+      "lastName": "Baker",
+      "firstName": "Bill",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-036",
+      "email": "tomthumb69@yahoo.com",
+      "isDeleted": false,
+      "lastName": "Foley",
+      "notes": "",
+      "firstName": "Bill",
+      "phone": "",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-037",
+      "email": "bkpatroncu@protonmail.com",
+      "firstName": "Carlie",
+      "joinedDate": "2026-01-01",
+      "lastName": "Sharling",
+      "notes": "",
+      "phone": "(975) 863-5214",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-038",
+      "notes": "",
+      "joinedDate": "2026-01-01",
+      "firstName": "Chris",
+      "phone": "(850) 554-9720",
+      "email": "ctrobbins70@gmail.com",
+      "isDeleted": false,
+      "lastName": "Robbins"
+    },
+    {
+      "id": "PA-039",
+      "lastName": "Miles",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "",
+      "firstName": "Christopher",
+      "email": "",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-040",
+      "isDeleted": false,
+      "lastName": "Dempsey",
+      "email": "codydempsey81@gmail.com",
+      "joinedDate": "2026-01-01",
+      "firstName": "Cody",
+      "phone": "(360) 921-1627",
+      "notes": ""
+    },
+    {
+      "id": "PA-041",
+      "notes": "",
+      "phone": "(541) 921-3011",
+      "isDeleted": false,
+      "email": "codebeng@gmail.com",
+      "lastName": "Glaess",
+      "joinedDate": "2026-01-01",
+      "firstName": "Cody"
+    },
+    {
+      "id": "PA-042",
+      "lastName": "Pietila",
+      "joinedDate": "2026-01-01",
+      "firstName": "Dan",
+      "email": "dan_pietila@yahoo.com",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "(503) 791-9625"
+    },
+    {
+      "id": "PA-043",
+      "notes": "",
+      "phone": "",
+      "isDeleted": false,
+      "email": "",
+      "lastName": "Wade",
+      "joinedDate": "2026-01-01",
+      "firstName": "Denny"
+    },
+    {
+      "id": "PA-044",
+      "phone": "",
+      "notes": "",
+      "joinedDate": "2026-01-01",
+      "isDeleted": false,
+      "email": "jmpaterson9@gmail.com",
+      "firstName": "James",
+      "lastName": "Patterson"
+    },
+    {
+      "id": "PA-045",
+      "email": "",
+      "joinedDate": "2026-01-01",
+      "isDeleted": false,
+      "notes": "",
+      "firstName": "Jermaine",
+      "lastName": "Spino",
+      "phone": ""
+    },
+    {
+      "id": "PA-046",
+      "joinedDate": "2026-01-01",
+      "lastName": "Viloria",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "",
+      "email": "",
+      "firstName": "Johnathan"
+    },
+    {
+      "id": "PA-047",
+      "joinedDate": "2026-01-01",
+      "firstName": "Juanito",
+      "email": "juanito.cunanan48@gmail.com",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "",
+      "isDealer": true,
+      "lastName": "Cunanan"
+    },
+    {
+      "id": "PA-048",
+      "isDeleted": false,
+      "lastName": "Schlosser Buffum",
+      "email": "",
+      "firstName": "Kacy",
+      "notes": "",
+      "phone": "",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-049",
+      "phone": "",
+      "joinedDate": "2026-01-01",
+      "notes": "",
+      "firstName": "Katrina",
+      "email": "katrinahambleton@yahoo.com",
+      "lastName": "Hambleton",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-050",
+      "isDeleted": false,
+      "lastName": "Hewlett",
+      "email": "ljhewlett@gmail.com",
+      "notes": "",
+      "firstName": "Luke",
+      "phone": "(520) 903-8228",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-051",
+      "firstName": "Mark",
+      "lastName": "Browning",
+      "notes": "",
+      "phone": "(360) 839-7734",
+      "joinedDate": "2026-01-01",
+      "isDeleted": false,
+      "email": "markbco@yahoo.com"
+    },
+    {
+      "id": "PA-052",
+      "isDeleted": false,
+      "email": "",
+      "firstName": "Mark",
+      "lastName": "Tanner",
+      "notes": "",
+      "joinedDate": "2026-01-01",
+      "phone": ""
+    },
+    {
+      "id": "PA-053",
+      "notes": "",
+      "phone": "",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "firstName": "Mary",
+      "email": "",
+      "lastName": "Lind Handy"
+    },
+    {
+      "id": "PA-054",
+      "firstName": "Michelle",
+      "lastName": "Boyle",
+      "joinedDate": "2026-01-01",
+      "notes": "",
+      "phone": "",
+      "isDeleted": false,
+      "email": ""
+    },
+    {
+      "id": "PA-055",
+      "lastName": "Hanning",
+      "notes": "",
+      "joinedDate": "2026-01-01",
+      "firstName": "Michelle",
+      "phone": "(360) 624-7343",
+      "email": "mfrogger30@myctl.net",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-056",
+      "phone": "(703) 940-2931",
+      "firstName": "Mihail",
+      "notes": "",
+      "joinedDate": "2026-01-01",
+      "lastName": "Gizea",
+      "isDeleted": false,
+      "email": "gizea.v13@gmail.com"
+    },
+    {
+      "id": "PA-057",
+      "notes": "",
+      "phone": "",
+      "firstName": "Nichlas",
+      "email": "",
+      "joinedDate": "2026-01-01",
+      "lastName": "Priest",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-058",
+      "firstName": "Nick",
+      "lastName": "Stoltz",
+      "email": "dstoltz@gmail.com",
+      "isDeleted": false,
+      "phone": "(702) 493-5485",
+      "joinedDate": "2026-01-01",
+      "notes": ""
+    },
+    {
+      "id": "PA-059",
+      "isDeleted": false,
+      "phone": "",
+      "lastName": "Turney",
+      "notes": "",
+      "joinedDate": "2026-01-01",
+      "firstName": "Rita",
+      "email": ""
+    },
+    {
+      "id": "PA-060",
+      "notes": "",
+      "isDeleted": false,
+      "phone": "(360) 989-4050",
+      "lastName": "Buell",
+      "joinedDate": "2026-01-01",
+      "email": "ryanbuell15@gmail.com",
+      "firstName": "Ryan"
+    },
+    {
+      "id": "PA-061",
+      "email": "",
+      "firstName": "Sean",
+      "phone": "",
+      "joinedDate": "2026-01-01",
+      "notes": "",
+      "lastName": "Manley",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-062",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "",
+      "lastName": "Osorio",
+      "joinedDate": "2026-01-01",
+      "email": "",
+      "firstName": "Sebastian"
+    },
+    {
+      "id": "PA-063",
+      "email": "",
+      "lastName": "Cagle",
+      "isDeleted": false,
+      "notes": "",
+      "phone": "",
+      "firstName": "Shawn",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-064",
+      "firstName": "Steve",
+      "lastName": "Hambleton",
+      "phone": "",
+      "notes": "",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "email": "steve@wheelkraftnw.com"
+    },
+    {
+      "id": "PA-065",
+      "firstName": "Steve",
+      "email": "smhanning@myctl.net",
+      "lastName": "Hanning",
+      "phone": "(360) 624-8739",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "notes": ""
+    },
+    {
+      "id": "PA-066",
+      "email": "",
+      "isDeleted": false,
+      "lastName": "Sample",
+      "joinedDate": "2026-01-01",
+      "notes": "",
+      "phone": "",
+      "firstName": "Test"
+    },
+    {
+      "id": "PA-067",
+      "firstName": "Tiffany",
+      "email": "fieldtjean@gmail.com",
+      "joinedDate": "2026-01-01",
+      "lastName": "Field",
+      "notes": "",
+      "phone": "(702) 665-3555",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-068",
+      "isDeleted": false,
+      "joinedDate": "2026-01-01",
+      "phone": "",
+      "lastName": "Colemon",
+      "notes": "",
+      "firstName": "Tom",
+      "email": ""
+    },
+    {
+      "id": "PA-069",
+      "phone": "(360) 989-7370",
+      "firstName": "Tom",
+      "notes": "",
+      "lastName": "Scharf",
+      "isDeleted": false,
+      "email": "t.e.scharf@gmail.com",
+      "joinedDate": "2026-01-01"
+    },
+    {
+      "id": "PA-070",
+      "lastName": "Thom",
+      "joinedDate": "2026-01-01",
+      "firstName": "Tory",
+      "email": "",
+      "phone": "",
+      "isDeleted": false,
+      "notes": ""
+    },
+    {
+      "id": "PA-071",
+      "email": "",
+      "firstName": "Travis",
+      "joinedDate": "2026-01-01",
+      "lastName": "Baker",
+      "notes": "",
+      "phone": "",
+      "isDeleted": false
+    },
+    {
+      "id": "PA-072",
+      "isDeleted": false,
+      "email": "",
+      "lastName": "Sundvick",
+      "joinedDate": "2026-01-01",
+      "phone": "",
+      "firstName": "Trent",
+      "notes": ""
+    },
+    {
+      "id": "PA-073",
+      "isDealer": false,
+      "lastName": "Bumgardner",
+      "joinedDate": "2026-01-01",
+      "email": "walking@teleport.com",
+      "firstName": "Wendy",
+      "isDeleted": false,
+      "phone": "(503) 799-1004",
+      "notes": ""
+    }
+  ],
+  "tournaments": [
+    {
+      "id": "tour-1783635835730",
+      "payoutPercentages": [
+        36,
+        23,
+        14,
+        10,
+        0,
+        8,
+        5,
+        4,
+        0,
+        0
+      ],
+      "flyerType": "image",
+      "highHandAmount": 100,
+      "roundLength": 18,
+      "bountyAmount": 20,
+      "lateEntry": "Late Registration Closes at the End of Level 1",
+      "totalPrizePool": 0,
+      "date": "2026-08-15",
+      "rebuys": "Freeze out",
+      "name": "S4-G2 Bounty Hunter Tournament",
+      "totalDealerAppreciation": 0,
+      "dealerAppreciationAmount": 5,
+      "preassignedDealers": [
+        "101",
+        "133",
+        "PA-003",
+        "PA-001",
+        "PA-016"
+      ],
+      "location": "Wasougal Eagles Club",
+      "totalBountyPool": 0,
+      "startingStack": "20,000 Starting Chips",
+      "flyerUrl": "https://drive.google.com/file/d/1G0nVrGhPq8-2WYLFw85HELlFZbsxscc2/view?usp=sharing",
+      "entries": [
+        {
+          "payoutEarned": 0,
+          "createdAt": "2026-07-27T17:05:32.699Z",
+          "hasDealerAppreciation": false,
+          "hasAddon": false,
+          "pointsEarned": 0,
+          "bountiesCollected": 0,
+          "memberId": "PA-003",
+          "hasBuyIn": false
+        },
+        {
+          "payoutEarned": 0,
+          "bountiesCollected": 0,
+          "createdAt": "2026-07-21T19:49:00.275Z",
+          "pointsEarned": 0,
+          "memberId": "PA-034",
+          "hasBuyIn": false,
+          "hasAddon": false,
+          "hasDealerAppreciation": false
+        },
+        {
+          "hasAddon": false,
+          "pointsEarned": 0,
+          "hasDealerAppreciation": false,
+          "memberId": "PA-002",
+          "hasBuyIn": false,
+          "createdAt": "2026-07-22T13:54:09.568Z",
+          "bountiesCollected": 0,
+          "payoutEarned": 0
+        },
+        {
+          "hasBuyIn": false,
+          "memberId": "PA-023",
+          "createdAt": "2026-07-22T14:12:09.155Z",
+          "hasAddon": false,
+          "bountiesCollected": 0,
+          "payoutEarned": 0,
+          "hasDealerAppreciation": false,
+          "pointsEarned": 0
+        },
+        {
+          "bountiesCollected": 0,
+          "hasDealerAppreciation": false,
+          "pointsEarned": 0,
+          "hasAddon": false,
+          "memberId": "PA-020",
+          "hasBuyIn": false,
+          "createdAt": "2026-07-27T07:20:04.254Z",
+          "payoutEarned": 0
+        },
+        {
+          "pointsEarned": 0,
+          "hasAddon": false,
+          "bountiesCollected": 0,
+          "createdAt": "2026-07-27T17:05:28.845Z",
+          "memberId": "PA-001",
+          "hasBuyIn": false,
+          "payoutEarned": 0,
+          "hasDealerAppreciation": false
+        },
+        {
+          "hasAddon": false,
+          "payoutEarned": 0,
+          "hasBuyIn": false,
+          "memberId": "PA-069",
+          "createdAt": "2026-07-28T00:18:54.241Z",
+          "hasDealerAppreciation": false,
+          "bountiesCollected": 0,
+          "pointsEarned": 0
+        },
+        {
+          "payoutEarned": 0,
+          "createdAt": "2026-07-28T00:19:05.903Z",
+          "pointsEarned": 0,
+          "hasAddon": false,
+          "bountiesCollected": 0,
+          "hasDealerAppreciation": false,
+          "hasBuyIn": false,
+          "memberId": "PA-004"
+        },
+        {
+          "hasAddon": false,
+          "payoutEarned": 0,
+          "bountiesCollected": 0,
+          "memberId": "PA-015",
+          "hasBuyIn": false,
+          "pointsEarned": 0,
+          "createdAt": "2026-07-28T00:19:44.928Z",
+          "hasDealerAppreciation": false
+        },
+        {
+          "payoutEarned": 0,
+          "memberId": "PA-017",
+          "hasBuyIn": false,
+          "hasAddon": false,
+          "pointsEarned": 0,
+          "bountiesCollected": 0,
+          "createdAt": "2026-07-28T00:19:49.599Z",
+          "hasDealerAppreciation": false
+        },
+        {
+          "hasDealerAppreciation": false,
+          "hasBuyIn": false,
+          "memberId": "PA-027",
+          "payoutEarned": 0,
+          "createdAt": "2026-07-28T00:19:56.694Z",
+          "bountiesCollected": 0,
+          "hasAddon": false,
+          "pointsEarned": 0
+        },
+        {
+          "createdAt": "2026-07-28T00:20:13.397Z",
+          "pointsEarned": 0,
+          "hasAddon": false,
+          "hasDealerAppreciation": false,
+          "bountiesCollected": 0,
+          "hasBuyIn": false,
+          "memberId": "PA-030",
+          "payoutEarned": 0
+        },
+        {
+          "createdAt": "2026-07-28T00:20:18.363Z",
+          "payoutEarned": 0,
+          "memberId": "PA-060",
+          "hasBuyIn": false,
+          "bountiesCollected": 0,
+          "hasAddon": false,
+          "hasDealerAppreciation": false,
+          "pointsEarned": 0
+        },
+        {
+          "bountiesCollected": 0,
+          "pointsEarned": 0,
+          "createdAt": "2026-07-28T00:20:40.772Z",
+          "hasBuyIn": false,
+          "memberId": "PA-021",
+          "payoutEarned": 0,
+          "hasAddon": false,
+          "hasDealerAppreciation": false
+        },
+        {
+          "createdAt": "2026-07-28T00:25:42.537Z",
+          "hasDealerAppreciation": false,
+          "payoutEarned": 0,
+          "hasAddon": false,
+          "bountiesCollected": 0,
+          "pointsEarned": 0,
+          "memberId": "101",
+          "hasBuyIn": false
+        },
+        {
+          "pointsEarned": 0,
+          "hasDealerAppreciation": false,
+          "bountiesCollected": 0,
+          "createdAt": "2026-07-28T00:25:59.038Z",
+          "hasBuyIn": false,
+          "memberId": "PA-055",
+          "payoutEarned": 0,
+          "hasAddon": false
+        },
+        {
+          "memberId": "PA-013",
+          "hasBuyIn": false,
+          "pointsEarned": 0,
+          "hasDealerAppreciation": false,
+          "hasAddon": false,
+          "createdAt": "2026-07-28T06:39:53.725Z",
+          "bountiesCollected": 0,
+          "payoutEarned": 0
+        },
+        {
+          "hasBuyIn": false,
+          "memberId": "PA-073",
+          "hasAddon": false,
+          "pointsEarned": 0,
+          "hasDealerAppreciation": false,
+          "bountiesCollected": 0,
+          "createdAt": "2026-07-29T22:13:46.051Z",
+          "payoutEarned": 0
+        }
+      ],
+      "buyInAmount": 55,
+      "clockState": {
+        "isRunning": false,
+        "lastUpdated": "2026-07-13T14:52:57.718Z",
+        "currentLevelIndex": 0,
+        "timeRemainingSeconds": 1080
+      },
+      "isBetaTest": false,
+      "time": "11:45 AM",
+      "totalAddons": 0,
+      "addonAmount": 15,
+      "status": "draft",
+      "maxPlayers": 50,
+      "seasonId": "season-4"
+    },
+    {
+      "id": "tour-s4g1",
+      "dealerAppreciationAmount": 9,
+      "name": "Season 4, Game 1",
+      "addonAmount": 10,
+      "totalPrizePool": 1450,
+      "overridePrizePool": 1450,
+      "totalBountyPool": 155,
+      "totalDealerAppreciation": 124,
+      "seasonId": "season-4",
+      "entries": [
+        {
+          "finishPosition": 1,
+          "hasDealerAppreciation": true,
+          "hasAddon": true,
+          "pointsEarned": 139,
+          "hasBuyIn": true,
+          "bountiesCollected": 12,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "payoutEarned": 522,
+          "memberId": "PA-001"
+        },
+        {
+          "hasAddon": true,
+          "payoutEarned": 334,
+          "bountiesCollected": 2,
+          "hasBuyIn": true,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "pointsEarned": 76,
+          "finishPosition": 2,
+          "hasDealerAppreciation": true,
+          "memberId": "PA-002"
+        },
+        {
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "payoutEarned": 203,
+          "bountiesCollected": 2,
+          "memberId": "PA-003",
+          "hasDealerAppreciation": true,
+          "hasBuyIn": true,
+          "pointsEarned": 74,
+          "hasAddon": true,
+          "finishPosition": 3
+        },
+        {
+          "hasAddon": true,
+          "bountiesCollected": 4,
+          "hasBuyIn": true,
+          "hasDealerAppreciation": true,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "payoutEarned": 145,
+          "finishPosition": 4,
+          "pointsEarned": 78,
+          "memberId": "PA-004"
+        },
+        {
+          "hasDealerAppreciation": true,
+          "bountiesCollected": 3,
+          "pointsEarned": 73,
+          "hasBuyIn": true,
+          "hasAddon": true,
+          "finishPosition": 5,
+          "memberId": "PA-005",
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "payoutEarned": 116
+        },
+        {
+          "finishPosition": 6,
+          "payoutEarned": 73,
+          "bountiesCollected": 0,
+          "memberId": "PA-006",
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "pointsEarned": 62,
+          "hasDealerAppreciation": true,
+          "hasBuyIn": true,
+          "hasAddon": true
+        },
+        {
+          "pointsEarned": 66,
+          "memberId": "PA-007",
+          "bountiesCollected": 2,
+          "hasDealerAppreciation": true,
+          "finishPosition": 7,
+          "payoutEarned": 58,
+          "hasBuyIn": true,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasAddon": true
+        },
+        {
+          "bountiesCollected": 2,
+          "hasBuyIn": true,
+          "pointsEarned": 64,
+          "hasAddon": true,
+          "hasDealerAppreciation": true,
+          "finishPosition": 8,
+          "memberId": "PA-008",
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "payoutEarned": 0
+        },
+        {
+          "bountiesCollected": 1,
+          "memberId": "PA-009",
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "pointsEarned": 59,
+          "hasBuyIn": true,
+          "hasAddon": true,
+          "finishPosition": 9,
+          "hasDealerAppreciation": true
+        },
+        {
+          "hasAddon": true,
+          "payoutEarned": 0,
+          "hasBuyIn": true,
+          "bountiesCollected": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasDealerAppreciation": true,
+          "memberId": "PA-010",
+          "finishPosition": 10,
+          "pointsEarned": 54
+        },
+        {
+          "hasBuyIn": true,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasAddon": true,
+          "payoutEarned": 0,
+          "bountiesCollected": 0,
+          "pointsEarned": 31,
+          "memberId": "PA-011",
+          "finishPosition": 11,
+          "hasDealerAppreciation": true
+        },
+        {
+          "memberId": "PA-012",
+          "payoutEarned": 0,
+          "finishPosition": 12,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "bountiesCollected": 0,
+          "pointsEarned": 30,
+          "hasAddon": true,
+          "hasDealerAppreciation": true,
+          "hasBuyIn": true
+        },
+        {
+          "finishPosition": 13,
+          "hasAddon": true,
+          "bountiesCollected": 0,
+          "hasBuyIn": true,
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "pointsEarned": 29,
+          "memberId": "PA-013",
+          "hasDealerAppreciation": true
+        },
+        {
+          "hasAddon": true,
+          "hasBuyIn": true,
+          "pointsEarned": 28,
+          "bountiesCollected": 0,
+          "memberId": "PA-014",
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "finishPosition": 14,
+          "payoutEarned": 0,
+          "hasDealerAppreciation": true
+        },
+        {
+          "finishPosition": 15,
+          "bountiesCollected": 1,
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "memberId": "PA-015",
+          "pointsEarned": 30,
+          "hasDealerAppreciation": true,
+          "hasAddon": true,
+          "hasBuyIn": true
+        },
+        {
+          "memberId": "PA-016",
+          "pointsEarned": 26,
+          "bountiesCollected": 0,
+          "payoutEarned": 0,
+          "hasAddon": true,
+          "finishPosition": 16,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasBuyIn": true,
+          "hasDealerAppreciation": true
+        },
+        {
+          "pointsEarned": 25,
+          "hasDealerAppreciation": true,
+          "hasAddon": true,
+          "hasBuyIn": true,
+          "finishPosition": 17,
+          "bountiesCollected": 0,
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "memberId": "PA-017"
+        },
+        {
+          "memberId": "PA-018",
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasDealerAppreciation": true,
+          "finishPosition": 18,
+          "pointsEarned": 24,
+          "hasBuyIn": true,
+          "hasAddon": true,
+          "bountiesCollected": 0
+        },
+        {
+          "bountiesCollected": 0,
+          "memberId": "PA-019",
+          "payoutEarned": 0,
+          "finishPosition": 19,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "pointsEarned": 23,
+          "hasBuyIn": true,
+          "hasDealerAppreciation": true,
+          "hasAddon": true
+        },
+        {
+          "bountiesCollected": 0,
+          "pointsEarned": 22,
+          "hasBuyIn": true,
+          "hasAddon": true,
+          "finishPosition": 20,
+          "memberId": "PA-020",
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "payoutEarned": 0,
+          "hasDealerAppreciation": true
+        },
+        {
+          "hasAddon": true,
+          "hasBuyIn": true,
+          "finishPosition": 21,
+          "pointsEarned": 21,
+          "payoutEarned": 0,
+          "memberId": "PA-021",
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasDealerAppreciation": true,
+          "bountiesCollected": 0
+        },
+        {
+          "bountiesCollected": 0,
+          "pointsEarned": 10,
+          "hasAddon": false,
+          "hasBuyIn": true,
+          "memberId": "PA-022",
+          "finishPosition": 22,
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasDealerAppreciation": true
+        },
+        {
+          "pointsEarned": 19,
+          "finishPosition": 23,
+          "hasAddon": false,
+          "hasBuyIn": true,
+          "bountiesCollected": 0,
+          "payoutEarned": 0,
+          "hasDealerAppreciation": true,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "memberId": "PA-023"
+        },
+        {
+          "hasDealerAppreciation": true,
+          "finishPosition": 24,
+          "memberId": "PA-024",
+          "pointsEarned": 8,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "bountiesCollected": 0,
+          "payoutEarned": 0,
+          "hasAddon": false,
+          "hasBuyIn": true
+        },
+        {
+          "memberId": "PA-025",
+          "pointsEarned": 17,
+          "hasDealerAppreciation": true,
+          "bountiesCollected": 0,
+          "hasBuyIn": true,
+          "hasAddon": false,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "payoutEarned": 0,
+          "finishPosition": 25
+        },
+        {
+          "memberId": "PA-026",
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "payoutEarned": 0,
+          "bountiesCollected": 0,
+          "finishPosition": 26,
+          "hasBuyIn": true,
+          "hasAddon": false,
+          "hasDealerAppreciation": true,
+          "pointsEarned": 16
+        },
+        {
+          "memberId": "PA-027",
+          "finishPosition": 27,
+          "hasDealerAppreciation": true,
+          "bountiesCollected": 0,
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasBuyIn": true,
+          "pointsEarned": 15,
+          "hasAddon": false
+        },
+        {
+          "hasBuyIn": true,
+          "hasDealerAppreciation": true,
+          "pointsEarned": 14,
+          "hasAddon": false,
+          "finishPosition": 28,
+          "memberId": "PA-028",
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "bountiesCollected": 0,
+          "payoutEarned": 0
+        },
+        {
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "hasBuyIn": true,
+          "bountiesCollected": 0,
+          "hasAddon": false,
+          "finishPosition": 29,
+          "pointsEarned": 13,
+          "memberId": "PA-029",
+          "hasDealerAppreciation": true
+        },
+        {
+          "hasAddon": false,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "finishPosition": 30,
+          "hasBuyIn": true,
+          "payoutEarned": 0,
+          "bountiesCollected": 0,
+          "pointsEarned": 12,
+          "hasDealerAppreciation": true,
+          "memberId": "PA-030"
+        },
+        {
+          "pointsEarned": 11,
+          "hasAddon": false,
+          "hasDealerAppreciation": true,
+          "hasBuyIn": true,
+          "finishPosition": 31,
+          "memberId": "PA-031",
+          "payoutEarned": 0,
+          "eliminatedAt": "2026-01-08T22:00:00.000Z",
+          "bountiesCollected": 0
+        }
+      ],
+      "date": "2026-06-20",
+      "buyInAmount": 40,
+      "status": "completed",
+      "payoutPercentages": [
+        36,
+        23,
+        14,
+        10,
+        8,
+        5,
+        4,
+        0,
+        0,
+        0
+      ],
+      "bountyAmount": 5
+    }
+  ],
+  "seasons": [
+    {
+      "id": "season-2026",
+      "endDate": "2026-12-31",
+      "startDate": "2026-01-01",
+      "isActive": false,
+      "name": "Season 2026"
+    },
+    {
+      "id": "season-4",
+      "startDate": "2026-01-01",
+      "isActive": true,
+      "endDate": "2026-06-30",
+      "name": "Season 4"
+    }
+  ],
+  "settings": [
+    {
+      "id": "main",
+      "defaultBuyIn": 40,
+      "defaultDealerAppreciation": 9,
+      "defaultAddon": 10,
+      "pointsBaseAttendance": 10,
+      "maxPlayersPerTable": 8,
+      "defaultBounty": 5
+    }
+  ],
+  "pendingApprovals": []
+}

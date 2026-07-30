@@ -1,6 +1,5 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { PlayerBanner } from '../components/PlayerBanner';
 import { Calendar, Clock, MapPin, DollarSign, Coins, Timer, RefreshCcw, AlarmClock, Zap, Handshake, Plus } from 'lucide-react';
 import { getEmbeddableFlyerUrl } from '../utils/flyer';
 
@@ -36,10 +35,6 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
 
   return (
     <div className="player-page player-events-page animate-fade-in">
-      <PlayerBanner>
-        <h1 className="banner-title">Upcoming Events</h1>
-      </PlayerBanner>
-
       <div className="player-page-content">
         <div className="events-list-container">
           {upcomingTournaments.length === 0 ? (
