@@ -398,9 +398,9 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
       setPin('');
       setIsDealer(false);
       setErrorMsg(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to save changes: ' + (err as Error).message);
+      setErrorMsg('Failed to save changes: ' + err.message);
     } finally {
       setIsSaving(false);
     }
@@ -881,7 +881,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   <input
                     type="file"
                     id="admin-edit-logo-input"
-                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                    accept="image/png, image/jpeg, image/webp, image/svg+xml, .png, .jpg, .jpeg, .webp, .svg"
                     style={{ display: 'none' }}
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
@@ -895,37 +895,60 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         if (!proceed) return;
                       }
                       const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
-                      if (!allowedTypes.includes(file.type)) {
+                      const extension = file.name.split('.').pop()?.toLowerCase();
+                      const allowedExtensions = ['png', 'jpg', 'jpeg', 'webp', 'svg'];
+                      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(extension || '')) {
                         alert('Only PNG, JPG, WebP, and SVG formats are supported.');
                         return;
                       }
                       
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                          const canvas = document.createElement('canvas');
-                          canvas.width = 128;
-                          canvas.height = 128;
-                          const ctx = canvas.getContext('2d');
-                          if (!ctx) return;
-                          
-                          const size = Math.min(img.width, img.height);
-                          const sx = (img.width - size) / 2;
-                          const sy = (img.height - size) / 2;
-                          
-                          ctx.clearRect(0, 0, 128, 128);
-                          ctx.drawImage(img, sx, sy, size, size, 0, 0, 128, 128);
-                          
-                          let dataUrl = canvas.toDataURL('image/webp', 0.7);
-                          if (dataUrl.length > 25 * 1024) {
-                            dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                      try {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          try {
+                            const img = new Image();
+                            img.onload = () => {
+                              try {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = 128;
+                                canvas.height = 128;
+                                const ctx = canvas.getContext('2d');
+                                if (!ctx) {
+                                  alert('Could not initialize canvas context.');
+                                  return;
+                                }
+                                
+                                const size = Math.min(img.width, img.height);
+                                const sx = (img.width - size) / 2;
+                                const sy = (img.height - size) / 2;
+                                
+                                ctx.clearRect(0, 0, 128, 128);
+                                ctx.drawImage(img, sx, sy, size, size, 0, 0, 128, 128);
+                                
+                                let dataUrl = canvas.toDataURL('image/webp', 0.7);
+                                if (dataUrl.length > 25 * 1024) {
+                                  dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                                }
+                                setLogoUrl(dataUrl);
+                              } catch (canvasErr: any) {
+                                alert('Failed to resize logo image: ' + canvasErr.message);
+                              }
+                            };
+                            img.onerror = () => {
+                              alert('Selected logo file is not a valid image format.');
+                            };
+                            img.src = event.target?.result as string;
+                          } catch (loadErr: any) {
+                            alert('Failed to parse logo file content: ' + loadErr.message);
                           }
-                          setLogoUrl(dataUrl);
                         };
-                        img.src = event.target?.result as string;
-                      };
-                      reader.readAsDataURL(file);
+                        reader.onerror = () => {
+                          alert('Failed to read logo file.');
+                        };
+                        reader.readAsDataURL(file);
+                      } catch (readErr: any) {
+                        alert('FileReader error: ' + readErr.message);
+                      }
                     }}
                   />
                 </div>
@@ -977,7 +1000,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   <input
                     type="file"
                     id="admin-edit-card-input"
-                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                    accept="image/png, image/jpeg, image/webp, image/svg+xml, .png, .jpg, .jpeg, .webp, .svg"
                     style={{ display: 'none' }}
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
@@ -991,48 +1014,71 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         if (!proceed) return;
                       }
                       const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
-                      if (!allowedTypes.includes(file.type)) {
+                      const extension = file.name.split('.').pop()?.toLowerCase();
+                      const allowedExtensions = ['png', 'jpg', 'jpeg', 'webp', 'svg'];
+                      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(extension || '')) {
                         alert('Only PNG, JPG, WebP, and SVG formats are supported.');
                         return;
                       }
                       
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                          const canvas = document.createElement('canvas');
-                          canvas.width = 200;
-                          canvas.height = 350;
-                          const ctx = canvas.getContext('2d');
-                          if (!ctx) return;
-                          
-                          const targetRatio = 200 / 350;
-                          const sourceRatio = img.width / img.height;
-                          let sx, sy, sWidth, sHeight;
-                          if (sourceRatio > targetRatio) {
-                            sHeight = img.height;
-                            sWidth = img.height * targetRatio;
-                            sx = (img.width - sWidth) / 2;
-                            sy = 0;
-                          } else {
-                            sWidth = img.width;
-                            sHeight = img.width / targetRatio;
-                            sx = 0;
-                            sy = (img.height - sHeight) / 2;
+                      try {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          try {
+                            const img = new Image();
+                            img.onload = () => {
+                              try {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = 200;
+                                canvas.height = 350;
+                                const ctx = canvas.getContext('2d');
+                                if (!ctx) {
+                                  alert('Could not initialize canvas context.');
+                                  return;
+                                }
+                                
+                                const targetRatio = 200 / 350;
+                                const sourceRatio = img.width / img.height;
+                                let sx, sy, sWidth, sHeight;
+                                if (sourceRatio > targetRatio) {
+                                  sHeight = img.height;
+                                  sWidth = img.height * targetRatio;
+                                  sx = (img.width - sWidth) / 2;
+                                  sy = 0;
+                                } else {
+                                  sWidth = img.width;
+                                  sHeight = img.width / targetRatio;
+                                  sx = 0;
+                                  sy = (img.height - sHeight) / 2;
+                                }
+                                
+                                ctx.clearRect(0, 0, 200, 350);
+                                ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 200, 350);
+                                
+                                let dataUrl = canvas.toDataURL('image/webp', 0.7);
+                                if (dataUrl.length > 40 * 1024) {
+                                  dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                                }
+                                setCardUrl(dataUrl);
+                              } catch (canvasErr: any) {
+                                alert('Failed to resize card image: ' + canvasErr.message);
+                              }
+                            };
+                            img.onerror = () => {
+                              alert('Selected card file is not a valid image format.');
+                            };
+                            img.src = event.target?.result as string;
+                          } catch (loadErr: any) {
+                            alert('Failed to parse card file content: ' + loadErr.message);
                           }
-                          
-                          ctx.clearRect(0, 0, 200, 350);
-                          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 200, 350);
-                          
-                          let dataUrl = canvas.toDataURL('image/webp', 0.7);
-                          if (dataUrl.length > 40 * 1024) {
-                            dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                          }
-                          setCardUrl(dataUrl);
                         };
-                        img.src = event.target?.result as string;
-                      };
-                      reader.readAsDataURL(file);
+                        reader.onerror = () => {
+                          alert('Failed to read card file.');
+                        };
+                        reader.readAsDataURL(file);
+                      } catch (readErr: any) {
+                        alert('FileReader error: ' + readErr.message);
+                      }
                     }}
                   />
                 </div>
