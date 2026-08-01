@@ -884,8 +884,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         const img = new Image();
                         img.onload = () => {
                           const canvas = document.createElement('canvas');
-                          canvas.width = 768;
-                          canvas.height = 768;
+                          canvas.width = 256;
+                          canvas.height = 256;
                           const ctx = canvas.getContext('2d');
                           if (!ctx) return;
                           
@@ -893,22 +893,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                           const sx = (img.width - size) / 2;
                           const sy = (img.height - size) / 2;
                           
-                          ctx.clearRect(0, 0, 768, 768);
-                          ctx.drawImage(img, sx, sy, size, size, 0, 0, 768, 768);
+                          ctx.clearRect(0, 0, 256, 256);
+                          ctx.drawImage(img, sx, sy, size, size, 0, 0, 256, 256);
                           
-                          let dataUrl = canvas.toDataURL('image/webp', 0.8);
-                          if (dataUrl.length > 900 * 1024) {
-                            dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                          }
-                          if (dataUrl.length > 900 * 1024) {
-                            const smallCanvas = document.createElement('canvas');
-                            smallCanvas.width = 512;
-                            smallCanvas.height = 512;
-                            const sCtx = smallCanvas.getContext('2d');
-                            if (sCtx) {
-                              sCtx.drawImage(canvas, 0, 0, 512, 512);
-                              dataUrl = smallCanvas.toDataURL('image/jpeg', 0.6);
-                            }
+                          let dataUrl = canvas.toDataURL('image/webp', 0.7);
+                          if (dataUrl.length > 40 * 1024) {
+                            dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                           }
                           setLogoUrl(dataUrl);
                         };
@@ -982,12 +972,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         const img = new Image();
                         img.onload = () => {
                           const canvas = document.createElement('canvas');
-                          canvas.width = 1200;
-                          canvas.height = 2100;
+                          canvas.width = 300;
+                          canvas.height = 525;
                           const ctx = canvas.getContext('2d');
                           if (!ctx) return;
                           
-                          const targetRatio = 1200 / 2100;
+                          const targetRatio = 300 / 525;
                           const sourceRatio = img.width / img.height;
                           let sx, sy, sWidth, sHeight;
                           if (sourceRatio > targetRatio) {
@@ -1002,10 +992,13 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                             sy = (img.height - sHeight) / 2;
                           }
                           
-                          ctx.clearRect(0, 0, 1200, 2100);
-                          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 1200, 2100);
+                          ctx.clearRect(0, 0, 300, 525);
+                          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 300, 525);
                           
-                          const dataUrl = canvas.toDataURL('image/webp', 0.85);
+                          let dataUrl = canvas.toDataURL('image/webp', 0.7);
+                          if (dataUrl.length > 70 * 1024) {
+                            dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                          }
                           setCardUrl(dataUrl);
                         };
                         img.src = event.target?.result as string;
