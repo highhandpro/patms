@@ -183,6 +183,14 @@ function App() {
     : [];
 
   useEffect(() => {
+    const hostname = window.location.hostname;
+    if (hostname.endsWith('.web.app') || hostname.endsWith('.firebaseapp.com')) {
+      const newUrl = 'https://www.pennyantepoker.com' + window.location.pathname + window.location.search + window.location.hash;
+      window.location.replace(newUrl);
+    }
+  }, []);
+
+  useEffect(() => {
     if (state.settings.colorPalette) {
       applyThemePalette(state.settings.colorPalette);
     }
