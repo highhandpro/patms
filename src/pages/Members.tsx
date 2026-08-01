@@ -886,12 +886,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      if (file.size > 1500 * 1024) {
-                        alert('Maximum file size is 1.5 MB.');
+                      if (file.size > 15 * 1024 * 1024) {
+                        alert('Maximum file size is 15 MB.');
                         return;
                       }
-                      if (file.size > 500 * 1024) {
-                        const proceed = window.confirm('The selected logo file is over 500 KB. Resizing and uploading large files might take a moment. Do you want to proceed?');
+                      if (file.size > 5 * 1024 * 1024) {
+                        const proceed = window.confirm('The selected logo file is over 5 MB. Resizing and uploading large files might take a moment. Do you want to proceed?');
                         if (!proceed) return;
                       }
                       const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
@@ -982,12 +982,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      if (file.size > 1500 * 1024) {
-                        alert('Maximum file size is 1.5 MB.');
+                      if (file.size > 15 * 1024 * 1024) {
+                        alert('Maximum file size is 15 MB.');
                         return;
                       }
-                      if (file.size > 500 * 1024) {
-                        const proceed = window.confirm('The selected card file is over 500 KB. Resizing and uploading large files might take a moment. Do you want to proceed?');
+                      if (file.size > 5 * 1024 * 1024) {
+                        const proceed = window.confirm('The selected card file is over 5 MB. Resizing and uploading large files might take a moment. Do you want to proceed?');
                         if (!proceed) return;
                       }
                       const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
