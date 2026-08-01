@@ -2271,21 +2271,21 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
             <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px', alignItems: 'start' }}>
-              {renderFastPlayerLookup("Fast RSVP Player Lookup", rsvpSearchRef)}
+              {renderFastPlayerLookup("Register a Player", rsvpSearchRef)}
 
               <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>RSVP Summary</h4>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Registration Summary</h4>
                 <div style={{ fontSize: '1.5rem', color: 'var(--color-emerald)', fontWeight: 700 }}>
                   {rsvpEntries.length} Players
                 </div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
-                  These players have registered to attend. Click **Check In** to confirm their attendance and buy-in investment.
+                  These players have registered to play. Click **Check In** to confirm their attendance and buy-in investment.
                 </p>
               </div>
             </div>
 
             <div className="glass-card">
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>Registered RSVPs (Unconfirmed Check-ins)</h4>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>Registered Players (Unconfirmed Check-ins)</h4>
               {rsvpEntries.length > 0 ? (
                 <div className="rsvp-columns-grid" style={{
                   display: 'grid',
@@ -2637,7 +2637,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 </div>
               ) : (
                 <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  No unconfirmed RSVPs. All registered players are checked in!
+                  No unconfirmed registrations. All registered players are checked in!
                 </div>
               )}
             </div>
@@ -2649,9 +2649,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {subTab === 'checkin' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
           {activeTournament.status === 'draft' ? (
-            !isSubAdmin && renderFastPlayerLookup("Fast Player Lookup", checkinSearchRef)
+            !isSubAdmin && renderFastPlayerLookup("Register a Player", checkinSearchRef)
           ) : (
-            !isSubAdmin && renderFastPlayerLookup("Fast Player Lookup (Late Entry / Registration)", lateSearchRef)
+            !isSubAdmin && renderFastPlayerLookup("Register a Player (Late Entry / Registration)", lateSearchRef)
           )}
           
           {/* Checked-in list */}
@@ -2919,7 +2919,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             <div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Seating Assignments</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px', margin: 0 }}>
-                Seating is generated only for checked-in (registered) players. RSVP'ed players who have not checked in yet will not be assigned a seat.
+                Seating is generated only for checked-in players. Registered players who have not checked in yet will not be assigned a seat.
               </p>
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -3898,7 +3898,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     borderColor: printType === 'signin' ? 'var(--color-emerald)' : 'rgba(255,255,255,0.1)'
                   }}
                 >
-                  Player Sign-In Sheet ({sortedRegisteredMembers.length} RSVPs)
+                  Player Sign-In Sheet ({sortedRegisteredMembers.length} Registered Players)
                 </button>
                 <button
                   type="button"
