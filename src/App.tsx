@@ -204,6 +204,20 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    let link = document.querySelector("link[rel='canonical']") as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
+    }
+    if (activePlayerTab === 'update-info') {
+      link.setAttribute('href', 'https://www.pennyantepoker.com/update-info');
+    } else {
+      link.setAttribute('href', 'https://www.pennyantepoker.com/');
+    }
+  }, [activePlayerTab]);
+
   // Levenshtein helper
   const calculateLevenshtein = (a: string, b: string): number => {
     const matrix = [];
