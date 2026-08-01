@@ -873,6 +873,10 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         alert('Maximum file size is 1.5 MB.');
                         return;
                       }
+                      if (file.size > 500 * 1024) {
+                        const proceed = window.confirm('The selected logo file is over 500 KB. Resizing and uploading large files might take a moment. Do you want to proceed?');
+                        if (!proceed) return;
+                      }
                       const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
                       if (!allowedTypes.includes(file.type)) {
                         alert('Only PNG, JPG, WebP, and SVG formats are supported.');
@@ -961,6 +965,14 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
+                      if (file.size > 1500 * 1024) {
+                        alert('Maximum file size is 1.5 MB.');
+                        return;
+                      }
+                      if (file.size > 500 * 1024) {
+                        const proceed = window.confirm('The selected card file is over 500 KB. Resizing and uploading large files might take a moment. Do you want to proceed?');
+                        if (!proceed) return;
+                      }
                       const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
                       if (!allowedTypes.includes(file.type)) {
                         alert('Only PNG, JPG, WebP, and SVG formats are supported.');
