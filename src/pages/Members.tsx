@@ -88,6 +88,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
   const [tempPassword, setTempPassword] = useState('');
   const [pin, setPin] = useState('');
   const [isDealer, setIsDealer] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
   const [playerAId, setPlayerAId] = useState('');
@@ -306,12 +307,16 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim()) return;
 
+    setIsSaving(true);
+    setErrorMsg(null);
+
     const cleanEmail = email.trim().toLowerCase();
 
     // If role is administrative, check/create Firebase Auth account
     if (role !== 'player') {
       if (!cleanEmail) {
         setErrorMsg("Email address is required for administrative roles.");
+        setIsSaving(false);
         return;
       }
 
@@ -322,6 +327,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
         const pass = tempPassword.trim();
         if (pass.length < 6) {
           setErrorMsg("Password must be at least 6 characters long.");
+          setIsSaving(false);
           return;
         }
 
@@ -337,6 +343,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           console.error("Firebase auth creation failed:", authErr);
           if (authErr.code !== 'auth/email-already-in-use') {
             setErrorMsg("Auth Error: " + (authErr.message || authErr.code));
+            setIsSaving(false);
             return;
           }
         }
@@ -345,6 +352,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
     if (pin.trim() && !/^\d{4}$/.test(pin.trim())) {
       setErrorMsg('PIN must be exactly 4 digits.');
+      setIsSaving(false);
       return;
     }
 
@@ -368,6 +376,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           const idExists = state.members.some(m => m.id === memberIdInput.trim());
           if (idExists) {
             setErrorMsg(`Member ID "${memberIdInput.trim()}" is already assigned. Please use a unique ID.`);
+            setIsSaving(false);
             return;
           }
         }
@@ -392,6 +401,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     } catch (err) {
       console.error(err);
       alert('Failed to save changes: ' + (err as Error).message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -792,8 +803,14 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                 {editingMember ? `Edit Member Info (${editingMember.id})` : 'Register New Player'}
               </h3>
               <button 
-                onClick={() => { setIsAddMemberOpen(false); setEditingMember(null); }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                onClick={() => { if (!isSaving) { setIsAddMemberOpen(false); setEditingMember(null); } }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  opacity: isSaving ? 0.5 : 1
+                }}
               >
                 <X size={20} />
               </button>
@@ -888,8 +905,8 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         const img = new Image();
                         img.onload = () => {
                           const canvas = document.createElement('canvas');
-                          canvas.width = 256;
-                          canvas.height = 256;
+                          canvas.width = 128;
+                          canvas.height = 128;
                           const ctx = canvas.getContext('2d');
                           if (!ctx) return;
                           
@@ -897,11 +914,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                           const sx = (img.width - size) / 2;
                           const sy = (img.height - size) / 2;
                           
-                          ctx.clearRect(0, 0, 256, 256);
-                          ctx.drawImage(img, sx, sy, size, size, 0, 0, 256, 256);
+                          ctx.clearRect(0, 0, 128, 128);
+                          ctx.drawImage(img, sx, sy, size, size, 0, 0, 128, 128);
                           
                           let dataUrl = canvas.toDataURL('image/webp', 0.7);
-                          if (dataUrl.length > 40 * 1024) {
+                          if (dataUrl.length > 25 * 1024) {
                             dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                           }
                           setLogoUrl(dataUrl);
@@ -984,12 +1001,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                         const img = new Image();
                         img.onload = () => {
                           const canvas = document.createElement('canvas');
-                          canvas.width = 300;
-                          canvas.height = 525;
+                          canvas.width = 200;
+                          canvas.height = 350;
                           const ctx = canvas.getContext('2d');
                           if (!ctx) return;
                           
-                          const targetRatio = 300 / 525;
+                          const targetRatio = 200 / 350;
                           const sourceRatio = img.width / img.height;
                           let sx, sy, sWidth, sHeight;
                           if (sourceRatio > targetRatio) {
@@ -1004,11 +1021,11 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                             sy = (img.height - sHeight) / 2;
                           }
                           
-                          ctx.clearRect(0, 0, 300, 525);
-                          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 300, 525);
+                          ctx.clearRect(0, 0, 200, 350);
+                          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 200, 350);
                           
                           let dataUrl = canvas.toDataURL('image/webp', 0.7);
-                          if (dataUrl.length > 70 * 1024) {
+                          if (dataUrl.length > 40 * 1024) {
                             dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                           }
                           setCardUrl(dataUrl);
@@ -1182,14 +1199,16 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                   type="button"
                   onClick={() => { setIsAddMemberOpen(false); setEditingMember(null); }}
                   className="btn btn-secondary"
+                  disabled={isSaving}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary"
+                  disabled={isSaving}
                 >
-                  {editingMember ? 'Save Changes' : 'Register Player'}
+                  {isSaving ? 'Saving...' : (editingMember ? 'Save Changes' : 'Register Player')}
                 </button>
               </div>
             </form>
