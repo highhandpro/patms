@@ -859,14 +859,13 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button
-                      type="button"
-                      onClick={() => document.getElementById('admin-edit-logo-input')?.click()}
+                    <label
+                      htmlFor="admin-edit-logo-input"
                       className="btn btn-secondary"
-                      style={{ padding: '3px 8px', fontSize: '0.7rem' }}
+                      style={{ padding: '3px 8px', fontSize: '0.7rem', cursor: 'pointer', display: 'inline-block', margin: 0 }}
                     >
                       Upload Logo
-                    </button>
+                    </label>
                     {logoUrl && (
                       <button
                         type="button"
@@ -978,14 +977,13 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button
-                      type="button"
-                      onClick={() => document.getElementById('admin-edit-card-input')?.click()}
+                    <label
+                      htmlFor="admin-edit-card-input"
                       className="btn btn-secondary"
-                      style={{ padding: '3px 8px', fontSize: '0.7rem' }}
+                      style={{ padding: '3px 8px', fontSize: '0.7rem', cursor: 'pointer', display: 'inline-block', margin: 0 }}
                     >
                       Upload Card
-                    </button>
+                    </label>
                     {cardUrl && (
                       <button
                         type="button"
