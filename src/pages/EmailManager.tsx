@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import type { Member } from '../types';
 import { 
   Mail, 
   Send, 
@@ -47,6 +48,10 @@ export const EmailManager: React.FC = () => {
   const [broadcastLogs, setBroadcastLogs] = useState<{ name: string; email: string; status: 'sending' | 'success' | 'failed'; error?: string }[]>([]);
   const [showLogs, setShowLogs] = useState(false);
   const [showRecipients, setShowRecipients] = useState(false);
+  
+  // Tournament selection state for announcements
+  const [selectedTournamentId, setSelectedTournamentId] = useState<string>('');
+  const selectedTournament = state.tournaments.find(t => t.id === selectedTournamentId);
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -144,15 +149,49 @@ export const EmailManager: React.FC = () => {
   };
 
   // Replace tokens for live previewing
-  const getCompiledPreview = (rawContent: string) => {
-    const sampleFirstName = "Tim";
-    const sampleLastName = "Hufler";
-    const sampleCode = "5432";
+  const getCompiledPreview = (rawContent: string, member?: Member) => {
+    const firstName = member ? member.firstName : "Tim";
+    const lastName = member ? member.lastName : "Hufler";
+    const code = "5432";
     
-    return rawContent
-      .replace(/\{\{\s*first_name\s*\}\}/g, sampleFirstName)
-      .replace(/\{\{\s*last_name\s*\}\}/g, sampleLastName)
-      .replace(/\{\{\s*code\s*\}\}/g, sampleCode);
+    let result = rawContent
+      .replace(/\{\{\s*first_name\s*\}\}/g, firstName)
+      .replace(/\{\{\s*last_name\s*\}\}/g, lastName)
+      .replace(/\{\{\s*code\s*\}\}/g, code);
+
+    // Replace tournament placeholders
+    if (selectedTournament) {
+      result = result
+        .replace(/\{\{\s*tournament_name\s*\}\}/g, selectedTournament.name)
+        .replace(/\{\{\s*tournament_date\s*\}\}/g, selectedTournament.date)
+        .replace(/\{\{\s*tournament_time\s*\}\}/g, selectedTournament.time || 'N/A')
+        .replace(/\{\{\s*tournament_location\s*\}\}/g, selectedTournament.location || 'N/A')
+        .replace(/\{\{\s*tournament_buyin\s*\}\}/g, `$${selectedTournament.buyInAmount}`)
+        .replace(/\{\{\s*tournament_addon\s*\}\}/g, `$${selectedTournament.addonAmount}`)
+        .replace(/\{\{\s*tournament_bounty\s*\}\}/g, `$${selectedTournament.bountyAmount}`)
+        .replace(/\{\{\s*tournament_starting_stack\s*\}\}/g, selectedTournament.startingStack || 'N/A')
+        .replace(/\{\{\s*tournament_round_length\s*\}\}/g, selectedTournament.roundLength ? `${selectedTournament.roundLength} mins` : 'N/A')
+        .replace(/\{\{\s*tournament_rebuys\s*\}\}/g, selectedTournament.rebuys || 'N/A')
+        .replace(/\{\{\s*tournament_late_entry\s*\}\}/g, selectedTournament.lateEntry || 'N/A')
+        .replace(/\{\{\s*tournament_flyer_url\s*\}\}/g, selectedTournament.flyerUrl || '');
+    } else {
+      // Fallback preview values if no tournament is selected
+      result = result
+        .replace(/\{\{\s*tournament_name\s*\}\}/g, "S4-G2 Bounty Hunter Tournament")
+        .replace(/\{\{\s*tournament_date\s*\}\}/g, "2026-08-15")
+        .replace(/\{\{\s*tournament_time\s*\}\}/g, "11:45 AM")
+        .replace(/\{\{\s*tournament_location\s*\}\}/g, "Wasougal Eagles Club")
+        .replace(/\{\{\s*tournament_buyin\s*\}\}/g, "$55")
+        .replace(/\{\{\s*tournament_addon\s*\}\}/g, "$15")
+        .replace(/\{\{\s*tournament_bounty\s*\}\}/g, "$20")
+        .replace(/\{\{\s*tournament_starting_stack\s*\}\}/g, "20,000 Starting Chips")
+        .replace(/\{\{\s*tournament_round_length\s*\}\}/g, "18 mins")
+        .replace(/\{\{\s*tournament_rebuys\s*\}\}/g, "Freeze out")
+        .replace(/\{\{\s*tournament_late_entry\s*\}\}/g, "Late Registration Closed")
+        .replace(/\{\{\s*tournament_flyer_url\s*\}\}/g, "https://drive.google.com/file/d/example/view");
+    }
+
+    return result;
   };
 
   // Save Settings to Firestore
@@ -319,14 +358,9 @@ export const EmailManager: React.FC = () => {
       // Update status to 'sending'
       setBroadcastLogs(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'sending' } : item));
 
-      // Compile personalized subject and body
-      const personalizedSubject = subject
-        .replace(/\{\{\s*first_name\s*\}\}/g, member.firstName)
-        .replace(/\{\{\s*last_name\s*\}\}/g, member.lastName);
-
-      const personalizedBody = body
-        .replace(/\{\{\s*first_name\s*\}\}/g, member.firstName)
-        .replace(/\{\{\s*last_name\s*\}\}/g, member.lastName);
+      // Compile personalized subject and body using the helper (substitutes member and selected tournament details)
+      const personalizedSubject = getCompiledPreview(subject, member);
+      const personalizedBody = getCompiledPreview(body, member);
 
       try {
         const endpoint = useLocalApi 
@@ -704,6 +738,32 @@ export const EmailManager: React.FC = () => {
             </button>
           </div>
 
+          {/* Tournament Selector (Only for announcements) */}
+          {selectedTemplate === 'announcement' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '20px' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                Select Tournament to Announce (Optional - Populates details below)
+              </label>
+              <select
+                value={selectedTournamentId}
+                onChange={(e) => setSelectedTournamentId(e.target.value)}
+                className="form-input"
+                style={{ width: '100%', borderRadius: '8px', fontSize: '0.95rem', cursor: 'pointer' }}
+              >
+                <option value="">-- No specific tournament (Uses generic sample values) --</option>
+                {state.tournaments
+                  .slice()
+                  .sort((a, b) => b.date.localeCompare(a.date))
+                  .map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.date} - {t.name} ({t.location || 'No Location'})
+                    </option>
+                  ))
+                }
+              </select>
+            </div>
+          )}
+
           {/* Subject Field */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '20px' }}>
             <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Subject Line</label>
@@ -721,8 +781,9 @@ export const EmailManager: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Email HTML Body</label>
             
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'flex-end', maxWidth: '70%' }}>
               <button 
+                type="button"
                 onClick={() => insertToken('first_name')}
                 className="btn btn-ghost"
                 style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(255,255,255,0.08)', minHeight: '26px' }}
@@ -731,16 +792,92 @@ export const EmailManager: React.FC = () => {
                 + First Name
               </button>
               {selectedTemplate === 'announcement' ? (
-                <button 
-                  onClick={() => insertToken('last_name')}
-                  className="btn btn-ghost"
-                  style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(255,255,255,0.08)', minHeight: '26px' }}
-                  title="Insert {{last_name}} placeholder tag"
-                >
-                  + Last Name
-                </button>
+                <>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('last_name')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(255,255,255,0.08)', minHeight: '26px' }}
+                    title="Insert {{last_name}} placeholder tag"
+                  >
+                    + Last Name
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('tournament_name')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.05)', color: '#10B981', minHeight: '26px' }}
+                    title="Insert {{tournament_name}} placeholder tag"
+                  >
+                    + Tour Name
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('tournament_date')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.05)', color: '#10B981', minHeight: '26px' }}
+                    title="Insert {{tournament_date}} placeholder tag"
+                  >
+                    + Tour Date
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('tournament_time')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.05)', color: '#10B981', minHeight: '26px' }}
+                    title="Insert {{tournament_time}} placeholder tag"
+                  >
+                    + Tour Time
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('tournament_location')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.05)', color: '#10B981', minHeight: '26px' }}
+                    title="Insert {{tournament_location}} placeholder tag"
+                  >
+                    + Tour Location
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('tournament_buyin')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.05)', color: '#10B981', minHeight: '26px' }}
+                    title="Insert {{tournament_buyin}} placeholder tag"
+                  >
+                    + Buy-in
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('tournament_addon')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.05)', color: '#10B981', minHeight: '26px' }}
+                    title="Insert {{tournament_addon}} placeholder tag"
+                  >
+                    + Add-on
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('tournament_bounty')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.05)', color: '#10B981', minHeight: '26px' }}
+                    title="Insert {{tournament_bounty}} placeholder tag"
+                  >
+                    + Bounty
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => insertToken('tournament_starting_stack')}
+                    className="btn btn-ghost"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.05)', color: '#10B981', minHeight: '26px' }}
+                    title="Insert {{tournament_starting_stack}} placeholder tag"
+                  >
+                    + Stacks
+                  </button>
+                </>
               ) : (
                 <button 
+                  type="button"
                   onClick={() => insertToken('code')}
                   className="btn btn-ghost"
                   style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(255,255,255,0.08)', minHeight: '26px' }}
