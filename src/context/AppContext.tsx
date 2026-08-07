@@ -5,12 +5,42 @@ import { getAutoPayoutPercentages } from '../utils/stats';
 import { 
   collection, 
   doc, 
-  setDoc, 
-  updateDoc,
+  setDoc as firebaseSetDoc, 
+  updateDoc as firebaseUpdateDoc,
   onSnapshot, 
   deleteDoc, 
   getDocs
 } from 'firebase/firestore';
+
+// Helper to recursively strip undefined properties from Firestore payloads
+const cleanUndefined = (obj: any): any => {
+  if (Array.isArray(obj)) {
+    return obj.map(cleanUndefined);
+  }
+  if (obj !== null && typeof obj === 'object') {
+    const proto = Object.getPrototypeOf(obj);
+    if (proto === null || proto === Object.prototype) {
+      return Object.fromEntries(
+        Object.entries(obj)
+          .filter(([_, v]) => v !== undefined)
+          .map(([k, v]) => [k, cleanUndefined(v)])
+      );
+    }
+  }
+  return obj;
+};
+
+const setDoc = (ref: any, data: any, options?: any) => {
+  if (options) {
+    return firebaseSetDoc(ref, cleanUndefined(data), options);
+  }
+  return firebaseSetDoc(ref, cleanUndefined(data));
+};
+
+const updateDoc = (ref: any, data: any) => {
+  return firebaseUpdateDoc(ref, cleanUndefined(data));
+};
+
 
 interface AppContextProps {
   state: DatabaseState;
@@ -79,7 +109,48 @@ const DEFAULT_SETTINGS = {
   pointsBaseAttendance: 10,
   maxPlayersPerTable: 8,
   adminPassword: 'pennyante',
-  isUnderConstruction: false
+  isUnderConstruction: false,
+  resendApiKey: '',
+  emailSender: 'Penny Ante Poker Club <onboarding@resend.dev>',
+  emailCorsProxy: '',
+  emailTemplates: {
+    loginPin: {
+      subject: 'Your Temporary Security PIN - Penny Ante Poker Club',
+      body: `<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
+  <div style="background-color: #052e16; padding: 24px; border-top-left-radius: 12px; border-top-right-radius: 12px; text-align: center; border-bottom: 3px solid #fbbf24;">
+    <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: -0.02em;">Penny Ante Poker Club</h1>
+  </div>
+  <div style="background-color: #ffffff; padding: 40px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <h2 style="margin-top: 0; font-size: 20px; color: #111827;">Hello {{first_name}},</h2>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">You requested a temporary security PIN to access your player profile. Use the verification code below to log in:</p>
+    <div style="text-align: center; margin: 32px 0;">
+      <span style="display: inline-block; background-color: #f3f4f6; color: #052e16; font-size: 36px; font-weight: 800; letter-spacing: 6px; padding: 16px 32px; border-radius: 8px; border: 1px solid #e5e7eb; font-family: 'JetBrains Mono', monospace;">{{code}}</span>
+    </div>
+    <p style="font-size: 14px; color: #9ca3af; line-height: 1.6;">If you did not request this email, you can safely ignore it. This code will expire in 15 minutes.</p>
+    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
+    <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
+  </div>
+</div>`
+    },
+    resetPin: {
+      subject: 'Reset Your Security PIN - Penny Ante Poker Club',
+      body: `<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
+  <div style="background-color: #052e16; padding: 24px; border-top-left-radius: 12px; border-top-right-radius: 12px; text-align: center; border-bottom: 3px solid #fbbf24;">
+    <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: -0.02em;">Penny Ante Poker Club</h1>
+  </div>
+  <div style="background-color: #ffffff; padding: 40px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <h2 style="margin-top: 0; font-size: 20px; color: #111827;">Hello {{first_name}},</h2>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">We received a request to reset the security PIN for your Penny Ante Poker Club account. Please use the following code to complete your reset:</p>
+    <div style="text-align: center; margin: 32px 0;">
+      <span style="display: inline-block; background-color: #f3f4f6; color: #b91c1c; font-size: 36px; font-weight: 800; letter-spacing: 6px; padding: 16px 32px; border-radius: 8px; border: 1px solid #e5e7eb; font-family: 'JetBrains Mono', monospace;">{{code}}</span>
+    </div>
+    <p style="font-size: 14px; color: #9ca3af; line-height: 1.6;">If you did not request a PIN reset, please verify your account security or contact Tim Hufler. This code will expire in 15 minutes.</p>
+    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
+    <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
+  </div>
+</div>`
+    }
+  }
 };
 
 // Initial default mock database to make the app look stunning right away

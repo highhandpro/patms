@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Users, Trophy, Award, Settings as SettingsIcon, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, Award, Settings as SettingsIcon, Menu, X, Mail } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 interface SidebarProps {
@@ -23,7 +23,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
     { id: 'members', name: 'Members', icon: Users },
     { id: 'tournaments', name: 'Tournaments', icon: Trophy },
     { id: 'standings', name: 'Standings', icon: Award },
-    ...(isSubAdmin ? [] : [{ id: 'settings', name: 'Settings', icon: SettingsIcon }]),
+    ...(isSubAdmin ? [] : [
+      { id: 'emails', name: 'Emails', icon: Mail },
+      { id: 'settings', name: 'Settings', icon: SettingsIcon }
+    ]),
   ];
 
   return (

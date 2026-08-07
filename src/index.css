@@ -714,7 +714,7 @@ textarea:not(.bounty-number-input):focus,
 /* Player Banner */
 .player-banner {
   width: 100%;
-  padding: 48px 40px;
+  padding: 20px 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -862,7 +862,7 @@ textarea:not(.bounty-number-input):focus,
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 40px;
+  padding: 24px 40px 40px 40px;
 }
 
 /* Upcoming Event Card Styling */
