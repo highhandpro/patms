@@ -52,6 +52,10 @@ export const EmailManager: React.FC = () => {
   // Tournament selection state for announcements
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>('');
   const selectedTournament = state.tournaments.find(t => t.id === selectedTournamentId);
+
+  // WYSIWYG Visual Editor States
+  const [editorMode, setEditorMode] = useState<'visual' | 'code'>('visual');
+  const editableRef = useRef<HTMLDivElement>(null);
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -64,18 +68,18 @@ export const EmailManager: React.FC = () => {
     } else {
       // Fallbacks
       if (selectedTemplate === 'loginPin') {
-        setSubject('Your Temporary Security PIN - Penny Ante Poker Club');
+        setSubject('Your Temporary Login PIN - Penny Ante Poker Club');
         setBody(`<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
   <div style="background-color: #052e16; padding: 24px; border-top-left-radius: 12px; border-top-right-radius: 12px; text-align: center; border-bottom: 3px solid #fbbf24;">
     <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: -0.02em;">Penny Ante Poker Club</h1>
   </div>
   <div style="background-color: #ffffff; padding: 40px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
     <h2 style="margin-top: 0; font-size: 20px; color: #111827;">Hello {{first_name}},</h2>
-    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">You requested a temporary security PIN to access your player profile. Use the verification code below to log in:</p>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">You have requested a temporary login PIN. Please enter the following code on the login page to proceed:</p>
     <div style="text-align: center; margin: 32px 0;">
       <span style="display: inline-block; background-color: #f3f4f6; color: #052e16; font-size: 36px; font-weight: 800; letter-spacing: 6px; padding: 16px 32px; border-radius: 8px; border: 1px solid #e5e7eb; font-family: 'JetBrains Mono', monospace;">{{code}}</span>
     </div>
-    <p style="font-size: 14px; color: #9ca3af; line-height: 1.6;">If you did not request this email, you can safely ignore it. This code will expire in 15 minutes.</p>
+    <p style="font-size: 14px; color: #9ca3af; line-height: 1.6;">If you did not request a PIN, you can safely ignore this email. This code is only valid for 15 minutes.</p>
     <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
     <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
   </div>
@@ -127,25 +131,84 @@ export const EmailManager: React.FC = () => {
     }
   }, [selectedTemplate, state.settings.emailTemplates]);
 
-  // Insert token helper at cursor position
-  const insertToken = (token: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  // Sync HTML state to contentEditable innerHTML when editor switches to visual or template changes
+  useEffect(() => {
+    if (editorMode === 'visual' && editableRef.current) {
+      if (editableRef.current.innerHTML !== body) {
+        editableRef.current.innerHTML = body;
+      }
+    }
+  }, [editorMode, selectedTemplate]);
 
-    const startPos = textarea.selectionStart;
-    const endPos = textarea.selectionEnd;
-    const text = textarea.value;
+  // Insert token helper at cursor position (supports both textarea and contentEditable visual canvas)
+  const insertToken = (token: string) => {
     const replacement = `{{${token}}}`;
-    const newBody = text.substring(0, startPos) + replacement + text.substring(endPos);
-    
-    setBody(newBody);
-    
-    // Reset cursor position
-    setTimeout(() => {
-      textarea.focus();
-      textarea.selectionStart = startPos + replacement.length;
-      textarea.selectionEnd = startPos + replacement.length;
-    }, 50);
+
+    if (editorMode === 'code') {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      const startPos = textarea.selectionStart;
+      const endPos = textarea.selectionEnd;
+      const text = textarea.value;
+      const newBody = text.substring(0, startPos) + replacement + text.substring(endPos);
+      
+      setBody(newBody);
+      
+      // Reset cursor position
+      setTimeout(() => {
+        textarea.focus();
+        textarea.selectionStart = startPos + replacement.length;
+        textarea.selectionEnd = startPos + replacement.length;
+      }, 50);
+    } else {
+      const editable = editableRef.current;
+      if (!editable) return;
+      
+      editable.focus();
+      
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        
+        // Ensure selection cursor is inside our contentEditable editor
+        if (editable.contains(range.commonAncestorContainer)) {
+          range.deleteContents();
+          const textNode = document.createTextNode(replacement);
+          range.insertNode(textNode);
+          
+          // Move cursor after the inserted text
+          range.setStartAfter(textNode);
+          range.setEndAfter(textNode);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          
+          // Sync changes to state
+          setBody(editable.innerHTML);
+          return;
+        }
+      }
+      
+      // Fallback: append if focus was not in visual editor
+      const newBody = body + replacement;
+      setBody(newBody);
+      editable.innerHTML = newBody;
+    }
+  };
+
+  // WYSIWYG Formatting Actions
+  const execFormat = (command: string, value: string = '') => {
+    if (editableRef.current) {
+      editableRef.current.focus();
+    }
+    document.execCommand(command, false, value);
+    if (editableRef.current) {
+      setBody(editableRef.current.innerHTML);
+    }
+  };
+
+  const handleVisualEditorInput = (e: React.FormEvent<HTMLDivElement>) => {
+    setBody(e.currentTarget.innerHTML);
   };
 
   // Replace tokens for live previewing
@@ -889,25 +952,194 @@ export const EmailManager: React.FC = () => {
             </div>
           </div>
 
-          {/* HTML Source Editor */}
-          <textarea
-            ref={textareaRef}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            className="form-input"
-            rows={18}
-            style={{ 
-              width: '100%', 
-              fontFamily: "'JetBrains Mono', Consolas, monospace", 
-              fontSize: '0.85rem', 
-              lineHeight: '1.5',
-              padding: '16px',
-              borderRadius: '8px',
+          {/* Editor Mode Toggle Control */}
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
+            <div style={{ display: 'flex', backgroundColor: 'rgba(255,255,255,0.03)', padding: '3px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <button
+                type="button"
+                onClick={() => setEditorMode('visual')}
+                style={{
+                  background: editorMode === 'visual' ? 'rgba(16,185,129,0.1)' : 'none',
+                  border: 'none',
+                  color: editorMode === 'visual' ? '#10B981' : 'var(--text-muted)',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  transition: 'all 0.15s'
+                }}
+              >
+                Visual Editor (WYSIWYG)
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditorMode('code')}
+                style={{
+                  background: editorMode === 'code' ? 'rgba(255,255,255,0.08)' : 'none',
+                  border: 'none',
+                  color: editorMode === 'code' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  transition: 'all 0.15s'
+                }}
+              >
+                HTML Source Code
+              </button>
+            </div>
+          </div>
+
+          {/* Visual Editor Toolbar */}
+          {editorMode === 'visual' && (
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '6px',
+              padding: '10px 14px',
               backgroundColor: '#0a0f1d',
-              color: '#d4e2f0',
-              border: '1px solid rgba(255,255,255,0.08)'
-            }}
-          />
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderBottom: 'none',
+              borderTopLeftRadius: '8px',
+              borderTopRightRadius: '8px',
+              alignItems: 'center'
+            }}>
+              {/* Bold, Italic, Underline */}
+              <button type="button" onClick={() => execFormat('bold')} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: '28px', fontSize: '0.8rem' }} title="Bold">
+                <strong>B</strong>
+              </button>
+              <button type="button" onClick={() => execFormat('italic')} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: '28px', fontStyle: 'italic', fontSize: '0.8rem' }} title="Italic">
+                <em>I</em>
+              </button>
+              <button type="button" onClick={() => execFormat('underline')} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: '28px', textDecoration: 'underline', fontSize: '0.8rem' }} title="Underline">
+                <u>U</u>
+              </button>
+              
+              <div style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+
+              {/* Alignments */}
+              <button type="button" onClick={() => execFormat('justifyLeft')} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: '28px', fontSize: '0.75rem' }} title="Align Left">
+                Left
+              </button>
+              <button type="button" onClick={() => execFormat('justifyCenter')} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: '28px', fontSize: '0.75rem' }} title="Align Center">
+                Center
+              </button>
+              <button type="button" onClick={() => execFormat('justifyRight')} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: '28px', fontSize: '0.75rem' }} title="Align Right">
+                Right
+              </button>
+
+              <div style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+
+              {/* Lists */}
+              <button type="button" onClick={() => execFormat('insertUnorderedList')} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: '28px', fontSize: '0.75rem' }} title="Bullet List">
+                • List
+              </button>
+              <button type="button" onClick={() => execFormat('insertOrderedList')} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: '28px', fontSize: '0.75rem' }} title="Numbered List">
+                1. List
+              </button>
+
+              <div style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+
+              {/* Headings */}
+              <button type="button" onClick={() => execFormat('formatBlock', '<h2>')} className="btn btn-ghost" style={{ padding: '4px 8px', minHeight: '28px', fontSize: '0.72rem', fontWeight: 'bold' }} title="Large Heading">
+                H2
+              </button>
+              <button type="button" onClick={() => execFormat('formatBlock', '<h3>')} className="btn btn-ghost" style={{ padding: '4px 8px', minHeight: '28px', fontSize: '0.72rem', fontWeight: 'bold' }} title="Medium Heading">
+                H3
+              </button>
+              <button type="button" onClick={() => execFormat('formatBlock', '<p>')} className="btn btn-ghost" style={{ padding: '4px 8px', minHeight: '28px', fontSize: '0.72rem' }} title="Normal Paragraph">
+                Text
+              </button>
+
+              <div style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+
+              {/* Hyperlink */}
+              <button
+                type="button"
+                onClick={() => {
+                  const url = prompt("Enter Link URL (e.g., https://example.com):");
+                  if (url) execFormat('createLink', url);
+                }}
+                className="btn btn-ghost"
+                style={{ padding: '4px 8px', minHeight: '28px', fontSize: '0.72rem', color: '#60A5FA', borderColor: 'rgba(96,165,250,0.15)' }}
+                title="Insert link"
+              >
+                Add Link
+              </button>
+
+              {/* Quick Swatch Palette */}
+              <div style={{ display: 'flex', gap: '4px', marginLeft: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Color:</span>
+                {[
+                  { label: 'Dark Gray', value: '#1f2937' },
+                  { label: 'Forest Green', value: '#052e16' },
+                  { label: 'Amber Gold', value: '#d97706' },
+                  { label: 'Slate Gray', value: '#4b5563' },
+                  { label: 'Alert Red', value: '#dc2626' }
+                ].map(c => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => execFormat('foreColor', c.value)}
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      backgroundColor: c.value,
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                    title={`Text Color: ${c.label}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Editor Input Area */}
+          {editorMode === 'visual' ? (
+            <div
+              ref={editableRef}
+              contentEditable
+              onInput={handleVisualEditorInput}
+              style={{
+                width: '100%',
+                minHeight: '480px',
+                maxHeight: '600px',
+                overflowY: 'auto',
+                padding: '24px',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderBottomLeftRadius: '8px',
+                borderBottomRightRadius: '8px',
+                backgroundColor: '#ffffff',
+                color: '#1f2937',
+                lineHeight: '1.6',
+                fontFamily: "'Outfit', sans-serif"
+              }}
+            />
+          ) : (
+            <textarea
+              ref={textareaRef}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              className="form-input"
+              rows={18}
+              style={{ 
+                width: '100%', 
+                fontFamily: "'JetBrains Mono', Consolas, monospace", 
+                fontSize: '0.85rem', 
+                lineHeight: '1.5',
+                padding: '16px',
+                borderRadius: '8px',
+                backgroundColor: '#0a0f1d',
+                color: '#d4e2f0',
+                border: '1px solid rgba(255,255,255,0.08)'
+              }}
+            />
+          )}
 
           {/* Placeholders Help Box */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px', padding: '10px 14px', backgroundColor: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.15)', borderRadius: '8px', fontSize: '0.78rem', color: '#60A5FA' }}>
