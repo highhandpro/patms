@@ -24,7 +24,7 @@ export const EmailManager: React.FC = () => {
   const [emailCorsProxy, setEmailCorsProxy] = useState(state.settings.emailCorsProxy || '');
   
   // Templates state
-  const [selectedTemplate, setSelectedTemplate] = useState<'loginPin' | 'resetPin'>('loginPin');
+  const [selectedTemplate, setSelectedTemplate] = useState<'loginPin' | 'resetPin' | 'announcement'>('loginPin');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   
@@ -39,6 +39,14 @@ export const EmailManager: React.FC = () => {
   // Test Email status
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  
+  // Broadcast states
+  const abortBroadcastRef = useRef<boolean>(false);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [broadcastProgress, setBroadcastProgress] = useState({ sent: 0, total: 0, success: 0, failed: 0 });
+  const [broadcastLogs, setBroadcastLogs] = useState<{ name: string; email: string; status: 'sending' | 'success' | 'failed'; error?: string }[]>([]);
+  const [showLogs, setShowLogs] = useState(false);
+  const [showRecipients, setShowRecipients] = useState(false);
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -67,7 +75,7 @@ export const EmailManager: React.FC = () => {
     <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
   </div>
 </div>`);
-      } else {
+      } else if (selectedTemplate === 'resetPin') {
         setSubject('Reset Your Security PIN - Penny Ante Poker Club');
         setBody(`<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
   <div style="background-color: #052e16; padding: 24px; border-top-left-radius: 12px; border-top-right-radius: 12px; text-align: center; border-bottom: 3px solid #fbbf24;">
@@ -80,6 +88,32 @@ export const EmailManager: React.FC = () => {
       <span style="display: inline-block; background-color: #f3f4f6; color: #b91c1c; font-size: 36px; font-weight: 800; letter-spacing: 6px; padding: 16px 32px; border-radius: 8px; border: 1px solid #e5e7eb; font-family: 'JetBrains Mono', monospace;">{{code}}</span>
     </div>
     <p style="font-size: 14px; color: #9ca3af; line-height: 1.6;">If you did not request a PIN reset, please verify your account security or contact Tim Hufler. This code will expire in 15 minutes.</p>
+    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
+    <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
+  </div>
+</div>`);
+      } else {
+        setSubject('Club Announcement - Penny Ante Poker Club');
+        setBody(`<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
+  <div style="background-color: #052e16; padding: 24px; border-top-left-radius: 12px; border-top-right-radius: 12px; text-align: center; border-bottom: 3px solid #fbbf24;">
+    <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: -0.02em;">Penny Ante Poker Club</h1>
+  </div>
+  <div style="background-color: #ffffff; padding: 40px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <h2 style="margin-top: 0; font-size: 20px; color: #111827;">Hello {{first_name}},</h2>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+      We have an exciting announcement for members of the Penny Ante Poker Club!
+    </p>
+    <div style="background-color: #f9fafb; border-left: 4px solid #052e16; padding: 16px; margin: 24px 0; border-radius: 6px;">
+      <p style="font-size: 15px; line-height: 1.6; color: #1f2937; margin: 0; font-weight: 500;">
+        Write your main announcement content here. You can customize this layout completely using HTML.
+      </p>
+    </div>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+      Check the standings, schedule, and live tournament results directly on our portal:
+    </p>
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="https://pennyantepoker.com" style="display: inline-block; background-color: #052e16; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 12px 32px; border-radius: 8px; border-bottom: 3px solid #042512; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); transition: background-color 0.2s;">Visit the Poker Portal</a>
+    </div>
     <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
     <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
   </div>
@@ -110,12 +144,14 @@ export const EmailManager: React.FC = () => {
   };
 
   // Replace tokens for live previewing
-  const getCompiledPreview = (rawContent: string, isSubjectField = false) => {
+  const getCompiledPreview = (rawContent: string) => {
     const sampleFirstName = "Tim";
-    const sampleCode = isSubjectField ? "5432" : "5432";
+    const sampleLastName = "Hufler";
+    const sampleCode = "5432";
     
     return rawContent
       .replace(/\{\{\s*first_name\s*\}\}/g, sampleFirstName)
+      .replace(/\{\{\s*last_name\s*\}\}/g, sampleLastName)
       .replace(/\{\{\s*code\s*\}\}/g, sampleCode);
   };
 
@@ -160,33 +196,31 @@ export const EmailManager: React.FC = () => {
     setIsSendingTest(true);
     setTestResult(null);
 
-    const finalSubject = getCompiledPreview(subject, true);
-    const finalBody = getCompiledPreview(body, false);
+    const finalSubject = getCompiledPreview(subject);
+    const finalBody = getCompiledPreview(body);
 
     const sender = emailSender.trim();
     const apiKey = resendApiKey.trim();
     const proxy = emailCorsProxy.trim();
-
-    if (!apiKey) {
-      setTestResult({
-        success: false,
-        message: 'Resend API Key is required to send emails. Enter it in the settings panel.'
-      });
-      setIsSendingTest(false);
-      return;
-    }
+    const useLocalApi = !apiKey;
 
     try {
-      const endpoint = proxy 
-        ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
-        : 'https://api.resend.com/emails';
+      const endpoint = useLocalApi 
+        ? '/api/send-email'
+        : (proxy 
+            ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
+            : 'https://api.resend.com/emails');
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      if (!useLocalApi) {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
 
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
           from: sender,
           to: [testRecipient.trim()],
@@ -202,19 +236,154 @@ export const EmailManager: React.FC = () => {
 
       setTestResult({
         success: true,
-        message: `Test email successfully dispatched to ${testRecipient} via Resend!`
+        message: `Test email successfully dispatched to ${testRecipient}!`
       });
       setTestRecipient('');
     } catch (err: any) {
       console.error("Test email dispatch failed:", err);
       setTestResult({
         success: false,
-        message: `Dispatch failed: ${err.message || err}. (Note: If this is a CORS error, you can configure the CORS Proxy input to route requests securely).`
+        message: `Dispatch failed: ${err.message || err}. (Note: If this is a CORS issue, check proxy or API Key configuration).`
       });
     } finally {
       setIsSendingTest(false);
     }
   };
+
+
+  // Members calculation
+  const activeMembers = state.members.filter(m => !m.isDeleted);
+  const optedInMembers = activeMembers.filter(m => {
+    const hasEmail = m.email && m.email.trim().includes('@');
+    const isOptedIn = m.emailAnnouncements !== false; // defaults to true
+    return hasEmail && isOptedIn;
+  });
+  const optedOutCount = activeMembers.filter(m => {
+    const hasEmail = m.email && m.email.trim().includes('@');
+    const isOptedIn = m.emailAnnouncements !== false;
+    return hasEmail && !isOptedIn;
+  }).length;
+
+  const handleBroadcast = async () => {
+    if (optedInMembers.length === 0) {
+      alert("There are no opted-in members with valid email addresses to send to.");
+      return;
+    }
+
+    const confirmMsg = `Are you sure you want to broadcast this announcement to all ${optedInMembers.length} opted-in members? This will send personalized emails one-by-one using your Resend integration.`;
+    if (!window.confirm(confirmMsg)) {
+      return;
+    }
+
+    setIsBroadcasting(true);
+    abortBroadcastRef.current = false;
+    setBroadcastProgress({ sent: 0, total: optedInMembers.length, success: 0, failed: 0 });
+    
+    // Initialize logs
+    setBroadcastLogs(optedInMembers.map(m => ({
+      name: `${m.firstName} ${m.lastName}`,
+      email: m.email,
+      status: 'sending'
+    })));
+    setShowLogs(true);
+
+    const apiKey = resendApiKey.trim();
+    const sender = emailSender.trim();
+    const proxy = emailCorsProxy.trim();
+    const useLocalApi = !apiKey;
+
+    if (!useLocalApi && !apiKey) {
+      alert("Resend API Key is required to broadcast. Please configure it above.");
+      setIsBroadcasting(false);
+      return;
+    }
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (let i = 0; i < optedInMembers.length; i++) {
+      if (abortBroadcastRef.current) {
+        setBroadcastLogs(prev => [
+          ...prev.slice(0, i),
+          ...prev.slice(i).map(item => ({ 
+            ...item, 
+            status: 'failed' as const, 
+            error: 'Broadcast cancelled by administrator.' 
+          }))
+        ]);
+        break;
+      }
+
+      const member = optedInMembers[i];
+      
+      // Update status to 'sending'
+      setBroadcastLogs(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'sending' } : item));
+
+      // Compile personalized subject and body
+      const personalizedSubject = subject
+        .replace(/\{\{\s*first_name\s*\}\}/g, member.firstName)
+        .replace(/\{\{\s*last_name\s*\}\}/g, member.lastName);
+
+      const personalizedBody = body
+        .replace(/\{\{\s*first_name\s*\}\}/g, member.firstName)
+        .replace(/\{\{\s*last_name\s*\}\}/g, member.lastName);
+
+      try {
+        const endpoint = useLocalApi 
+          ? '/api/send-email'
+          : (proxy 
+              ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
+              : 'https://api.resend.com/emails');
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json'
+        };
+        if (!useLocalApi) {
+          headers['Authorization'] = `Bearer ${apiKey}`;
+        }
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            from: sender,
+            to: [member.email.trim()],
+            subject: personalizedSubject,
+            html: personalizedBody
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || `HTTP status ${response.status}`);
+        }
+
+        successCount++;
+        setBroadcastLogs(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'success' } : item));
+      } catch (err: any) {
+        console.error(`Broadcast failed for ${member.firstName} ${member.lastName}:`, err);
+        failedCount++;
+        setBroadcastLogs(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'failed', error: err.message || err.toString() } : item));
+      }
+
+      setBroadcastProgress(prev => ({
+        ...prev,
+        sent: i + 1,
+        success: successCount,
+        failed: failedCount
+      }));
+
+      // Delay between sends
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+
+    setIsBroadcasting(false);
+  };
+
+  const handleCancelBroadcast = () => {
+    abortBroadcastRef.current = true;
+  };
+
 
   return (
     <div className="email-manager-page animate-fade-in" style={{ padding: '32px' }}>
@@ -333,6 +502,150 @@ export const EmailManager: React.FC = () => {
         </div>
       </div>
 
+      {/* Broadcast Announcement Control Dashboard */}
+      {selectedTemplate === 'announcement' && (
+        <div className="glass-card" style={{ padding: '24px', marginBottom: '32px', border: '1px solid var(--border-subtle)' }}>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)' }}>
+            <Send size={18} style={{ color: 'var(--color-emerald)' }} />
+            <span>Broadcast Announcement to Club</span>
+          </h3>
+          
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-subtle)', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', gap: '32px' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Total Members</span>
+                <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>{activeMembers.length}</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-emerald)', fontWeight: 600 }}>Opted-In Recipients</span>
+                <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-emerald)', marginTop: '4px' }}>{optedInMembers.length}</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>Opted-Out</span>
+                <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-secondary)', marginTop: '4px' }}>{optedOutCount}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => setShowRecipients(!showRecipients)}
+                className="btn btn-ghost"
+                style={{ fontSize: '0.85rem', padding: '10px 16px', borderRadius: '8px' }}
+              >
+                {showRecipients ? 'Hide Recipient List' : 'View Recipient List'}
+              </button>
+              
+              {!isBroadcasting ? (
+                <button
+                  onClick={handleBroadcast}
+                  disabled={optedInMembers.length === 0}
+                  className="btn btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, minHeight: '40px' }}
+                >
+                  <Send size={16} />
+                  <span>Send Announcement to {optedInMembers.length} Members</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleCancelBroadcast}
+                  className="btn btn-danger"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, minHeight: '40px', backgroundColor: 'var(--color-danger)', borderColor: 'var(--color-danger)' }}
+                >
+                  <span className="animate-pulse" style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#ffffff', marginRight: '4px' }}></span>
+                  <span>Stop Broadcast</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Recipient list drawer */}
+          {showRecipients && (
+            <div className="animate-slide-down" style={{ marginTop: '16px', padding: '16px', backgroundColor: 'rgba(0,0,0,0.1)', border: '1px solid var(--border-subtle)', borderRadius: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+              <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '8px', color: 'var(--text-secondary)' }}>Recipient List ({optedInMembers.length} players)</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {optedInMembers.map((m) => (
+                  <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '4px 8px', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '4px' }}>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{m.firstName} {m.lastName}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>{m.email}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Broadcast Progress details */}
+          {isBroadcasting && (
+            <div className="animate-slide-up" style={{ marginTop: '20px', padding: '16px', border: '1px solid rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.02)', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Broadcasting announcement... {broadcastProgress.sent} / {broadcastProgress.total} emails processed
+                </span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-emerald)' }}>
+                  {Math.round((broadcastProgress.sent / broadcastProgress.total) * 100)}% Complete
+                </span>
+              </div>
+              
+              {/* Progress bar */}
+              <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden', marginBottom: '16px' }}>
+                <div style={{ width: `${(broadcastProgress.sent / broadcastProgress.total) * 100}%`, height: '100%', backgroundColor: 'var(--color-emerald)', transition: 'width 0.2s' }}></div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '20px', fontSize: '0.85rem', marginBottom: '12px' }}>
+                <span style={{ color: 'var(--color-emerald)', fontWeight: 600 }}>✓ {broadcastProgress.success} Successful</span>
+                {broadcastProgress.failed > 0 && <span style={{ color: 'var(--color-danger)', fontWeight: 600 }}>✗ {broadcastProgress.failed} Failed</span>}
+              </div>
+
+              {/* Real-time sending logs */}
+              <div style={{ maxHeight: '150px', overflowY: 'auto', backgroundColor: '#070a13', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '10px', fontFamily: 'monospace', fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {broadcastLogs.map((log, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: log.status === 'success' ? '#10B981' : log.status === 'failed' ? '#EF4444' : '#60A5FA' }}>
+                    <span>[{log.status.toUpperCase()}] {log.name} ({log.email})</span>
+                    {log.error && <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>- {log.error}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Final summary message if done and not currently broadcasting */}
+          {!isBroadcasting && broadcastProgress.sent > 0 && (
+            <div className="animate-slide-up" style={{ marginTop: '20px', padding: '16px', border: '1px solid var(--border-subtle)', backgroundColor: 'rgba(255,255,255,0.01)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: broadcastProgress.failed === 0 ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle size={20} style={{ color: broadcastProgress.failed === 0 ? 'var(--color-emerald)' : 'var(--color-gold)' }} />
+              </div>
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>Broadcast Finished</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                  Successfully sent {broadcastProgress.success} of {broadcastProgress.total} announcement emails.
+                  {broadcastProgress.failed > 0 && ` ${broadcastProgress.failed} emails encountered dispatch failures (check the log below).`}
+                </p>
+                
+                {/* View results log toggle */}
+                <button 
+                  onClick={() => setShowLogs(!showLogs)} 
+                  style={{ background: 'none', border: 'none', padding: 0, marginTop: '6px', fontSize: '0.75rem', color: 'var(--color-emerald)', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  {showLogs ? 'Hide detailed results' : 'Show detailed results'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Completed results detailed log */}
+          {!isBroadcasting && broadcastProgress.sent > 0 && showLogs && (
+            <div className="animate-slide-down" style={{ marginTop: '12px', maxHeight: '150px', overflowY: 'auto', backgroundColor: '#070a13', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '10px', fontFamily: 'monospace', fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {broadcastLogs.map((log, idx) => (
+                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: log.status === 'success' ? '#10B981' : '#EF4444' }}>
+                  <span>[{log.status.toUpperCase()}] {log.name} ({log.email})</span>
+                  {log.error && <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>- {log.error}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+
+        </div>
+      )}
+
       {/* Editor & Preview Split Workspace */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '32px', alignItems: 'start' }}>
         
@@ -373,6 +686,22 @@ export const EmailManager: React.FC = () => {
             >
               Reset Security PIN
             </button>
+            <button
+              onClick={() => setSelectedTemplate('announcement')}
+              style={{
+                background: 'none',
+                border: 'none',
+                borderBottom: selectedTemplate === 'announcement' ? '2.5px solid var(--color-emerald)' : '2.5px solid transparent',
+                color: selectedTemplate === 'announcement' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                fontWeight: selectedTemplate === 'announcement' ? 700 : 500,
+                padding: '10px 20px',
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              Club Announcement
+            </button>
           </div>
 
           {/* Subject Field */}
@@ -399,16 +728,27 @@ export const EmailManager: React.FC = () => {
                 style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(255,255,255,0.08)', minHeight: '26px' }}
                 title="Insert {{first_name}} placeholder tag"
               >
-                + Member First Name
+                + First Name
               </button>
-              <button 
-                onClick={() => insertToken('code')}
-                className="btn btn-ghost"
-                style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(255,255,255,0.08)', minHeight: '26px' }}
-                title="Insert {{code}} placeholder tag"
-              >
-                + Verification Code
-              </button>
+              {selectedTemplate === 'announcement' ? (
+                <button 
+                  onClick={() => insertToken('last_name')}
+                  className="btn btn-ghost"
+                  style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(255,255,255,0.08)', minHeight: '26px' }}
+                  title="Insert {{last_name}} placeholder tag"
+                >
+                  + Last Name
+                </button>
+              ) : (
+                <button 
+                  onClick={() => insertToken('code')}
+                  className="btn btn-ghost"
+                  style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', borderColor: 'rgba(255,255,255,0.08)', minHeight: '26px' }}
+                  title="Insert {{code}} placeholder tag"
+                >
+                  + Verification Code
+                </button>
+              )}
             </div>
           </div>
 
@@ -574,7 +914,7 @@ export const EmailManager: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <span style={{ color: '#64748b', width: '60px', fontWeight: 600 }}>Subject:</span>
                 <span style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.88rem' }}>
-                  {getCompiledPreview(subject, true)}
+                  {getCompiledPreview(subject)}
                 </span>
               </div>
             </div>
@@ -606,7 +946,7 @@ export const EmailManager: React.FC = () => {
                 {/* Embedded dynamic iframe to isolate CSS */}
                 <iframe
                   title="email-body-preview"
-                  srcDoc={body ? getCompiledPreview(body, false) : ''}
+                  srcDoc={body ? getCompiledPreview(body) : ''}
                   style={{
                     width: '100%',
                     height: '480px',
