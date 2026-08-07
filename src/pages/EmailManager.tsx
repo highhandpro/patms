@@ -517,9 +517,56 @@ export const EmailManager: React.FC = () => {
 
   return (
     <div className="email-manager-page animate-fade-in" style={{ padding: '32px' }}>
+      {/* Local Responsive Styles */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .email-manager-page {
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+        .email-manager-workspace {
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 32px;
+          align-items: start;
+        }
+        .email-config-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 20px;
+        }
+        .email-recipients-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+        @media (max-width: 1024px) {
+          .email-manager-workspace {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+          }
+          .email-manager-page {
+            padding: 16px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .email-config-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
+          .email-recipients-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .email-manager-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+          }
+        }
+      ` }} />
       
       {/* Header Panel */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '20px' }}>
+      <div className="email-manager-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '20px' }}>
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Mail size={32} className="text-emerald" style={{ color: 'var(--color-emerald)' }} />
@@ -564,7 +611,7 @@ export const EmailManager: React.FC = () => {
           <span>Resend & Delivery Configuration</span>
         </h3>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+        <div className="email-config-grid">
           {/* API Key */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -692,7 +739,7 @@ export const EmailManager: React.FC = () => {
           {showRecipients && (
             <div className="animate-slide-down" style={{ marginTop: '16px', padding: '16px', backgroundColor: 'rgba(0,0,0,0.1)', border: '1px solid var(--border-subtle)', borderRadius: '8px', maxHeight: '200px', overflowY: 'auto' }}>
               <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '8px', color: 'var(--text-secondary)' }}>Recipient List ({optedInMembers.length} players)</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div className="email-recipients-grid">
                 {optedInMembers.map((m) => (
                   <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '4px 8px', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '4px' }}>
                     <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{m.firstName} {m.lastName}</span>
@@ -777,7 +824,7 @@ export const EmailManager: React.FC = () => {
       )}
 
       {/* Editor & Preview Split Workspace */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '32px', alignItems: 'start' }}>
+      <div className="email-manager-workspace">
         
         {/* Left: Template Selector and Content Editor */}
         <div className="glass-card" style={{ padding: '24px', border: '1px solid var(--border-subtle)' }}>
