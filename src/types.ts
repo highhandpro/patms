@@ -122,6 +122,15 @@ export interface Settings {
   blinds?: BlindLevel[];
   colorPalette?: string;
   isUnderConstruction?: boolean;
+  resendApiKey?: string;
+  emailSender?: string;
+  emailCorsProxy?: string;
+  emailTemplates?: {
+    [key: string]: {
+      subject: string;
+      body: string;
+    };
+  };
 }
 
 export interface PendingApproval {

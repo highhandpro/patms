@@ -5,6 +5,7 @@ import { Members } from './pages/Members';
 import { Tournaments } from './pages/Tournaments';
 import { Standings } from './pages/Standings';
 import { Settings } from './pages/Settings';
+import { EmailManager } from './pages/EmailManager';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
 
 // Player Portal Imports
@@ -129,46 +130,73 @@ function App() {
   };
 
   const sendPinEmail = async (toEmail: string, firstName: string, code: string, isReset: boolean = false) => {
-    const subject = isReset 
+    const templateKey = isReset ? 'resetPin' : 'loginPin';
+    const template = state.settings.emailTemplates?.[templateKey];
+
+    // Default subjects and bodies as fallbacks
+    const defaultSubject = isReset 
       ? "Reset Your Security PIN - Penny Ante Poker Club" 
       : "Your Temporary Security PIN - Penny Ante Poker Club";
 
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+    const defaultBody = `<div style="font-family: 'Outfit', sans-serif; padding: 20px;">
+      <h2>Hello {{first_name}},</h2>
+      <p>${isReset ? 'Please use the verification code below to reset your PIN:' : 'Use the verification code below to log in:'}</p>
+      <h3>{{code}}</h3>
+    </div>`;
 
-    if (!serviceId || !templateId || !publicKey) {
-      console.warn('EmailJS environment variables are missing. Falling back to console log:');
-      console.log("[MOCK EMAIL LOG]", { toEmail, subject, code });
+    const rawSubject = template?.subject || defaultSubject;
+    const rawBody = template?.body || defaultBody;
+
+    // Substitute variables
+    const finalSubject = rawSubject
+      .replace(/\{\{\s*first_name\s*\}\}/g, firstName)
+      .replace(/\{\{\s*code\s*\}\}/g, code);
+    const finalBody = rawBody
+      .replace(/\{\{\s*first_name\s*\}\}/g, firstName)
+      .replace(/\{\{\s*code\s*\}\}/g, code);
+
+    const apiKey = state.settings.resendApiKey;
+    const sender = state.settings.emailSender || 'Penny Ante Poker Club <onboarding@resend.dev>';
+    const proxy = state.settings.emailCorsProxy || '';
+
+    // If Resend API key is missing, mock send in console
+    if (!apiKey) {
+      console.warn('Resend API key is missing. Falling back to console log:');
+      console.log("[MOCK RESEND EMAIL LOG]", {
+        to: toEmail,
+        from: sender,
+        subject: finalSubject,
+        body: finalBody
+      });
       return;
     }
 
     try {
-      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      const endpoint = proxy 
+        ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
+        : 'https://api.resend.com/emails';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          service_id: serviceId,
-          template_id: templateId,
-          user_id: publicKey,
-          template_params: {
-            to_email: toEmail,
-            first_name: firstName,
-            code: code,
-            subject: subject
-          }
+          from: sender,
+          to: [toEmail],
+          subject: finalSubject,
+          html: finalBody
         })
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(errorText || 'Failed to dispatch email via EmailJS');
+        throw new Error(errorText || `HTTP error ${response.status}`);
       }
-      console.log('Email sent successfully via EmailJS API.');
+      console.log('Email sent successfully via Resend API.');
     } catch (err: any) {
-      console.error('EmailJS dispatch failed:', err);
+      console.error('Resend dispatch failed:', err);
     }
   };
 
@@ -838,6 +866,22 @@ function App() {
         );
       case 'standings':
         return <Standings isChiefAdmin={isChiefAdmin} />;
+      case 'emails':
+        if (isSubAdmin) {
+          return (
+            <div className="glass-card text-center animate-slide-up" style={{ padding: '60px 40px', maxWidth: '600px', margin: '80px auto 0 auto' }}>
+              <ShieldAlert size={64} style={{ color: 'var(--color-danger)', marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }} />
+              <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '12px' }}>Access Denied</h1>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
+                You do not have administrative permissions to view or edit email templates.
+              </p>
+              <button className="btn btn-primary" style={{ marginLeft: 'auto', marginRight: 'auto' }} onClick={() => setActiveTab('dashboard')}>
+                Return to Dashboard
+              </button>
+            </div>
+          );
+        }
+        return <EmailManager />;
       case 'settings':
         if (isSubAdmin) {
           return (
