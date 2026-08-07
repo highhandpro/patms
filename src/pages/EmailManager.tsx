@@ -211,6 +211,39 @@ export const EmailManager: React.FC = () => {
     setBody(e.currentTarget.innerHTML);
   };
 
+  // Helper to format date into "Saturday, August 15, 2026"
+  const formatLongDate = (dateStr: string) => {
+    if (!dateStr) return 'N/A';
+    try {
+      let year, month, day;
+      if (dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10) - 1; // 0-indexed month
+        day = parseInt(parts[2], 10);
+      } else if (dateStr.includes('/')) {
+        const parts = dateStr.split('/');
+        month = parseInt(parts[0], 10) - 1;
+        day = parseInt(parts[1], 10);
+        year = parseInt(parts[2], 10);
+      } else {
+        return dateStr;
+      }
+      
+      const date = new Date(year, month, day);
+      if (isNaN(date.getTime())) return dateStr;
+      
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
   // Replace tokens for live previewing
   const getCompiledPreview = (rawContent: string, member?: Member) => {
     const firstName = member ? member.firstName : "Tim";
@@ -226,7 +259,7 @@ export const EmailManager: React.FC = () => {
     if (selectedTournament) {
       result = result
         .replace(/\{\{\s*tournament_name\s*\}\}/g, selectedTournament.name)
-        .replace(/\{\{\s*tournament_date\s*\}\}/g, selectedTournament.date)
+        .replace(/\{\{\s*tournament_date\s*\}\}/g, formatLongDate(selectedTournament.date))
         .replace(/\{\{\s*tournament_time\s*\}\}/g, selectedTournament.time || 'N/A')
         .replace(/\{\{\s*tournament_location\s*\}\}/g, selectedTournament.location || 'N/A')
         .replace(/\{\{\s*tournament_buyin\s*\}\}/g, `$${selectedTournament.buyInAmount}`)
@@ -241,7 +274,7 @@ export const EmailManager: React.FC = () => {
       // Fallback preview values if no tournament is selected
       result = result
         .replace(/\{\{\s*tournament_name\s*\}\}/g, "S4-G2 Bounty Hunter Tournament")
-        .replace(/\{\{\s*tournament_date\s*\}\}/g, "2026-08-15")
+        .replace(/\{\{\s*tournament_date\s*\}\}/g, "Saturday, August 15, 2026")
         .replace(/\{\{\s*tournament_time\s*\}\}/g, "11:45 AM")
         .replace(/\{\{\s*tournament_location\s*\}\}/g, "Wasougal Eagles Club")
         .replace(/\{\{\s*tournament_buyin\s*\}\}/g, "$55")
