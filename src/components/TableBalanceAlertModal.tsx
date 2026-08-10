@@ -216,14 +216,15 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 style={{
                   width: '100%',
                   padding: '16px 18px',
-                  backgroundColor: '#1e293b',
-                  border: '2px solid rgba(255, 255, 255, 0.2)',
+                  backgroundColor: '#ffffff',
+                  border: '2.5px solid #f59e0b',
                   borderRadius: '12px',
-                  color: '#ffffff',
-                  fontSize: '1.2rem',
-                  fontWeight: 800,
+                  color: '#0f172a',
+                  fontSize: '1.25rem',
+                  fontWeight: 850,
                   outline: 'none',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)'
                 }}
               >
                 {(() => {
@@ -236,7 +237,7 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                   return activeList.map(pId => {
                     const name = getMemberName(pId);
                     return (
-                      <option key={pId} value={pId} style={{ backgroundColor: '#1e293b', color: '#ffffff' }}>
+                      <option key={pId} value={pId} style={{ backgroundColor: '#ffffff', color: '#0f172a', fontSize: '1.15rem', fontWeight: 700 }}>
                         {name}
                       </option>
                     );
