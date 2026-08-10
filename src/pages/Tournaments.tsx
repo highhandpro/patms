@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import type { Member } from '../types';
-import { formatDate } from '../utils/stats';
+import { formatDate, getAutoPayoutPercentages, calculateDollarPayouts } from '../utils/stats';
 import { generateSignInSheetPDF, generateTDScoreSheetPDF } from '../utils/pdf';
 import { SeatingDisplayModal } from '../components/SeatingDisplayModal';
 import { EliminationModal } from '../components/EliminationModal';
@@ -170,8 +170,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   useEffect(() => {
     if (activeTournament) {
+      const currentBuyIns = activeTournament.entries.filter(e => e.hasBuyIn).length;
+      const autoPcts = getAutoPayoutPercentages(currentBuyIns);
       setModalAddons(activeTournament.totalAddons || 0);
-      setModalPayoutPcts(activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+      const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
+      if (isCustomConfigured) {
+        setModalPayoutPcts(activeTournament.payoutPercentages!);
+      } else {
+        setModalPayoutPcts(autoPcts);
+      }
       setModalHighHand(activeTournament.highHandAmount || 0);
       setModalBubble(activeTournament.bubbleAmount || 0);
     }
@@ -3306,13 +3313,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const addonCount = activeTournament.totalAddons !== undefined 
           ? activeTournament.totalAddons 
           : activeTournament.entries.filter(e => e.hasAddon).length;
-        const netBuyInContribution = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
+        const netBuyInContribution = activeTournament.buyInAmount - (activeTournament.bountyAmount || 0) - (activeTournament.dealerAppreciationAmount || 0) - (activeTournament.foodAmount || 0);
         const totalPrizePool = Math.max(0, (buyInCount * netBuyInContribution) + (addonCount * activeTournament.addonAmount) - (activeTournament.highHandAmount || 0) - (activeTournament.bubbleAmount || 0));
         const payoutPrizePool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
           ? activeTournament.overridePrizePool
           : totalPrizePool;
-        const pctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
-        const payouts = pctList.map(pct => Math.round(payoutPrizePool * (pct / 100)));
+        const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
+        const pctList = isCustomConfigured
+          ? activeTournament.payoutPercentages!
+          : getAutoPayoutPercentages(buyInCount);
+        const payouts = calculateDollarPayouts(payoutPrizePool, pctList);
 
         // Generate all positions from 1 to N
         const allPositions = Array.from({ length: N }, (_, idx) => {
@@ -3561,12 +3571,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   {(() => {
                     const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
                     const addonCount = activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length;
-                    const rawPrizePool = (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
-                    const currentPrizePool = rawPrizePool - (buyInCount * (activeTournament.dealerAppreciationAmount || 0)) - (buyInCount * (activeTournament.foodAmount || 0));
-                    const calculatedPrizePool = currentPrizePool - (activeTournament.bubbleAmount || 0) - (activeTournament.highHandAmount || 0);
+                    const netBuyIn = activeTournament.buyInAmount - (activeTournament.bountyAmount || 0) - (activeTournament.dealerAppreciationAmount || 0) - (activeTournament.foodAmount || 0);
+                    const rawPrizePool = (buyInCount * netBuyIn) + (addonCount * activeTournament.addonAmount);
+                    const calculatedPrizePool = Math.max(0, rawPrizePool - (activeTournament.bubbleAmount || 0) - (activeTournament.highHandAmount || 0));
                     
-                    const pctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
-                    const payouts = pctList.map(pct => Math.round(calculatedPrizePool * (pct / 100)));
+                    const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
+                    const pctList = isCustomConfigured
+                      ? activeTournament.payoutPercentages!
+                      : getAutoPayoutPercentages(buyInCount);
+                    const payouts = calculateDollarPayouts(calculatedPrizePool, pctList);
 
                     const winners = activeTournament.entries
                       .map(e => {
@@ -3708,13 +3721,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   <div style={{ backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {(() => {
                       const countAddons = activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length;
-                      const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
-              const rawCalcPrizePool = (activeTournament.entries.filter(e => e.hasBuyIn).length * netBuyIn) + (countAddons * activeTournament.addonAmount);
-              const calcPrizePool = Math.max(0, rawCalcPrizePool - (activeTournament.highHandAmount || 0));
+                      const netBuyIn = activeTournament.buyInAmount - (activeTournament.bountyAmount || 0) - (activeTournament.dealerAppreciationAmount || 0) - (activeTournament.foodAmount || 0);
+                      const rawCalcPrizePool = (activeTournament.entries.filter(e => e.hasBuyIn).length * netBuyIn) + (countAddons * activeTournament.addonAmount);
+                      const calcPrizePool = Math.max(0, rawCalcPrizePool - (activeTournament.highHandAmount || 0) - (activeTournament.bubbleAmount || 0));
                       const finalPool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
                         ? activeTournament.overridePrizePool
                         : calcPrizePool;
-                      const pctList = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+                      const currentBuyIns = activeTournament.entries.filter(e => e.hasBuyIn).length;
+                      const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
+                      const pctList = isCustomConfigured
+                        ? activeTournament.payoutPercentages!
+                        : getAutoPayoutPercentages(currentBuyIns);
+                      const previewDollarPayouts = calculateDollarPayouts(finalPool, pctList);
                       
                       const activeAndElims = [...activeTournament.entries].sort((a,b) => {
                         const aPos = a.eliminatedAt ? (a.finishPosition || 999) : 1;
@@ -3725,7 +3743,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       const previewRows = pctList.map((pct, idx) => {
                         if (pct <= 0) return null;
                         const place = idx + 1;
-                        const amt = Math.round(finalPool * (pct / 100));
+                        const amt = previewDollarPayouts[idx];
                         const entry = activeAndElims[idx];
                         const playerName = entry ? getMemberName(entry.memberId) : 'TBD';
                         return (
@@ -4167,7 +4185,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const addonCount = buyInCount === 0 ? 0 : (activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter(e => e.hasAddon).length);
         const dealerCount = activeTournament.entries.filter(e => e.hasDealerAppreciation).length;
 
-        const netBuyIn = activeTournament.buyInAmount - (activeTournament.dealerAppreciationAmount || 0) - (activeTournament.foodAmount || 0);
+        const netBuyIn = activeTournament.buyInAmount - (activeTournament.bountyAmount || 0) - (activeTournament.dealerAppreciationAmount || 0) - (activeTournament.foodAmount || 0);
         const netAddon = activeTournament.addonAmount;
         const rawPrizePool = (buyInCount * netBuyIn) + (addonCount * netAddon);
         const currentPrizePool = activeTournament.status === 'completed' 
@@ -4180,8 +4198,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
         const totalCollected = (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
 
-        const payouts = (activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0])
-          .map((pct, idx) => ({ place: idx + 1, pct }))
+        const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
+        const pctList = isCustomConfigured
+          ? activeTournament.payoutPercentages!
+          : getAutoPayoutPercentages(buyInCount);
+        const dollarPayouts = calculateDollarPayouts(currentPrizePool, pctList);
+
+        const payouts = pctList
+          .map((pct, idx) => ({ place: idx + 1, pct, amount: dollarPayouts[idx] }))
           .filter(p => p.pct > 0);
 
         return (
@@ -4254,7 +4278,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   <tbody>
                     {payouts.length > 0 ? (
                       payouts.map(p => {
-                        const amount = (p.pct / 100) * currentPrizePool;
+                        const amount = p.amount;
                         
                         // Find matching player if completed
                         const placingPlayer = activeTournament.entries.find(e => e.eliminatedAt && e.finishPosition === p.place);
@@ -4396,27 +4420,54 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               updateTournament(activeTournament.id, {
                 totalAddons: modalAddons,
                 payoutPercentages: finalPayoutPcts,
+                hasCustomPayouts: true,
                 highHandAmount: modalHighHand,
                 bubbleAmount: modalBubble
               });
               setIsPayoutModalOpen(false);
             }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Total Add-ons Count</label>
-                <input
-                  type="number"
-                  min={0}
-                  required
-                  value={modalAddons}
-                  onChange={(e) => setModalAddons(Number(e.target.value))}
-                  className="form-input"
-                  style={{ padding: '8px 12px' }}
-                />
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0, flex: 1 }}>
+                  <label style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '6px', display: 'block' }}>Total Add-ons Count</label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={modalAddons}
+                    onChange={(e) => setModalAddons(Number(e.target.value))}
+                    className="form-input"
+                    style={{ padding: '8px 12px', width: '100%' }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalPayoutPcts(getAutoPayoutPercentages(buyInCount));
+                  }}
+                  className="btn btn-primary"
+                  style={{
+                    backgroundColor: 'var(--color-emerald)',
+                    borderColor: 'var(--color-emerald)',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    letterSpacing: '0.04em',
+                    padding: '9px 16px',
+                    borderRadius: '8px',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)'
+                  }}
+                >
+                  SET PLACES PAID ({buyInCount} PLAYERS)
+                </button>
               </div>
 
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
-                <label style={{ fontWeight: 600, display: 'block', marginBottom: '12px', fontSize: '0.9rem' }}>Payout Structure (1st - 10th Place)</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <label style={{ fontWeight: 600, fontSize: '0.9rem', margin: 0 }}>Payout Structure (1st - 10th Place)</label>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
                   {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => {
                     if (place === 9) {
@@ -4489,10 +4540,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
                   const rawCalculatedPrizePool = (buyInCount * netBuyIn) + (modalAddons * activeTournament.addonAmount);
                   const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - modalHighHand - modalBubble);
+                  const dollarAmounts = calculateDollarPayouts(calculatedPrizePool, modalPayoutPcts.slice(0, 8));
                   const previewRows = modalPayoutPcts.slice(0, 8).map((pct, idx) => {
                     if (pct <= 0) return null;
                     const place = idx + 1;
-                    const amt = Math.round(calculatedPrizePool * (pct / 100));
+                    const amt = dollarAmounts[idx];
                     return (
                       <div key={place} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         <span>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`} Place:</span>

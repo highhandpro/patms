@@ -818,7 +818,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       totalPrizePool: 0,
       totalBountyPool: 0,
       totalDealerAppreciation: 0,
-      payoutPercentages: payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0],
+      payoutPercentages: payoutPercentages || undefined,
+      hasCustomPayouts: false,
       time: time || '7:00 PM',
       location: location || 'Wasougal Eagles Club',
       startingStack: startingStack || '20,000 Starting Chips',
@@ -1079,7 +1080,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const bubbleAmount = t.bubbleAmount || 0;
     const highHandAmount = t.highHandAmount || 0;
-    const netBuyInContribution = t.buyInAmount - t.bountyAmount - t.dealerAppreciationAmount;
+    const netBuyInContribution = t.buyInAmount - (t.bountyAmount || 0) - (t.dealerAppreciationAmount || 0) - (t.foodAmount || 0);
     const rawPrizePool = (buyInCount * netBuyInContribution) + (addonCount * t.addonAmount);
     const totalBountyPool = bountyCount * t.bountyAmount;
     const totalDealerAppreciation = dealerCount * t.dealerAppreciationAmount;
@@ -1089,7 +1090,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : rawPrizePool;
 
     const prizePoolAfterDeductions = Math.max(0, payoutPrizePool - highHandAmount - bubbleAmount);
-    const pctList = t.payoutPercentages || getAutoPayoutPercentages(buyInCount);
+    const isCustomConfigured = !!t.hasCustomPayouts && t.totalAddons !== undefined && !!t.payoutPercentages && t.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0;
+    const pctList = isCustomConfigured ? t.payoutPercentages! : getAutoPayoutPercentages(buyInCount);
     const payouts = pctList.map((pct: number) => Math.round(prizePoolAfterDeductions * (pct / 100)));
     const placesPaidCount = pctList.filter((pct: number) => pct > 0).length;
     const bubblePosition = placesPaidCount + 1;

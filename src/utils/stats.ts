@@ -144,23 +144,34 @@ export const formatDate = (dateStr: string) => {
 };
 
 export function getAutoPayoutPercentages(playerCount: number): number[] {
-  let pcts: number[] = [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
-  if (playerCount < 6) {
-    pcts = [100, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  } else if (playerCount >= 6 && playerCount <= 9) {
-    pcts = [60, 40, 0, 0, 0, 0, 0, 0, 0, 0];
-  } else if (playerCount >= 10 && playerCount <= 15) {
-    pcts = [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
-  } else if (playerCount >= 16 && playerCount <= 24) {
-    pcts = [40, 30, 20, 10, 0, 0, 0, 0, 0, 0];
-  } else if (playerCount >= 25 && playerCount <= 30) {
-    pcts = [35, 25, 18, 12, 10, 0, 0, 0, 0, 0];
-  } else if (playerCount >= 31 && playerCount <= 34) {
-    pcts = [30, 22, 17, 13, 10, 8, 0, 0, 0, 0];
-  } else if (playerCount >= 35 && playerCount <= 40) {
-    pcts = [28, 20, 16, 12, 10, 8, 6, 0, 0, 0];
-  } else if (playerCount >= 41) {
-    pcts = [26, 19, 15, 12, 10, 8, 6, 4, 0, 0];
+  if (playerCount < 10) {
+    return [60, 40, 0, 0, 0, 0, 0, 0, 0, 0];
+  } else if (playerCount <= 15) {
+    return [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+  } else if (playerCount <= 24) {
+    return [40, 30, 20, 10, 0, 0, 0, 0, 0, 0];
+  } else if (playerCount <= 30) {
+    return [35, 25, 18, 12, 10, 0, 0, 0, 0, 0];
+  } else if (playerCount <= 34) {
+    return [30, 22, 17, 13, 10, 8, 0, 0, 0, 0];
+  } else if (playerCount <= 40) {
+    return [28, 20, 16, 12, 10, 8, 6, 0, 0, 0];
+  } else {
+    return [26, 19, 15, 12, 10, 8, 6, 4, 0, 0];
   }
-  return pcts;
 }
+
+export function calculateDollarPayouts(prizePool: number, pcts: number[]): number[] {
+  if (prizePool <= 0) return new Array(pcts.length).fill(0);
+  const rawAmts = pcts.map(pct => {
+    if (pct <= 0) return 0;
+    return Math.floor((prizePool * pct / 100) / 5) * 5;
+  });
+  const totalAwarded = rawAmts.reduce((a, b) => a + b, 0);
+  const leftover = prizePool - totalAwarded;
+  if (leftover > 0 && pcts[0] > 0) {
+    rawAmts[0] += leftover;
+  }
+  return rawAmts;
+}
+

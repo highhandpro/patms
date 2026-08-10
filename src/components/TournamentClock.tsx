@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Maximize, Minimize, Play, Pause, RotateCcw, ShieldAlert, Award, Shuffle, DollarSign } from 'lucide-react';
 import type { Tournament, Member, BlindLevel, TournamentEntry } from '../types';
 import { useApp } from '../context/AppContext';
-import { getAutoPayoutPercentages } from '../utils/stats';
+import { getAutoPayoutPercentages, calculateDollarPayouts } from '../utils/stats';
 import { EliminationModal } from './EliminationModal';
 
 interface TournamentClockProps {
@@ -766,12 +766,15 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   const highHandAmount = tournament.highHandAmount || 0;
   const prizePoolAfterBubble = Math.max(0, prizePool - bubbleAmount - highHandAmount);
   
-  const pctSource = tournament.payoutPercentages && tournament.payoutPercentages.reduce((a, b) => a + b, 0) > 0
-    ? tournament.payoutPercentages
+  const isCustomConfigured = !!tournament.hasCustomPayouts && tournament.totalAddons !== undefined && !!tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0;
+  const pctSource = isCustomConfigured
+    ? tournament.payoutPercentages!
     : getAutoPayoutPercentages(buyInCount);
 
+  const dollarAmounts = calculateDollarPayouts(prizePoolAfterBubble, pctSource);
+
   const payoutsList = pctSource
-    .map((pct: number, idx: number) => ({ place: idx + 1, pct, amount: (pct / 100) * prizePoolAfterBubble }))
+    .map((pct: number, idx: number) => ({ place: idx + 1, pct, amount: dollarAmounts[idx] }))
     .filter((p: { place: number; pct: number; amount: number }) => p.pct > 0);
 
   const getPlayerAtPlace = (place: number) => {
@@ -2196,8 +2199,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         const rawCalculatedPrizePool = (buyInCount * netBuyIn) + ((tournament.totalAddons || 0) * tournament.addonAmount);
         const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - (tournament.highHandAmount || 0) - (tournament.bubbleAmount || 0));
 
-        const pctList = tournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
-        const payouts = pctList.map(pct => Math.round(calculatedPrizePool * (pct / 100)));
+        const isCustomConfigured = !!tournament.hasCustomPayouts && tournament.totalAddons !== undefined && !!tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0;
+        const pctList = isCustomConfigured
+          ? tournament.payoutPercentages!
+          : getAutoPayoutPercentages(buyInCount);
+        const payouts = calculateDollarPayouts(calculatedPrizePool, pctList);
         const placesPaidCount = pctList.filter(pct => pct > 0).length;
         const bubblePosition = placesPaidCount + 1;
 

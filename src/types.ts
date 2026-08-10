@@ -66,6 +66,7 @@ export interface Tournament {
   totalBountyPool: number;
   totalDealerAppreciation: number;
   payoutPercentages?: number[]; // Percentages for 1st to 10th place
+  hasCustomPayouts?: boolean;    // Whether user manually configured custom percentages
   overridePrizePool?: number;    // Manual prize pool input at the end
   totalAddons?: number;          // Centralized total addons count
   time?: string;
