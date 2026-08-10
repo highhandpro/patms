@@ -931,7 +931,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           backgroundColor: '#06260B',
           color: '#ffffff',
           fontFamily: '"Outfit", -apple-system, sans-serif',
-          padding: isFullscreen ? '16px 32px' : '16px 28px',
+          padding: isFullscreen ? '12px 28px 16px 28px' : '12px 24px',
           borderRadius: isFullscreen ? '0' : '16px',
           border: isFullscreen ? 'none' : '1px solid rgba(255,255,255,0.08)',
           boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
@@ -992,7 +992,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           {/* Card 1: Level */}
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
-            <span style={{ fontSize: isFullscreen ? '2.5rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {currentLevel.type === 'round' ? currentLevel.roundNumber : 'BREAK'}
             </span>
           </div>
@@ -1039,7 +1039,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         </div>
 
         {/* Right Column: Main Clock Display + Places Paid Card underneath */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', justifyContent: 'space-between', minHeight: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'space-between', minHeight: 0 }}>
           
           {/* Card A: Timer & Blinds & Active Players (Full Width stack) */}
           <div style={{ 
@@ -1048,7 +1048,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             backgroundColor: 'rgba(0,0,0,0.2)', 
             border: '1px solid rgba(255,255,255,0.1)', 
             borderRadius: '16px', 
-            padding: isFullscreen ? '14px 24px' : '10px 16px', 
+            padding: isFullscreen ? '10px 20px' : '8px 14px', 
             flex: 1, 
             textAlign: 'center',
             minHeight: 0
@@ -1060,15 +1060,15 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
-                fontSize: isFullscreen ? '17.5rem' : '10rem', 
+                fontSize: isFullscreen ? '14.5rem' : '9rem', 
                 fontWeight: 900, 
                 color: '#ffffff', 
                 fontFamily: '"Outfit", -apple-system, sans-serif', 
                 letterSpacing: '-0.02em',
                 cursor: 'pointer',
                 userSelect: 'none',
-                lineHeight: 0.82,
-                margin: isFullscreen ? '0 0 10px 0' : '0 0 4px 0'
+                lineHeight: 0.8,
+                margin: '0'
               }}
             >
               {formatCountdown(timeRemaining)}
@@ -1080,23 +1080,23 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               justifyContent: 'space-between', 
               alignItems: 'center', 
               borderTop: '2px solid rgba(255,255,255,0.15)', 
-              paddingTop: '10px', 
-              marginBottom: '10px',
+              paddingTop: '8px', 
+              marginBottom: '8px',
               flexWrap: 'wrap',
-              gap: '10px'
+              gap: '8px'
             }}>
               {/* Current Blinds */}
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
-                <span style={{ fontSize: isFullscreen ? '1.15rem' : '1rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <span style={{ fontSize: isFullscreen ? '1.1rem' : '0.95rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
                   CURRENT BLINDS
                 </span>
-                <span style={{ fontSize: isFullscreen ? '4.8rem' : '2.8rem', fontWeight: 900, color: '#F2C166', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
+                <span style={{ fontSize: isFullscreen ? '3.8rem' : '2.6rem', fontWeight: 900, color: '#F2C166', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
                   {currentLevel.type === 'round' 
                     ? `${currentLevel.smallBlind?.toLocaleString()} / ${currentLevel.bigBlind?.toLocaleString()}` 
                     : 'BREAK TIME'}
                 </span>
                 {currentLevel.chipUp && (
-                  <span style={{ fontSize: isFullscreen ? '1.15rem' : '0.95rem', color: 'var(--color-danger)', fontWeight: 800, textTransform: 'uppercase', marginLeft: '8px' }}>
+                  <span style={{ fontSize: isFullscreen ? '1.1rem' : '0.9rem', color: 'var(--color-danger)', fontWeight: 800, textTransform: 'uppercase', marginLeft: '6px' }}>
                     ⚠️ CHIP UP
                   </span>
                 )}
@@ -1104,9 +1104,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
               {/* Next Level */}
               {nextLevel && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: isFullscreen ? '1.3rem' : '1.1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: isFullscreen ? '1.25rem' : '1.05rem' }}>
                   <span style={{ fontWeight: 600 }}>NEXT LEVEL:</span>
-                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: isFullscreen ? '2.1rem' : '1.3rem', fontFamily: '"Outfit", sans-serif' }}>
+                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: isFullscreen ? '1.9rem' : '1.25rem', fontFamily: '"Outfit", sans-serif' }}>
                     {nextLevel.type === 'round' 
                       ? `${nextLevel.smallBlind?.toLocaleString()} / ${nextLevel.bigBlind?.toLocaleString()}` 
                       : 'BREAK TIME'}
@@ -1120,7 +1120,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               width: '100%',
               height: '2px',
               background: 'linear-gradient(90deg, rgba(242, 193, 102, 0.15) 0%, rgba(242, 193, 102, 0.8) 50%, rgba(242, 193, 102, 0.15) 100%)',
-              marginBottom: '10px',
+              marginBottom: '8px',
               borderRadius: '2px'
             }} />
 
@@ -1130,24 +1130,24 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               border: isBustOutOpen ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.15)', 
               boxShadow: isBustOutOpen ? '0 0 20px rgba(239, 68, 68, 0.4)' : 'none',
               borderRadius: '12px', 
-              padding: isFullscreen ? '10px 16px' : '10px 14px', 
+              padding: isFullscreen ? '8px 14px' : '8px 12px', 
               width: '100%', 
               textAlign: 'left', 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '6px',
-              maxHeight: isFullscreen ? '360px' : '220px',
+              gap: '4px',
+              maxHeight: isFullscreen ? '300px' : '200px',
               transition: 'all 0.3s ease-in-out',
               minHeight: 0
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
-                <span style={{ fontSize: isFullscreen ? '1.25rem' : '1rem', fontWeight: 800, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '3px' }}>
+                <span style={{ fontSize: isFullscreen ? '1.15rem' : '0.95rem', fontWeight: 800, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
                   ACTIVE PLAYERS ({activePlayers.length} ALIVE)
                 </span>
               </div>
               <div style={{ 
                 columnCount: activePlayers.length <= 15 ? 3 : 4,
-                columnGap: '20px',
+                columnGap: '16px',
                 overflowY: 'auto',
                 paddingRight: '4px',
                 width: '100%'
@@ -1173,10 +1173,10 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                       }}
                       style={{ 
                         cursor: 'pointer', 
-                        fontSize: isFullscreen ? '1.85rem' : '0.95rem', 
+                        fontSize: isFullscreen ? '1.45rem' : '0.9rem', 
                         fontWeight: 700, 
                         color: '#ffffff',
-                        padding: isFullscreen ? '4px 12px' : '3px 8px',
+                        padding: isFullscreen ? '3px 8px' : '2px 6px',
                         borderRadius: '6px',
                         backgroundColor: 'rgba(255,255,255,0.03)',
                         textAlign: 'left',
@@ -1186,7 +1186,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                         textOverflow: 'ellipsis',
                         transition: 'all 0.15s ease-in-out',
                         breakInside: 'avoid',
-                        marginBottom: isFullscreen ? '6px' : '6px',
+                        marginBottom: isFullscreen ? '4px' : '4px',
                         display: 'block'
                       }}
                       title={`Click to bust out ${name}`}
