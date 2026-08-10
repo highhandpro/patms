@@ -1027,65 +1027,65 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         {/* Left Column: Stats Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {/* Card 1: Level */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
-            <span style={{ fontSize: '2.6rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
+            <span style={{ fontSize: '3rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {currentLevel.type === 'round' ? currentLevel.roundNumber : 'BREAK'}
             </span>
           </div>
 
           {/* Card 2: Current Time */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CURRENT TIME</span>
-            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CURRENT TIME</span>
+            <span style={{ fontSize: '2.4rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {realTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toLowerCase()}
             </span>
           </div>
 
           {/* Card 3: Next Break */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NEXT BREAK IN</span>
-            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#F2C166', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NEXT BREAK IN</span>
+            <span style={{ fontSize: '2.4rem', fontWeight: 900, color: '#F2C166', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatHoursMinsSecs(getNextBreakInSeconds())}
             </span>
           </div>
 
           {/* Card 4: Players In */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PLAYERS IN / ALIVE</span>
-            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PLAYERS IN / ALIVE</span>
+            <span style={{ fontSize: '2.4rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {activePlayers.length} / {checkedInPlayers.length}
             </span>
           </div>
 
           {/* Card 5: Average Stack */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AVERAGE STACK</span>
-            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AVERAGE STACK</span>
+            <span style={{ fontSize: '2.4rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(avgStack)}
             </span>
           </div>
 
           {/* Card 6: Chips In Play */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CHIPS IN PLAY</span>
-            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CHIPS IN PLAY</span>
+            <span style={{ fontSize: '2.4rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(totalChips)}
             </span>
           </div>
         </div>
 
         {/* Right Column: Main Clock Display + Places Paid Card underneath */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'space-between', minHeight: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'space-between', minHeight: 0 }}>
           
           {/* Card A: Timer & Blinds & Active Players (Full Width stack) */}
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column', 
-            backgroundColor: 'rgba(0,0,0,0.2)', 
+            backgroundColor: 'rgba(0,0,0,0.25)', 
             border: '1px solid rgba(255,255,255,0.1)', 
             borderRadius: '16px', 
-            padding: isFullscreen ? '10px 20px' : '8px 14px', 
+            padding: '6px 16px 10px 16px', 
             flex: 1, 
             textAlign: 'center',
             minHeight: 0
@@ -1097,15 +1097,15 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
-                fontSize: '18rem', 
-                fontWeight: 900, 
+                fontSize: '24.5rem', 
+                fontWeight: 950, 
                 color: '#ffffff', 
                 fontFamily: '"Outfit", -apple-system, sans-serif', 
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.025em',
                 cursor: 'pointer',
                 userSelect: 'none',
-                lineHeight: 0.8,
-                margin: '0 0 6px 0'
+                lineHeight: 0.76,
+                margin: '0 0 4px 0'
               }}
             >
               {formatCountdown(timeRemaining)}
@@ -1117,23 +1117,23 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               justifyContent: 'space-between', 
               alignItems: 'center', 
               borderTop: '2px solid rgba(255,255,255,0.15)', 
-              paddingTop: '8px', 
-              marginBottom: '8px',
+              paddingTop: '6px', 
+              marginBottom: '6px',
               flexWrap: 'wrap',
-              gap: '8px'
+              gap: '12px'
             }}>
               {/* Current Blinds */}
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
-                <span style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
+                <span style={{ fontSize: '1.4rem', color: '#ffffff', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.05em' }}>
                   CURRENT BLINDS
                 </span>
-                <span style={{ fontSize: '5rem', fontWeight: 900, color: '#F2C166', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
+                <span style={{ fontSize: '6.2rem', fontWeight: 950, color: '#ffffff', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
                   {currentLevel.type === 'round' 
                     ? `${currentLevel.smallBlind?.toLocaleString()} / ${currentLevel.bigBlind?.toLocaleString()}` 
                     : 'BREAK TIME'}
                 </span>
                 {currentLevel.chipUp && (
-                  <span style={{ fontSize: '1.15rem', color: 'var(--color-danger)', fontWeight: 800, textTransform: 'uppercase', marginLeft: '6px' }}>
+                  <span style={{ fontSize: '1.25rem', color: 'var(--color-danger)', fontWeight: 900, textTransform: 'uppercase', marginLeft: '6px' }}>
                     ⚠️ CHIP UP
                   </span>
                 )}
@@ -1141,9 +1141,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
               {/* Next Level */}
               {nextLevel && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '1.35rem' }}>
-                  <span style={{ fontWeight: 600 }}>NEXT LEVEL:</span>
-                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: '2.4rem', fontFamily: '"Outfit", sans-serif' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', color: '#ffffff' }}>
+                  <span style={{ fontWeight: 800, fontSize: '1.45rem' }}>NEXT LEVEL:</span>
+                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: '3.6rem', fontFamily: '"Outfit", sans-serif', lineHeight: 1 }}>
                     {nextLevel.type === 'round' 
                       ? `${nextLevel.smallBlind?.toLocaleString()} / ${nextLevel.bigBlind?.toLocaleString()}` 
                       : 'BREAK TIME'}
@@ -1155,8 +1155,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             {/* Divider Line between Blinds and Active Players */}
             <div style={{
               width: '100%',
-              height: '2px',
-              background: 'linear-gradient(90deg, rgba(242, 193, 102, 0.15) 0%, rgba(242, 193, 102, 0.8) 50%, rgba(242, 193, 102, 0.15) 100%)',
+              height: '3px',
+              background: 'linear-gradient(90deg, rgba(242, 193, 102, 0.2) 0%, rgba(242, 193, 102, 0.95) 50%, rgba(242, 193, 102, 0.2) 100%)',
               marginBottom: '8px',
               borderRadius: '2px'
             }} />
@@ -1167,7 +1167,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               border: isBustOutOpen ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.15)', 
               boxShadow: isBustOutOpen ? '0 0 20px rgba(239, 68, 68, 0.4)' : 'none',
               borderRadius: '12px', 
-              padding: '8px 14px', 
+              padding: '6px 14px 10px 14px', 
               width: '100%', 
               textAlign: 'left', 
               display: 'flex', 
@@ -1176,7 +1176,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               transition: 'all 0.3s ease-in-out'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '3px' }}>
-                <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
                   ACTIVE PLAYERS ({activePlayers.length} ALIVE)
                 </span>
               </div>
@@ -1205,19 +1205,19 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                         e.currentTarget.style.borderColor = '#ef4444';
                       }}
                       onMouseLeave={e => {
-                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
-                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
                       }}
                       style={{ 
                         cursor: 'pointer', 
-                        fontSize: '1.05rem', 
-                        fontWeight: 700, 
+                        fontSize: '1.15rem', 
+                        fontWeight: 800, 
                         color: '#ffffff',
-                        padding: '2px 8px',
-                        borderRadius: '5px',
-                        backgroundColor: 'rgba(255,255,255,0.03)',
+                        padding: '2px 10px',
+                        borderRadius: '6px',
+                        backgroundColor: 'rgba(255,255,255,0.04)',
                         textAlign: 'left',
-                        border: '1px solid rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.08)',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
