@@ -3739,12 +3739,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             }}>
               <div className="glass-card animate-scale-up" style={{
                 width: '100%',
-                maxWidth: '560px',
+                maxWidth: '820px',
                 backgroundColor: '#06260B',
                 border: '2px solid var(--color-emerald)',
-                boxShadow: '0 0 50px rgba(16, 185, 129, 0.4), 0 20px 40px rgba(0,0,0,0.8)',
+                boxShadow: '0 0 60px rgba(16, 185, 129, 0.45), 0 20px 40px rgba(0,0,0,0.9)',
                 borderRadius: '24px',
-                padding: '32px',
+                padding: '32px 36px',
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
@@ -3762,24 +3762,24 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   justifyContent: 'center',
                   color: 'var(--color-emerald)'
                 }}>
-                  <Play size={32} style={{ marginLeft: '4px' }} />
+                  <Play size={34} style={{ marginLeft: '4px' }} />
                 </div>
 
                 <div>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--color-gold)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--color-gold)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                     TABLE REORGANIZATION COMPLETE
                   </span>
-                  <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', margin: '6px 0 10px 0' }}>
+                  <h2 style={{ fontSize: '2rem', fontWeight: 950, color: '#ffffff', margin: '6px 0 10px 0' }}>
                     {showResumeClockModal.title}
                   </h2>
-                  <p style={{ fontSize: '0.95rem', color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: '1.05rem', color: 'rgba(255, 255, 255, 0.85)', margin: 0, lineHeight: 1.5, fontWeight: 600 }}>
                     {showResumeClockModal.message}
                   </p>
                 </div>
 
                 {/* List of moves if assignments exist */}
                 {showResumeClockModal.assignments && showResumeClockModal.assignments.length > 0 && (
-                  <div style={{ width: '100%', maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                  <div style={{ width: '100%', maxHeight: '280px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
                     {(() => {
                       const grouped = showResumeClockModal.assignments.reduce((acc, item) => {
                         if (!acc[item.targetTable]) acc[item.targetTable] = [];
@@ -3790,21 +3790,22 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       return Object.keys(grouped).map(tName => {
                         const playerList = grouped[tName] || [];
                         return (
-                          <div key={tName} style={{ backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px' }}>
-                            <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--color-gold)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                          <div key={tName} style={{ backgroundColor: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '12px 16px' }}>
+                            <span style={{ fontSize: '0.95rem', fontWeight: 950, color: 'var(--color-gold)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                               Moving to {tName}
                             </span>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                               {playerList.map(item => {
                                 const mem = state.members.find(m => m.id === item.playerId);
                                 const name = mem ? `${mem.firstName} ${mem.lastName}` : 'Player';
+                                const openSeatText = item.orderNumber === 1 ? '1st Open Seat' : item.orderNumber === 2 ? '2nd Open Seat' : item.orderNumber === 3 ? '3rd Open Seat' : `${item.orderNumber}th Open Seat`;
                                 return (
-                                  <div key={item.playerId} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                                    <span style={{ color: '#ffffff', fontWeight: 700 }}>
+                                  <div key={item.playerId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.05rem', backgroundColor: 'rgba(255,255,255,0.04)', padding: '6px 12px', borderRadius: '6px' }}>
+                                    <span style={{ color: '#ffffff', fontWeight: 800 }}>
                                       {item.orderNumber}. {name}
                                     </span>
-                                    <span style={{ color: '#10b981', fontWeight: 800 }}>
-                                      Seat {item.targetSeatNumber} ({item.orderNumber === 1 ? '1st' : item.orderNumber === 2 ? '2nd' : `${item.orderNumber}th`} open seat)
+                                    <span style={{ color: '#10b981', fontWeight: 900 }}>
+                                      {openSeatText}
                                     </span>
                                   </div>
                                 );
