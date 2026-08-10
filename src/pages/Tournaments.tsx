@@ -197,6 +197,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // Table balancing alert modal state
   const [balanceRecommendation, setBalanceRecommendation] = useState<TableBalanceRecommendation | null>(null);
   const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
+  const [showResumeClockModal, setShowResumeClockModal] = useState<{ title: string; message: string } | null>(null);
 
   // Payout and Add-ons configuration states
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
@@ -756,6 +757,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     updateTournament(activeTournament.id, { seating: updated });
     setIsBalanceModalOpen(false);
     setBalanceRecommendation(null);
+
+    const m = state.members.find(member => member.id === playerId);
+    const playerName = m ? `${m.firstName} ${m.lastName}` : 'Player';
+    setShowResumeClockModal({
+      title: 'Table Balanced',
+      message: `${playerName} moved from ${sourceTable.toUpperCase()} to ${targetTable.toUpperCase()}. Verify the player is in their new seat, then start the clock.`
+    });
   };
 
   const handleConfirmTableBreak = (breakTable: string) => {
@@ -766,6 +774,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     updateTournament(activeTournament.id, { seating: updated });
     setIsBalanceModalOpen(false);
     setBalanceRecommendation(null);
+
+    setShowResumeClockModal({
+      title: 'Table Broken & Players Moved',
+      message: `${breakTable.toUpperCase()} has been broken and players distributed to active tables. Verify all players are in their seats, then start the clock.`
+    });
   };
 
   const exportTournamentResultsCSV = (tournament: any) => {
@@ -3671,6 +3684,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 const simulatedTournament = { ...activeTournament, entries: updatedEntries };
                 const rec = checkTableBalance(seating, simulatedTournament);
                 if (rec) {
+                  // Automatically pause the clock when table balancing or breaking is required
+                  if (activeTournament.clockState?.isRunning) {
+                    updateTournament(activeTournament.id, {
+                      clockState: {
+                        ...activeTournament.clockState,
+                        isRunning: false,
+                        lastUpdated: new Date().toISOString()
+                      }
+                    });
+                  }
                   playTableBalanceAlertSound();
                   setBalanceRecommendation(rec);
                   setIsBalanceModalOpen(true);
@@ -3694,6 +3717,119 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             onConfirmMove={handleConfirmBalanceMove}
             onConfirmBreak={handleConfirmTableBreak}
           />
+
+          {/* Big Start The Clock Modal after Table Move/Break */}
+          {showResumeClockModal && activeTournament && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.88)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '20px',
+              zIndex: 1000000
+            }}>
+              <div className="glass-card animate-scale-up" style={{
+                width: '100%',
+                maxWidth: '560px',
+                backgroundColor: '#06260B',
+                border: '2px solid var(--color-emerald)',
+                boxShadow: '0 0 50px rgba(16, 185, 129, 0.4), 0 20px 40px rgba(0,0,0,0.8)',
+                borderRadius: '24px',
+                padding: '32px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '20px'
+              }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                  border: '2px solid var(--color-emerald)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--color-emerald)'
+                }}>
+                  <Play size={32} style={{ marginLeft: '4px' }} />
+                </div>
+
+                <div>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--color-gold)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    TABLE REORGANIZATION COMPLETE
+                  </span>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', margin: '6px 0 10px 0' }}>
+                    {showResumeClockModal.title}
+                  </h2>
+                  <p style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: 1.5 }}>
+                    {showResumeClockModal.message}
+                  </p>
+                </div>
+
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
+                  <button
+                    onClick={() => {
+                      if (activeTournament.clockState) {
+                        updateTournament(activeTournament.id, {
+                          clockState: {
+                            ...activeTournament.clockState,
+                            isRunning: true,
+                            lastUpdated: new Date().toISOString()
+                          }
+                        });
+                      }
+                      setShowResumeClockModal(null);
+                    }}
+                    className="btn btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '18px 24px',
+                      fontWeight: 900,
+                      fontSize: '1.35rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      borderRadius: '14px',
+                      backgroundColor: 'var(--color-emerald)',
+                      borderColor: 'var(--color-emerald)',
+                      color: '#ffffff',
+                      boxShadow: '0 8px 24px rgba(16, 185, 129, 0.5)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Play size={24} fill="#ffffff" />
+                    <span>START THE CLOCK</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowResumeClockModal(null)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      padding: '8px'
+                    }}
+                  >
+                    Keep Clock Paused
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Game Over Announcement Modal */}
           {showGameOverModal && activeTournament && (
