@@ -344,11 +344,11 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                     flexShrink: 0
                   }}
                 >
-                  <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: t.textColor, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#000000', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {t.name}
                   </h2>
                   {hasPlayers && (
-                    <span style={{ fontSize: '0.8rem', color: t.secondaryTextColor, fontWeight: 800 }}>
+                    <span style={{ fontSize: '0.8rem', color: '#000000', fontWeight: 800 }}>
                       {players.filter(p => p && typeof p === 'string' && p.trim() !== "").length} Players Seated
                     </span>
                   )}
@@ -406,7 +406,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                             : (isDealer ? t.dealerBadgeBg : t.rowBg),
                           border: `1px solid ${t.rowBorder}`,
                           borderRadius: '8px',
-                          color: t.textColor,
+                          color: '#000000',
                           opacity: isEliminated ? 0.5 : 1,
                           textDecoration: isEliminated ? 'line-through' : 'none',
                           boxShadow: 'none',
@@ -417,19 +417,19 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        <span style={{ fontWeight: 900, color: isEliminated ? t.mutedTextColor : t.textColor, marginRight: '8px', minWidth: '40px', fontSize: 'clamp(1.15rem, 1.5vw, 1.45rem)', letterSpacing: '-0.02em', textDecoration: isEliminated ? 'line-through' : 'none' }}>
+                        <span style={{ fontWeight: 900, color: isEliminated ? t.mutedTextColor : '#000000', marginRight: '8px', minWidth: '40px', fontSize: 'clamp(1.15rem, 1.5vw, 1.45rem)', letterSpacing: '-0.02em', textDecoration: isEliminated ? 'line-through' : 'none' }}>
                           #{idx + 1}
                         </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, overflow: 'hidden' }}>
                           {!isEliminated && isDealer && <Crown size={18} fill="#000000" style={{ color: '#000000', flexShrink: 0 }} />}
                           <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', lineHeight: 1.05 }}>
-                            <span style={{ fontWeight: 900, fontSize: 'clamp(1.25rem, 1.7vw, 1.6rem)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', letterSpacing: '-0.015em', color: isEliminated ? t.mutedTextColor : t.textColor, textDecoration: isEliminated ? 'line-through' : 'none' }}>
+                            <span style={{ fontWeight: 900, fontSize: 'clamp(1.25rem, 1.7vw, 1.6rem)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', letterSpacing: '-0.015em', color: isEliminated ? t.mutedTextColor : '#000000', textDecoration: isEliminated ? 'line-through' : 'none' }}>
                               {details.firstName}
                             </span>
                             <span style={{ 
-                              fontWeight: 800, 
-                              fontSize: 'clamp(0.8rem, 1.05vw, 0.95rem)', 
-                              color: isEliminated ? t.mutedTextColor : t.secondaryTextColor, 
+                              fontWeight: 900, 
+                              fontSize: 'clamp(0.85rem, 1.1vw, 1rem)', 
+                              color: isEliminated ? t.mutedTextColor : '#000000', 
                               textTransform: 'uppercase', 
                               letterSpacing: '0.04em',
                               textOverflow: 'ellipsis',
