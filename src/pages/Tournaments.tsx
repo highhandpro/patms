@@ -32,6 +32,86 @@ const getOrdinal = (n: number) => {
 
 
 
+const CRAYOLA_TABLE_THEMES: Record<string, {
+  bgColor: string;
+  textColor: string;
+  secondaryTextColor: string;
+  borderColor: string;
+  headerBadgeBg: string;
+  headerBadgeText: string;
+  rowBorder: string;
+  selectBg: string;
+  selectBorder: string;
+  selectColor: string;
+  shadow: string;
+}> = {
+  'red table': {
+    bgColor: '#EE204D',
+    textColor: '#ffffff',
+    secondaryTextColor: 'rgba(255, 255, 255, 0.7)',
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    headerBadgeBg: 'rgba(0, 0, 0, 0.28)',
+    headerBadgeText: '#ffffff',
+    rowBorder: 'rgba(255, 255, 255, 0.2)',
+    selectBg: 'rgba(0, 0, 0, 0.35)',
+    selectBorder: 'rgba(255, 255, 255, 0.3)',
+    selectColor: '#ffffff',
+    shadow: '0 8px 24px -6px rgba(238, 32, 77, 0.45)'
+  },
+  'blue table': {
+    bgColor: '#1F75FE',
+    textColor: '#ffffff',
+    secondaryTextColor: 'rgba(255, 255, 255, 0.7)',
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    headerBadgeBg: 'rgba(0, 0, 0, 0.28)',
+    headerBadgeText: '#ffffff',
+    rowBorder: 'rgba(255, 255, 255, 0.2)',
+    selectBg: 'rgba(0, 0, 0, 0.35)',
+    selectBorder: 'rgba(255, 255, 255, 0.3)',
+    selectColor: '#ffffff',
+    shadow: '0 8px 24px -6px rgba(31, 117, 254, 0.45)'
+  },
+  'gold table': {
+    bgColor: '#E6BE8A',
+    textColor: '#000000',
+    secondaryTextColor: 'rgba(0, 0, 0, 0.55)',
+    borderColor: 'rgba(0, 0, 0, 0.25)',
+    headerBadgeBg: 'rgba(0, 0, 0, 0.12)',
+    headerBadgeText: '#000000',
+    rowBorder: 'rgba(0, 0, 0, 0.14)',
+    selectBg: 'rgba(255, 255, 255, 0.5)',
+    selectBorder: 'rgba(0, 0, 0, 0.25)',
+    selectColor: '#000000',
+    shadow: '0 8px 24px -6px rgba(230, 190, 138, 0.45)'
+  },
+  'gray table': {
+    bgColor: '#8B8680',
+    textColor: '#000000',
+    secondaryTextColor: 'rgba(0, 0, 0, 0.55)',
+    borderColor: 'rgba(0, 0, 0, 0.25)',
+    headerBadgeBg: 'rgba(0, 0, 0, 0.12)',
+    headerBadgeText: '#000000',
+    rowBorder: 'rgba(0, 0, 0, 0.14)',
+    selectBg: 'rgba(255, 255, 255, 0.5)',
+    selectBorder: 'rgba(0, 0, 0, 0.25)',
+    selectColor: '#000000',
+    shadow: '0 8px 24px -6px rgba(139, 134, 128, 0.45)'
+  },
+  'purple table': {
+    bgColor: '#7442C8',
+    textColor: '#ffffff',
+    secondaryTextColor: 'rgba(255, 255, 255, 0.7)',
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    headerBadgeBg: 'rgba(0, 0, 0, 0.28)',
+    headerBadgeText: '#ffffff',
+    rowBorder: 'rgba(255, 255, 255, 0.2)',
+    selectBg: 'rgba(0, 0, 0, 0.35)',
+    selectBorder: 'rgba(255, 255, 255, 0.3)',
+    selectColor: '#ffffff',
+    shadow: '0 8px 24px -6px rgba(116, 66, 200, 0.45)'
+  }
+};
+
 export const Tournaments: React.FC<TournamentsProps> = ({
   selectedTournamentId,
   setSelectedTournamentId,
@@ -2949,11 +3029,45 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 })
                 .map(([tableName, players]) => {
                   const seatedCount = players.filter(id => id !== "").length;
+                  const theme = CRAYOLA_TABLE_THEMES[tableName.toLowerCase()] || {
+                    bgColor: '#1e293b',
+                    textColor: '#ffffff',
+                    secondaryTextColor: 'rgba(255, 255, 255, 0.65)',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    headerBadgeBg: 'rgba(0, 0, 0, 0.25)',
+                    headerBadgeText: '#ffffff',
+                    rowBorder: 'rgba(255, 255, 255, 0.15)',
+                    selectBg: 'rgba(0, 0, 0, 0.35)',
+                    selectBorder: 'rgba(255, 255, 255, 0.25)',
+                    selectColor: '#ffffff',
+                    shadow: 'none'
+                  };
                 return (
-                  <div key={tableName} className="glass-card accent-emerald" style={{ padding: '12px 14px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'capitalize', margin: 0 }}>{tableName}</h4>
-                      <span className="badge badge-emerald" style={{ fontSize: '0.75rem', padding: '2px 6px' }}>{seatedCount}/10</span>
+                  <div 
+                    key={tableName} 
+                    style={{ 
+                      backgroundColor: theme.bgColor,
+                      color: theme.textColor,
+                      border: `2px solid ${theme.borderColor}`,
+                      borderRadius: '16px',
+                      padding: '14px',
+                      boxShadow: theme.shadow,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: `1.5px solid ${theme.rowBorder}`, paddingBottom: '8px' }}>
+                      <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: theme.textColor, textTransform: 'capitalize', margin: 0 }}>{tableName}</h4>
+                      <span style={{ 
+                        fontSize: '0.75rem', 
+                        fontWeight: 700, 
+                        color: theme.headerBadgeText, 
+                        backgroundColor: theme.headerBadgeBg, 
+                        border: `1px solid ${theme.rowBorder}`,
+                        padding: '3px 8px', 
+                        borderRadius: '12px' 
+                      }}>
+                        {seatedCount}/10
+                      </span>
                     </div>
 
                     <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', padding: 0, margin: 0 }}>
@@ -2966,15 +3080,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 display: 'flex', 
                                 justifyContent: 'space-between', 
                                 alignItems: 'center',
-                                fontSize: '1.05rem',
-                                color: 'var(--text-muted)',
-                                borderBottom: '1px dashed rgba(255,255,255,0.05)',
+                                fontSize: '0.95rem',
+                                color: theme.secondaryTextColor,
+                                borderBottom: `1px dashed ${theme.rowBorder}`,
                                 paddingBottom: '4px'
                               }}
                             >
-                              <span style={{ fontWeight: 400 }}>
-                                <span style={{ color: 'var(--text-muted)', marginRight: '6px', fontSize: '0.95rem' }}>{idx + 1}:</span>
-                                <span style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.25)' }}>[Empty]</span>
+                              <span style={{ fontWeight: 400, color: theme.secondaryTextColor }}>
+                                <span style={{ marginRight: '6px', fontSize: '0.9rem', color: theme.secondaryTextColor }}>{idx + 1}:</span>
+                                <span style={{ fontStyle: 'italic', color: theme.secondaryTextColor }}>[Empty]</span>
                               </span>
                             </li>
                           );
@@ -2991,10 +3105,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               display: 'flex', 
                               justifyContent: 'space-between', 
                               alignItems: 'center',
-                              fontSize: '1.05rem',
-                              opacity: isEliminated ? 0.4 : 1,
+                              fontSize: '0.95rem',
+                              color: isEliminated ? theme.secondaryTextColor : theme.textColor,
+                              opacity: isEliminated ? 0.6 : 1,
                               textDecoration: isEliminated ? 'line-through' : 'none',
-                              borderBottom: '1px solid rgba(255,255,255,0.05)',
+                              borderBottom: `1px solid ${theme.rowBorder}`,
                               paddingBottom: '4px'
                             }}
                           >
@@ -3004,16 +3119,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 alignItems: 'center',
                                 gap: '4px',
                                 fontWeight: 600,
-                                color: isDealer ? 'var(--color-gold)' : 'inherit',
+                                color: isDealer ? (theme.textColor === '#000000' ? '#854d0e' : '#fde047') : (isEliminated ? theme.secondaryTextColor : theme.textColor),
                                 userSelect: 'none',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
-                                maxWidth: '140px'
+                                maxWidth: '140px',
+                                textDecoration: isEliminated ? 'line-through' : 'none'
                               }}
                               title={getMemberName(playerId)}
                             >
-                              <span style={{ color: 'var(--text-muted)', marginRight: '4px', fontWeight: 400, fontSize: '0.95rem' }}>{idx + 1}:</span>
+                              <span style={{ color: theme.secondaryTextColor, marginRight: '4px', fontWeight: 400, fontSize: '0.9rem', textDecoration: isEliminated ? 'line-through' : 'none' }}>{idx + 1}:</span>
                               <button
                                 type="button"
                                 onClick={() => toggleDealerStatus(playerId, tableName)}
@@ -3022,7 +3138,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   border: 'none',
                                   cursor: isSubAdmin ? 'not-allowed' : 'pointer',
                                   fontSize: '0.95rem',
-                                  opacity: isDealer ? 1 : 0.2,
+                                  opacity: isDealer ? 1 : 0.35,
                                   filter: isDealer ? 'grayscale(0)' : 'grayscale(100%)',
                                   transition: 'all 0.15s ease',
                                   padding: '2px',
@@ -3045,9 +3161,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 onChange={(e) => movePlayerTable(playerId, tableName, e.target.value)}
                                 disabled={isSubAdmin}
                                 style={{
-                                  backgroundColor: 'rgba(0,0,0,0.3)',
-                                  color: 'var(--text-secondary)',
-                                  border: '1px solid var(--border-subtle)',
+                                  backgroundColor: theme.selectBg,
+                                  color: theme.selectColor,
+                                  border: `1px solid ${theme.selectBorder}`,
                                   borderRadius: '4px',
                                   fontSize: '0.75rem',
                                   padding: '2px 4px',
@@ -3055,7 +3171,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 }}
                               >
                                 {Object.keys(seating).map(tName => (
-                                  <option key={tName} value={tName}>{tName}</option>
+                                  <option key={tName} value={tName} style={{ backgroundColor: '#1e293b', color: '#ffffff' }}>{tName}</option>
                                 ))}
                               </select>
                             )}
