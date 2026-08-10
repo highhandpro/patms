@@ -31,13 +31,18 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
   const { state } = useApp();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
 
+  const getMemberName = (id: string) => {
+    const m = state.members.find(member => member.id === id);
+    return m ? `${m.firstName} ${m.lastName}` : id;
+  };
+
   useEffect(() => {
     if (recommendation) {
-      const activeList = (recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0)
+      const sourceTableSeats = (seating && recommendation.sourceTable && seating[recommendation.sourceTable]) || [];
+      const activeList = ((recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0)
         ? recommendation.sourceActivePlayers
-        : (seating && recommendation.sourceTable && seating[recommendation.sourceTable]
-            ? seating[recommendation.sourceTable].filter(id => id && id.trim() !== '')
-            : []);
+        : sourceTableSeats.filter(id => id && id.trim() !== '')
+      ).slice().sort((a, b) => getMemberName(a).localeCompare(getMemberName(b)));
 
       if (activeList.length > 0) {
         setSelectedPlayerId(activeList[0]);
@@ -47,14 +52,9 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
     } else {
       setSelectedPlayerId('');
     }
-  }, [recommendation, seating]);
+  }, [recommendation, seating, state.members]);
 
   if (!isOpen || !recommendation) return null;
-
-  const getMemberName = (id: string) => {
-    const m = state.members.find(member => member.id === id);
-    return m ? `${m.firstName} ${m.lastName}` : id;
-  };
 
   const isRebalance = recommendation.type === 'rebalance';
   const sourceBadge = recommendation.sourceTable ? TABLE_THEME_BADGES[recommendation.sourceTable.toLowerCase()] || { bg: '#334155', color: '#fff' } : null;
@@ -228,17 +228,16 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
               >
                 {(() => {
                   const sourceTableSeats = (seating && recommendation.sourceTable && seating[recommendation.sourceTable]) || [];
-                  const activeList = (recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0)
+                  const activeList = ((recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0)
                     ? recommendation.sourceActivePlayers
-                    : sourceTableSeats.filter(id => id && id.trim() !== '');
+                    : sourceTableSeats.filter(id => id && id.trim() !== '')
+                  ).slice().sort((a, b) => getMemberName(a).localeCompare(getMemberName(b)));
 
                   return activeList.map(pId => {
-                    const seatIndex = sourceTableSeats.findIndex(id => id === pId);
-                    const seatLabel = seatIndex !== -1 ? `Seat ${seatIndex + 1}: ` : '';
                     const name = getMemberName(pId);
                     return (
                       <option key={pId} value={pId} style={{ backgroundColor: '#1e293b', color: '#ffffff' }}>
-                        {seatLabel}{name}
+                        {name}
                       </option>
                     );
                   });
