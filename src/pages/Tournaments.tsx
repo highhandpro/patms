@@ -1033,6 +1033,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       });
 
   const triggerCheckInFlow = (memberId: string, onConfirm: (phone?: string) => void) => {
+    // If the tournament has "Disable Emails / BETA Testing" enabled (or has BETA in name), bypass contact prompt modal
+    const isBetaTournament = !!activeTournament && (activeTournament.isBetaTest || activeTournament.name.toUpperCase().includes('BETA'));
+    if (isBetaTournament) {
+      onConfirm();
+      return;
+    }
+
     const member = state.members.find(m => m.id === memberId);
     if (member && (!member.phone || !member.phone.trim())) {
       setPhonePromptMember(member);
