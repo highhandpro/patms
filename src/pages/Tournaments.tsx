@@ -3722,7 +3722,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       const finalPool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
                         ? activeTournament.overridePrizePool
                         : calcPrizePool;
-                      const currentBuyIns = activeTournament.entries.filter(e => e.hasBuyIn).length;
                       const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
                         ? activeTournament.payoutPercentages
                         : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];

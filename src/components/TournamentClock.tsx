@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Maximize, Minimize, Play, Pause, RotateCcw, ShieldAlert, Award, Shuffle, DollarSign } from 'lucide-react';
 import type { Tournament, Member, BlindLevel, TournamentEntry } from '../types';
 import { useApp } from '../context/AppContext';
-import { getAutoPayoutPercentages, calculateDollarPayouts } from '../utils/stats';
+import { calculateDollarPayouts } from '../utils/stats';
 import { EliminationModal } from './EliminationModal';
 
 interface TournamentClockProps {

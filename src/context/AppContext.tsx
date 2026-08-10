@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Member, Tournament, Season, Settings, DatabaseState, TournamentEntry, PendingApproval } from '../types';
 import { db } from '../firebase';
-import { getAutoPayoutPercentages } from '../utils/stats';
 import { 
   collection, 
   doc, 
