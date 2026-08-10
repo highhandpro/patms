@@ -1090,8 +1090,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : rawPrizePool;
 
     const prizePoolAfterDeductions = Math.max(0, payoutPrizePool - highHandAmount - bubbleAmount);
-    const isCustomConfigured = !!t.hasCustomPayouts && t.totalAddons !== undefined && !!t.payoutPercentages && t.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0;
-    const pctList = isCustomConfigured ? t.payoutPercentages! : getAutoPayoutPercentages(buyInCount);
+    const pctList = (t.payoutPercentages && t.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0)
+      ? t.payoutPercentages
+      : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
     const payouts = pctList.map((pct: number) => Math.round(prizePoolAfterDeductions * (pct / 100)));
     const placesPaidCount = pctList.filter((pct: number) => pct > 0).length;
     const bubblePosition = placesPaidCount + 1;

@@ -170,14 +170,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   useEffect(() => {
     if (activeTournament) {
-      const currentBuyIns = activeTournament.entries.filter(e => e.hasBuyIn).length;
-      const autoPcts = getAutoPayoutPercentages(currentBuyIns);
       setModalAddons(activeTournament.totalAddons || 0);
-      const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
-      if (isCustomConfigured) {
-        setModalPayoutPcts(activeTournament.payoutPercentages!);
+      if (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0) {
+        setModalPayoutPcts(activeTournament.payoutPercentages);
       } else {
-        setModalPayoutPcts(autoPcts);
+        setModalPayoutPcts([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
       }
       setModalHighHand(activeTournament.highHandAmount || 0);
       setModalBubble(activeTournament.bubbleAmount || 0);
@@ -3318,10 +3315,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const payoutPrizePool = activeTournament.overridePrizePool !== undefined && activeTournament.overridePrizePool > 0
           ? activeTournament.overridePrizePool
           : totalPrizePool;
-        const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
-        const pctList = isCustomConfigured
-          ? activeTournament.payoutPercentages!
-          : getAutoPayoutPercentages(buyInCount);
+        const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
+          ? activeTournament.payoutPercentages
+          : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
         const payouts = calculateDollarPayouts(payoutPrizePool, pctList);
 
         // Generate all positions from 1 to N
@@ -3575,10 +3571,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     const rawPrizePool = (buyInCount * netBuyIn) + (addonCount * activeTournament.addonAmount);
                     const calculatedPrizePool = Math.max(0, rawPrizePool - (activeTournament.bubbleAmount || 0) - (activeTournament.highHandAmount || 0));
                     
-                    const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
-                    const pctList = isCustomConfigured
-                      ? activeTournament.payoutPercentages!
-                      : getAutoPayoutPercentages(buyInCount);
+                    const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
+                      ? activeTournament.payoutPercentages
+                      : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
                     const payouts = calculateDollarPayouts(calculatedPrizePool, pctList);
 
                     const winners = activeTournament.entries
@@ -3728,10 +3723,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         ? activeTournament.overridePrizePool
                         : calcPrizePool;
                       const currentBuyIns = activeTournament.entries.filter(e => e.hasBuyIn).length;
-                      const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
-                      const pctList = isCustomConfigured
-                        ? activeTournament.payoutPercentages!
-                        : getAutoPayoutPercentages(currentBuyIns);
+                      const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
+                        ? activeTournament.payoutPercentages
+                        : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
                       const previewDollarPayouts = calculateDollarPayouts(finalPool, pctList);
                       
                       const activeAndElims = [...activeTournament.entries].sort((a,b) => {
@@ -4198,10 +4192,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
         const totalCollected = (buyInCount * activeTournament.buyInAmount) + (addonCount * activeTournament.addonAmount);
 
-        const isCustomConfigured = !!activeTournament.hasCustomPayouts && activeTournament.totalAddons !== undefined && !!activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0;
-        const pctList = isCustomConfigured
-          ? activeTournament.payoutPercentages!
-          : getAutoPayoutPercentages(buyInCount);
+        const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
+          ? activeTournament.payoutPercentages
+          : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
         const dollarPayouts = calculateDollarPayouts(currentPrizePool, pctList);
 
         const payouts = pctList

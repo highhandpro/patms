@@ -766,10 +766,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   const highHandAmount = tournament.highHandAmount || 0;
   const prizePoolAfterBubble = Math.max(0, prizePool - bubbleAmount - highHandAmount);
   
-  const isCustomConfigured = !!tournament.hasCustomPayouts && tournament.totalAddons !== undefined && !!tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0;
-  const pctSource = isCustomConfigured
-    ? tournament.payoutPercentages!
-    : getAutoPayoutPercentages(buyInCount);
+  const pctSource = (tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0)
+    ? tournament.payoutPercentages
+    : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
 
   const dollarAmounts = calculateDollarPayouts(prizePoolAfterBubble, pctSource);
 
@@ -2199,10 +2198,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         const rawCalculatedPrizePool = (buyInCount * netBuyIn) + ((tournament.totalAddons || 0) * tournament.addonAmount);
         const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - (tournament.highHandAmount || 0) - (tournament.bubbleAmount || 0));
 
-        const isCustomConfigured = !!tournament.hasCustomPayouts && tournament.totalAddons !== undefined && !!tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0;
-        const pctList = isCustomConfigured
-          ? tournament.payoutPercentages!
-          : getAutoPayoutPercentages(buyInCount);
+        const pctList = (tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0)
+          ? tournament.payoutPercentages
+          : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
         const payouts = calculateDollarPayouts(calculatedPrizePool, pctList);
         const placesPaidCount = pctList.filter(pct => pct > 0).length;
         const bubblePosition = placesPaidCount + 1;
