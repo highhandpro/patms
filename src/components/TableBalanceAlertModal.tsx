@@ -51,6 +51,16 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
 
   if (!isOpen || !recommendation) return null;
 
+  const getMemberName = (id: string) => {
+    const m = state.members.find(member => member.id === id);
+    return m ? `${m.firstName} ${m.lastName}` : id;
+  };
+
+  const isRebalance = recommendation.type === 'rebalance';
+  const sourceBadge = recommendation.sourceTable ? TABLE_THEME_BADGES[recommendation.sourceTable.toLowerCase()] || { bg: '#334155', color: '#fff' } : null;
+  const targetBadge = recommendation.targetTable ? TABLE_THEME_BADGES[recommendation.targetTable.toLowerCase()] || { bg: '#334155', color: '#fff' } : null;
+  const breakBadge = recommendation.breakTable ? TABLE_THEME_BADGES[recommendation.breakTable.toLowerCase()] || { bg: '#334155', color: '#fff' } : null;
+
   const formatOpenSeatOrder = (orderNum: number) => {
     if (orderNum === 1) return '1st Open Seat';
     if (orderNum === 2) return '2nd Open Seat';
