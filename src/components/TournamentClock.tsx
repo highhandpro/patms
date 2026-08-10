@@ -4,6 +4,10 @@ import type { Tournament, Member, BlindLevel, TournamentEntry } from '../types';
 import { useApp } from '../context/AppContext';
 import { calculateDollarPayouts } from '../utils/stats';
 import { EliminationModal } from './EliminationModal';
+import { TableBalanceAlertModal } from './TableBalanceAlertModal';
+import { checkTableBalance, executePlayerMove, executeTableBreak } from '../utils/tableBalancing';
+import type { TableBalanceRecommendation } from '../utils/tableBalancing';
+import { playTableBalanceAlertSound } from '../utils/audioAlerts';
 
 interface TournamentClockProps {
   tournament: Tournament;
@@ -106,6 +110,26 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   // Final Table Announcement States
   const [isFinalTableOpen, setIsFinalTableOpen] = useState(false);
   const [finalTablePlayers, setFinalTablePlayers] = useState<TournamentEntry[]>([]);
+
+  // Table balancing alert modal state
+  const [balanceRecommendation, setBalanceRecommendation] = useState<TableBalanceRecommendation | null>(null);
+  const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
+
+  const handleConfirmBalanceMove = (playerId: string, sourceTable: string, targetTable: string) => {
+    if (!tournament.seating) return;
+    const updated = executePlayerMove(tournament.seating, playerId, sourceTable, targetTable);
+    updateTournament(tournament.id, { seating: updated });
+    setIsBalanceModalOpen(false);
+    setBalanceRecommendation(null);
+  };
+
+  const handleConfirmTableBreak = (breakTable: string) => {
+    if (!tournament.seating) return;
+    const updated = executeTableBreak(tournament.seating, breakTable, tournament);
+    updateTournament(tournament.id, { seating: updated });
+    setIsBalanceModalOpen(false);
+    setBalanceRecommendation(null);
+  };
 
   // Sound played tracking flags (to prevent skipping during tab throttling/lag)
   const [played1MinSound, setPlayed1MinSound] = useState(false);
@@ -2102,6 +2126,21 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           onConfirm={(bounties) => {
             const finalBounties = bounties !== undefined ? bounties : bountiesWon;
             eliminatePlayer(tournament.id, eliminatingPlayerId, finalBounties);
+
+            // Check table balance
+            if (tournament.seating) {
+              const updatedEntries = tournament.entries.map((e: any) =>
+                e.memberId === eliminatingPlayerId ? { ...e, eliminatedAt: new Date().toISOString() } : e
+              );
+              const simulatedTournament = { ...tournament, entries: updatedEntries };
+              const rec = checkTableBalance(tournament.seating, simulatedTournament);
+              if (rec) {
+                playTableBalanceAlertSound();
+                setBalanceRecommendation(rec);
+                setIsBalanceModalOpen(true);
+              }
+            }
+
             setEliminatingPlayerId(null);
             setBountiesWon(0);
 
@@ -2117,6 +2156,18 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           initialBounties={tournament.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}
         />
       )}
+
+      {/* Table Balancing Alert Modal */}
+      <TableBalanceAlertModal
+        isOpen={isBalanceModalOpen}
+        recommendation={balanceRecommendation}
+        onClose={() => {
+          setIsBalanceModalOpen(false);
+          setBalanceRecommendation(null);
+        }}
+        onConfirmMove={handleConfirmBalanceMove}
+        onConfirmBreak={handleConfirmTableBreak}
+      />
 
       {showWinningsModal && (() => {
         const buyInCount = tournament.entries.filter(e => e.hasBuyIn).length;

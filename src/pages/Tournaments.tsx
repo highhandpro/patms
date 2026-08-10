@@ -9,6 +9,10 @@ import { EliminationModal } from '../components/EliminationModal';
 import { LateEntryModal } from '../components/LateEntryModal';
 import { TournamentClock } from '../components/TournamentClock';
 import { GameResultsFacebook } from '../components/GameResultsFacebook';
+import { TableBalanceAlertModal } from '../components/TableBalanceAlertModal';
+import { checkTableBalance, executePlayerMove, executeTableBreak } from '../utils/tableBalancing';
+import type { TableBalanceRecommendation } from '../utils/tableBalancing';
+import { playTableBalanceAlertSound } from '../utils/audioAlerts';
 import { 
   Trophy, Play, RotateCcw, Plus, 
   UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award,
@@ -189,6 +193,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [showFinalizeModal, setShowFinalizeModal] = useState(false);
   const [showGameOverModal, setShowGameOverModal] = useState(false);
   const [payoutPcts, setPayoutPcts] = useState<number[]>([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+
+  // Table balancing alert modal state
+  const [balanceRecommendation, setBalanceRecommendation] = useState<TableBalanceRecommendation | null>(null);
+  const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
 
   // Payout and Add-ons configuration states
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
@@ -738,6 +746,26 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       seating: updated,
       dealers: updatedDealers
     });
+  };
+
+  const handleConfirmBalanceMove = (playerId: string, sourceTable: string, targetTable: string) => {
+    if (!activeTournament) return;
+    const updated = executePlayerMove(seating, playerId, sourceTable, targetTable);
+    setSeating(updated);
+    localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updated));
+    updateTournament(activeTournament.id, { seating: updated });
+    setIsBalanceModalOpen(false);
+    setBalanceRecommendation(null);
+  };
+
+  const handleConfirmTableBreak = (breakTable: string) => {
+    if (!activeTournament) return;
+    const updated = executeTableBreak(seating, breakTable, activeTournament);
+    setSeating(updated);
+    localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updated));
+    updateTournament(activeTournament.id, { seating: updated });
+    setIsBalanceModalOpen(false);
+    setBalanceRecommendation(null);
   };
 
   const exportTournamentResultsCSV = (tournament: any) => {
@@ -3628,11 +3656,36 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               const finalBounties = bounties !== undefined ? bounties : bountiesWon;
               if (activeTournament && eliminatingPlayerId) {
                 eliminatePlayer(activeTournament.id, eliminatingPlayerId, finalBounties);
+                
+                // Simulate tournament state with this player eliminated to check balance
+                const updatedEntries = activeTournament.entries.map((e: any) =>
+                  e.memberId === eliminatingPlayerId ? { ...e, eliminatedAt: new Date().toISOString() } : e
+                );
+                const simulatedTournament = { ...activeTournament, entries: updatedEntries };
+                const rec = checkTableBalance(seating, simulatedTournament);
+                if (rec) {
+                  playTableBalanceAlertSound();
+                  setBalanceRecommendation(rec);
+                  setIsBalanceModalOpen(true);
+                }
+
                 setEliminatingPlayerId(null);
                 setBountiesWon(0);
               }
             }}
             initialBounties={activeTournament?.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}
+          />
+
+          {/* Table Balancing Alert Modal */}
+          <TableBalanceAlertModal
+            isOpen={isBalanceModalOpen}
+            recommendation={balanceRecommendation}
+            onClose={() => {
+              setIsBalanceModalOpen(false);
+              setBalanceRecommendation(null);
+            }}
+            onConfirmMove={handleConfirmBalanceMove}
+            onConfirmBreak={handleConfirmTableBreak}
           />
 
           {/* Game Over Announcement Modal */}
