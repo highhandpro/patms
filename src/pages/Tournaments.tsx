@@ -39,6 +39,7 @@ const CRAYOLA_TABLE_THEMES: Record<string, {
   borderColor: string;
   headerBadgeBg: string;
   headerBadgeText: string;
+  rowBg: string;
   rowBorder: string;
   selectBg: string;
   selectBorder: string;
@@ -46,69 +47,74 @@ const CRAYOLA_TABLE_THEMES: Record<string, {
   shadow: string;
 }> = {
   'red table': {
-    bgColor: '#EE204D',
-    textColor: '#ffffff',
-    secondaryTextColor: 'rgba(255, 255, 255, 0.7)',
-    borderColor: 'rgba(255, 255, 255, 0.35)',
-    headerBadgeBg: 'rgba(0, 0, 0, 0.28)',
-    headerBadgeText: '#ffffff',
-    rowBorder: 'rgba(255, 255, 255, 0.2)',
-    selectBg: 'rgba(0, 0, 0, 0.35)',
-    selectBorder: 'rgba(255, 255, 255, 0.3)',
-    selectColor: '#ffffff',
-    shadow: '0 8px 24px -6px rgba(238, 32, 77, 0.45)'
+    bgColor: 'rgba(238, 32, 77, 0.7)', // Crayola Red 70%
+    textColor: '#000000',
+    secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+    borderColor: 'rgba(238, 32, 77, 0.9)',
+    headerBadgeBg: 'rgba(255, 255, 255, 0.55)',
+    headerBadgeText: '#000000',
+    rowBg: 'rgba(255, 255, 255, 0.4)',
+    rowBorder: 'rgba(0, 0, 0, 0.12)',
+    selectBg: 'rgba(255, 255, 255, 0.7)',
+    selectBorder: 'rgba(0, 0, 0, 0.25)',
+    selectColor: '#000000',
+    shadow: '0 8px 24px -6px rgba(238, 32, 77, 0.4)'
   },
   'blue table': {
-    bgColor: '#1F75FE',
-    textColor: '#ffffff',
-    secondaryTextColor: 'rgba(255, 255, 255, 0.7)',
-    borderColor: 'rgba(255, 255, 255, 0.35)',
-    headerBadgeBg: 'rgba(0, 0, 0, 0.28)',
-    headerBadgeText: '#ffffff',
-    rowBorder: 'rgba(255, 255, 255, 0.2)',
-    selectBg: 'rgba(0, 0, 0, 0.35)',
-    selectBorder: 'rgba(255, 255, 255, 0.3)',
-    selectColor: '#ffffff',
-    shadow: '0 8px 24px -6px rgba(31, 117, 254, 0.45)'
+    bgColor: 'rgba(31, 117, 254, 0.7)', // Crayola Blue 70%
+    textColor: '#000000',
+    secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+    borderColor: 'rgba(31, 117, 254, 0.9)',
+    headerBadgeBg: 'rgba(255, 255, 255, 0.55)',
+    headerBadgeText: '#000000',
+    rowBg: 'rgba(255, 255, 255, 0.4)',
+    rowBorder: 'rgba(0, 0, 0, 0.12)',
+    selectBg: 'rgba(255, 255, 255, 0.7)',
+    selectBorder: 'rgba(0, 0, 0, 0.25)',
+    selectColor: '#000000',
+    shadow: '0 8px 24px -6px rgba(31, 117, 254, 0.4)'
   },
   'gold table': {
-    bgColor: '#E6BE8A',
+    bgColor: 'rgba(230, 190, 138, 0.7)', // Crayola Gold 70%
     textColor: '#000000',
-    secondaryTextColor: 'rgba(0, 0, 0, 0.55)',
-    borderColor: 'rgba(0, 0, 0, 0.25)',
-    headerBadgeBg: 'rgba(0, 0, 0, 0.12)',
+    secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+    borderColor: 'rgba(230, 190, 138, 0.9)',
+    headerBadgeBg: 'rgba(255, 255, 255, 0.55)',
     headerBadgeText: '#000000',
-    rowBorder: 'rgba(0, 0, 0, 0.14)',
-    selectBg: 'rgba(255, 255, 255, 0.5)',
+    rowBg: 'rgba(255, 255, 255, 0.4)',
+    rowBorder: 'rgba(0, 0, 0, 0.12)',
+    selectBg: 'rgba(255, 255, 255, 0.7)',
     selectBorder: 'rgba(0, 0, 0, 0.25)',
     selectColor: '#000000',
-    shadow: '0 8px 24px -6px rgba(230, 190, 138, 0.45)'
+    shadow: '0 8px 24px -6px rgba(230, 190, 138, 0.4)'
   },
   'gray table': {
-    bgColor: '#8B8680',
+    bgColor: 'rgba(139, 134, 128, 0.7)', // Crayola Gray 70%
     textColor: '#000000',
-    secondaryTextColor: 'rgba(0, 0, 0, 0.55)',
-    borderColor: 'rgba(0, 0, 0, 0.25)',
-    headerBadgeBg: 'rgba(0, 0, 0, 0.12)',
+    secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+    borderColor: 'rgba(139, 134, 128, 0.9)',
+    headerBadgeBg: 'rgba(255, 255, 255, 0.55)',
     headerBadgeText: '#000000',
-    rowBorder: 'rgba(0, 0, 0, 0.14)',
-    selectBg: 'rgba(255, 255, 255, 0.5)',
+    rowBg: 'rgba(255, 255, 255, 0.4)',
+    rowBorder: 'rgba(0, 0, 0, 0.12)',
+    selectBg: 'rgba(255, 255, 255, 0.7)',
     selectBorder: 'rgba(0, 0, 0, 0.25)',
     selectColor: '#000000',
-    shadow: '0 8px 24px -6px rgba(139, 134, 128, 0.45)'
+    shadow: '0 8px 24px -6px rgba(139, 134, 128, 0.4)'
   },
   'purple table': {
-    bgColor: '#7442C8',
-    textColor: '#ffffff',
-    secondaryTextColor: 'rgba(255, 255, 255, 0.7)',
-    borderColor: 'rgba(255, 255, 255, 0.35)',
-    headerBadgeBg: 'rgba(0, 0, 0, 0.28)',
-    headerBadgeText: '#ffffff',
-    rowBorder: 'rgba(255, 255, 255, 0.2)',
-    selectBg: 'rgba(0, 0, 0, 0.35)',
-    selectBorder: 'rgba(255, 255, 255, 0.3)',
-    selectColor: '#ffffff',
-    shadow: '0 8px 24px -6px rgba(116, 66, 200, 0.45)'
+    bgColor: 'rgba(116, 66, 200, 0.7)', // Crayola Purple Heart 70%
+    textColor: '#000000',
+    secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+    borderColor: 'rgba(116, 66, 200, 0.9)',
+    headerBadgeBg: 'rgba(255, 255, 255, 0.55)',
+    headerBadgeText: '#000000',
+    rowBg: 'rgba(255, 255, 255, 0.4)',
+    rowBorder: 'rgba(0, 0, 0, 0.12)',
+    selectBg: 'rgba(255, 255, 255, 0.7)',
+    selectBorder: 'rgba(0, 0, 0, 0.25)',
+    selectColor: '#000000',
+    shadow: '0 8px 24px -6px rgba(116, 66, 200, 0.4)'
   }
 };
 
@@ -3070,7 +3076,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       </span>
                     </div>
 
-                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', padding: 0, margin: 0 }}>
+                    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px', padding: 0, margin: 0 }}>
                       {players.map((playerId, idx) => {
                         if (!playerId) {
                           return (
@@ -3081,14 +3087,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 justifyContent: 'space-between', 
                                 alignItems: 'center',
                                 fontSize: '0.95rem',
-                                color: theme.secondaryTextColor,
-                                borderBottom: `1px dashed ${theme.rowBorder}`,
-                                paddingBottom: '4px'
+                                color: 'rgba(0, 0, 0, 0.45)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                border: `1px dashed ${theme.rowBorder}`,
+                                borderRadius: '8px',
+                                padding: '6px 10px'
                               }}
                             >
-                              <span style={{ fontWeight: 400, color: theme.secondaryTextColor }}>
-                                <span style={{ marginRight: '6px', fontSize: '0.9rem', color: theme.secondaryTextColor }}>{idx + 1}:</span>
-                                <span style={{ fontStyle: 'italic', color: theme.secondaryTextColor }}>[Empty]</span>
+                              <span style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.45)' }}>
+                                <span style={{ marginRight: '6px', fontSize: '0.95rem', fontWeight: 900 }}>{idx + 1}:</span>
+                                <span style={{ fontStyle: 'italic' }}>[Empty]</span>
                               </span>
                             </li>
                           );
@@ -3105,21 +3113,23 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               display: 'flex', 
                               justifyContent: 'space-between', 
                               alignItems: 'center',
-                              fontSize: '0.95rem',
-                              color: isEliminated ? theme.secondaryTextColor : theme.textColor,
-                              opacity: isEliminated ? 0.6 : 1,
+                              fontSize: '1rem',
+                              color: theme.textColor,
+                              opacity: isEliminated ? 0.5 : 1,
                               textDecoration: isEliminated ? 'line-through' : 'none',
-                              borderBottom: `1px solid ${theme.rowBorder}`,
-                              paddingBottom: '4px'
+                              backgroundColor: isEliminated ? 'rgba(255, 255, 255, 0.22)' : theme.rowBg,
+                              border: `1px solid ${theme.rowBorder}`,
+                              borderRadius: '8px',
+                              padding: '6px 10px'
                             }}
                           >
                             <span 
                               style={{ 
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '4px',
-                                fontWeight: 600,
-                                color: isDealer ? (theme.textColor === '#000000' ? '#854d0e' : '#fde047') : (isEliminated ? theme.secondaryTextColor : theme.textColor),
+                                gap: '6px',
+                                fontWeight: 800,
+                                color: '#000000',
                                 userSelect: 'none',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
@@ -3129,7 +3139,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               }}
                               title={getMemberName(playerId)}
                             >
-                              <span style={{ color: theme.secondaryTextColor, marginRight: '4px', fontWeight: 400, fontSize: '0.9rem', textDecoration: isEliminated ? 'line-through' : 'none' }}>{idx + 1}:</span>
+                              <span style={{ color: isEliminated ? 'rgba(0, 0, 0, 0.45)' : '#000000', marginRight: '2px', fontWeight: 900, fontSize: '0.95rem', textDecoration: isEliminated ? 'line-through' : 'none' }}>{idx + 1}:</span>
                               <button
                                 type="button"
                                 onClick={() => toggleDealerStatus(playerId, tableName)}
@@ -3166,12 +3176,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   border: `1px solid ${theme.selectBorder}`,
                                   borderRadius: '4px',
                                   fontSize: '0.75rem',
+                                  fontWeight: 700,
                                   padding: '2px 4px',
                                   cursor: isSubAdmin ? 'not-allowed' : 'pointer'
                                 }}
                               >
                                 {Object.keys(seating).map(tName => (
-                                  <option key={tName} value={tName} style={{ backgroundColor: '#1e293b', color: '#ffffff' }}>{tName}</option>
+                                  <option key={tName} value={tName} style={{ backgroundColor: '#ffffff', color: '#000000' }}>{tName}</option>
                                 ))}
                               </select>
                             )}

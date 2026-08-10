@@ -44,97 +44,102 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
     return m ? { firstName: m.firstName, lastName: m.lastName } : { firstName: 'Unknown', lastName: 'Player' };
   };
 
-  // Define the exactly 5 columns in specified order with Crayola crayon color themes
+  // Define the exactly 5 columns in specified order with 70% opacity Crayola themes and large black text
   const tableColors = [
     {
       key: 'red table',
       name: 'Red Table',
-      bgColor: '#EE204D', // Crayola Red
-      textColor: '#ffffff',
-      secondaryTextColor: 'rgba(255, 255, 255, 0.65)',
-      borderColor: 'rgba(255, 255, 255, 0.35)',
-      headerBg: 'rgba(0, 0, 0, 0.25)',
-      rowBg: 'rgba(0, 0, 0, 0.15)',
-      rowBorder: 'rgba(255, 255, 255, 0.2)',
-      emptyRowBg: 'rgba(0, 0, 0, 0.08)',
-      eliminatedRowBg: 'rgba(0, 0, 0, 0.25)',
-      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.35)',
-      eliminatedBadgeText: '#ffffff',
-      dealerBadgeBg: 'rgba(255, 255, 255, 0.25)',
-      dealerBadgeText: '#ffffff',
-      shadow: '0 10px 30px -10px rgba(238, 32, 77, 0.5)'
+      bgColor: 'rgba(238, 32, 77, 0.7)', // Crayola Red 70%
+      textColor: '#000000',
+      secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+      mutedTextColor: 'rgba(0, 0, 0, 0.45)',
+      borderColor: 'rgba(238, 32, 77, 0.9)',
+      headerBg: 'rgba(255, 255, 255, 0.45)',
+      rowBg: 'rgba(255, 255, 255, 0.4)',
+      rowBorder: 'rgba(0, 0, 0, 0.12)',
+      emptyRowBg: 'rgba(255, 255, 255, 0.18)',
+      eliminatedRowBg: 'rgba(255, 255, 255, 0.22)',
+      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.15)',
+      eliminatedBadgeText: '#000000',
+      dealerBadgeBg: 'rgba(255, 255, 255, 0.65)',
+      dealerBadgeText: '#000000',
+      shadow: '0 10px 30px -10px rgba(238, 32, 77, 0.4)'
     },
     {
       key: 'blue table',
       name: 'Blue Table',
-      bgColor: '#1F75FE', // Crayola Blue
-      textColor: '#ffffff',
-      secondaryTextColor: 'rgba(255, 255, 255, 0.65)',
-      borderColor: 'rgba(255, 255, 255, 0.35)',
-      headerBg: 'rgba(0, 0, 0, 0.25)',
-      rowBg: 'rgba(0, 0, 0, 0.15)',
-      rowBorder: 'rgba(255, 255, 255, 0.2)',
-      emptyRowBg: 'rgba(0, 0, 0, 0.08)',
-      eliminatedRowBg: 'rgba(0, 0, 0, 0.25)',
-      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.35)',
-      eliminatedBadgeText: '#ffffff',
-      dealerBadgeBg: 'rgba(255, 255, 255, 0.25)',
-      dealerBadgeText: '#ffffff',
-      shadow: '0 10px 30px -10px rgba(31, 117, 254, 0.5)'
+      bgColor: 'rgba(31, 117, 254, 0.7)', // Crayola Blue 70%
+      textColor: '#000000',
+      secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+      mutedTextColor: 'rgba(0, 0, 0, 0.45)',
+      borderColor: 'rgba(31, 117, 254, 0.9)',
+      headerBg: 'rgba(255, 255, 255, 0.45)',
+      rowBg: 'rgba(255, 255, 255, 0.4)',
+      rowBorder: 'rgba(0, 0, 0, 0.12)',
+      emptyRowBg: 'rgba(255, 255, 255, 0.18)',
+      eliminatedRowBg: 'rgba(255, 255, 255, 0.22)',
+      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.15)',
+      eliminatedBadgeText: '#000000',
+      dealerBadgeBg: 'rgba(255, 255, 255, 0.65)',
+      dealerBadgeText: '#000000',
+      shadow: '0 10px 30px -10px rgba(31, 117, 254, 0.4)'
     },
     {
       key: 'gold table',
       name: 'Gold Table',
-      bgColor: '#E6BE8A', // Crayola Gold
+      bgColor: 'rgba(230, 190, 138, 0.7)', // Crayola Gold 70%
       textColor: '#000000',
-      secondaryTextColor: 'rgba(0, 0, 0, 0.55)',
-      borderColor: 'rgba(0, 0, 0, 0.25)',
-      headerBg: 'rgba(0, 0, 0, 0.12)',
-      rowBg: 'rgba(255, 255, 255, 0.25)',
+      secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+      mutedTextColor: 'rgba(0, 0, 0, 0.45)',
+      borderColor: 'rgba(230, 190, 138, 0.9)',
+      headerBg: 'rgba(255, 255, 255, 0.45)',
+      rowBg: 'rgba(255, 255, 255, 0.4)',
       rowBorder: 'rgba(0, 0, 0, 0.12)',
-      emptyRowBg: 'rgba(0, 0, 0, 0.05)',
-      eliminatedRowBg: 'rgba(0, 0, 0, 0.09)',
-      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.18)',
+      emptyRowBg: 'rgba(255, 255, 255, 0.18)',
+      eliminatedRowBg: 'rgba(255, 255, 255, 0.22)',
+      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.15)',
       eliminatedBadgeText: '#000000',
-      dealerBadgeBg: 'rgba(0, 0, 0, 0.15)',
+      dealerBadgeBg: 'rgba(255, 255, 255, 0.65)',
       dealerBadgeText: '#000000',
-      shadow: '0 10px 30px -10px rgba(230, 190, 138, 0.5)'
+      shadow: '0 10px 30px -10px rgba(230, 190, 138, 0.4)'
     },
     {
       key: 'gray table',
       name: 'Gray Table',
-      bgColor: '#8B8680', // Crayola Gray
+      bgColor: 'rgba(139, 134, 128, 0.7)', // Crayola Gray 70%
       textColor: '#000000',
-      secondaryTextColor: 'rgba(0, 0, 0, 0.55)',
-      borderColor: 'rgba(0, 0, 0, 0.25)',
-      headerBg: 'rgba(0, 0, 0, 0.12)',
-      rowBg: 'rgba(255, 255, 255, 0.25)',
+      secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+      mutedTextColor: 'rgba(0, 0, 0, 0.45)',
+      borderColor: 'rgba(139, 134, 128, 0.9)',
+      headerBg: 'rgba(255, 255, 255, 0.45)',
+      rowBg: 'rgba(255, 255, 255, 0.4)',
       rowBorder: 'rgba(0, 0, 0, 0.12)',
-      emptyRowBg: 'rgba(0, 0, 0, 0.05)',
-      eliminatedRowBg: 'rgba(0, 0, 0, 0.09)',
-      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.18)',
+      emptyRowBg: 'rgba(255, 255, 255, 0.18)',
+      eliminatedRowBg: 'rgba(255, 255, 255, 0.22)',
+      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.15)',
       eliminatedBadgeText: '#000000',
-      dealerBadgeBg: 'rgba(0, 0, 0, 0.15)',
+      dealerBadgeBg: 'rgba(255, 255, 255, 0.65)',
       dealerBadgeText: '#000000',
-      shadow: '0 10px 30px -10px rgba(139, 134, 128, 0.5)'
+      shadow: '0 10px 30px -10px rgba(139, 134, 128, 0.4)'
     },
     {
       key: 'purple table',
       name: 'Purple Table',
-      bgColor: '#7442C8', // Crayola Purple Heart
-      textColor: '#ffffff',
-      secondaryTextColor: 'rgba(255, 255, 255, 0.65)',
-      borderColor: 'rgba(255, 255, 255, 0.35)',
-      headerBg: 'rgba(0, 0, 0, 0.25)',
-      rowBg: 'rgba(0, 0, 0, 0.15)',
-      rowBorder: 'rgba(255, 255, 255, 0.2)',
-      emptyRowBg: 'rgba(0, 0, 0, 0.08)',
-      eliminatedRowBg: 'rgba(0, 0, 0, 0.25)',
-      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.35)',
-      eliminatedBadgeText: '#ffffff',
-      dealerBadgeBg: 'rgba(255, 255, 255, 0.25)',
-      dealerBadgeText: '#ffffff',
-      shadow: '0 10px 30px -10px rgba(116, 66, 200, 0.5)'
+      bgColor: 'rgba(116, 66, 200, 0.7)', // Crayola Purple Heart 70%
+      textColor: '#000000',
+      secondaryTextColor: 'rgba(0, 0, 0, 0.65)',
+      mutedTextColor: 'rgba(0, 0, 0, 0.45)',
+      borderColor: 'rgba(116, 66, 200, 0.9)',
+      headerBg: 'rgba(255, 255, 255, 0.45)',
+      rowBg: 'rgba(255, 255, 255, 0.4)',
+      rowBorder: 'rgba(0, 0, 0, 0.12)',
+      emptyRowBg: 'rgba(255, 255, 255, 0.18)',
+      eliminatedRowBg: 'rgba(255, 255, 255, 0.22)',
+      eliminatedBadgeBg: 'rgba(0, 0, 0, 0.15)',
+      eliminatedBadgeText: '#000000',
+      dealerBadgeBg: 'rgba(255, 255, 255, 0.65)',
+      dealerBadgeText: '#000000',
+      shadow: '0 10px 30px -10px rgba(116, 66, 200, 0.4)'
     }
   ];
 
@@ -243,11 +248,13 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
       <div 
         style={{
           flex: 1,
-          padding: '24px 16px',
+          padding: '16px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          height: '100vh',
+          boxSizing: 'border-box'
         }}
       >
         {/* Floating Exit Button (Absolute) */}
@@ -255,14 +262,14 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '16px',
-            right: '30px',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            color: '#a0aec0',
+            top: '12px',
+            right: '24px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#cbd5e1',
             cursor: 'pointer',
-            padding: '8px 18px',
-            borderRadius: '10px',
+            padding: '6px 14px',
+            borderRadius: '8px',
             fontSize: '0.85rem',
             fontWeight: 700,
             display: 'flex',
@@ -272,12 +279,12 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
             zIndex: 1000
           }}
           onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)';
             e.currentTarget.style.color = '#ffffff';
           }}
           onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
-            e.currentTarget.style.color = '#a0aec0';
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+            e.currentTarget.style.color = '#cbd5e1';
           }}
         >
           <X size={14} />
@@ -292,7 +299,9 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
             gap: '12px',
             flex: 1,
             alignItems: 'stretch',
-            marginTop: '45px'
+            marginTop: '36px',
+            height: 'calc(100vh - 68px)',
+            boxSizing: 'border-box'
           }}
         >
           {activeTables.map((t) => {
@@ -312,13 +321,15 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                   backgroundColor: t.bgColor,
                   color: t.textColor,
                   border: `2px solid ${t.borderColor}`,
-                  borderRadius: '20px',
-                  padding: '12px',
+                  borderRadius: '16px',
+                  padding: '10px',
                   display: 'flex',
                   flexDirection: 'column',
-                  opacity: hasPlayers ? 1 : 0.4,
+                  opacity: hasPlayers ? 1 : 0.45,
                   transition: 'all 0.3s ease',
-                  boxShadow: t.shadow
+                  boxShadow: t.shadow,
+                  height: '100%',
+                  boxSizing: 'border-box'
                 }}
               >
                 {/* Table Column Title */}
@@ -326,24 +337,25 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                   style={{
                     background: t.headerBg,
                     border: `1px solid ${t.rowBorder}`,
-                    borderRadius: '12px',
-                    padding: '8px 10px',
+                    borderRadius: '10px',
+                    padding: '6px 10px',
                     textAlign: 'center',
-                    marginBottom: '10px'
+                    marginBottom: '8px',
+                    flexShrink: 0
                   }}
                 >
-                  <h2 style={{ fontSize: '1.05rem', fontWeight: 900, color: t.textColor, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: t.textColor, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {t.name}
                   </h2>
                   {hasPlayers && (
-                    <span style={{ fontSize: '0.75rem', color: t.secondaryTextColor, fontWeight: 700 }}>
+                    <span style={{ fontSize: '0.8rem', color: t.secondaryTextColor, fontWeight: 800 }}>
                       {players.filter(p => p && typeof p === 'string' && p.trim() !== "").length} Players Seated
                     </span>
                   )}
                 </div>
 
-                {/* Seated Players List (Always exactly 10 slots) */}
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+                {/* Seated Players List (Always exactly 10 slots filling the available height evenly) */}
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minHeight: 0, justifyContent: 'space-between' }}>
                   {seatSlots.map((playerId, idx) => {
                     const preassigned = activeTournament?.preassignedDealers || [];
                     const isDealer = playerId ? preassigned.includes(playerId) : false;
@@ -355,19 +367,20 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            padding: '4px 8px',
+                            padding: '2px 10px',
                             backgroundColor: t.emptyRowBg,
                             border: `1px dashed ${t.rowBorder}`,
-                            borderRadius: '10px',
-                            color: t.secondaryTextColor,
-                            height: '46px',
+                            borderRadius: '8px',
+                            color: t.mutedTextColor,
+                            flex: 1,
+                            minHeight: 0,
                             boxSizing: 'border-box'
                           }}
                         >
-                          <span style={{ fontWeight: 900, color: t.secondaryTextColor, marginRight: '6px', minWidth: '35px', fontSize: '1.15rem', letterSpacing: '-0.02em' }}>
+                          <span style={{ fontWeight: 900, color: t.mutedTextColor, marginRight: '8px', minWidth: '40px', fontSize: 'clamp(1.1rem, 1.4vw, 1.35rem)', letterSpacing: '-0.02em' }}>
                             #{idx + 1}
                           </span>
-                          <span style={{ fontStyle: 'italic', fontSize: '0.85rem', color: t.secondaryTextColor }}>Empty Seat</span>
+                          <span style={{ fontStyle: 'italic', fontSize: 'clamp(0.9rem, 1.1vw, 1.05rem)', color: t.mutedTextColor, fontWeight: 600 }}>Empty Seat</span>
                         </li>
                       );
                     }
@@ -387,37 +400,36 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '4px 8px',
+                          padding: '2px 10px',
                           backgroundColor: isEliminated 
                             ? t.eliminatedRowBg 
                             : (isDealer ? t.dealerBadgeBg : t.rowBg),
                           border: `1px solid ${t.rowBorder}`,
-                          borderRadius: '10px',
-                          color: isEliminated 
-                            ? t.secondaryTextColor 
-                            : t.textColor,
-                          opacity: isEliminated ? 0.6 : 1,
+                          borderRadius: '8px',
+                          color: t.textColor,
+                          opacity: isEliminated ? 0.5 : 1,
                           textDecoration: isEliminated ? 'line-through' : 'none',
                           boxShadow: 'none',
-                          height: '46px',
+                          flex: 1,
+                          minHeight: 0,
                           boxSizing: 'border-box',
                           cursor: (!isEliminated && onEliminatePlayer) ? 'pointer' : 'default',
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        <span style={{ fontWeight: 900, color: isEliminated ? t.secondaryTextColor : t.textColor, marginRight: '6px', minWidth: '35px', fontSize: '1.15rem', letterSpacing: '-0.02em', textDecoration: isEliminated ? 'line-through' : 'none' }}>
+                        <span style={{ fontWeight: 900, color: isEliminated ? t.mutedTextColor : t.textColor, marginRight: '8px', minWidth: '40px', fontSize: 'clamp(1.15rem, 1.5vw, 1.45rem)', letterSpacing: '-0.02em', textDecoration: isEliminated ? 'line-through' : 'none' }}>
                           #{idx + 1}
                         </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, overflow: 'hidden' }}>
-                          {!isEliminated && isDealer && <Crown size={15} fill={t.textColor} style={{ color: t.textColor, flexShrink: 0 }} />}
+                          {!isEliminated && isDealer && <Crown size={18} fill="#000000" style={{ color: '#000000', flexShrink: 0 }} />}
                           <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', lineHeight: 1.05 }}>
-                            <span style={{ fontWeight: 900, fontSize: '1.15rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', letterSpacing: '-0.015em', color: isEliminated ? t.secondaryTextColor : t.textColor, textDecoration: isEliminated ? 'line-through' : 'none' }}>
+                            <span style={{ fontWeight: 900, fontSize: 'clamp(1.25rem, 1.7vw, 1.6rem)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', letterSpacing: '-0.015em', color: isEliminated ? t.mutedTextColor : t.textColor, textDecoration: isEliminated ? 'line-through' : 'none' }}>
                               {details.firstName}
                             </span>
                             <span style={{ 
-                              fontWeight: 600, 
-                              fontSize: '0.75rem', 
-                              color: isEliminated ? t.secondaryTextColor : t.textColor, 
+                              fontWeight: 800, 
+                              fontSize: 'clamp(0.8rem, 1.05vw, 0.95rem)', 
+                              color: isEliminated ? t.mutedTextColor : t.secondaryTextColor, 
                               textTransform: 'uppercase', 
                               letterSpacing: '0.04em',
                               textOverflow: 'ellipsis',
@@ -433,10 +445,10 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                         {!isEliminated && isDealer && (
                           <span 
                             style={{ 
-                              fontSize: '0.65rem', 
-                              fontWeight: 800, 
+                              fontSize: '0.7rem', 
+                              fontWeight: 900, 
                               color: t.textColor,
-                              backgroundColor: t.headerBg,
+                              backgroundColor: 'rgba(255, 255, 255, 0.7)',
                               border: `1px solid ${t.rowBorder}`,
                               padding: '2px 6px',
                               borderRadius: '6px',
@@ -451,8 +463,8 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                         {isEliminated && (
                           <span 
                             style={{ 
-                              fontSize: '0.65rem', 
-                              fontWeight: 800, 
+                              fontSize: '0.7rem', 
+                              fontWeight: 900, 
                               color: t.eliminatedBadgeText,
                               backgroundColor: t.eliminatedBadgeBg,
                               border: `1px solid ${t.rowBorder}`,
