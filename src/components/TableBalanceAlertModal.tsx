@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, ArrowRight, X, Shuffle, CheckCircle, Volume2 } from 'lucide-react';
-import type { TableBalanceRecommendation } from '../utils/tableBalancing';
+import type { TableBalanceRecommendation, PlayerMoveAssignment } from '../utils/tableBalancing';
 import { useApp } from '../context/AppContext';
 
 interface TableBalanceAlertModalProps {
@@ -320,9 +320,9 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 {(() => {
                   const grouped = (recommendation.breakAssignments || []).reduce((acc, item) => {
                     if (!acc[item.targetTable]) acc[item.targetTable] = [];
-                    acc[item.targetTable].push(item);
+                    acc[item.targetTable]!.push(item);
                     return acc;
-                  }, {} as Record<string, typeof recommendation.breakAssignments>);
+                  }, {} as Record<string, PlayerMoveAssignment[]>);
 
                   const targetTables = Object.keys(grouped);
 
