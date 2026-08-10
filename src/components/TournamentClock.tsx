@@ -1273,14 +1273,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               gap: '12px',
               flexWrap: 'wrap'
             }}>
-              {/* Left Side: Tournament Name and Tagline */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'left', flex: 1, minWidth: '260px' }}>
+              {/* Left Side: Tournament Name */}
+              <div style={{ display: 'flex', alignItems: 'center', textAlign: 'left', flex: 1, minWidth: '260px' }}>
                 <h3 style={{ fontSize: isFullscreen ? '1.25rem' : '1.05rem', fontWeight: 800, margin: 0, color: '#F2C166', lineHeight: 1.15 }}>
                   {tournament.name} — Tournament Clock
                 </h3>
-                <span style={{ fontSize: isFullscreen ? '0.8rem' : '0.7rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.15 }}>
-                  {startingChipsPerPlayer.toLocaleString()} Starting Stack • {tournament.rebuys === 'None' ? 'Freeze-out' : 'Rebuys'} • ${tournament.addonAmount} Add-on for {addonChipsPerPlayer.toLocaleString()} at 1st Break
-                </span>
               </div>
 
               {/* Right Side: Actions Buttons */}
