@@ -931,7 +931,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           backgroundColor: '#06260B',
           color: '#ffffff',
           fontFamily: '"Outfit", -apple-system, sans-serif',
-          padding: '24px 40px',
+          padding: isFullscreen ? '16px 32px' : '16px 28px',
           borderRadius: isFullscreen ? '0' : '16px',
           border: isFullscreen ? 'none' : '1px solid rgba(255,255,255,0.08)',
           boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
@@ -981,17 +981,18 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
       {/* Main Clock Grid - 2 Column Layout optimized for large TV displays */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: isFullscreen ? '360px minmax(0, 1fr)' : '320px minmax(0, 1fr)', 
-        gap: '24px', 
+        gridTemplateColumns: isFullscreen ? '350px minmax(0, 1fr)' : '310px minmax(0, 1fr)', 
+        gap: '20px', 
         flex: 1, 
-        margin: '6px 0' 
+        margin: '0',
+        minHeight: 0
       }}>
                {/* Left Column: Stats Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isFullscreen ? '4px' : '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {/* Card 1: Level */}
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
             <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
-            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+            <span style={{ fontSize: isFullscreen ? '2.5rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {currentLevel.type === 'round' ? currentLevel.roundNumber : 'BREAK'}
             </span>
           </div>
@@ -1038,7 +1039,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         </div>
 
         {/* Right Column: Main Clock Display + Places Paid Card underneath */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', justifyContent: 'space-between', minHeight: 0 }}>
           
           {/* Card A: Timer & Blinds & Active Players (Full Width stack) */}
           <div style={{ 
@@ -1047,9 +1048,10 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             backgroundColor: 'rgba(0,0,0,0.2)', 
             border: '1px solid rgba(255,255,255,0.1)', 
             borderRadius: '16px', 
-            padding: isFullscreen ? '16px 24px' : '12px 16px', 
+            padding: isFullscreen ? '14px 24px' : '10px 16px', 
             flex: 1, 
-            textAlign: 'center' 
+            textAlign: 'center',
+            minHeight: 0
           }}>
             {/* Big countdown timer in custom heavy Outfit font */}
             <div 
@@ -1058,15 +1060,15 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
-                fontSize: isFullscreen ? '21.5rem' : '10.5rem', 
+                fontSize: isFullscreen ? '17.5rem' : '10rem', 
                 fontWeight: 900, 
                 color: '#ffffff', 
                 fontFamily: '"Outfit", -apple-system, sans-serif', 
                 letterSpacing: '-0.02em',
                 cursor: 'pointer',
                 userSelect: 'none',
-                lineHeight: 0.85,
-                margin: isFullscreen ? '2px 0 16px 0' : '2px 0'
+                lineHeight: 0.82,
+                margin: isFullscreen ? '0 0 10px 0' : '0 0 4px 0'
               }}
             >
               {formatCountdown(timeRemaining)}
@@ -1078,23 +1080,23 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               justifyContent: 'space-between', 
               alignItems: 'center', 
               borderTop: '2px solid rgba(255,255,255,0.15)', 
-              paddingTop: '16px', 
-              marginBottom: '16px',
+              paddingTop: '10px', 
+              marginBottom: '10px',
               flexWrap: 'wrap',
-              gap: '12px'
+              gap: '10px'
             }}>
               {/* Current Blinds */}
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
-                <span style={{ fontSize: isFullscreen ? '1.2rem' : '1.05rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
+                <span style={{ fontSize: isFullscreen ? '1.15rem' : '1rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
                   CURRENT BLINDS
                 </span>
-                <span style={{ fontSize: isFullscreen ? '5.8rem' : '3rem', fontWeight: 900, color: '#F2C166', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
+                <span style={{ fontSize: isFullscreen ? '4.8rem' : '2.8rem', fontWeight: 900, color: '#F2C166', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
                   {currentLevel.type === 'round' 
                     ? `${currentLevel.smallBlind?.toLocaleString()} / ${currentLevel.bigBlind?.toLocaleString()}` 
                     : 'BREAK TIME'}
                 </span>
                 {currentLevel.chipUp && (
-                  <span style={{ fontSize: isFullscreen ? '1.2rem' : '1rem', color: 'var(--color-danger)', fontWeight: 800, textTransform: 'uppercase', marginLeft: '8px' }}>
+                  <span style={{ fontSize: isFullscreen ? '1.15rem' : '0.95rem', color: 'var(--color-danger)', fontWeight: 800, textTransform: 'uppercase', marginLeft: '8px' }}>
                     ⚠️ CHIP UP
                   </span>
                 )}
@@ -1102,9 +1104,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
               {/* Next Level */}
               {nextLevel && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: isFullscreen ? '1.4rem' : '1.2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: isFullscreen ? '1.3rem' : '1.1rem' }}>
                   <span style={{ fontWeight: 600 }}>NEXT LEVEL:</span>
-                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: isFullscreen ? '2.4rem' : '1.4rem', fontFamily: '"Outfit", sans-serif' }}>
+                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: isFullscreen ? '2.1rem' : '1.3rem', fontFamily: '"Outfit", sans-serif' }}>
                     {nextLevel.type === 'round' 
                       ? `${nextLevel.smallBlind?.toLocaleString()} / ${nextLevel.bigBlind?.toLocaleString()}` 
                       : 'BREAK TIME'}
@@ -1118,7 +1120,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               width: '100%',
               height: '2px',
               background: 'linear-gradient(90deg, rgba(242, 193, 102, 0.15) 0%, rgba(242, 193, 102, 0.8) 50%, rgba(242, 193, 102, 0.15) 100%)',
-              marginBottom: '16px',
+              marginBottom: '10px',
               borderRadius: '2px'
             }} />
 
@@ -1128,17 +1130,18 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               border: isBustOutOpen ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.15)', 
               boxShadow: isBustOutOpen ? '0 0 20px rgba(239, 68, 68, 0.4)' : 'none',
               borderRadius: '12px', 
-              padding: isFullscreen ? '12px 18px' : '16px 20px', 
+              padding: isFullscreen ? '10px 16px' : '10px 14px', 
               width: '100%', 
               textAlign: 'left', 
               display: 'flex', 
               flexDirection: 'column', 
               gap: '6px',
-              maxHeight: isFullscreen ? '500px' : '260px',
-              transition: 'all 0.3s ease-in-out'
+              maxHeight: isFullscreen ? '360px' : '220px',
+              transition: 'all 0.3s ease-in-out',
+              minHeight: 0
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
-                <span style={{ fontSize: isFullscreen ? '1.35rem' : '1.05rem', fontWeight: 800, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: isFullscreen ? '1.25rem' : '1rem', fontWeight: 800, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
                   ACTIVE PLAYERS ({activePlayers.length} ALIVE)
                 </span>
               </div>
@@ -1254,11 +1257,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column',
-            gap: '8px', 
+            gap: '4px', 
             backgroundColor: '#0D4014', 
             border: '1px solid rgba(255,255,255,0.1)', 
-            borderRadius: '12px', 
-            padding: isFullscreen ? '12px 20px' : '10px 16px',
+            borderRadius: '10px', 
+            padding: isFullscreen ? '8px 16px' : '6px 12px',
             width: '100%'
           }}>
             {/* Administration Actions shortcuts (excluding Buy-in and Bust Out) */}
@@ -1267,15 +1270,15 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               justifyContent: 'space-between',
               alignItems: 'center', 
               width: '100%', 
-              gap: '16px',
+              gap: '12px',
               flexWrap: 'wrap'
             }}>
               {/* Left Side: Tournament Name and Tagline */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left', flex: 1, minWidth: '280px' }}>
-                <h3 style={{ fontSize: isFullscreen ? '1.4rem' : '1.15rem', fontWeight: 800, margin: 0, color: '#F2C166', lineHeight: 1.15 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', textAlign: 'left', flex: 1, minWidth: '260px' }}>
+                <h3 style={{ fontSize: isFullscreen ? '1.25rem' : '1.05rem', fontWeight: 800, margin: 0, color: '#F2C166', lineHeight: 1.15 }}>
                   {tournament.name} — Tournament Clock
                 </h3>
-                <span style={{ fontSize: isFullscreen ? '0.85rem' : '0.75rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.15 }}>
+                <span style={{ fontSize: isFullscreen ? '0.8rem' : '0.7rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.15 }}>
                   {startingChipsPerPlayer.toLocaleString()} Starting Stack • {tournament.rebuys === 'None' ? 'Freeze-out' : 'Rebuys'} • ${tournament.addonAmount} Add-on for {addonChipsPerPlayer.toLocaleString()} at 1st Break
                 </span>
               </div>
