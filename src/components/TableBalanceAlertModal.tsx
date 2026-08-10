@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 interface TableBalanceAlertModalProps {
   isOpen: boolean;
   recommendation: TableBalanceRecommendation | null;
+  seating?: Record<string, string[]>;
   onClose: () => void;
   onConfirmMove: (playerId: string, sourceTable: string, targetTable: string) => void;
   onConfirmBreak: (breakTable: string) => void;
@@ -22,6 +23,7 @@ const TABLE_THEME_BADGES: Record<string, { bg: string; color: string }> = {
 export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
   isOpen,
   recommendation,
+  seating,
   onClose,
   onConfirmMove,
   onConfirmBreak
@@ -30,13 +32,22 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
 
   useEffect(() => {
-    if (recommendation && recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0) {
-      // Default to first active player in list
-      setSelectedPlayerId(recommendation.sourceActivePlayers[0]);
+    if (recommendation) {
+      const activeList = (recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0)
+        ? recommendation.sourceActivePlayers
+        : (seating && recommendation.sourceTable && seating[recommendation.sourceTable]
+            ? seating[recommendation.sourceTable].filter(id => id && id.trim() !== '')
+            : []);
+
+      if (activeList.length > 0) {
+        setSelectedPlayerId(activeList[0]);
+      } else {
+        setSelectedPlayerId('');
+      }
     } else {
       setSelectedPlayerId('');
     }
-  }, [recommendation]);
+  }, [recommendation, seating]);
 
   if (!isOpen || !recommendation) return null;
 
@@ -208,11 +219,23 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                   cursor: 'pointer'
                 }}
               >
-                {(recommendation.sourceActivePlayers || []).map(pId => (
-                  <option key={pId} value={pId} style={{ backgroundColor: '#1e293b', color: '#ffffff' }}>
-                    {getMemberName(pId)}
-                  </option>
-                ))}
+                {(() => {
+                  const sourceTableSeats = (seating && recommendation.sourceTable && seating[recommendation.sourceTable]) || [];
+                  const activeList = (recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0)
+                    ? recommendation.sourceActivePlayers
+                    : sourceTableSeats.filter(id => id && id.trim() !== '');
+
+                  return activeList.map(pId => {
+                    const seatIndex = sourceTableSeats.findIndex(id => id === pId);
+                    const seatLabel = seatIndex !== -1 ? `Seat ${seatIndex + 1}: ` : '';
+                    const name = getMemberName(pId);
+                    return (
+                      <option key={pId} value={pId} style={{ backgroundColor: '#1e293b', color: '#ffffff' }}>
+                        {seatLabel}{name}
+                      </option>
+                    );
+                  });
+                })()}
               </select>
               <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '6px', margin: 0 }}>
                 💡 The player will automatically be placed into the first open seat at {recommendation.targetTable.toUpperCase()}.

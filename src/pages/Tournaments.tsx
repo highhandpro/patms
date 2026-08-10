@@ -3712,6 +3712,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           <TableBalanceAlertModal
             isOpen={isBalanceModalOpen}
             recommendation={balanceRecommendation}
+            seating={seating}
             onClose={() => {
               setIsBalanceModalOpen(false);
               setBalanceRecommendation(null);
