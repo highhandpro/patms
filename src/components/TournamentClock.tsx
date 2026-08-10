@@ -1087,7 +1087,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             backgroundColor: 'rgba(0,0,0,0.25)', 
             border: '1px solid rgba(255,255,255,0.1)', 
             borderRadius: '16px', 
-            padding: '6px 16px 10px 16px', 
+            padding: '14px 20px 14px 20px', 
             flex: 1, 
             textAlign: 'center',
             minHeight: 0
@@ -1099,15 +1099,17 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
-                fontSize: '24.5rem', 
+                fontSize: '21.5rem', 
                 fontWeight: 950, 
                 color: '#ffffff', 
                 fontFamily: '"Outfit", -apple-system, sans-serif', 
-                letterSpacing: '-0.025em',
+                letterSpacing: '-0.02em',
                 cursor: 'pointer',
                 userSelect: 'none',
-                lineHeight: 0.76,
-                margin: '0 0 4px 0'
+                lineHeight: 0.86,
+                paddingTop: '20px',
+                paddingBottom: '20px',
+                margin: '0'
               }}
             >
               {formatCountdown(timeRemaining)}
@@ -1119,8 +1121,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               justifyContent: 'space-between', 
               alignItems: 'center', 
               borderTop: '2px solid rgba(255,255,255,0.15)', 
-              paddingTop: '6px', 
-              marginBottom: '6px',
+              paddingTop: '10px', 
+              marginBottom: '8px',
               flexWrap: 'wrap',
               gap: '12px'
             }}>
