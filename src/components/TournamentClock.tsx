@@ -1024,52 +1024,52 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         margin: '0',
         minHeight: 0
       }}>
-               {/* Left Column: Stats Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {/* Left Column: Stats Cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {/* Card 1: Level */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
-            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
+            <span style={{ fontSize: '2.6rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {currentLevel.type === 'round' ? currentLevel.roundNumber : 'BREAK'}
             </span>
           </div>
 
           {/* Card 2: Current Time */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CURRENT TIME</span>
-            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CURRENT TIME</span>
+            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {realTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toLowerCase()}
             </span>
           </div>
 
           {/* Card 3: Next Break */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NEXT BREAK IN</span>
-            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#F2C166', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NEXT BREAK IN</span>
+            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#F2C166', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatHoursMinsSecs(getNextBreakInSeconds())}
             </span>
           </div>
 
           {/* Card 4: Players In */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PLAYERS IN / ALIVE</span>
-            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PLAYERS IN / ALIVE</span>
+            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {activePlayers.length} / {checkedInPlayers.length}
             </span>
           </div>
 
           {/* Card 5: Average Stack */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AVERAGE STACK</span>
-            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AVERAGE STACK</span>
+            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(avgStack)}
             </span>
           </div>
 
           {/* Card 6: Chips In Play */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CHIPS IN PLAY</span>
-            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px 12px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CHIPS IN PLAY</span>
+            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(totalChips)}
             </span>
           </div>
@@ -1097,7 +1097,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
-                fontSize: isFullscreen ? '14.5rem' : '9rem', 
+                fontSize: '18rem', 
                 fontWeight: 900, 
                 color: '#ffffff', 
                 fontFamily: '"Outfit", -apple-system, sans-serif', 
@@ -1105,7 +1105,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 cursor: 'pointer',
                 userSelect: 'none',
                 lineHeight: 0.8,
-                margin: '0'
+                margin: '0 0 6px 0'
               }}
             >
               {formatCountdown(timeRemaining)}
@@ -1123,17 +1123,17 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               gap: '8px'
             }}>
               {/* Current Blinds */}
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                <span style={{ fontSize: isFullscreen ? '1.1rem' : '0.95rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
+                <span style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
                   CURRENT BLINDS
                 </span>
-                <span style={{ fontSize: isFullscreen ? '3.8rem' : '2.6rem', fontWeight: 900, color: '#F2C166', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
+                <span style={{ fontSize: '5rem', fontWeight: 900, color: '#F2C166', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
                   {currentLevel.type === 'round' 
                     ? `${currentLevel.smallBlind?.toLocaleString()} / ${currentLevel.bigBlind?.toLocaleString()}` 
                     : 'BREAK TIME'}
                 </span>
                 {currentLevel.chipUp && (
-                  <span style={{ fontSize: isFullscreen ? '1.1rem' : '0.9rem', color: 'var(--color-danger)', fontWeight: 800, textTransform: 'uppercase', marginLeft: '6px' }}>
+                  <span style={{ fontSize: '1.15rem', color: 'var(--color-danger)', fontWeight: 800, textTransform: 'uppercase', marginLeft: '6px' }}>
                     ⚠️ CHIP UP
                   </span>
                 )}
@@ -1141,9 +1141,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
               {/* Next Level */}
               {nextLevel && (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: isFullscreen ? '1.25rem' : '1.05rem' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '1.35rem' }}>
                   <span style={{ fontWeight: 600 }}>NEXT LEVEL:</span>
-                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: isFullscreen ? '1.9rem' : '1.25rem', fontFamily: '"Outfit", sans-serif' }}>
+                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: '2.4rem', fontFamily: '"Outfit", sans-serif' }}>
                     {nextLevel.type === 'round' 
                       ? `${nextLevel.smallBlind?.toLocaleString()} / ${nextLevel.bigBlind?.toLocaleString()}` 
                       : 'BREAK TIME'}
@@ -1161,32 +1161,32 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               borderRadius: '2px'
             }} />
 
-            {/* Active Players list (Full width under blinds row) */}
+            {/* Active Players list (Full width under blinds row in balanced 4 columns) */}
             <div style={{ 
               backgroundColor: 'rgba(5, 16, 32, 0.95)', 
               border: isBustOutOpen ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.15)', 
               boxShadow: isBustOutOpen ? '0 0 20px rgba(239, 68, 68, 0.4)' : 'none',
               borderRadius: '12px', 
-              padding: isFullscreen ? '8px 14px' : '8px 12px', 
+              padding: '8px 14px', 
               width: '100%', 
               textAlign: 'left', 
               display: 'flex', 
               flexDirection: 'column', 
               gap: '4px',
-              maxHeight: isFullscreen ? '300px' : '200px',
-              transition: 'all 0.3s ease-in-out',
-              minHeight: 0
+              transition: 'all 0.3s ease-in-out'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '3px' }}>
-                <span style={{ fontSize: isFullscreen ? '1.15rem' : '0.95rem', fontWeight: 800, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
                   ACTIVE PLAYERS ({activePlayers.length} ALIVE)
                 </span>
               </div>
               <div style={{ 
-                columnCount: activePlayers.length <= 15 ? 3 : 4,
+                display: 'grid',
+                gridTemplateColumns: activePlayers.length <= 15 ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
+                gridTemplateRows: `repeat(${Math.max(1, Math.ceil(sortedActivePlayers.length / (activePlayers.length <= 15 ? 3 : 4)))}, auto)`,
+                gridAutoFlow: 'column',
                 columnGap: '16px',
-                overflowY: 'auto',
-                paddingRight: '4px',
+                rowGap: '3px',
                 width: '100%'
               }}>
                 {sortedActivePlayers.map(p => {
@@ -1210,11 +1210,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                       }}
                       style={{ 
                         cursor: 'pointer', 
-                        fontSize: isFullscreen ? '1.45rem' : '0.9rem', 
+                        fontSize: '1.05rem', 
                         fontWeight: 700, 
                         color: '#ffffff',
-                        padding: isFullscreen ? '3px 8px' : '2px 6px',
-                        borderRadius: '6px',
+                        padding: '2px 8px',
+                        borderRadius: '5px',
                         backgroundColor: 'rgba(255,255,255,0.03)',
                         textAlign: 'left',
                         border: '1px solid rgba(255,255,255,0.06)',
@@ -1222,8 +1222,6 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         transition: 'all 0.15s ease-in-out',
-                        breakInside: 'avoid',
-                        marginBottom: isFullscreen ? '4px' : '4px',
                         display: 'block'
                       }}
                       title={`Click to bust out ${name}`}
