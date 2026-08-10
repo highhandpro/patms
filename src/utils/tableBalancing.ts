@@ -1,3 +1,11 @@
+export interface PlayerMoveAssignment {
+  playerId: string;
+  orderNumber: number; // 1, 2, 3...
+  targetTable: string;
+  targetSeatIndex: number; // 0-indexed
+  targetSeatNumber: number; // 1-indexed (Seat 1 - 10)
+}
+
 export interface TableBalanceRecommendation {
   type: 'rebalance' | 'break';
   sourceTable?: string;
@@ -7,11 +15,83 @@ export interface TableBalanceRecommendation {
   targetActiveCount?: number;
   breakTable?: string;
   breakPlayerIds?: string[];
+  breakAssignments?: PlayerMoveAssignment[];
   remainingTables?: string[];
   message: string;
 }
 
 const TABLE_ORDER = ['red table', 'blue table', 'gold table', 'gray table', 'purple table'];
+
+/**
+ * Calculates deterministic numbered player assignments to destination tables and open seats.
+ */
+export const calculateBreakAssignments = (
+  seating: Record<string, string[]>,
+  breakTable: string,
+  activeTournament: any
+): PlayerMoveAssignment[] => {
+  if (!activeTournament || !activeTournament.entries || !seating || !seating[breakTable]) return [];
+
+  const activeEntries = activeTournament.entries.filter((e: any) => !e.eliminatedAt);
+  const activeSet = new Set<string>(activeEntries.map((e: any) => e.memberId));
+
+  // Get active players at break table in seat order (Seat 1 to 10)
+  const playersToMove = (seating[breakTable] || []).filter(id => id && activeSet.has(id));
+  if (playersToMove.length === 0) return [];
+
+  // Get remaining active tables in standard order
+  const remainingTableNames = Object.keys(seating)
+    .filter(t => t !== breakTable)
+    .sort((a, b) => TABLE_ORDER.indexOf(a) - TABLE_ORDER.indexOf(b));
+
+  if (remainingTableNames.length === 0) return [];
+
+  // Find open seat indices for each remaining table
+  const openSeatsByTable: Record<string, number[]> = {};
+  remainingTableNames.forEach(tName => {
+    const seats = seating[tName] || [];
+    const openSeats: number[] = [];
+    for (let i = 0; i < 10; i++) {
+      const occupant = seats[i];
+      if (!occupant || !activeSet.has(occupant)) {
+        openSeats.push(i);
+      }
+    }
+    openSeatsByTable[tName] = openSeats;
+  });
+
+  const assignments: PlayerMoveAssignment[] = [];
+  const tablePlayerCounts: Record<string, number> = {};
+  remainingTableNames.forEach(tName => {
+    tablePlayerCounts[tName] = 0;
+  });
+
+  let tableIdx = 0;
+  playersToMove.forEach(pId => {
+    const targetTable = remainingTableNames[tableIdx % remainingTableNames.length];
+    tablePlayerCounts[targetTable] = (tablePlayerCounts[targetTable] || 0) + 1;
+    const orderNumber = tablePlayerCounts[targetTable]; // 1, 2, 3...
+
+    const availableSeats = openSeatsByTable[targetTable] || [];
+    // 1st player gets 1st open seat (availableSeats[0]), 2nd gets availableSeats[1], etc.
+    let seatIndex = availableSeats[orderNumber - 1];
+    if (seatIndex === undefined) {
+      seatIndex = (seating[targetTable]?.length || 10) + (orderNumber - 1);
+    }
+
+    assignments.push({
+      playerId: pId,
+      orderNumber,
+      targetTable,
+      targetSeatIndex: seatIndex,
+      targetSeatNumber: seatIndex + 1
+    });
+
+    tableIdx++;
+  });
+
+  return assignments;
+};
 
 /**
  * Checks whether tables are currently unbalanced (difference >= 2) or if a table break threshold is reached.
@@ -54,6 +134,7 @@ export const checkTableBalance = (
       type: 'break',
       breakTable: breakTableObj.name,
       breakPlayerIds: breakTableObj.activePlayers,
+      breakAssignments: calculateBreakAssignments(seating, breakTableObj.name, activeTournament),
       remainingTables: remaining,
       message: `Consolidate to 4 tables: Break ${breakTableObj.name.toUpperCase()} (${totalActive} players remaining).`
     };
@@ -66,6 +147,7 @@ export const checkTableBalance = (
       type: 'break',
       breakTable: breakTableObj.name,
       breakPlayerIds: breakTableObj.activePlayers,
+      breakAssignments: calculateBreakAssignments(seating, breakTableObj.name, activeTournament),
       remainingTables: remaining,
       message: `Consolidate to 3 tables: Break ${breakTableObj.name.toUpperCase()} (${totalActive} players remaining).`
     };
@@ -78,6 +160,7 @@ export const checkTableBalance = (
       type: 'break',
       breakTable: breakTableObj.name,
       breakPlayerIds: breakTableObj.activePlayers,
+      breakAssignments: calculateBreakAssignments(seating, breakTableObj.name, activeTournament),
       remainingTables: remaining,
       message: `Consolidate to 2 tables: Break ${breakTableObj.name.toUpperCase()} (${totalActive} players remaining).`
     };
@@ -90,6 +173,7 @@ export const checkTableBalance = (
       type: 'break',
       breakTable: breakTableObj.name,
       breakPlayerIds: breakTableObj.activePlayers,
+      breakAssignments: calculateBreakAssignments(seating, breakTableObj.name, activeTournament),
       remainingTables: remaining,
       message: `Final Table Reached! Break ${breakTableObj.name.toUpperCase()} (${totalActive} players remaining).`
     };
@@ -166,18 +250,15 @@ export const executePlayerMove = (
 };
 
 /**
- * Breaks a table and distributes all active players into open seats across remaining tables.
+ * Breaks a table and distributes all active players into open seats across remaining tables in numbered 1, 2, 3 order.
  */
 export const executeTableBreak = (
   seating: Record<string, string[]>,
   breakTable: string,
   activeTournament: any
 ): Record<string, string[]> => {
+  const assignments = calculateBreakAssignments(seating, breakTable, activeTournament);
   const updatedSeating: Record<string, string[]> = {};
-  const activeEntries = activeTournament.entries.filter((e: any) => !e.eliminatedAt);
-  const activeSet = new Set<string>(activeEntries.map((e: any) => e.memberId));
-
-  const playersToMove = (seating[breakTable] || []).filter(id => id && activeSet.has(id));
 
   // Copy remaining tables
   Object.entries(seating).forEach(([tName, seats]) => {
@@ -186,22 +267,15 @@ export const executeTableBreak = (
     }
   });
 
-  const remainingTableNames = Object.keys(updatedSeating).sort(
-    (a, b) => TABLE_ORDER.indexOf(a) - TABLE_ORDER.indexOf(b)
-  );
-
-  if (remainingTableNames.length === 0) return seating;
-
-  let tableIdx = 0;
-  playersToMove.forEach(pId => {
-    const targetTable = remainingTableNames[tableIdx % remainingTableNames.length];
-    const emptyIndex = updatedSeating[targetTable].findIndex(id => !id || id === "");
-    if (emptyIndex !== -1) {
-      updatedSeating[targetTable][emptyIndex] = pId;
-    } else {
-      updatedSeating[targetTable].push(pId);
+  // Apply the assignments to the target tables in exact seat order
+  assignments.forEach(item => {
+    if (!updatedSeating[item.targetTable]) {
+      updatedSeating[item.targetTable] = Array(10).fill("");
     }
-    tableIdx++;
+    while (updatedSeating[item.targetTable].length <= item.targetSeatIndex) {
+      updatedSeating[item.targetTable].push("");
+    }
+    updatedSeating[item.targetTable][item.targetSeatIndex] = item.playerId;
   });
 
   return updatedSeating;

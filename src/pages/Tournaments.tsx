@@ -10,8 +10,8 @@ import { LateEntryModal } from '../components/LateEntryModal';
 import { TournamentClock } from '../components/TournamentClock';
 import { GameResultsFacebook } from '../components/GameResultsFacebook';
 import { TableBalanceAlertModal } from '../components/TableBalanceAlertModal';
-import { checkTableBalance, executePlayerMove, executeTableBreak } from '../utils/tableBalancing';
-import type { TableBalanceRecommendation } from '../utils/tableBalancing';
+import { checkTableBalance, executePlayerMove, executeTableBreak, calculateBreakAssignments } from '../utils/tableBalancing';
+import type { TableBalanceRecommendation, PlayerMoveAssignment } from '../utils/tableBalancing';
 import { playTableBalanceAlertSound } from '../utils/audioAlerts';
 import { 
   Trophy, Play, RotateCcw, Plus, 
@@ -197,7 +197,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // Table balancing alert modal state
   const [balanceRecommendation, setBalanceRecommendation] = useState<TableBalanceRecommendation | null>(null);
   const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
-  const [showResumeClockModal, setShowResumeClockModal] = useState<{ title: string; message: string } | null>(null);
+  const [showResumeClockModal, setShowResumeClockModal] = useState<{ title: string; message: string; assignments?: PlayerMoveAssignment[] } | null>(null);
 
   // Payout and Add-ons configuration states
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
@@ -768,6 +768,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   const handleConfirmTableBreak = (breakTable: string) => {
     if (!activeTournament) return;
+    const assignments = calculateBreakAssignments(seating, breakTable, activeTournament);
     const updated = executeTableBreak(seating, breakTable, activeTournament);
     setSeating(updated);
     localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updated));
@@ -777,7 +778,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
     setShowResumeClockModal({
       title: 'Table Broken & Players Moved',
-      message: `${breakTable.toUpperCase()} has been broken and players distributed to active tables. Verify all players are in their seats, then start the clock.`
+      message: `${breakTable.toUpperCase()} has been broken and players distributed to active tables in 1, 2, 3 order. Verify all players are in their seats, then start the clock.`,
+      assignments
     });
   };
 
@@ -3769,10 +3771,50 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', margin: '6px 0 10px 0' }}>
                     {showResumeClockModal.title}
                   </h2>
-                  <p style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: '0.95rem', color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: 1.5 }}>
                     {showResumeClockModal.message}
                   </p>
                 </div>
+
+                {/* List of moves if assignments exist */}
+                {showResumeClockModal.assignments && showResumeClockModal.assignments.length > 0 && (
+                  <div style={{ width: '100%', maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                    {(() => {
+                      const grouped = showResumeClockModal.assignments.reduce((acc, item) => {
+                        if (!acc[item.targetTable]) acc[item.targetTable] = [];
+                        acc[item.targetTable].push(item);
+                        return acc;
+                      }, {} as Record<string, typeof showResumeClockModal.assignments>);
+
+                      return Object.keys(grouped).map(tName => {
+                        const playerList = grouped[tName] || [];
+                        return (
+                          <div key={tName} style={{ backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px' }}>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--color-gold)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                              Moving to {tName}
+                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              {playerList.map(item => {
+                                const mem = state.members.find(m => m.id === item.playerId);
+                                const name = mem ? `${mem.firstName} ${mem.lastName}` : 'Player';
+                                return (
+                                  <div key={item.playerId} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                                    <span style={{ color: '#ffffff', fontWeight: 700 }}>
+                                      {item.orderNumber}. {name}
+                                    </span>
+                                    <span style={{ color: '#10b981', fontWeight: 800 }}>
+                                      Seat {item.targetSeatNumber} ({item.orderNumber === 1 ? '1st' : item.orderNumber === 2 ? '2nd' : `${item.orderNumber}th`} open seat)
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                )}
 
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
                   <button

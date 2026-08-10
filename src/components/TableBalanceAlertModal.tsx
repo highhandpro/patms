@@ -278,36 +278,145 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
                 border: '1px solid rgba(239, 68, 68, 0.3)',
                 borderRadius: '14px',
-                padding: '16px',
-                marginBottom: '20px',
+                padding: '14px',
+                marginBottom: '16px',
                 textAlign: 'center'
               }}
             >
-              <span style={{ fontSize: '0.8rem', color: '#fca5a5', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#fca5a5', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
                 TABLE BEING BROKEN
               </span>
               <span
                 style={{
                   backgroundColor: breakBadge?.bg,
                   color: breakBadge?.color,
-                  padding: '8px 16px',
-                  borderRadius: '10px',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
                   fontWeight: 900,
-                  fontSize: '1.05rem',
+                  fontSize: '1rem',
                   textTransform: 'uppercase',
                   display: 'inline-block'
                 }}
               >
                 {recommendation.breakTable}
               </span>
-              <p style={{ fontSize: '0.85rem', color: '#e2e8f0', marginTop: '12px', margin: 0, fontWeight: 600 }}>
+              <p style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: '8px', margin: 0, fontWeight: 600 }}>
                 {recommendation.message}
               </p>
             </div>
 
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '20px', lineHeight: 1.4 }}>
-              Active players from <strong>{recommendation.breakTable.toUpperCase()}</strong> will be distributed evenly into the open seats of the remaining active tables.
-            </p>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <label style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                  Player Move Assignments (In Order 1, 2, 3...):
+                </label>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>
+                  Fills open seats in order
+                </span>
+              </div>
+
+              {/* Grouped Table Assignments List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '280px', overflowY: 'auto', paddingRight: '4px' }}>
+                {(() => {
+                  const grouped = (recommendation.breakAssignments || []).reduce((acc, item) => {
+                    if (!acc[item.targetTable]) acc[item.targetTable] = [];
+                    acc[item.targetTable].push(item);
+                    return acc;
+                  }, {} as Record<string, typeof recommendation.breakAssignments>);
+
+                  const targetTables = Object.keys(grouped);
+
+                  if (targetTables.length === 0) {
+                    return (
+                      <p style={{ fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
+                        Active players from {recommendation.breakTable.toUpperCase()} will be distributed evenly into open seats.
+                      </p>
+                    );
+                  }
+
+                  return targetTables.map(tName => {
+                    const badge = TABLE_THEME_BADGES[tName.toLowerCase()] || { bg: '#334155', color: '#fff' };
+                    const playerList = grouped[tName] || [];
+
+                    return (
+                      <div
+                        key={tName}
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderRadius: '10px',
+                          padding: '10px 12px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span
+                            style={{
+                              backgroundColor: badge.bg,
+                              color: badge.color,
+                              padding: '3px 8px',
+                              borderRadius: '6px',
+                              fontWeight: 900,
+                              fontSize: '0.8rem',
+                              textTransform: 'uppercase'
+                            }}
+                          >
+                            Moving to {tName}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>
+                            {playerList.length} player{playerList.length > 1 ? 's' : ''}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          {playerList.map(item => (
+                            <div
+                              key={item.playerId}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                                padding: '5px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ 
+                                  backgroundColor: '#f59e0b', 
+                                  color: '#000000', 
+                                  width: '20px', 
+                                  height: '20px', 
+                                  borderRadius: '50%', 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'center', 
+                                  fontWeight: 900, 
+                                  fontSize: '0.75rem' 
+                                }}>
+                                  {item.orderNumber}
+                                </span>
+                                <span style={{ fontWeight: 700, color: '#ffffff' }}>
+                                  {getMemberName(item.playerId)}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ color: '#10b981', fontWeight: 800 }}>
+                                  Seat {item.targetSeatNumber}
+                                </span>
+                                <span style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '0.75rem' }}>
+                                  ({item.orderNumber === 1 ? '1st' : item.orderNumber === 2 ? '2nd' : `${item.orderNumber}th`} open seat)
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
 
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -353,7 +462,7 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 }}
               >
                 <Shuffle size={18} />
-                <span>Break & Distribute Players</span>
+                <span>Confirm & Break Table</span>
               </button>
             </div>
           </div>
