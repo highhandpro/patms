@@ -1117,8 +1117,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             <div style={{
               width: '100%',
               height: '2px',
-              backgroundColor: 'rgba(255, 255, 255, 0.25)',
-              marginBottom: '16px'
+              background: 'linear-gradient(90deg, rgba(242, 193, 102, 0.15) 0%, rgba(242, 193, 102, 0.8) 50%, rgba(242, 193, 102, 0.15) 100%)',
+              marginBottom: '16px',
+              borderRadius: '2px'
             }} />
 
             {/* Active Players list (Full width under blinds row) */}
