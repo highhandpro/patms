@@ -986,60 +986,59 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         flex: 1, 
         margin: '6px 0' 
       }}>
-        
-        {/* Left Column: Stats Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isFullscreen ? '6px' : '6px' }}>
+               {/* Left Column: Stats Cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isFullscreen ? '4px' : '4px' }}>
           {/* Card 1: Level */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
-            <span style={{ fontSize: isFullscreen ? '2.8rem' : '2.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>LEVEL</span>
+            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {currentLevel.type === 'round' ? currentLevel.roundNumber : 'BREAK'}
             </span>
           </div>
 
           {/* Card 2: Current Time */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CURRENT TIME</span>
-            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CURRENT TIME</span>
+            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {realTime.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toLowerCase()}
             </span>
           </div>
 
           {/* Card 3: Next Break */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NEXT BREAK IN</span>
-            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#F2C166', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NEXT BREAK IN</span>
+            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#F2C166', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatHoursMinsSecs(getNextBreakInSeconds())}
             </span>
           </div>
 
           {/* Card 4: Players In */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PLAYERS IN / ALIVE</span>
-            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PLAYERS IN / ALIVE</span>
+            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {activePlayers.length} / {checkedInPlayers.length}
             </span>
           </div>
 
           {/* Card 5: Average Stack */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AVERAGE STACK</span>
-            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AVERAGE STACK</span>
+            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(avgStack)}
             </span>
           </div>
 
           {/* Card 6: Chips In Play */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '8px 12px' : '8px 10px', textAlign: 'center', flex: 1 }}>
-            <span style={{ fontSize: isFullscreen ? '1.05rem' : '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CHIPS IN PLAY</span>
-            <span style={{ fontSize: isFullscreen ? '2.4rem' : '2.1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px', fontFamily: '"Outfit", sans-serif' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: isFullscreen ? '6px 10px' : '4px 8px', textAlign: 'center', flex: 1 }}>
+            <span style={{ fontSize: isFullscreen ? '0.95rem' : '0.75rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>CHIPS IN PLAY</span>
+            <span style={{ fontSize: isFullscreen ? '2.1rem' : '1.75rem', fontWeight: 900, color: '#ffffff', marginTop: '1px', fontFamily: '"Outfit", sans-serif' }}>
               {formatChipsCompact(totalChips)}
             </span>
           </div>
         </div>
 
         {/* Right Column: Main Clock Display + Places Paid Card underneath */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'space-between' }}>
           
           {/* Card A: Timer & Blinds & Active Players (Full Width stack) */}
           <div style={{ 
@@ -1113,6 +1112,14 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 </div>
               )}
             </div>
+
+            {/* Divider Line between Blinds and Active Players */}
+            <div style={{
+              width: '100%',
+              height: '2px',
+              backgroundColor: 'rgba(255, 255, 255, 0.25)',
+              marginBottom: '16px'
+            }} />
 
             {/* Active Players list (Full width under blinds row) */}
             <div style={{ 
@@ -1200,11 +1207,11 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   gridTemplateRows: 'repeat(3, auto)',
                   gridAutoFlow: 'column',
                   gap: '8px 24px', 
-                  backgroundColor: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  width: '100%'
+                  backgroundColor: 'rgba(255,255,255,0.02)', 
+                  border: '1px solid rgba(255,255,255,0.05)', 
+                  borderRadius: '8px', 
+                  padding: '10px 14px', 
+                  width: '100%' 
                 }}>
                   {(() => {
                     const bubblePosition = payoutsList.length + 1;
@@ -1242,105 +1249,23 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             )}
           </div>
 
-          {/* Card B: Places Paid & Controls Stack (Wide layout at the bottom, logo removed) */}
+          {/* Card B: Tournament Info & Controls Stack (Wide layout at the bottom, scrolling ticker removed) */}
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column',
-            gap: '12px', 
+            gap: '8px', 
             backgroundColor: '#0D4014', 
             border: '1px solid rgba(255,255,255,0.1)', 
             borderRadius: '12px', 
-            padding: isFullscreen ? '14px 20px' : '10px 16px',
+            padding: isFullscreen ? '12px 20px' : '10px 16px',
             width: '100%'
           }}>
-            {/* Inline Style Injection for infinite loop horizontal scrolling marquee */}
-            <style>{`
-              @keyframes marquee {
-                0% { transform: translate3d(0, 0, 0); }
-                100% { transform: translate3d(-50%, 0, 0); }
-              }
-            `}</style>
-
-            {/* Places Paid Horizontal Marquee Ticker */}
-            <div style={{ width: '100%' }}>
-
-                {(() => {
-                  const bubblePosition = payoutsList.length + 1;
-                  const tickerList = [...payoutsList];
-                  if (bubbleAmount > 0) {
-                    tickerList.push({
-                      place: bubblePosition,
-                      pct: 0,
-                      amount: bubbleAmount,
-                      isBubble: true
-                    } as any);
-                  }
-                  if (tickerList.length === 0) {
-                    return (
-                      <div style={{ color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', fontSize: '0.9rem', textAlign: 'center', padding: '6px' }}>
-                        Setup place payout percentages to display dynamic awards.
-                      </div>
-                    );
-                  }
-
-                  const showVerticalStack = activePlayers.length <= 10;
-
-                  if (showVerticalStack) {
-                    return null;
-                  }
-
-                  return (
-                    <div style={{ 
-                      overflow: 'hidden', 
-                      width: '100%', 
-                      position: 'relative', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      height: isFullscreen ? '36px' : '30px', 
-                      backgroundColor: 'rgba(255,255,255,0.02)', 
-                      borderRadius: '6px', 
-                      border: '1px solid rgba(255,255,255,0.05)', 
-                      padding: '0 12px' 
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        gap: '40px',
-                        whiteSpace: 'nowrap',
-                        animation: 'marquee 25s linear infinite',
-                        width: 'max-content'
-                      }}>
-                        {[...tickerList, ...tickerList].map((p: any, idx) => {
-                          const playerNameAtPlace = getPlayerAtPlace(p.place);
-                          const displayLabel = p.isBubble
-                            ? (playerNameAtPlace ? `Bubble (${p.place}th) ${playerNameAtPlace}` : `Bubble (${p.place}th)`)
-                            : (playerNameAtPlace 
-                              ? `${p.place === 1 ? '🥇' : p.place === 2 ? '🥈' : p.place === 3 ? '🥉' : `${p.place}th`} ${playerNameAtPlace}`
-                              : (p.place === 1 ? '🥇 1st Place' : p.place === 2 ? '🥈 2nd Place' : p.place === 3 ? '🥉 3rd Place' : `${p.place}th Place`));
-
-                          return (
-                            <div key={`${p.place}-${idx}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: isFullscreen ? '1.25rem' : '1rem' }}>
-                              <span style={{ color: playerNameAtPlace ? '#ffffff' : 'rgba(255,255,255,0.7)', fontWeight: 800 }}>
-                                {displayLabel}:
-                              </span>
-                              <span style={{ color: 'var(--color-emerald)', fontWeight: 900, fontFamily: '"Outfit", sans-serif' }}>
-                                ${p.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })()}
-            </div>
             {/* Administration Actions shortcuts (excluding Buy-in and Bust Out) */}
             <div style={{ 
               display: 'flex', 
               justifyContent: 'space-between',
-              alignItems: 'center',
+              alignItems: 'center', 
               width: '100%', 
-              borderTop: '1px solid rgba(255,255,255,0.05)', 
-              paddingTop: '12px',
               gap: '16px',
               flexWrap: 'wrap'
             }}>
