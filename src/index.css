@@ -1664,6 +1664,17 @@ body.display-mode-active .main-content {
   padding: 0 !important;
 }
 
+/* Seating Display Modal - Active Player Name 100% Black Font */
+.seating-display-active-name {
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
+.seating-display-active-seat {
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
 /* Active Players Column Layout */
 .active-players-columns-grid {
   column-count: 5;
