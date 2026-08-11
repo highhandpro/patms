@@ -638,8 +638,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         while (tablePlayers.length + remainingTablePlayers.length < size) {
           if (nonDealerIdx < shuffledNonDealers.length) {
             remainingTablePlayers.push(shuffledNonDealers[nonDealerIdx++]);
-          } else if (dealerIdx < dealersWithoutDerek.length) {
-            remainingTablePlayers.push(dealersWithoutDerek[dealerIdx++]);
+          } else if (dealerIdx < dealersWithoutDerekOrTim.length) {
+            remainingTablePlayers.push(dealersWithoutDerekOrTim[dealerIdx++]);
           } else {
             break;
           }
