@@ -29,8 +29,8 @@ const bufferToHex = (buffer: ArrayBuffer): string => {
 export const hashPin = async (pin: string, existingSalt?: string): Promise<string> => {
   if (!pin) return '';
   const salt = existingSalt || generateSalt(16);
-  const data = stringToBuffer(`${salt}:${pin}`);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const data = new TextEncoder().encode(`${salt}:${pin}`);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data as unknown as BufferSource);
   const hashHex = bufferToHex(hashBuffer);
   return `sha256$${salt}$${hashHex}`;
 };
