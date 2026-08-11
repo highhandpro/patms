@@ -468,7 +468,7 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 type="button"
                 onClick={() => {
                   if (recommendation.breakTable) {
-                    onConfirmBreak(recommendation.breakTable, recommendation.breakAssignments || []);
+                    onConfirmBreak(recommendation.breakTable);
                   }
                 }}
                 style={{
