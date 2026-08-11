@@ -3084,7 +3084,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   return tableOrder.indexOf(a[0]) - tableOrder.indexOf(b[0]);
                 })
                 .map(([tableName, players]) => {
-                  const seatedCount = players.filter(id => id !== "").length;
+                  const activeCount = players.filter(id => {
+                    if (!id || typeof id !== 'string' || id.trim() === '') return false;
+                    const entry = activeTournament?.entries.find(e => e.memberId === id);
+                    return !entry?.eliminatedAt;
+                  }).length;
                   const theme = CRAYOLA_TABLE_THEMES[tableName.toLowerCase()] || {
                     bgColor: '#1e293b',
                     textColor: '#ffffff',
@@ -3114,15 +3118,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: `1.5px solid ${theme.rowBorder}`, paddingBottom: '8px' }}>
                       <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: theme.textColor, textTransform: 'capitalize', margin: 0 }}>{tableName}</h4>
                       <span style={{ 
-                        fontSize: '0.75rem', 
-                        fontWeight: 700, 
+                        fontSize: '0.85rem', 
+                        fontWeight: 900, 
                         color: theme.headerBadgeText, 
                         backgroundColor: theme.headerBadgeBg, 
                         border: `1px solid ${theme.rowBorder}`,
-                        padding: '3px 8px', 
+                        padding: '3px 10px', 
                         borderRadius: '12px' 
                       }}>
-                        {seatedCount}/10
+                        {activeCount}
                       </span>
                     </div>
 

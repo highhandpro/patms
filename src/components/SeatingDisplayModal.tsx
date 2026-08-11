@@ -350,8 +350,10 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                     background: t.headerBg,
                     border: `1px solid ${t.rowBorder}`,
                     borderRadius: '10px',
-                    padding: '6px 10px',
-                    textAlign: 'center',
+                    padding: '6px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                     marginBottom: '8px',
                     flexShrink: 0
                   }}
@@ -360,8 +362,20 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
                     {t.name}
                   </h2>
                   {hasPlayers && (
-                    <span style={{ fontSize: '0.8rem', color: '#000000', fontWeight: 800 }}>
-                      {players.filter(p => p && typeof p === 'string' && p.trim() !== "").length} Players Seated
+                    <span style={{ 
+                      fontSize: '0.9rem', 
+                      color: '#000000', 
+                      fontWeight: 950, 
+                      backgroundColor: 'rgba(0, 0, 0, 0.12)', 
+                      border: '1.5px solid rgba(0, 0, 0, 0.25)',
+                      padding: '2px 9px', 
+                      borderRadius: '10px' 
+                    }}>
+                      {players.filter(p => {
+                        if (!p || typeof p !== 'string' || p.trim() === '') return false;
+                        const entry = activeTournament ? activeTournament.entries.find((e: any) => e.memberId === p) : null;
+                        return !entry?.eliminatedAt;
+                      }).length}
                     </span>
                   )}
                 </div>
