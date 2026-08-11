@@ -55,6 +55,9 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
     return `${orderNum}th Open Seat`;
   };
 
+  const portalTarget = typeof document !== 'undefined' ? (document.fullscreenElement || document.body) : null;
+  if (!portalTarget) return null;
+
   return createPortal(
     <div
       style={{
@@ -63,12 +66,12 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        width: '100vw',
-        height: '100vh',
+        width: '100%',
+        height: '100%',
         backgroundColor: '#070b14',
         backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 65%)',
         color: '#ffffff',
-        zIndex: 9999999,
+        zIndex: 2147483647,
         display: 'flex',
         flexDirection: 'column',
         padding: '24px 40px',
@@ -511,6 +514,6 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
         </div>
       )}
     </div>,
-    document.body
+    portalTarget
   );
 };

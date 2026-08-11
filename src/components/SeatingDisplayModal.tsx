@@ -171,6 +171,9 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
       }).filter(Boolean)
     : [];
 
+  const portalTarget = typeof document !== 'undefined' ? (document.fullscreenElement || document.body) : null;
+  if (!portalTarget) return null;
+
   return createPortal(
     <div 
       className="seating-display-modal"
@@ -180,12 +183,12 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        width: '100vw',
-        height: '100vh',
+        width: '100%',
+        height: '100%',
         backgroundColor: '#010101',
         backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(212, 163, 89, 0.05) 0%, transparent 50%)',
         color: '#e2e8f0',
-        zIndex: 999999,
+        zIndex: 2147483647,
         display: 'flex',
         flexDirection: 'row',
         overflow: 'hidden'
@@ -506,6 +509,6 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
         </div>
       </div>
     </div>,
-    document.body
+    portalTarget
   );
 };
