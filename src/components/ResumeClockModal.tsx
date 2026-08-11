@@ -145,13 +145,14 @@ export const ResumeClockModal: React.FC<ResumeClockModalProps> = ({
           {targetTables.map(tName => {
             const badge = TABLE_THEME_BADGES[tName.toLowerCase()] || { bg: '#334155', color: '#fff' };
             const playerList = grouped[tName] || [];
+            const isFinal = modalData.title.toLowerCase().includes('final table') || (targetTables.length === 1 && tName.toLowerCase() === 'red table' && playerList.length >= 6);
 
             return (
               <div
                 key={tName}
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '2px solid rgba(255, 255, 255, 0.14)',
+                  border: isFinal ? '2px solid rgba(234, 179, 8, 0.45)' : '2px solid rgba(255, 255, 255, 0.14)',
                   borderRadius: '18px',
                   padding: '16px 22px',
                   display: 'flex',
@@ -163,8 +164,8 @@ export const ResumeClockModal: React.FC<ResumeClockModalProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span
                     style={{
-                      backgroundColor: badge.bg,
-                      color: badge.color,
+                      backgroundColor: isFinal ? '#EE204D' : badge.bg,
+                      color: '#ffffff',
                       padding: '8px 18px',
                       borderRadius: '10px',
                       fontWeight: 950,
@@ -174,7 +175,7 @@ export const ResumeClockModal: React.FC<ResumeClockModalProps> = ({
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)'
                     }}
                   >
-                    Moving to {tName}
+                    {isFinal ? 'RED TABLE (FINAL TABLE)' : `Moving to ${tName}`}
                   </span>
                   <span style={{ fontSize: '1.15rem', color: '#cbd5e1', fontWeight: 850 }}>
                     {playerList.length} player{playerList.length > 1 ? 's' : ''}
@@ -182,50 +183,57 @@ export const ResumeClockModal: React.FC<ResumeClockModalProps> = ({
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {playerList.map(item => (
-                    <div
-                      key={item.playerId}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                        border: '1.5px solid rgba(255, 255, 255, 0.12)',
-                        padding: '12px 18px',
-                        borderRadius: '12px',
-                        gap: '16px'
-                      }}
-                    >
-                      {/* Left: Open Seat Position */}
-                      <div style={{ flexShrink: 0 }}>
-                        <span style={{ 
-                          color: '#10b981', 
-                          fontWeight: 950, 
-                          fontSize: '1.75rem',
-                          letterSpacing: '-0.01em',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {formatOpenSeatOrder(item.orderNumber)}
-                        </span>
-                      </div>
+                  {playerList.map(item => {
+                    const isDealerSeat = item.targetSeatNumber === 1 || item.targetSeatIndex === 0;
+                    const seatLabel = isFinal 
+                      ? (isDealerSeat ? '👑 Seat #1 (Dealer)' : `Seat #${item.targetSeatNumber || (item.targetSeatIndex + 1)}`)
+                      : formatOpenSeatOrder(item.orderNumber);
 
-                      {/* Right: Player Name */}
-                      <div style={{ overflow: 'hidden', textAlign: 'right' }}>
-                        <span style={{ 
-                          fontWeight: 950, 
-                          color: '#ffffff', 
-                          fontSize: '1.85rem', 
-                          textOverflow: 'ellipsis', 
-                          overflow: 'hidden', 
-                          whiteSpace: 'nowrap',
-                          letterSpacing: '-0.02em',
-                          display: 'block'
-                        }}>
-                          {getMemberName(item.playerId)}
-                        </span>
+                    return (
+                      <div
+                        key={item.playerId}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          backgroundColor: isDealerSeat && isFinal ? 'rgba(234, 179, 8, 0.16)' : 'rgba(0, 0, 0, 0.5)',
+                          border: isDealerSeat && isFinal ? '2px solid rgba(234, 179, 8, 0.6)' : '1.5px solid rgba(255, 255, 255, 0.12)',
+                          padding: '12px 18px',
+                          borderRadius: '12px',
+                          gap: '16px'
+                        }}
+                      >
+                        {/* Left: Open Seat Position */}
+                        <div style={{ flexShrink: 0 }}>
+                          <span style={{ 
+                            color: isDealerSeat && isFinal ? '#fbbf24' : '#10b981', 
+                            fontWeight: 950, 
+                            fontSize: '1.75rem',
+                            letterSpacing: '-0.01em',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {seatLabel}
+                          </span>
+                        </div>
+
+                        {/* Right: Player Name */}
+                        <div style={{ overflow: 'hidden', textAlign: 'right' }}>
+                          <span style={{ 
+                            fontWeight: 950, 
+                            color: '#ffffff', 
+                            fontSize: '1.85rem', 
+                            textOverflow: 'ellipsis', 
+                            overflow: 'hidden', 
+                            whiteSpace: 'nowrap',
+                            letterSpacing: '-0.02em',
+                            display: 'block'
+                          }}>
+                            {getMemberName(item.playerId)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );

@@ -6,7 +6,7 @@ import { calculateDollarPayouts } from '../utils/stats';
 import { EliminationModal } from './EliminationModal';
 import { TableBalanceAlertModal } from './TableBalanceAlertModal';
 import { ResumeClockModal } from './ResumeClockModal';
-import { checkTableBalance, executePlayerMove, executeTableBreak, calculateBreakAssignments } from '../utils/tableBalancing';
+import { checkTableBalance, executePlayerMove, executeTableBreak, calculateBreakAssignments, calculateFinalTableRedraw } from '../utils/tableBalancing';
 import type { TableBalanceRecommendation, PlayerMoveAssignment } from '../utils/tableBalancing';
 import { playTableBalanceAlertSound } from '../utils/audioAlerts';
 
@@ -134,15 +134,33 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
   const handleConfirmTableBreak = (breakTable: string) => {
     if (!tournament.seating) return;
-    const assignments = calculateBreakAssignments(tournament.seating, breakTable, tournament);
-    const updated = executeTableBreak(tournament.seating, breakTable, tournament);
-    updateTournament(tournament.id, { seating: updated });
+    
+    let assignments = balanceRecommendation?.breakAssignments;
+    let updated: Record<string, string[]>;
+    let updatedDealers = tournament.dealers ? { ...tournament.dealers } : {};
+    const isFinal = balanceRecommendation?.isFinalTable;
+
+    if (isFinal) {
+      const finalRedraw = calculateFinalTableRedraw(tournament.seating, tournament, members);
+      assignments = finalRedraw.assignments;
+      updated = finalRedraw.finalSeating;
+      if (finalRedraw.dealerId) {
+        updatedDealers = { 'red table': finalRedraw.dealerId };
+      }
+    } else {
+      assignments = calculateBreakAssignments(tournament.seating, breakTable, tournament);
+      updated = executeTableBreak(tournament.seating, breakTable, tournament);
+    }
+
+    updateTournament(tournament.id, { seating: updated, dealers: updatedDealers });
     setIsBalanceModalOpen(false);
     setBalanceRecommendation(null);
 
     setShowResumeClockModal({
-      title: 'Table Broken & Players Moved',
-      message: `${breakTable.toUpperCase()} has been broken and players distributed to active tables in 1, 2, 3 order. Verify all players are in their seats, then start the clock.`,
+      title: isFinal ? 'Final Table Seating Set!' : 'Table Broken & Players Moved',
+      message: isFinal 
+        ? 'All remaining players randomly redrawn to the Final Table with Dealer in Seat #1. Verify all players are in their seats, then start the clock.'
+        : `${breakTable.toUpperCase()} has been broken and players distributed to active tables in 1, 2, 3 order. Verify all players are in their seats, then start the clock.`,
       assignments
     });
   };
@@ -2149,7 +2167,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 e.memberId === eliminatingPlayerId ? { ...e, eliminatedAt: new Date().toISOString() } : e
               );
               const simulatedTournament = { ...tournament, entries: updatedEntries };
-              const rec = checkTableBalance(tournament.seating, simulatedTournament);
+              const rec = checkTableBalance(tournament.seating, simulatedTournament, members);
               if (rec) {
                 // Automatically pause the clock when table balancing or breaking is required
                 if (isRunning || tournament.clockState?.isRunning) {

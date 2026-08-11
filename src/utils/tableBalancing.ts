@@ -8,6 +8,8 @@ export interface PlayerMoveAssignment {
 
 export interface TableBalanceRecommendation {
   type: 'rebalance' | 'break';
+  isFinalTable?: boolean;
+  finalTableDealerId?: string;
   sourceTable?: string;
   targetTable?: string;
   sourceActivePlayers?: string[];
@@ -21,6 +23,90 @@ export interface TableBalanceRecommendation {
 }
 
 const TABLE_ORDER = ['red table', 'blue table', 'gold table', 'gray table', 'purple table'];
+
+/**
+ * Calculates a complete random redraw for the Final Table (Red Table).
+ * Assigns a designated dealer to Seat 1 (index 0).
+ * Dealer Priority:
+ *  1. Derek Allen (if active in tournament)
+ *  2. Tim Hufler (if active in tournament)
+ *  3. Any other remaining active dealer in preassignedDealers
+ *  4. Any remaining active player
+ * All other active players are randomly shuffled into Seats 2..N (indices 1..N-1).
+ */
+export const calculateFinalTableRedraw = (
+  seating: Record<string, string[]>,
+  activeTournament: any,
+  members: any[] = []
+): { assignments: PlayerMoveAssignment[]; dealerId: string; finalSeating: Record<string, string[]> } => {
+  const activeEntries = activeTournament?.entries?.filter((e: any) => !e.eliminatedAt) || [];
+  const activeIds = activeEntries.map((e: any) => e.memberId);
+  const activeSet = new Set<string>(activeIds);
+
+  const preassignedDealers: string[] = activeTournament?.preassignedDealers || [];
+
+  // Find member IDs for Derek Allen and Tim Hufler
+  const derekMember = members.find(m => m.firstName?.toLowerCase() === 'derek' && m.lastName?.toLowerCase() === 'allen');
+  const derekId = derekMember?.id;
+  const timMember = members.find(m => m.firstName?.toLowerCase() === 'tim' && m.lastName?.toLowerCase() === 'hufler');
+  const timId = timMember?.id;
+
+  // 1. Pick dealer for Seat 1
+  let dealerId = '';
+  if (derekId && activeSet.has(derekId)) {
+    dealerId = derekId;
+  } else if (timId && activeSet.has(timId)) {
+    dealerId = timId;
+  } else {
+    // 3rd priority: other active preassigned dealer
+    const otherActiveDealers = preassignedDealers.filter(id => activeSet.has(id));
+    if (otherActiveDealers.length > 0) {
+      dealerId = otherActiveDealers[0];
+    } else if (activeIds.length > 0) {
+      // 4th priority: any active player
+      dealerId = activeIds[0];
+    }
+  }
+
+  // 2. Remaining active players randomly shuffled
+  const remainingPlayers = activeIds.filter(id => id !== dealerId).sort(() => Math.random() - 0.5);
+
+  const assignments: PlayerMoveAssignment[] = [];
+  const redTableSeats = Array(10).fill('');
+
+  // Seat 1 (index 0): Dealer
+  if (dealerId) {
+    redTableSeats[0] = dealerId;
+    assignments.push({
+      playerId: dealerId,
+      orderNumber: 1,
+      targetTable: 'red table',
+      targetSeatIndex: 0,
+      targetSeatNumber: 1
+    });
+  }
+
+  // Seats 2..N (indices 1..N-1): Remaining players
+  remainingPlayers.forEach((pId, idx) => {
+    const seatIdx = idx + 1;
+    if (seatIdx < 10) {
+      redTableSeats[seatIdx] = pId;
+      assignments.push({
+        playerId: pId,
+        orderNumber: seatIdx + 1,
+        targetTable: 'red table',
+        targetSeatIndex: seatIdx,
+        targetSeatNumber: seatIdx + 1
+      });
+    }
+  });
+
+  const finalSeating: Record<string, string[]> = {
+    'red table': redTableSeats
+  };
+
+  return { assignments, dealerId, finalSeating };
+};
 
 /**
  * Calculates deterministic numbered player assignments to destination tables and open seats.
@@ -114,7 +200,8 @@ export const calculateBreakAssignments = (
  */
 export const checkTableBalance = (
   seating: Record<string, string[]>,
-  activeTournament: any
+  activeTournament: any,
+  members: any[] = []
 ): TableBalanceRecommendation | null => {
   if (!activeTournament || !activeTournament.entries || !seating) return null;
 
@@ -185,13 +272,16 @@ export const checkTableBalance = (
   if (numActiveTables === 2 && totalActive <= 10) {
     const breakTableObj = tableStats[tableStats.length - 1]; // blue table
     const remaining = [tableStats[0].name]; // red table / Final Table
+    const finalRedraw = calculateFinalTableRedraw(seating, activeTournament, members);
     return {
       type: 'break',
+      isFinalTable: true,
+      finalTableDealerId: finalRedraw.dealerId,
       breakTable: breakTableObj.name,
       breakPlayerIds: breakTableObj.activePlayers,
-      breakAssignments: calculateBreakAssignments(seating, breakTableObj.name, activeTournament),
+      breakAssignments: finalRedraw.assignments,
       remainingTables: remaining,
-      message: `Final Table Reached! Break ${breakTableObj.name.toUpperCase()} (${totalActive} players remaining).`
+      message: `Final Table Reached (${totalActive} players remaining)! Random redraw with Dealer in Seat #1.`
     };
   }
 

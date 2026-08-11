@@ -319,8 +319,8 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
           {/* Top Banner */}
           <div
             style={{
-              backgroundColor: 'rgba(239, 68, 68, 0.14)',
-              border: '2px solid rgba(239, 68, 68, 0.45)',
+              backgroundColor: recommendation.isFinalTable ? 'rgba(234, 179, 8, 0.14)' : 'rgba(239, 68, 68, 0.14)',
+              border: recommendation.isFinalTable ? '2px solid rgba(234, 179, 8, 0.5)' : '2px solid rgba(239, 68, 68, 0.45)',
               borderRadius: '20px',
               padding: '16px 28px',
               marginBottom: '18px',
@@ -328,13 +328,13 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
               flexShrink: 0
             }}
           >
-            <span style={{ fontSize: '1rem', color: '#fca5a5', fontWeight: 900, display: 'block', marginBottom: '6px', letterSpacing: '0.08em' }}>
-              TABLE BEING BROKEN
+            <span style={{ fontSize: '1rem', color: recommendation.isFinalTable ? '#fef08a' : '#fca5a5', fontWeight: 900, display: 'block', marginBottom: '6px', letterSpacing: '0.08em' }}>
+              {recommendation.isFinalTable ? '🏆 FINAL TABLE REACHED — RANDOM REDRAW' : 'TABLE BEING BROKEN'}
             </span>
             <span
               style={{
-                backgroundColor: breakBadge?.bg,
-                color: breakBadge?.color,
+                backgroundColor: recommendation.isFinalTable ? '#EE204D' : breakBadge?.bg,
+                color: '#ffffff',
                 padding: '8px 32px',
                 borderRadius: '14px',
                 fontWeight: 950,
@@ -344,7 +344,7 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
               }}
             >
-              {recommendation.breakTable}
+              {recommendation.isFinalTable ? 'RED TABLE (FINAL TABLE)' : recommendation.breakTable}
             </span>
             <p style={{ fontSize: '1.3rem', color: '#f1f5f9', marginTop: '10px', margin: 0, fontWeight: 800 }}>
               {recommendation.message}
@@ -354,10 +354,10 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
           {/* Section Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexShrink: 0 }}>
             <label style={{ fontSize: '1.45rem', fontWeight: 950, color: '#f8fafc', margin: 0 }}>
-              Player Move Assignments (In Order 1, 2, 3...):
+              {recommendation.isFinalTable ? 'Final Table Seat Assignments (Seats 1 - 10):' : 'Player Move Assignments (In Order 1, 2, 3...):'}
             </label>
             <span style={{ fontSize: '1.15rem', color: '#94a3b8', fontWeight: 800 }}>
-              Fills open seats in order
+              {recommendation.isFinalTable ? 'Dealer assigned to Seat #1' : 'Fills open seats in order'}
             </span>
           </div>
 
@@ -375,7 +375,7 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
               if (targetTables.length === 0) {
                 return (
                   <p style={{ gridColumn: 'span 2', fontSize: '1.35rem', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
-                    Active players from {recommendation.breakTable.toUpperCase()} will be distributed evenly into open seats.
+                    Active players will be reseated.
                   </p>
                 );
               }
@@ -412,7 +412,7 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                           boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)'
                         }}
                       >
-                        Moving to {tName}
+                        {recommendation.isFinalTable ? 'RED TABLE (FINAL TABLE)' : `Moving to ${tName}`}
                       </span>
                       <span style={{ fontSize: '1.2rem', color: '#cbd5e1', fontWeight: 850 }}>
                         {playerList.length} player{playerList.length > 1 ? 's' : ''}
@@ -420,50 +420,57 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {playerList.map(item => (
-                        <div
-                          key={item.playerId}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                            border: '1.5px solid rgba(255, 255, 255, 0.12)',
-                            padding: '12px 20px',
-                            borderRadius: '12px',
-                            gap: '16px'
-                          }}
-                        >
-                          {/* Left: Open Seat Position */}
-                          <div style={{ flexShrink: 0 }}>
-                            <span style={{ 
-                              color: '#10b981', 
-                              fontWeight: 950, 
-                              fontSize: '1.85rem',
-                              letterSpacing: '-0.01em',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {formatOpenSeatOrder(item.orderNumber)}
-                            </span>
-                          </div>
+                      {playerList.map(item => {
+                        const isDealerSeat = item.targetSeatNumber === 1 || item.targetSeatIndex === 0;
+                        const seatLabel = recommendation.isFinalTable 
+                          ? (isDealerSeat ? '👑 Seat #1 (Dealer)' : `Seat #${item.targetSeatNumber}`)
+                          : formatOpenSeatOrder(item.orderNumber);
 
-                          {/* Right: Player Name */}
-                          <div style={{ overflow: 'hidden', textAlign: 'right' }}>
-                            <span style={{ 
-                              fontWeight: 950, 
-                              color: '#ffffff', 
-                              fontSize: '1.95rem', 
-                              textOverflow: 'ellipsis', 
-                              overflow: 'hidden', 
-                              whiteSpace: 'nowrap',
-                              letterSpacing: '-0.02em',
-                              display: 'block'
-                            }}>
-                              {getMemberName(item.playerId)}
-                            </span>
+                        return (
+                          <div
+                            key={item.playerId}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              backgroundColor: isDealerSeat && recommendation.isFinalTable ? 'rgba(234, 179, 8, 0.16)' : 'rgba(0, 0, 0, 0.5)',
+                              border: isDealerSeat && recommendation.isFinalTable ? '2px solid rgba(234, 179, 8, 0.6)' : '1.5px solid rgba(255, 255, 255, 0.12)',
+                              padding: '12px 20px',
+                              borderRadius: '12px',
+                              gap: '16px'
+                            }}
+                          >
+                            {/* Left: Seat Position */}
+                            <div style={{ flexShrink: 0 }}>
+                              <span style={{ 
+                                color: isDealerSeat && recommendation.isFinalTable ? '#fbbf24' : '#10b981', 
+                                fontWeight: 950, 
+                                fontSize: '1.85rem',
+                                letterSpacing: '-0.01em',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {seatLabel}
+                              </span>
+                            </div>
+
+                            {/* Right: Player Name */}
+                            <div style={{ overflow: 'hidden', textAlign: 'right' }}>
+                              <span style={{ 
+                                fontWeight: 950, 
+                                color: '#ffffff', 
+                                fontSize: '1.95rem', 
+                                textOverflow: 'ellipsis', 
+                                overflow: 'hidden', 
+                                whiteSpace: 'nowrap',
+                                letterSpacing: '-0.02em',
+                                display: 'block'
+                              }}>
+                                {getMemberName(item.playerId)}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );
