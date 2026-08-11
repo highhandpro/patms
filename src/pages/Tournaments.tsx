@@ -3978,8 +3978,30 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     });
                   }
                   playTableBalanceAlertSound();
-                  setBalanceRecommendation(rec);
-                  setIsBalanceModalOpen(true);
+
+                  if (rec.isFinalTable) {
+                    const finalRedraw = calculateFinalTableRedraw(seating, simulatedTournament, state.members);
+                    const updatedSeating = finalRedraw.finalSeating;
+                    let updatedDealers = dealers ? { ...dealers } : {};
+                    if (finalRedraw.dealerId) {
+                      updatedDealers = { 'red table': finalRedraw.dealerId };
+                      setDealers(updatedDealers);
+                      localStorage.setItem(`patms_dealers_${activeTournament.id}`, JSON.stringify(updatedDealers));
+                    }
+                    setSeating(updatedSeating);
+                    localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updatedSeating));
+                    updateTournament(activeTournament.id, {
+                      seating: updatedSeating,
+                      dealers: updatedDealers
+                    });
+                    
+                    logTournamentAction(activeTournament.id, "Final Table Redraw", `Players automatically redrawn to the Final Table with Dealer in Seat #1.`);
+
+                    setIsDisplayModeOpen(true);
+                  } else {
+                    setBalanceRecommendation(rec);
+                    setIsBalanceModalOpen(true);
+                  }
                 }
 
                 setEliminatingPlayerId(null);
@@ -4883,6 +4905,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           eliminatePlayer={eliminatePlayer}
           updateTournament={updateTournament}
           onAddLateEntry={() => setSubTab('checkin')}
+          onTriggerFinalTableRedraw={() => setIsDisplayModeOpen(true)}
         />
       )}
 

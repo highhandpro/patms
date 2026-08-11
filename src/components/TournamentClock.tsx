@@ -16,6 +16,7 @@ interface TournamentClockProps {
   onAddLateEntry: () => void;
   eliminatePlayer: (tournamentId: string, memberId: string, bountiesCollected: number) => void;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
+  onTriggerFinalTableRedraw?: () => void;
 }
 
 
@@ -46,7 +47,7 @@ const DEFAULT_BLINDS: BlindLevel[] = [
 ];
 
 export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
-  const { tournament, members, eliminatePlayer, updateTournament } = props;
+  const { tournament, members, eliminatePlayer, updateTournament, onTriggerFinalTableRedraw } = props;
   const { state } = useApp();
   const rawBlinds = state.settings.blinds && state.settings.blinds.length > 0 ? state.settings.blinds : DEFAULT_BLINDS;
 
@@ -2265,8 +2266,42 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   });
                 }
                 playTableBalanceAlertSound();
-                setBalanceRecommendation(rec);
-                setIsBalanceModalOpen(true);
+
+                if (rec.isFinalTable) {
+                  const finalRedraw = calculateFinalTableRedraw(tournament.seating, simulatedTournament, members);
+                  const updatedSeating = finalRedraw.finalSeating;
+                  let updatedDealers = tournament.dealers ? { ...tournament.dealers } : {};
+                  if (finalRedraw.dealerId) {
+                    updatedDealers = { 'red table': finalRedraw.dealerId };
+                    localStorage.setItem(`patms_dealers_${tournament.id}`, JSON.stringify(updatedDealers));
+                  }
+                  localStorage.setItem(`patms_seating_${tournament.id}`, JSON.stringify(updatedSeating));
+                  
+                  updateTournament(tournament.id, {
+                    seating: updatedSeating,
+                    dealers: updatedDealers
+                  });
+
+                  // Log to audit log
+                  const logTournamentActionLocal = (action: string, details: string) => {
+                    const logs = tournament.auditLogs || [];
+                    const performedBy = sessionStorage.getItem('patms_user_email') || 'TD';
+                    const newLog = {
+                      id: Math.random().toString(36).substr(2, 9),
+                      timestamp: new Date().toISOString(),
+                      action,
+                      details,
+                      performedBy
+                    };
+                    updateTournament(tournament.id, { auditLogs: [newLog, ...logs] });
+                  };
+                  logTournamentActionLocal("Final Table Redraw", "Players automatically redrawn to the Final Table with Dealer in Seat #1.");
+
+                  onTriggerFinalTableRedraw?.();
+                } else {
+                  setBalanceRecommendation(rec);
+                  setIsBalanceModalOpen(true);
+                }
               }
             }
 
