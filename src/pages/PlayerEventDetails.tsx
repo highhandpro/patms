@@ -46,8 +46,9 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
   }, [loggedInMemberId, state.members]);
 
   const tournament = state.tournaments.find(t => t.id === tournamentId);
+  const isBeta = tournament ? (tournament.name.toLowerCase().includes('beta') || tournament.isBetaTest) : false;
 
-  if (!tournament) {
+  if (!tournament || isBeta) {
     return (
       <div className="player-page animate-fade-in" style={{ padding: '40px', textAlign: 'center' }}>
         <h2 style={{ color: 'var(--text-primary)' }}>Event not found</h2>

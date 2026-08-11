@@ -16,7 +16,7 @@ export interface PlayerStanding {
 export const calculateStandings = (state: DatabaseState, seasonId?: string): PlayerStanding[] => {
   const activeMembers = state.members.filter(m => !m.isDeleted);
   const targetTournaments = state.tournaments.filter(t => 
-    t.status === 'completed' && (!seasonId || t.seasonId === seasonId)
+    t.status === 'completed' && (!seasonId || t.seasonId === seasonId) && !t.name.toLowerCase().includes('beta') && !t.isBetaTest
   );
 
   const standingsMap: Record<string, PlayerStanding> = {};
@@ -85,7 +85,7 @@ export interface MemberStats {
 }
 
 export const calculateMemberStats = (state: DatabaseState, memberId: string): MemberStats => {
-  const completedTournaments = state.tournaments.filter(t => t.status === 'completed');
+  const completedTournaments = state.tournaments.filter(t => t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest);
   
   let played = 0;
   let wins = 0;

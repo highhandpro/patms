@@ -24,19 +24,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Get active members count
   const activeMembersCount = state.members.filter(m => !m.isDeleted).length;
 
-  // Filter completed tournaments in active season
+  // Filter completed tournaments in active season (exclude Beta)
   const completedTournaments = state.tournaments.filter(
-    t => t.status === 'completed' && t.seasonId === activeSeason?.id
+    t => t.status === 'completed' && t.seasonId === activeSeason?.id && !t.name.toLowerCase().includes('beta') && !t.isBetaTest
   );
 
   const totalDealerStaffApprec = activeSeason
     ? state.tournaments
-        .filter(t => t.seasonId === activeSeason.id && t.status === 'completed')
+        .filter(t => t.seasonId === activeSeason.id && t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest)
         .reduce((sum, t) => sum + t.totalDealerAppreciation, 0)
     : 0;
 
-  // Active or draft tournaments (running right now)
-  const activeTournaments = state.tournaments.filter(t => t.status !== 'completed');
+  // Active or draft tournaments (running right now, exclude Beta)
+  const activeTournaments = state.tournaments.filter(t => t.status !== 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest);
 
   // Standings leaderboard (top 15)
   const standings = activeSeason ? calculateStandings(state, activeSeason.id).slice(0, 15) : [];

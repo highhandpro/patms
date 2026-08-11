@@ -86,16 +86,16 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
     return indexA - indexB;
   });
 
-  // Get completed tournaments sorted chronologically
+  // Get completed tournaments sorted chronologically (exclude Beta)
   const completedTournaments = selectedSeasonId
     ? state.tournaments
-        .filter(t => t.seasonId === selectedSeasonId && t.status === 'completed')
+        .filter(t => t.seasonId === selectedSeasonId && t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest)
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     : [];
 
   const seasonToCPool = selectedSeasonId
     ? state.tournaments
-        .filter(t => t.seasonId === selectedSeasonId && t.status === 'completed')
+        .filter(t => t.seasonId === selectedSeasonId && t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest)
         .reduce((sum, t) => sum + t.totalDealerAppreciation, 0)
     : 0;
 
