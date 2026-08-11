@@ -3519,7 +3519,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           : totalPrizePool;
         const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
           ? activeTournament.payoutPercentages
-          : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+          : getAutoPayoutPercentages(buyInCount);
         const payouts = calculateDollarPayouts(payoutPrizePool, pctList);
 
         // Generate all positions from 1 to N
@@ -3830,7 +3830,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     
                     const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
                       ? activeTournament.payoutPercentages
-                      : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+                      : getAutoPayoutPercentages(buyInCount);
                     const payouts = calculateDollarPayouts(calculatedPrizePool, pctList);
 
                     const winners = activeTournament.entries
@@ -3981,7 +3981,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         : calcPrizePool;
                       const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
                         ? activeTournament.payoutPercentages
-                        : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+                        : getAutoPayoutPercentages(activeTournament.entries.filter(e => e.hasBuyIn).length);
                       const previewDollarPayouts = calculateDollarPayouts(finalPool, pctList);
                       
                       const activeAndElims = [...activeTournament.entries].sort((a,b) => {
@@ -4450,7 +4450,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
         const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
           ? activeTournament.payoutPercentages
-          : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+          : getAutoPayoutPercentages(buyInCount);
         const dollarPayouts = calculateDollarPayouts(currentPrizePool, pctList);
 
         const payouts = pctList

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Member, Tournament, Season, Settings, DatabaseState, TournamentEntry, PendingApproval } from '../types';
+import { getAutoPayoutPercentages } from '../utils/stats';
 import { db } from '../firebase';
 import { 
   collection, 
@@ -838,7 +839,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateTournament = async (id: string, updated: Partial<Tournament>) => {
-    await updateDoc(doc(db, 'tournaments', id), updated);
+    const finalUpdate: any = { ...updated };
+    if (updated.entries && !updated.payoutPercentages) {
+      const buyInCount = updated.entries.filter(e => e.hasBuyIn).length;
+      finalUpdate.payoutPercentages = getAutoPayoutPercentages(buyInCount);
+    }
+    await updateDoc(doc(db, 'tournaments', id), finalUpdate);
   };
 
   const archiveTournament = async (id: string) => {
@@ -941,7 +947,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!t) return;
 
     const updatedEntries = t.entries.filter(e => e.memberId !== memberId);
-    const updateData: any = { entries: updatedEntries };
+    const buyInCount = updatedEntries.filter(e => e.hasBuyIn).length;
+    const updateData: any = { 
+      entries: updatedEntries,
+      payoutPercentages: getAutoPayoutPercentages(buyInCount)
+    };
 
     if (t.seating) {
       const updatedSeating = { ...t.seating };
@@ -970,8 +980,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return e;
     });
 
+    const buyInCount = updatedEntries.filter(e => e.hasBuyIn).length;
+
     await updateDoc(doc(db, 'tournaments', tournamentId), {
-      entries: updatedEntries
+      entries: updatedEntries,
+      payoutPercentages: getAutoPayoutPercentages(buyInCount)
     });
   };
 
@@ -983,7 +996,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const turningOff = targetEntry ? targetEntry.hasBuyIn : false;
 
     const updatedEntries = t.entries.map(e => e.memberId === memberId ? { ...e, hasBuyIn: !e.hasBuyIn } : e);
-    const updateData: any = { entries: updatedEntries };
+    const buyInCount = updatedEntries.filter(e => e.hasBuyIn).length;
+    const updateData: any = { 
+      entries: updatedEntries,
+      payoutPercentages: getAutoPayoutPercentages(buyInCount)
+    };
 
     if (turningOff && t.seating) {
       const updatedSeating = { ...t.seating };

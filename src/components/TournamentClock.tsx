@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Maximize, Minimize, Play, Pause, RotateCcw, ShieldAlert, Award, Shuffle, DollarSign } from 'lucide-react';
 import type { Tournament, Member, BlindLevel, TournamentEntry } from '../types';
 import { useApp } from '../context/AppContext';
-import { calculateDollarPayouts } from '../utils/stats';
+import { calculateDollarPayouts, getAutoPayoutPercentages } from '../utils/stats';
 import { EliminationModal } from './EliminationModal';
 import { TableBalanceAlertModal } from './TableBalanceAlertModal';
 import { ResumeClockModal } from './ResumeClockModal';
@@ -826,7 +826,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   
   const pctSource = (tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0)
     ? tournament.payoutPercentages
-    : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+    : getAutoPayoutPercentages(buyInCount);
 
   const dollarAmounts = calculateDollarPayouts(prizePoolAfterBubble, pctSource);
 
@@ -2247,7 +2247,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
         const pctList = (tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0)
           ? tournament.payoutPercentages
-          : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+          : getAutoPayoutPercentages(buyInCount);
         const payouts = calculateDollarPayouts(calculatedPrizePool, pctList);
         const placesPaidCount = pctList.filter(pct => pct > 0).length;
         const bubblePosition = placesPaidCount + 1;
