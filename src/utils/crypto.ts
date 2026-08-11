@@ -10,11 +10,6 @@ export const generateSalt = (bytes: number = 16): string => {
   return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
-// Convert string to Uint8Array buffer
-const stringToBuffer = (str: string): Uint8Array => {
-  return new TextEncoder().encode(str);
-};
-
 // Convert ArrayBuffer to hex string
 const bufferToHex = (buffer: ArrayBuffer): string => {
   return Array.from(new Uint8Array(buffer))
