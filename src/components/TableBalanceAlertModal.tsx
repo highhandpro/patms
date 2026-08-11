@@ -37,22 +37,8 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
   };
 
   useEffect(() => {
-    if (recommendation) {
-      const sourceTableSeats = (seating && recommendation.sourceTable && seating[recommendation.sourceTable]) || [];
-      const activeList = ((recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0)
-        ? recommendation.sourceActivePlayers
-        : sourceTableSeats.filter(id => id && id.trim() !== '')
-      ).slice().sort((a, b) => getMemberName(a).localeCompare(getMemberName(b)));
-
-      if (activeList.length > 0) {
-        setSelectedPlayerId(activeList[0]);
-      } else {
-        setSelectedPlayerId('');
-      }
-    } else {
-      setSelectedPlayerId('');
-    }
-  }, [recommendation, seating, state.members]);
+    setSelectedPlayerId('');
+  }, [recommendation, isOpen]);
 
   if (!isOpen || !recommendation) return null;
 
@@ -219,14 +205,21 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                   backgroundColor: '#ffffff',
                   border: '2.5px solid #f59e0b',
                   borderRadius: '12px',
-                  color: '#0f172a',
+                  color: selectedPlayerId ? '#0f172a' : '#dc2626',
                   fontSize: '1.25rem',
-                  fontWeight: 850,
+                  fontWeight: 900,
                   outline: 'none',
                   cursor: 'pointer',
                   boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)'
                 }}
               >
+                <option 
+                  value="" 
+                  disabled 
+                  style={{ backgroundColor: '#ffffff', color: '#dc2626', fontSize: '1.15rem', fontWeight: 900 }}
+                >
+                  SELECT PLAYER
+                </option>
                 {(() => {
                   const sourceTableSeats = (seating && recommendation.sourceTable && seating[recommendation.sourceTable]) || [];
                   const activeList = ((recommendation.sourceActivePlayers && recommendation.sourceActivePlayers.length > 0)
@@ -279,9 +272,9 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 style={{
                   flex: 1.6,
                   padding: '16px 20px',
-                  backgroundColor: '#f59e0b',
-                  border: 'none',
-                  color: '#000000',
+                  backgroundColor: selectedPlayerId ? '#f59e0b' : 'rgba(245, 158, 11, 0.2)',
+                  border: selectedPlayerId ? 'none' : '1px solid rgba(245, 158, 11, 0.3)',
+                  color: selectedPlayerId ? '#000000' : '#64748b',
                   borderRadius: '12px',
                   fontWeight: 950,
                   fontSize: '1.15rem',
@@ -290,7 +283,9 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '10px',
-                  boxShadow: '0 6px 20px rgba(245, 158, 11, 0.45)'
+                  boxShadow: selectedPlayerId ? '0 6px 20px rgba(245, 158, 11, 0.45)' : 'none',
+                  opacity: selectedPlayerId ? 1 : 0.6,
+                  transition: 'all 0.2s ease'
                 }}
               >
                 <CheckCircle size={22} />
