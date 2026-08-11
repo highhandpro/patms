@@ -35,12 +35,12 @@ const TABLE_ORDER = ['red table', 'blue table', 'gold table', 'gray table', 'pur
  * All other active players are randomly shuffled into Seats 2..N (indices 1..N-1).
  */
 export const calculateFinalTableRedraw = (
-  seating: Record<string, string[]>,
+  _seating: Record<string, string[]>,
   activeTournament: any,
   members: any[] = []
 ): { assignments: PlayerMoveAssignment[]; dealerId: string; finalSeating: Record<string, string[]> } => {
   const activeEntries = activeTournament?.entries?.filter((e: any) => !e.eliminatedAt) || [];
-  const activeIds = activeEntries.map((e: any) => e.memberId);
+  const activeIds: string[] = activeEntries.map((e: any) => e.memberId);
   const activeSet = new Set<string>(activeIds);
 
   const preassignedDealers: string[] = activeTournament?.preassignedDealers || [];
@@ -59,7 +59,7 @@ export const calculateFinalTableRedraw = (
     dealerId = timId;
   } else {
     // 3rd priority: other active preassigned dealer
-    const otherActiveDealers = preassignedDealers.filter(id => activeSet.has(id));
+    const otherActiveDealers = preassignedDealers.filter((id: string) => activeSet.has(id));
     if (otherActiveDealers.length > 0) {
       dealerId = otherActiveDealers[0];
     } else if (activeIds.length > 0) {
@@ -69,10 +69,10 @@ export const calculateFinalTableRedraw = (
   }
 
   // 2. Remaining active players randomly shuffled
-  const remainingPlayers = activeIds.filter(id => id !== dealerId).sort(() => Math.random() - 0.5);
+  const remainingPlayers: string[] = activeIds.filter((id: string) => id !== dealerId).sort(() => Math.random() - 0.5);
 
   const assignments: PlayerMoveAssignment[] = [];
-  const redTableSeats = Array(10).fill('');
+  const redTableSeats: string[] = Array(10).fill('');
 
   // Seat 1 (index 0): Dealer
   if (dealerId) {
@@ -87,7 +87,7 @@ export const calculateFinalTableRedraw = (
   }
 
   // Seats 2..N (indices 1..N-1): Remaining players
-  remainingPlayers.forEach((pId, idx) => {
+  remainingPlayers.forEach((pId: string, idx: number) => {
     const seatIdx = idx + 1;
     if (seatIdx < 10) {
       redTableSeats[seatIdx] = pId;
