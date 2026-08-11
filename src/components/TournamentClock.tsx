@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { calculateDollarPayouts } from '../utils/stats';
 import { EliminationModal } from './EliminationModal';
 import { TableBalanceAlertModal } from './TableBalanceAlertModal';
+import { ResumeClockModal } from './ResumeClockModal';
 import { checkTableBalance, executePlayerMove, executeTableBreak, calculateBreakAssignments } from '../utils/tableBalancing';
 import type { TableBalanceRecommendation, PlayerMoveAssignment } from '../utils/tableBalancing';
 import { playTableBalanceAlertSound } from '../utils/audioAlerts';
@@ -2198,162 +2199,27 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
       />
 
       {/* Big Start The Clock Modal after Table Move/Break */}
-      {showResumeClockModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.88)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '20px',
-          zIndex: 1000000
-        }}>
-          <div className="glass-card animate-scale-up" style={{
-            width: '100%',
-            maxWidth: '820px',
-            backgroundColor: '#06260B',
-            border: '2px solid var(--color-emerald)',
-            boxShadow: '0 0 60px rgba(16, 185, 129, 0.45), 0 20px 40px rgba(0,0,0,0.9)',
-            borderRadius: '24px',
-            padding: '32px 36px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px'
-          }}>
-            <div style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(16, 185, 129, 0.2)',
-              border: '2px solid var(--color-emerald)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--color-emerald)'
-            }}>
-              <Play size={34} style={{ marginLeft: '4px' }} />
-            </div>
-
-            <div>
-              <span style={{ fontSize: '0.9rem', color: 'var(--color-gold)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                TABLE REORGANIZATION COMPLETE
-              </span>
-              <h2 style={{ fontSize: '2rem', fontWeight: 950, color: '#ffffff', margin: '6px 0 10px 0' }}>
-                {showResumeClockModal.title}
-              </h2>
-              <p style={{ fontSize: '1.05rem', color: 'rgba(255, 255, 255, 0.85)', margin: 0, lineHeight: 1.5, fontWeight: 600 }}>
-                {showResumeClockModal.message}
-              </p>
-            </div>
-
-            {/* List of moves if assignments exist */}
-            {showResumeClockModal.assignments && showResumeClockModal.assignments.length > 0 && (
-              <div style={{ width: '100%', maxHeight: '280px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
-                {(() => {
-                  const grouped = showResumeClockModal.assignments.reduce((acc, item) => {
-                    if (!acc[item.targetTable]) acc[item.targetTable] = [];
-                    acc[item.targetTable].push(item);
-                    return acc;
-                  }, {} as Record<string, typeof showResumeClockModal.assignments>);
-
-                  return Object.keys(grouped).map(tName => {
-                    const playerList = grouped[tName] || [];
-                    return (
-                      <div key={tName} style={{ backgroundColor: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '12px 16px' }}>
-                        <span style={{ fontSize: '0.95rem', fontWeight: 950, color: 'var(--color-gold)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                          Moving to {tName}
-                        </span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {playerList.map(item => {
-                            const mem = members.find(m => m.id === item.playerId);
-                            const name = mem ? `${mem.firstName} ${mem.lastName}` : 'Player';
-                            const openSeatText = item.orderNumber === 1 ? '1st Open Seat' : item.orderNumber === 2 ? '2nd Open Seat' : item.orderNumber === 3 ? '3rd Open Seat' : `${item.orderNumber}th Open Seat`;
-                            return (
-                              <div key={item.playerId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.05rem', backgroundColor: 'rgba(255,255,255,0.04)', padding: '6px 12px', borderRadius: '6px' }}>
-                                <span style={{ color: '#ffffff', fontWeight: 800 }}>
-                                  {item.orderNumber}. {name}
-                                </span>
-                                <span style={{ color: '#10b981', fontWeight: 900 }}>
-                                  {openSeatText}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-            )}
-
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
-              <button
-                onClick={async () => {
-                  if (audioSuspended) {
-                    await resumeAudio();
-                  }
-                  playCustomSound('startStop');
-                  setIsRunning(true);
-                  updateTournament(tournament.id, {
-                    clockState: {
-                      currentLevelIndex,
-                      timeRemainingSeconds: timeRemaining,
-                      isRunning: true,
-                      lastUpdated: new Date().toISOString()
-                    }
-                  });
-                  setShowResumeClockModal(null);
-                }}
-                className="btn btn-primary"
-                style={{
-                  width: '100%',
-                  padding: '18px 24px',
-                  fontWeight: 900,
-                  fontSize: '1.35rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  borderRadius: '14px',
-                  backgroundColor: 'var(--color-emerald)',
-                  borderColor: 'var(--color-emerald)',
-                  color: '#ffffff',
-                  boxShadow: '0 8px 24px rgba(16, 185, 129, 0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px',
-                  cursor: 'pointer'
-                }}
-              >
-                <Play size={24} fill="#ffffff" />
-                <span>START THE CLOCK</span>
-              </button>
-
-              <button
-                onClick={() => setShowResumeClockModal(null)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'rgba(255, 255, 255, 0.6)',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: '8px'
-                }}
-              >
-                Keep Clock Paused
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ResumeClockModal
+        isOpen={!!showResumeClockModal}
+        modalData={showResumeClockModal}
+        onStartClock={async () => {
+          if (audioSuspended) {
+            await resumeAudio();
+          }
+          playCustomSound('startStop');
+          setIsRunning(true);
+          updateTournament(tournament.id, {
+            clockState: {
+              currentLevelIndex,
+              timeRemainingSeconds: timeRemaining,
+              isRunning: true,
+              lastUpdated: new Date().toISOString()
+            }
+          });
+          setShowResumeClockModal(null);
+        }}
+        onKeepPaused={() => setShowResumeClockModal(null)}
+      />
 
       {showWinningsModal && (() => {
         const buyInCount = tournament.entries.filter(e => e.hasBuyIn).length;
