@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Crown, Award } from 'lucide-react';
 import type { Member } from '../types';
 
@@ -170,12 +171,17 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
       }).filter(Boolean)
     : [];
 
-  return (
+  return createPortal(
     <div 
       className="seating-display-modal"
       style={{
         position: 'fixed',
-        inset: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
         backgroundColor: '#010101',
         backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(212, 163, 89, 0.05) 0%, transparent 50%)',
         color: '#e2e8f0',
@@ -499,6 +505,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
           })}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
