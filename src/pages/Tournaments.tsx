@@ -8,6 +8,7 @@ import { SeatingDisplayModal } from '../components/SeatingDisplayModal';
 import { EliminationModal } from '../components/EliminationModal';
 import { LateEntryModal } from '../components/LateEntryModal';
 import { TournamentClock } from '../components/TournamentClock';
+import { GameResultsFacebook } from '../components/GameResultsFacebook';
 import { TableBalanceAlertModal } from '../components/TableBalanceAlertModal';
 import { ResumeClockModal } from '../components/ResumeClockModal';
 import { checkTableBalance, executePlayerMove, executeTableBreak, calculateBreakAssignments } from '../utils/tableBalancing';
