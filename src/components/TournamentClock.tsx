@@ -182,6 +182,24 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     }
   });
   const [isAudioSettingsOpen, setIsAudioSettingsOpen] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      // Filter English by default, but fallback to all if needed
+      const english = voices.filter(v => v.lang.startsWith('en'));
+      setAvailableVoices(english.length > 0 ? english : voices);
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
 
   const updateAudioSettings = (newSettings: Partial<AudioSettings>) => {
     setAudioSettings(prev => {
@@ -201,13 +219,15 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
       if (lvl.type === 'break') {
         speakAnnouncement(`Tournament is now on a ${lvl.duration} minute break.`, {
           enabled: true,
-          volume: audioSettings.volume
+          volume: audioSettings.volume,
+          voiceURI: audioSettings.voiceURI
         });
       } else {
         const anteText = lvl.ante ? ` with a ${lvl.ante} big blind ante` : '';
         speakAnnouncement(`Level ${lvl.roundNumber || levelIndex + 1}. Blinds are ${lvl.smallBlind}, ${lvl.bigBlind}${anteText}.`, {
           enabled: true,
-          volume: audioSettings.volume
+          volume: audioSettings.volume,
+          voiceURI: audioSettings.voiceURI
         });
       }
     }
@@ -223,12 +243,14 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
       if (lvl.type === 'break') {
         speakAnnouncement("One minute remaining in the break.", {
           enabled: true,
-          volume: audioSettings.volume
+          volume: audioSettings.volume,
+          voiceURI: audioSettings.voiceURI
         });
       } else {
         speakAnnouncement(`One minute remaining in level ${lvl.roundNumber || levelIndex + 1}.`, {
           enabled: true,
-          volume: audioSettings.volume
+          volume: audioSettings.volume,
+          voiceURI: audioSettings.voiceURI
         });
       }
     }
@@ -2571,6 +2593,35 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 />
               </div>
 
+              {/* Voice Selection Dropdown */}
+              {audioSettings.voiceEnabled && availableVoices.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontWeight: 700, fontSize: '0.85rem', color: 'rgba(255,255,255,0.85)' }}>Select Voice Accent / Style</label>
+                  <select
+                    value={audioSettings.voiceURI || ""}
+                    onChange={e => updateAudioSettings({ voiceURI: e.target.value })}
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'rgba(0,0,0,0.4)',
+                      color: '#ffffff',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '8px',
+                      padding: '8px 10px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="">-- Default Natural Voice --</option>
+                    {availableVoices.map(voice => (
+                      <option key={voice.voiceURI} value={voice.voiceURI} style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
+                        {voice.name} ({voice.lang})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               {/* Chimes & Sound Alerts */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
@@ -2610,7 +2661,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   if (audioSettings.voiceEnabled) {
                     speakAnnouncement("Level test. Blinds are 500 and 1000 with a 1000 big blind ante.", {
                       enabled: true,
-                      volume: audioSettings.volume
+                      volume: audioSettings.volume,
+                      voiceURI: audioSettings.voiceURI
                     });
                   }
                 }}

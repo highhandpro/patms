@@ -7,6 +7,7 @@ export interface AudioSettings {
   voiceEnabled: boolean;
   chimesEnabled: boolean;
   volume: number; // 0.0 to 1.0
+  voiceURI?: string; // Stored user preferred voice
 }
 
 export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
@@ -136,7 +137,7 @@ export const playOneMinuteWarningChime = (volumeMultiplier: number = 1) => {
  */
 export const speakAnnouncement = (
   text: string,
-  options?: { enabled?: boolean; volume?: number; rate?: number }
+  options?: { enabled?: boolean; volume?: number; rate?: number; voiceURI?: string }
 ) => {
   if (!('speechSynthesis' in window)) return;
   if (options?.enabled === false) return;
@@ -149,11 +150,19 @@ export const speakAnnouncement = (
     utterance.rate = options?.rate || 1.0;
     utterance.pitch = 1.0;
 
-    // Pick a natural English voice if available
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(v => 
-      v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('David') || v.name.includes('Zira'))
-    ) || voices.find(v => v.lang.startsWith('en'));
+    let preferredVoice: SpeechSynthesisVoice | undefined;
+
+    if (options?.voiceURI) {
+      preferredVoice = voices.find(v => v.voiceURI === options.voiceURI);
+    }
+
+    if (!preferredVoice) {
+      // Pick a natural English voice if available
+      preferredVoice = voices.find(v => 
+        v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('David') || v.name.includes('Zira'))
+      ) || voices.find(v => v.lang.startsWith('en'));
+    }
 
     if (preferredVoice) {
       utterance.voice = preferredVoice;
