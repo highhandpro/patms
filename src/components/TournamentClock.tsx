@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Maximize, Minimize, Play, Pause, RotateCcw, ShieldAlert, Award, Shuffle, DollarSign, Volume2, VolumeX } from 'lucide-react';
+import { Maximize, Minimize, Play, Pause, RotateCcw, ShieldAlert, Award, Shuffle, DollarSign } from 'lucide-react';
 import type { Tournament, Member, BlindLevel, TournamentEntry } from '../types';
 import { useApp } from '../context/AppContext';
 import { calculateDollarPayouts, getAutoPayoutPercentages } from '../utils/stats';
@@ -8,8 +8,7 @@ import { TableBalanceAlertModal } from './TableBalanceAlertModal';
 import { ResumeClockModal } from './ResumeClockModal';
 import { checkTableBalance, executePlayerMove, executeTableBreak, calculateBreakAssignments, calculateFinalTableRedraw } from '../utils/tableBalancing';
 import type { TableBalanceRecommendation, PlayerMoveAssignment } from '../utils/tableBalancing';
-import { playTableBalanceAlertSound, playBlindLevelUpSound, playOneMinuteWarningChime, speakAnnouncement, DEFAULT_AUDIO_SETTINGS } from '../utils/audioAlerts';
-import type { AudioSettings } from '../utils/audioAlerts';
+import { playTableBalanceAlertSound } from '../utils/audioAlerts';
 
 interface TournamentClockProps {
   tournament: Tournament;
@@ -171,90 +170,6 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   const [played10sSound, setPlayed10sSound] = useState(false);
   const [audioSuspended, setAudioSuspended] = useState(false);
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
-
-  // Audio Settings & Spoken Announcements State
-  const [audioSettings, setAudioSettings] = useState<AudioSettings>(() => {
-    try {
-      const saved = localStorage.getItem('patms_clock_audio_settings');
-      return saved ? JSON.parse(saved) : DEFAULT_AUDIO_SETTINGS;
-    } catch {
-      return DEFAULT_AUDIO_SETTINGS;
-    }
-  });
-  const [isAudioSettingsOpen, setIsAudioSettingsOpen] = useState(false);
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
-
-  useEffect(() => {
-    if (!('speechSynthesis' in window)) return;
-    
-    const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      // Filter English by default, but fallback to all if needed
-      const english = voices.filter(v => v.lang.startsWith('en'));
-      setAvailableVoices(english.length > 0 ? english : voices);
-    };
-
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    return () => {
-      window.speechSynthesis.onvoiceschanged = null;
-    };
-  }, []);
-
-  const updateAudioSettings = (newSettings: Partial<AudioSettings>) => {
-    setAudioSettings(prev => {
-      const updated = { ...prev, ...newSettings };
-      localStorage.setItem('patms_clock_audio_settings', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const announceLevel = (levelIndex: number) => {
-    const lvl = levels[levelIndex];
-    if (!lvl) return;
-    if (audioSettings.chimesEnabled) {
-      playBlindLevelUpSound(audioSettings.volume);
-    }
-    if (audioSettings.voiceEnabled) {
-      if (lvl.type === 'break') {
-        speakAnnouncement(`Tournament is now on a ${lvl.duration} minute break.`, {
-          enabled: true,
-          volume: audioSettings.volume,
-          voiceURI: audioSettings.voiceURI
-        });
-      } else {
-        const anteText = lvl.ante ? ` with a ${lvl.ante} big blind ante` : '';
-        speakAnnouncement(`Level ${lvl.roundNumber || levelIndex + 1}. Blinds are ${lvl.smallBlind}, ${lvl.bigBlind}${anteText}.`, {
-          enabled: true,
-          volume: audioSettings.volume,
-          voiceURI: audioSettings.voiceURI
-        });
-      }
-    }
-  };
-
-  const announceOneMinuteWarning = (levelIndex: number) => {
-    const lvl = levels[levelIndex];
-    if (!lvl) return;
-    if (audioSettings.chimesEnabled) {
-      playOneMinuteWarningChime(audioSettings.volume);
-    }
-    if (audioSettings.voiceEnabled) {
-      if (lvl.type === 'break') {
-        speakAnnouncement("One minute remaining in the break.", {
-          enabled: true,
-          volume: audioSettings.volume,
-          voiceURI: audioSettings.voiceURI
-        });
-      } else {
-        speakAnnouncement(`One minute remaining in level ${lvl.roundNumber || levelIndex + 1}.`, {
-          enabled: true,
-          volume: audioSettings.volume,
-          voiceURI: audioSettings.voiceURI
-        });
-      }
-    }
-  };
 
   // Winnings modal Complete overlay states
   const [showWinningsModal, setShowWinningsModal] = useState(false);
@@ -605,7 +520,6 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         setCurrentLevelIndex(nextIndex);
         const nextTime = levels[nextIndex].duration * 60;
         setTimeRemaining(nextTime);
-        announceLevel(nextIndex);
         updateTournament(tournament.id, {
           clockState: {
             currentLevelIndex: nextIndex,
@@ -634,13 +548,12 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
     if (timeRemaining <= 60 && timeRemaining > 55 && !played1MinSound) {
       playCustomSound('1min');
-      announceOneMinuteWarning(currentLevelIndex);
       setPlayed1MinSound(true);
     } else if (timeRemaining <= 10 && timeRemaining > 5 && !played10sSound) {
       playCustomSound('10s');
       setPlayed10sSound(true);
     }
-  }, [timeRemaining, isRunning, played1MinSound, played10sSound, currentLevelIndex]);
+  }, [timeRemaining, isRunning, played1MinSound, played10sSound]);
 
   // Reset tracking flags if timer goes above the thresholds
   useEffect(() => {
@@ -1697,35 +1610,6 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   <span>PAY THE BUBBLE</span>
                 </button>
               )}
-              <button 
-                onClick={() => setIsAudioSettingsOpen(true)}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = '#0D4014';
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
-                }}
-                style={{ 
-                  backgroundColor: '#0D4014', 
-                  color: audioSettings.voiceEnabled ? '#6ee7b7' : 'rgba(255,255,255,0.7)', 
-                  border: `1px solid ${audioSettings.voiceEnabled ? 'rgba(110, 231, 183, 0.4)' : 'rgba(255,255,255,0.15)'}`, 
-                  padding: isFullscreen ? '8px 14px' : '6px 10px', 
-                  fontSize: isFullscreen ? '1rem' : '0.85rem', 
-                  fontWeight: 700,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s ease-in-out'
-                }}
-                title="Configure Voice Announcements & Chimes"
-              >
-                {audioSettings.voiceEnabled || audioSettings.chimesEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-                <span>Audio</span>
-              </button>
               </div>
             </div>
           </div>
@@ -2559,145 +2443,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           </div>
         </div>
       )}
-      {/* MODAL: AUDIO SETTINGS */}
-      {isAudioSettingsOpen && (
-        <div 
-          onClick={() => setIsAudioSettingsOpen(false)}
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000003, padding: '20px' }}
-        >
-          <div 
-            className="glass-card animate-slide-up" 
-            onClick={e => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: '420px', backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '24px' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: '#F2C166', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Volume2 size={22} style={{ color: 'var(--color-emerald)' }} />
-                Audio & Announcements
-              </h3>
-              <button onClick={() => setIsAudioSettingsOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '1.2rem', padding: '4px' }}>✕</button>
-            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              {/* Spoken Voice Announcements */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <label style={{ fontWeight: 700, fontSize: '0.95rem', color: '#ffffff', display: 'block' }}>Voice Announcements</label>
-                  <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }}>Speaks blind changes & 1-min warnings aloud</span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={audioSettings.voiceEnabled}
-                  onChange={e => updateAudioSettings({ voiceEnabled: e.target.checked })}
-                  style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-emerald)' }}
-                />
-              </div>
-
-              {/* Voice Selection Dropdown */}
-              {audioSettings.voiceEnabled && availableVoices.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontWeight: 700, fontSize: '0.85rem', color: 'rgba(255,255,255,0.85)' }}>Select Voice Accent / Style</label>
-                  <select
-                    value={audioSettings.voiceURI || ""}
-                    onChange={e => updateAudioSettings({ voiceURI: e.target.value })}
-                    style={{
-                      width: '100%',
-                      backgroundColor: 'rgba(0,0,0,0.4)',
-                      color: '#ffffff',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      borderRadius: '8px',
-                      padding: '8px 10px',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="">-- Default Natural Voice --</option>
-                    {availableVoices.map(voice => (
-                      <option key={voice.voiceURI} value={voice.voiceURI} style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
-                        {voice.name} ({voice.lang})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Chimes & Sound Alerts */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <label style={{ fontWeight: 700, fontSize: '0.95rem', color: '#ffffff', display: 'block' }}>Harmonic Chimes</label>
-                  <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }}>Plays bell chimes on level up & table rebalance</span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={audioSettings.chimesEnabled}
-                  onChange={e => updateAudioSettings({ chimesEnabled: e.target.checked })}
-                  style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-emerald)' }}
-                />
-              </div>
-
-              {/* Volume Slider */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label style={{ fontWeight: 700, fontSize: '0.95rem', color: '#ffffff' }}>Volume</label>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--color-emerald)' }}>{Math.round(audioSettings.volume * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="1.0"
-                  step="0.05"
-                  value={audioSettings.volume}
-                  onChange={e => updateAudioSettings({ volume: Number(e.target.value) })}
-                  style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--color-emerald)' }}
-                />
-              </div>
-
-              {/* Test Audio Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  playBlindLevelUpSound(audioSettings.volume);
-                  if (audioSettings.voiceEnabled) {
-                    speakAnnouncement("Level test. Blinds are 500 and 1000 with a 1000 big blind ante.", {
-                      enabled: true,
-                      volume: audioSettings.volume,
-                      voiceURI: audioSettings.voiceURI
-                    });
-                  }
-                }}
-                className="btn btn-secondary"
-                style={{
-                  padding: '10px',
-                  borderRadius: '10px',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  backgroundColor: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  color: '#ffffff',
-                  cursor: 'pointer'
-                }}
-              >
-                <Volume2 size={16} />
-                <span>Test Audio & Voice</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsAudioSettingsOpen(false)}
-                className="btn btn-primary"
-                style={{ width: '100%', padding: '12px', borderRadius: '10px', fontWeight: 800, fontSize: '0.95rem' }}
-              >
-                DONE
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
     </div>
