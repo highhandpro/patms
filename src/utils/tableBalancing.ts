@@ -2,7 +2,7 @@ export interface PlayerMoveAssignment {
   playerId: string;
   orderNumber: number; // 1, 2, 3...
   targetTable: string;
-  targetSeatIndex: number; // 0-indexed
+  targetSeatIndex: number; // 0-indexed (0 - 9)
   targetSeatNumber: number; // 1-indexed (Seat 1 - 10)
 }
 
@@ -24,6 +24,8 @@ const TABLE_ORDER = ['red table', 'blue table', 'gold table', 'gray table', 'pur
 
 /**
  * Calculates deterministic numbered player assignments to destination tables and open seats.
+ * STRICT RULE: A table can NEVER have more than 10 players.
+ * Players from broken table are distributed to tables with fewest active players first.
  */
 export const calculateBreakAssignments = (
   seating: Record<string, string[]>,
@@ -35,8 +37,9 @@ export const calculateBreakAssignments = (
   const activeEntries = activeTournament.entries.filter((e: any) => !e.eliminatedAt);
   const activeSet = new Set<string>(activeEntries.map((e: any) => e.memberId));
 
-  // Get active players at break table in seat order (Seat 1 to 10)
-  const playersToMove = (seating[breakTable] || []).filter(id => id && activeSet.has(id));
+  // Get active players at break table in seat order (Seats 1 to 10)
+  const breakSeats = (seating[breakTable] || []).slice(0, 10);
+  const playersToMove = breakSeats.filter(id => id && activeSet.has(id));
   if (playersToMove.length === 0) return [];
 
   // Get remaining active tables in standard order
@@ -46,38 +49,52 @@ export const calculateBreakAssignments = (
 
   if (remainingTableNames.length === 0) return [];
 
-  // Find open seat indices for each remaining table
-  const openSeatsByTable: Record<string, number[]> = {};
+  // Track active count and open seat indices (0..9) for each remaining table
+  const currentActiveCount: Record<string, number> = {};
+  const availableSeatsByTable: Record<string, number[]> = {};
+  const tablePlayerMoveCount: Record<string, number> = {};
+
   remainingTableNames.forEach(tName => {
-    const seats = seating[tName] || [];
+    const seats = (seating[tName] || []).slice(0, 10);
+    let count = 0;
     const openSeats: number[] = [];
     for (let i = 0; i < 10; i++) {
       const occupant = seats[i];
-      if (!occupant || !activeSet.has(occupant)) {
+      if (occupant && activeSet.has(occupant)) {
+        count++;
+      } else {
         openSeats.push(i);
       }
     }
-    openSeatsByTable[tName] = openSeats;
+    currentActiveCount[tName] = count;
+    availableSeatsByTable[tName] = openSeats;
+    tablePlayerMoveCount[tName] = 0;
   });
 
   const assignments: PlayerMoveAssignment[] = [];
-  const tablePlayerCounts: Record<string, number> = {};
-  remainingTableNames.forEach(tName => {
-    tablePlayerCounts[tName] = 0;
-  });
 
-  let tableIdx = 0;
   playersToMove.forEach(pId => {
-    const targetTable = remainingTableNames[tableIdx % remainingTableNames.length];
-    tablePlayerCounts[targetTable] = (tablePlayerCounts[targetTable] || 0) + 1;
-    const orderNumber = tablePlayerCounts[targetTable]; // 1, 2, 3...
+    // Pick the remaining table with fewest active players that is NOT full (< 10) and has open seats
+    const candidateTables = remainingTableNames
+      .filter(tName => currentActiveCount[tName] < 10 && (availableSeatsByTable[tName]?.length || 0) > 0)
+      .sort((a, b) => {
+        if (currentActiveCount[a] !== currentActiveCount[b]) {
+          return currentActiveCount[a] - currentActiveCount[b];
+        }
+        return TABLE_ORDER.indexOf(a) - TABLE_ORDER.indexOf(b);
+      });
 
-    const availableSeats = openSeatsByTable[targetTable] || [];
-    // 1st player gets 1st open seat (availableSeats[0]), 2nd gets availableSeats[1], etc.
-    let seatIndex = availableSeats[orderNumber - 1];
-    if (seatIndex === undefined) {
-      seatIndex = (seating[targetTable]?.length || 10) + (orderNumber - 1);
-    }
+    // Fallback if all candidates are full (strictly should not happen)
+    const targetTable = candidateTables.length > 0 ? candidateTables[0] : remainingTableNames[0];
+
+    tablePlayerMoveCount[targetTable] = (tablePlayerMoveCount[targetTable] || 0) + 1;
+    currentActiveCount[targetTable] = (currentActiveCount[targetTable] || 0) + 1;
+    const orderNumber = tablePlayerMoveCount[targetTable];
+
+    // Take the first available open seat index (0..9)
+    const seatIndex = (availableSeatsByTable[targetTable] && availableSeatsByTable[targetTable].length > 0)
+      ? availableSeatsByTable[targetTable].shift()!
+      : 0;
 
     assignments.push({
       playerId: pId,
@@ -86,8 +103,6 @@ export const calculateBreakAssignments = (
       targetSeatIndex: seatIndex,
       targetSeatNumber: seatIndex + 1
     });
-
-    tableIdx++;
   });
 
   return assignments;
@@ -95,6 +110,7 @@ export const calculateBreakAssignments = (
 
 /**
  * Checks whether tables are currently unbalanced (difference >= 2) or if a table break threshold is reached.
+ * Enforces maximum 10 players per table.
  */
 export const checkTableBalance = (
   seating: Record<string, string[]>,
@@ -105,13 +121,13 @@ export const checkTableBalance = (
   const activeEntries = activeTournament.entries.filter((e: any) => !e.eliminatedAt);
   const activeSet = new Set<string>(activeEntries.map((e: any) => e.memberId));
 
-  // Determine active tables that have at least 1 active seated player
+  // Determine active tables that have at least 1 active seated player (clamped to max 10 seats)
   const tableStats: { name: string; activePlayers: string[]; count: number }[] = [];
 
   Object.entries(seating)
     .sort((a, b) => TABLE_ORDER.indexOf(a[0]) - TABLE_ORDER.indexOf(b[0]))
     .forEach(([tableName, seats]) => {
-      const activePlayers = seats.filter(id => id && activeSet.has(id));
+      const activePlayers = (seats || []).slice(0, 10).filter(id => id && activeSet.has(id));
       if (activePlayers.length > 0) {
         tableStats.push({
           name: tableName,
@@ -188,7 +204,8 @@ export const checkTableBalance = (
     if (t.count < minTable.count) minTable = t;
   }
 
-  if (maxTable.count - minTable.count >= 2) {
+  // Only rebalance if source has at least 2 more than target AND target has open seats (< 10)
+  if (maxTable.count - minTable.count >= 2 && minTable.count < 10) {
     return {
       type: 'rebalance',
       sourceTable: maxTable.name,
@@ -205,6 +222,7 @@ export const checkTableBalance = (
 
 /**
  * Moves a player to the first open/empty seat at the target table.
+ * STRICT RULE: Target table array is always strictly 10 elements.
  */
 export const executePlayerMove = (
   seating: Record<string, string[]>,
@@ -215,7 +233,11 @@ export const executePlayerMove = (
   const updatedSeating: Record<string, string[]> = {};
 
   Object.entries(seating).forEach(([tName, seats]) => {
-    updatedSeating[tName] = [...seats];
+    const copy = Array(10).fill("");
+    for (let i = 0; i < 10; i++) {
+      copy[i] = seats[i] || "";
+    }
+    updatedSeating[tName] = copy;
   });
 
   // 1. Remove player from source table (replace with empty string)
@@ -223,34 +245,30 @@ export const executePlayerMove = (
     updatedSeating[sourceTable] = updatedSeating[sourceTable].map(id => (id === playerId ? "" : id));
   }
 
-  // 2. Insert into first open seat on target table (or append if full)
+  // 2. Insert into first open seat on target table (strictly within index 0..9)
   if (!updatedSeating[targetTable]) {
     updatedSeating[targetTable] = Array(10).fill("");
   }
 
   const emptyIndex = updatedSeating[targetTable].findIndex(id => !id || id === "");
-  if (emptyIndex !== -1) {
+  if (emptyIndex !== -1 && emptyIndex < 10) {
     updatedSeating[targetTable][emptyIndex] = playerId;
-  } else {
-    // If no empty seat exists among first 10, find first available or replace an empty slot
-    let inserted = false;
-    for (let i = 0; i < 10; i++) {
-      if (!updatedSeating[targetTable][i]) {
-        updatedSeating[targetTable][i] = playerId;
-        inserted = true;
-        break;
-      }
-    }
-    if (!inserted) {
-      updatedSeating[targetTable].push(playerId);
-    }
   }
+
+  // Ensure all table arrays are strictly 10 items
+  Object.keys(updatedSeating).forEach(tName => {
+    updatedSeating[tName] = updatedSeating[tName].slice(0, 10);
+    while (updatedSeating[tName].length < 10) {
+      updatedSeating[tName].push("");
+    }
+  });
 
   return updatedSeating;
 };
 
 /**
  * Breaks a table and distributes all active players into open seats across remaining tables in numbered 1, 2, 3 order.
+ * STRICT RULE: Every table is capped at 10 seats max.
  */
 export const executeTableBreak = (
   seating: Record<string, string[]>,
@@ -260,22 +278,32 @@ export const executeTableBreak = (
   const assignments = calculateBreakAssignments(seating, breakTable, activeTournament);
   const updatedSeating: Record<string, string[]> = {};
 
-  // Copy remaining tables
+  // Copy remaining tables ensuring exactly 10 slots each
   Object.entries(seating).forEach(([tName, seats]) => {
     if (tName !== breakTable) {
-      updatedSeating[tName] = [...seats];
+      const copy = Array(10).fill("");
+      for (let i = 0; i < 10; i++) {
+        copy[i] = seats[i] || "";
+      }
+      updatedSeating[tName] = copy;
     }
   });
 
-  // Apply the assignments to the target tables in exact seat order
+  // Apply assignments into the assigned target seat index (strictly 0..9)
   assignments.forEach(item => {
     if (!updatedSeating[item.targetTable]) {
       updatedSeating[item.targetTable] = Array(10).fill("");
     }
-    while (updatedSeating[item.targetTable].length <= item.targetSeatIndex) {
-      updatedSeating[item.targetTable].push("");
+    const idx = Math.min(Math.max(item.targetSeatIndex, 0), 9);
+    updatedSeating[item.targetTable][idx] = item.playerId;
+  });
+
+  // Ensure all tables are strictly 10 slots
+  Object.keys(updatedSeating).forEach(tName => {
+    updatedSeating[tName] = updatedSeating[tName].slice(0, 10);
+    while (updatedSeating[tName].length < 10) {
+      updatedSeating[tName].push("");
     }
-    updatedSeating[item.targetTable][item.targetSeatIndex] = item.playerId;
   });
 
   return updatedSeating;
