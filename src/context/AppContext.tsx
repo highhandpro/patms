@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Member, Tournament, Season, Settings, DatabaseState, TournamentEntry, PendingApproval } from '../types';
 import { getAutoPayoutPercentages } from '../utils/stats';
+import { hashPin, isPinHashed } from '../utils/crypto';
 import { db } from '../firebase';
 import { 
   collection, 
@@ -715,6 +716,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id = String(nextNum);
     }
 
+    let securePin = pin || '';
+    if (securePin && !isPinHashed(securePin)) {
+      securePin = await hashPin(securePin);
+    }
+
     const newMember: Member = {
       id,
       firstName,
@@ -727,7 +733,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       logoUrl: logoUrl || '',
       cardUrl: cardUrl || '',
       role: role || 'player',
-      pin: pin || '',
+      pin: securePin,
       isDealer: isDealer || false
     };
     await setDoc(doc(db, 'members', id), newMember);
@@ -736,7 +742,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateMember = async (id: string, updated: Partial<Member>) => {
     const member = state.members.find(m => m.id === id);
     if (!member) return;
-    await setDoc(doc(db, 'members', id), { ...member, ...updated }, { merge: true });
+
+    const finalUpdate: Partial<Member> = { ...updated };
+    if (finalUpdate.pin && !isPinHashed(finalUpdate.pin)) {
+      finalUpdate.pin = await hashPin(finalUpdate.pin);
+    }
+
+    await setDoc(doc(db, 'members', id), { ...member, ...finalUpdate }, { merge: true });
   };
 
   const deleteMember = async (id: string) => {

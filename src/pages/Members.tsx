@@ -298,7 +298,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
     setLogoUrl(m.logoUrl || '');
     setCardUrl(m.cardUrl || '');
     setTempPassword('');
-    setPin(m.pin || '');
+    setPin('');
     setIsDealer(!!m.isDealer);
     setErrorMsg(null);
   };
@@ -358,7 +358,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
 
     try {
       if (editingMember) {
-        await updateMember(editingMember.id, {
+        const updatePayload: Partial<Member> = {
           firstName,
           lastName,
           phone,
@@ -367,9 +367,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
           logoUrl,
           cardUrl,
           role,
-          pin: pin.trim(),
           isDealer: isDealer
-        });
+        };
+        if (pin.trim()) {
+          updatePayload.pin = pin.trim();
+        }
+        await updateMember(editingMember.id, updatePayload);
         setEditingMember(null);
       } else {
         if (memberIdInput.trim()) {
@@ -1213,7 +1216,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                     inputMode="numeric"
                     maxLength={4}
                     id="player-pin"
-                    placeholder="Enter 4-digit PIN (leave blank to clear PIN)"
+                    placeholder={editingMember?.pin ? "PIN is set (enter 4 digits to change)" : "Enter 4-digit PIN (leave blank to clear)"}
                     value={pin}
                     onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                     className="form-input"

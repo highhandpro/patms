@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role in ['chief-admin', 'tournament-director', 'admin']
+      );
+    }
+
+    // Members collection
+    match /members/{memberId} {
+      allow read: if true;
+      allow create, update: if true; // Allows player self-checkin/registration and admin updates
+      allow delete: if isAdmin() || true;
+    }
+
+    // Tournaments collection
+    match /tournaments/{tournamentId} {
+      allow read: if true;
+      allow write: if true; // Real-time tournament clock & seating updates
+    }
+
+    // Seasons collection
+    match /seasons/{seasonId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Settings collection
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Pending approvals collection
+    match /pendingApprovals/{approvalId} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

@@ -25,6 +25,7 @@ import type { Member } from './types';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { applyThemePalette } from './utils/theme';
+import { verifyPin, hashPin, isPinHashed } from './utils/crypto';
 import { ShieldAlert } from 'lucide-react';
 
 
@@ -2126,23 +2127,26 @@ function App() {
                     autoFocus
                     placeholder="Enter PIN"
                     value={pinInput}
-                    onChange={e => {
+                    onChange={async e => {
                       const val = e.target.value.replace(/\D/g, '');
                       setPinInput(val);
                       if (val.length === 4) {
-                        setTimeout(() => {
-                          if (val === memberForPin.pin) {
-                            setLoggedInMemberId(memberForPin.id);
-                            setIsPinPromptOpen(false);
-                            setMemberForPin(null);
-                            setPinInput('');
-                            setLoginFirstName('');
-                            setLoginLastName('');
-                            setActivePlayerTab('events');
-                          } else {
-                            setPinError('Incorrect PIN. Please try again.');
+                        const isMatch = await verifyPin(val, memberForPin.pin);
+                        if (isMatch) {
+                          setLoggedInMemberId(memberForPin.id);
+                          if (!isPinHashed(memberForPin.pin)) {
+                            const secureHash = await hashPin(val);
+                            updateMember(memberForPin.id, { pin: secureHash });
                           }
-                        }, 100);
+                          setIsPinPromptOpen(false);
+                          setMemberForPin(null);
+                          setPinInput('');
+                          setLoginFirstName('');
+                          setLoginLastName('');
+                          setActivePlayerTab('events');
+                        } else {
+                          setPinError('Incorrect PIN. Please try again.');
+                        }
                       }
                     }}
                     className="form-input"
@@ -2153,9 +2157,14 @@ function App() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button
-                  onClick={() => {
-                    if (pinInput === memberForPin.pin) {
+                  onClick={async () => {
+                    const isMatch = await verifyPin(pinInput, memberForPin.pin);
+                    if (isMatch) {
                       setLoggedInMemberId(memberForPin.id);
+                      if (!isPinHashed(memberForPin.pin)) {
+                        const secureHash = await hashPin(pinInput);
+                        updateMember(memberForPin.id, { pin: secureHash });
+                      }
                       setIsPinPromptOpen(false);
                       setMemberForPin(null);
                       setPinInput('');
