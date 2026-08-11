@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, ArrowRight, X, Shuffle, CheckCircle, Volume2 } from 'lucide-react';
 import type { TableBalanceRecommendation, PlayerMoveAssignment } from '../utils/tableBalancing';
 import { useApp } from '../context/AppContext';
@@ -54,111 +55,122 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
     return `${orderNum}th Open Seat`;
   };
 
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.88)',
-        backdropFilter: 'blur(8px)',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: '#070b14',
+        backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 65%)',
+        color: '#ffffff',
         zIndex: 9999999,
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px'
+        flexDirection: 'column',
+        padding: '24px 40px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        animation: 'fadeIn 0.2s ease-out'
       }}
     >
-      <div
-        style={{
-          backgroundColor: '#0c1322',
-          border: '2px solid rgba(245, 158, 11, 0.6)',
-          boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.95), 0 0 50px rgba(245, 158, 11, 0.35)',
-          borderRadius: '24px',
-          width: '100%',
-          maxWidth: '1020px',
-          padding: '24px 30px',
-          color: '#ffffff',
-          position: 'relative',
-          animation: 'fadeIn 0.2s ease-out'
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div
-              style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '14px',
-                backgroundColor: 'rgba(245, 158, 11, 0.2)',
-                border: '1.5px solid rgba(245, 158, 11, 0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#f59e0b'
-              }}
-            >
-              <AlertTriangle size={26} />
-            </div>
-            <div>
-              <h2 style={{ fontSize: '1.55rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em', color: '#ffffff' }}>
-                {isRebalance ? 'Table Balance Required' : 'Table Consolidation Alert'}
-              </h2>
-              <p style={{ fontSize: '0.9rem', color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px', fontWeight: 600 }}>
-                <Volume2 size={15} style={{ color: '#10b981' }} />
-                Tournament Director Alert
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div
             style={{
-              background: 'none',
-              border: 'none',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              padding: '8px',
-              borderRadius: '10px',
+              width: '52px',
+              height: '52px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(245, 158, 11, 0.2)',
+              border: '1.5px solid rgba(245, 158, 11, 0.5)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              color: '#f59e0b'
             }}
           >
-            <X size={26} />
-          </button>
-        </div>
-
-        {/* Rebalance Flow */}
-        {isRebalance && recommendation.sourceTable && recommendation.targetTable && (
+            <AlertTriangle size={30} />
+          </div>
           <div>
+            <h2 style={{ fontSize: '1.85rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em', color: '#ffffff' }}>
+              {isRebalance ? 'Table Balance Required' : 'Table Consolidation Alert'}
+            </h2>
+            <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px', fontWeight: 600 }}>
+              <Volume2 size={16} style={{ color: '#10b981' }} />
+              Tournament Director Alert
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            color: '#cbd5e1',
+            cursor: 'pointer',
+            padding: '8px 18px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '0.95rem',
+            fontWeight: 700,
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+            e.currentTarget.style.color = '#ffffff';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+            e.currentTarget.style.color = '#cbd5e1';
+          }}
+        >
+          <X size={18} />
+          <span>Exit</span>
+        </button>
+      </div>
+
+      {/* Rebalance Flow (Full Screen Centered) */}
+      {isRebalance && recommendation.sourceTable && recommendation.targetTable && (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 0 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', maxWidth: '820px', width: '100%', margin: '0 auto', gap: '28px' }}>
+            
+            {/* Table From -> To Banner */}
             <div
               style={{
+                width: '100%',
                 backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '16px',
-                padding: '20px',
-                marginBottom: '24px',
+                border: '1.5px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '20px',
+                padding: '28px 36px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                gap: '16px'
+                gap: '24px',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)'
               }}
             >
               {/* Source Table Badge */}
               <div style={{ flex: 1, textAlign: 'center' }}>
-                <span style={{ fontSize: '0.9rem', color: '#94a3b8', display: 'block', marginBottom: '8px', fontWeight: 800, textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '1rem', color: '#94a3b8', display: 'block', marginBottom: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   From ({recommendation.sourceActiveCount} active)
                 </span>
                 <span
                   style={{
                     backgroundColor: sourceBadge?.bg,
                     color: sourceBadge?.color,
-                    padding: '8px 18px',
-                    borderRadius: '10px',
+                    padding: '12px 28px',
+                    borderRadius: '14px',
                     fontWeight: 950,
-                    fontSize: '1.2rem',
+                    fontSize: '1.6rem',
                     textTransform: 'uppercase',
-                    display: 'inline-block'
+                    display: 'inline-block',
+                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)'
                   }}
                 >
                   {recommendation.sourceTable}
@@ -166,24 +178,25 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
               </div>
 
               <div style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ArrowRight size={32} />
+                <ArrowRight size={44} strokeWidth={2.5} />
               </div>
 
               {/* Target Table Badge */}
               <div style={{ flex: 1, textAlign: 'center' }}>
-                <span style={{ fontSize: '0.9rem', color: '#94a3b8', display: 'block', marginBottom: '8px', fontWeight: 800, textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '1rem', color: '#94a3b8', display: 'block', marginBottom: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   To ({recommendation.targetActiveCount} active)
                 </span>
                 <span
                   style={{
                     backgroundColor: targetBadge?.bg,
                     color: targetBadge?.color,
-                    padding: '8px 18px',
-                    borderRadius: '10px',
+                    padding: '12px 28px',
+                    borderRadius: '14px',
                     fontWeight: 950,
-                    fontSize: '1.2rem',
+                    fontSize: '1.6rem',
                     textTransform: 'uppercase',
-                    display: 'inline-block'
+                    display: 'inline-block',
+                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)'
                   }}
                 >
                   {recommendation.targetTable}
@@ -191,9 +204,9 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
               </div>
             </div>
 
-            {/* Instruction */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '1.1rem', fontWeight: 850, marginBottom: '10px', color: '#e2e8f0' }}>
+            {/* Instruction & Select Dropdown */}
+            <div style={{ width: '100%' }}>
+              <label style={{ display: 'block', fontSize: '1.25rem', fontWeight: 900, marginBottom: '12px', color: '#f8fafc' }}>
                 Select Player Moving (Next Big Blind):
               </label>
               <select
@@ -201,22 +214,22 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 onChange={(e) => setSelectedPlayerId(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '16px 18px',
+                  padding: '18px 24px',
                   backgroundColor: '#ffffff',
-                  border: '2.5px solid #f59e0b',
-                  borderRadius: '12px',
+                  border: '3px solid #f59e0b',
+                  borderRadius: '16px',
                   color: selectedPlayerId ? '#0f172a' : '#dc2626',
-                  fontSize: '1.25rem',
+                  fontSize: '1.45rem',
                   fontWeight: 900,
                   outline: 'none',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)'
+                  boxShadow: '0 6px 24px rgba(0, 0, 0, 0.35)'
                 }}
               >
                 <option 
                   value="" 
                   disabled 
-                  style={{ backgroundColor: '#ffffff', color: '#dc2626', fontSize: '1.15rem', fontWeight: 900 }}
+                  style={{ backgroundColor: '#ffffff', color: '#dc2626', fontSize: '1.3rem', fontWeight: 900 }}
                 >
                   SELECT PLAYER
                 </option>
@@ -230,271 +243,274 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                   return activeList.map(pId => {
                     const name = getMemberName(pId);
                     return (
-                      <option key={pId} value={pId} style={{ backgroundColor: '#ffffff', color: '#0f172a', fontSize: '1.15rem', fontWeight: 700 }}>
+                      <option key={pId} value={pId} style={{ backgroundColor: '#ffffff', color: '#0f172a', fontSize: '1.3rem', fontWeight: 800 }}>
                         {name}
                       </option>
                     );
                   });
                 })()}
               </select>
-              <p style={{ fontSize: '0.95rem', color: '#94a3b8', marginTop: '10px', margin: 0, fontWeight: 600 }}>
+              <p style={{ fontSize: '1.05rem', color: '#94a3b8', marginTop: '12px', margin: 0, fontWeight: 600 }}>
                 💡 The player will automatically be placed into the <strong>1st open seat</strong> at {recommendation.targetTable.toUpperCase()}.
               </p>
             </div>
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '16px', marginTop: '28px' }}>
-              <button
-                type="button"
-                onClick={onClose}
-                style={{
-                  flex: 1,
-                  padding: '16px 20px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#cbd5e1',
-                  borderRadius: '12px',
-                  fontWeight: 800,
-                  fontSize: '1.05rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Dismiss / Settle Later
-              </button>
-              <button
-                type="button"
-                disabled={!selectedPlayerId}
-                onClick={() => {
-                  if (selectedPlayerId && recommendation.sourceTable && recommendation.targetTable) {
-                    onConfirmMove(selectedPlayerId, recommendation.sourceTable, recommendation.targetTable);
-                  }
-                }}
-                style={{
-                  flex: 1.6,
-                  padding: '16px 20px',
-                  backgroundColor: selectedPlayerId ? '#f59e0b' : 'rgba(245, 158, 11, 0.2)',
-                  border: selectedPlayerId ? 'none' : '1px solid rgba(245, 158, 11, 0.3)',
-                  color: selectedPlayerId ? '#000000' : '#64748b',
-                  borderRadius: '12px',
-                  fontWeight: 950,
-                  fontSize: '1.15rem',
-                  cursor: selectedPlayerId ? 'pointer' : 'not-allowed',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  boxShadow: selectedPlayerId ? '0 6px 20px rgba(245, 158, 11, 0.45)' : 'none',
-                  opacity: selectedPlayerId ? 1 : 0.6,
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <CheckCircle size={22} />
-                <span>Confirm & Move Player</span>
-              </button>
-            </div>
           </div>
-        )}
 
-        {/* Table Break Flow */}
-        {!isRebalance && recommendation.breakTable && (
-          <div>
-            <div
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '18px', maxWidth: '820px', width: '100%', margin: '0 auto', flexShrink: 0, paddingTop: '16px' }}>
+            <button
+              type="button"
+              onClick={onClose}
               style={{
-                backgroundColor: 'rgba(239, 68, 68, 0.12)',
-                border: '1.5px solid rgba(239, 68, 68, 0.4)',
+                flex: 1,
+                padding: '18px 24px',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#cbd5e1',
                 borderRadius: '14px',
-                padding: '10px 16px',
-                marginBottom: '14px',
-                textAlign: 'center'
+                fontWeight: 800,
+                fontSize: '1.15rem',
+                cursor: 'pointer'
               }}
             >
-              <span style={{ fontSize: '0.8rem', color: '#fca5a5', fontWeight: 800, display: 'block', marginBottom: '4px', letterSpacing: '0.05em' }}>
-                TABLE BEING BROKEN
-              </span>
-              <span
-                style={{
-                  backgroundColor: breakBadge?.bg,
-                  color: breakBadge?.color,
-                  padding: '6px 20px',
-                  borderRadius: '8px',
-                  fontWeight: 950,
-                  fontSize: '1.25rem',
-                  textTransform: 'uppercase',
-                  display: 'inline-block'
-                }}
-              >
-                {recommendation.breakTable}
-              </span>
-              <p style={{ fontSize: '0.95rem', color: '#e2e8f0', marginTop: '6px', margin: 0, fontWeight: 700 }}>
-                {recommendation.message}
-              </p>
-            </div>
+              Dismiss / Settle Later
+            </button>
+            <button
+              type="button"
+              disabled={!selectedPlayerId}
+              onClick={() => {
+                if (selectedPlayerId && recommendation.sourceTable && recommendation.targetTable) {
+                  onConfirmMove(selectedPlayerId, recommendation.sourceTable, recommendation.targetTable);
+                }
+              }}
+              style={{
+                flex: 1.6,
+                padding: '18px 28px',
+                backgroundColor: selectedPlayerId ? '#f59e0b' : 'rgba(245, 158, 11, 0.2)',
+                border: selectedPlayerId ? 'none' : '1px solid rgba(245, 158, 11, 0.3)',
+                color: selectedPlayerId ? '#000000' : '#64748b',
+                borderRadius: '14px',
+                fontWeight: 950,
+                fontSize: '1.25rem',
+                cursor: selectedPlayerId ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                boxShadow: selectedPlayerId ? '0 8px 25px rgba(245, 158, 11, 0.45)' : 'none',
+                opacity: selectedPlayerId ? 1 : 0.6,
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <CheckCircle size={24} />
+              <span>Confirm & Move Player</span>
+            </button>
+          </div>
+        </div>
+      )}
 
-            <div style={{ marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <label style={{ fontSize: '1.05rem', fontWeight: 900, color: '#f8fafc', margin: 0 }}>
-                  Player Move Assignments (In Order 1, 2, 3...):
-                </label>
-                <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
-                  Fills open seats in order
-                </span>
-              </div>
+      {/* Table Break / Consolidation Flow (Full Screen) */}
+      {!isRebalance && recommendation.breakTable && (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          {/* Top Banner */}
+          <div
+            style={{
+              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              border: '1.5px solid rgba(239, 68, 68, 0.4)',
+              borderRadius: '16px',
+              padding: '12px 24px',
+              marginBottom: '16px',
+              textAlign: 'center',
+              flexShrink: 0
+            }}
+          >
+            <span style={{ fontSize: '0.85rem', color: '#fca5a5', fontWeight: 800, display: 'block', marginBottom: '4px', letterSpacing: '0.06em' }}>
+              TABLE BEING BROKEN
+            </span>
+            <span
+              style={{
+                backgroundColor: breakBadge?.bg,
+                color: breakBadge?.color,
+                padding: '6px 24px',
+                borderRadius: '10px',
+                fontWeight: 950,
+                fontSize: '1.45rem',
+                textTransform: 'uppercase',
+                display: 'inline-block'
+              }}
+            >
+              {recommendation.breakTable}
+            </span>
+            <p style={{ fontSize: '1.05rem', color: '#e2e8f0', marginTop: '6px', margin: 0, fontWeight: 700 }}>
+              {recommendation.message}
+            </p>
+          </div>
 
-              {/* Grouped Table Assignments Grid (2 Columns) */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                {(() => {
-                  const grouped = (recommendation.breakAssignments || []).reduce((acc, item) => {
-                    if (!acc[item.targetTable]) acc[item.targetTable] = [];
-                    acc[item.targetTable]!.push(item);
-                    return acc;
-                  }, {} as Record<string, PlayerMoveAssignment[]>);
+          {/* Section Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexShrink: 0 }}>
+            <label style={{ fontSize: '1.2rem', fontWeight: 900, color: '#f8fafc', margin: 0 }}>
+              Player Move Assignments (In Order 1, 2, 3...):
+            </label>
+            <span style={{ fontSize: '0.95rem', color: '#94a3b8', fontWeight: 700 }}>
+              Fills open seats in order
+            </span>
+          </div>
 
-                  const targetTables = Object.keys(grouped);
+          {/* 2-Column Grid (Fills screen height evenly) */}
+          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px', minHeight: 0, overflowY: 'auto', paddingRight: '4px' }}>
+            {(() => {
+              const grouped = (recommendation.breakAssignments || []).reduce((acc, item) => {
+                if (!acc[item.targetTable]) acc[item.targetTable] = [];
+                acc[item.targetTable]!.push(item);
+                return acc;
+              }, {} as Record<string, PlayerMoveAssignment[]>);
 
-                  if (targetTables.length === 0) {
-                    return (
-                      <p style={{ gridColumn: 'span 2', fontSize: '0.95rem', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
-                        Active players from {recommendation.breakTable.toUpperCase()} will be distributed evenly into open seats.
-                      </p>
-                    );
-                  }
+              const targetTables = Object.keys(grouped);
 
-                  return targetTables.map(tName => {
-                    const badge = TABLE_THEME_BADGES[tName.toLowerCase()] || { bg: '#334155', color: '#fff' };
-                    const playerList = grouped[tName] || [];
+              if (targetTables.length === 0) {
+                return (
+                  <p style={{ gridColumn: 'span 2', fontSize: '1.1rem', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
+                    Active players from {recommendation.breakTable.toUpperCase()} will be distributed evenly into open seats.
+                  </p>
+                );
+              }
 
-                    return (
-                      <div
-                        key={tName}
+              return targetTables.map(tName => {
+                const badge = TABLE_THEME_BADGES[tName.toLowerCase()] || { bg: '#334155', color: '#fff' };
+                const playerList = grouped[tName] || [];
+
+                return (
+                  <div
+                    key={tName}
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1.5px solid rgba(255, 255, 255, 0.12)',
+                      borderRadius: '14px',
+                      padding: '14px 18px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span
                         style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1.5px solid rgba(255, 255, 255, 0.12)',
-                          borderRadius: '12px',
-                          padding: '10px 14px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '8px'
+                          backgroundColor: badge.bg,
+                          color: badge.color,
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          fontWeight: 950,
+                          fontSize: '1.05rem',
+                          textTransform: 'uppercase',
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span
-                            style={{
-                              backgroundColor: badge.bg,
-                              color: badge.color,
-                              padding: '4px 10px',
-                              borderRadius: '6px',
-                              fontWeight: 950,
+                        Moving to {tName}
+                      </span>
+                      <span style={{ fontSize: '0.95rem', color: '#94a3b8', fontWeight: 800 }}>
+                        {playerList.length} player{playerList.length > 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {playerList.map(item => (
+                        <div
+                          key={item.playerId}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                            padding: '8px 14px',
+                            borderRadius: '8px',
+                            fontSize: '1.05rem'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+                            <span style={{ 
+                              backgroundColor: '#f59e0b', 
+                              color: '#000000', 
+                              width: '26px', 
+                              height: '26px', 
+                              borderRadius: '50%', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center', 
+                              fontWeight: 950, 
                               fontSize: '0.9rem',
-                              textTransform: 'uppercase',
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            Moving to {tName}
-                          </span>
-                          <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
-                            {playerList.length} player{playerList.length > 1 ? 's' : ''}
-                          </span>
+                              flexShrink: 0
+                            }}>
+                              {item.orderNumber}
+                            </span>
+                            <span style={{ fontWeight: 850, color: '#ffffff', fontSize: '1.15rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                              {getMemberName(item.playerId)}
+                            </span>
+                          </div>
+                          <div style={{ flexShrink: 0 }}>
+                            <span style={{ color: '#10b981', fontWeight: 950, fontSize: '1.1rem' }}>
+                              {formatOpenSeatOrder(item.orderNumber)}
+                            </span>
+                          </div>
                         </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          {playerList.map(item => (
-                            <div
-                              key={item.playerId}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                backgroundColor: 'rgba(0, 0, 0, 0.35)',
-                                padding: '6px 10px',
-                                borderRadius: '6px',
-                                fontSize: '0.95rem'
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                                <span style={{ 
-                                  backgroundColor: '#f59e0b', 
-                                  color: '#000000', 
-                                  width: '22px', 
-                                  height: '22px', 
-                                  borderRadius: '50%', 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
-                                  justifyContent: 'center', 
-                                  fontWeight: 950, 
-                                  fontSize: '0.8rem',
-                                  flexShrink: 0
-                                }}>
-                                  {item.orderNumber}
-                                </span>
-                                <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                                  {getMemberName(item.playerId)}
-                                </span>
-                              </div>
-                              <div style={{ flexShrink: 0 }}>
-                                <span style={{ color: '#10b981', fontWeight: 900, fontSize: '0.95rem' }}>
-                                  {formatOpenSeatOrder(item.orderNumber)}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '14px' }}>
-              <button
-                type="button"
-                onClick={onClose}
-                style={{
-                  flex: 1,
-                  padding: '14px 18px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#cbd5e1',
-                  borderRadius: '12px',
-                  fontWeight: 800,
-                  fontSize: '1rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Dismiss
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (recommendation.breakTable) {
-                    onConfirmBreak(recommendation.breakTable);
-                  }
-                }}
-                style={{
-                  flex: 1.6,
-                  padding: '14px 18px',
-                  backgroundColor: '#ef4444',
-                  border: 'none',
-                  color: '#ffffff',
-                  borderRadius: '12px',
-                  fontWeight: 950,
-                  fontSize: '1.1rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 6px 20px rgba(239, 68, 68, 0.45)'
-                }}
-              >
-                <Shuffle size={20} />
-                <span>Confirm & Break Table</span>
-              </button>
-            </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
-        )}
-      </div>
-    </div>
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                flex: 1,
+                padding: '16px 22px',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#cbd5e1',
+                borderRadius: '14px',
+                fontWeight: 800,
+                fontSize: '1.15rem',
+                cursor: 'pointer'
+              }}
+            >
+              Dismiss
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (recommendation.breakTable) {
+                  onConfirmBreak(recommendation.breakTable);
+                }
+              }}
+              style={{
+                flex: 1.6,
+                padding: '16px 24px',
+                backgroundColor: '#ef4444',
+                border: 'none',
+                color: '#ffffff',
+                borderRadius: '14px',
+                fontWeight: 950,
+                fontSize: '1.25rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                boxShadow: '0 8px 25px rgba(239, 68, 68, 0.45)'
+              }}
+            >
+              <Shuffle size={22} />
+              <span>Confirm & Break Table</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>,
+    document.body
   );
 };
