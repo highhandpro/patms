@@ -75,21 +75,21 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
           boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.95), 0 0 50px rgba(245, 158, 11, 0.35)',
           borderRadius: '24px',
           width: '100%',
-          maxWidth: '860px',
-          padding: '32px 36px',
+          maxWidth: '1020px',
+          padding: '24px 30px',
           color: '#ffffff',
           position: 'relative',
           animation: 'fadeIn 0.2s ease-out'
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div
               style={{
-                width: '54px',
-                height: '54px',
-                borderRadius: '16px',
+                width: '46px',
+                height: '46px',
+                borderRadius: '14px',
                 backgroundColor: 'rgba(245, 158, 11, 0.2)',
                 border: '1.5px solid rgba(245, 158, 11, 0.5)',
                 display: 'flex',
@@ -98,14 +98,14 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 color: '#f59e0b'
               }}
             >
-              <AlertTriangle size={30} />
+              <AlertTriangle size={26} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em', color: '#ffffff' }}>
+              <h2 style={{ fontSize: '1.55rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em', color: '#ffffff' }}>
                 {isRebalance ? 'Table Balance Required' : 'Table Consolidation Alert'}
               </h2>
-              <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', fontWeight: 600 }}>
-                <Volume2 size={16} style={{ color: '#10b981' }} />
+              <p style={{ fontSize: '0.9rem', color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px', fontWeight: 600 }}>
+                <Volume2 size={15} style={{ color: '#10b981' }} />
                 Tournament Director Alert
               </p>
             </div>
@@ -302,46 +302,46 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
               style={{
                 backgroundColor: 'rgba(239, 68, 68, 0.12)',
                 border: '1.5px solid rgba(239, 68, 68, 0.4)',
-                borderRadius: '16px',
-                padding: '16px 20px',
-                marginBottom: '20px',
+                borderRadius: '14px',
+                padding: '10px 16px',
+                marginBottom: '14px',
                 textAlign: 'center'
               }}
             >
-              <span style={{ fontSize: '0.85rem', color: '#fca5a5', fontWeight: 800, display: 'block', marginBottom: '6px', letterSpacing: '0.05em' }}>
+              <span style={{ fontSize: '0.8rem', color: '#fca5a5', fontWeight: 800, display: 'block', marginBottom: '4px', letterSpacing: '0.05em' }}>
                 TABLE BEING BROKEN
               </span>
               <span
                 style={{
                   backgroundColor: breakBadge?.bg,
                   color: breakBadge?.color,
-                  padding: '8px 22px',
-                  borderRadius: '10px',
+                  padding: '6px 20px',
+                  borderRadius: '8px',
                   fontWeight: 950,
-                  fontSize: '1.35rem',
+                  fontSize: '1.25rem',
                   textTransform: 'uppercase',
                   display: 'inline-block'
                 }}
               >
                 {recommendation.breakTable}
               </span>
-              <p style={{ fontSize: '1.05rem', color: '#e2e8f0', marginTop: '10px', margin: 0, fontWeight: 700 }}>
+              <p style={{ fontSize: '0.95rem', color: '#e2e8f0', marginTop: '6px', margin: 0, fontWeight: 700 }}>
                 {recommendation.message}
               </p>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <label style={{ fontSize: '1.1rem', fontWeight: 900, color: '#f8fafc', margin: 0 }}>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <label style={{ fontSize: '1.05rem', fontWeight: 900, color: '#f8fafc', margin: 0 }}>
                   Player Move Assignments (In Order 1, 2, 3...):
                 </label>
-                <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 700 }}>
+                <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
                   Fills open seats in order
                 </span>
               </div>
 
-              {/* Grouped Table Assignments List */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '380px', overflowY: 'auto', paddingRight: '6px' }}>
+              {/* Grouped Table Assignments Grid (2 Columns) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                 {(() => {
                   const grouped = (recommendation.breakAssignments || []).reduce((acc, item) => {
                     if (!acc[item.targetTable]) acc[item.targetTable] = [];
@@ -353,7 +353,7 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
 
                   if (targetTables.length === 0) {
                     return (
-                      <p style={{ fontSize: '1rem', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
+                      <p style={{ gridColumn: 'span 2', fontSize: '0.95rem', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
                         Active players from {recommendation.breakTable.toUpperCase()} will be distributed evenly into open seats.
                       </p>
                     );
@@ -369,30 +369,34 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                         style={{
                           backgroundColor: 'rgba(255, 255, 255, 0.05)',
                           border: '1.5px solid rgba(255, 255, 255, 0.12)',
-                          borderRadius: '14px',
-                          padding: '14px 18px'
+                          borderRadius: '12px',
+                          padding: '10px 14px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <span
                             style={{
                               backgroundColor: badge.bg,
                               color: badge.color,
-                              padding: '5px 14px',
-                              borderRadius: '8px',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
                               fontWeight: 950,
-                              fontSize: '1rem',
-                              textTransform: 'uppercase'
+                              fontSize: '0.9rem',
+                              textTransform: 'uppercase',
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             Moving to {tName}
                           </span>
-                          <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 700 }}>
+                          <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
                             {playerList.length} player{playerList.length > 1 ? 's' : ''}
                           </span>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                           {playerList.map(item => (
                             <div
                               key={item.playerId}
@@ -401,32 +405,33 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
                                 backgroundColor: 'rgba(0, 0, 0, 0.35)',
-                                padding: '10px 16px',
-                                borderRadius: '8px',
-                                fontSize: '1.05rem'
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.95rem'
                               }}
                             >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
                                 <span style={{ 
                                   backgroundColor: '#f59e0b', 
                                   color: '#000000', 
-                                  width: '28px', 
-                                  height: '28px', 
+                                  width: '22px', 
+                                  height: '22px', 
                                   borderRadius: '50%', 
                                   display: 'flex', 
                                   alignItems: 'center', 
                                   justifyContent: 'center', 
                                   fontWeight: 950, 
-                                  fontSize: '0.95rem' 
+                                  fontSize: '0.8rem',
+                                  flexShrink: 0
                                 }}>
                                   {item.orderNumber}
                                 </span>
-                                <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '1.15rem' }}>
+                                <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '1rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                                   {getMemberName(item.playerId)}
                                 </span>
                               </div>
-                              <div>
-                                <span style={{ color: '#10b981', fontWeight: 900, fontSize: '1.1rem' }}>
+                              <div style={{ flexShrink: 0 }}>
+                                <span style={{ color: '#10b981', fontWeight: 900, fontSize: '0.95rem' }}>
                                   {formatOpenSeatOrder(item.orderNumber)}
                                 </span>
                               </div>
@@ -441,19 +446,19 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ display: 'flex', gap: '14px' }}>
               <button
                 type="button"
                 onClick={onClose}
                 style={{
                   flex: 1,
-                  padding: '16px 20px',
+                  padding: '14px 18px',
                   backgroundColor: 'rgba(255, 255, 255, 0.08)',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   color: '#cbd5e1',
                   borderRadius: '12px',
                   fontWeight: 800,
-                  fontSize: '1.05rem',
+                  fontSize: '1rem',
                   cursor: 'pointer'
                 }}
               >
@@ -463,29 +468,26 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                 type="button"
                 onClick={() => {
                   if (recommendation.breakTable) {
-                    onConfirmBreak(recommendation.breakTable);
+                    onConfirmBreak(recommendation.breakTable, recommendation.breakAssignments || []);
                   }
                 }}
                 style={{
                   flex: 1.6,
-                  padding: '16px 20px',
+                  padding: '14px 18px',
                   backgroundColor: '#ef4444',
                   border: 'none',
                   color: '#ffffff',
                   borderRadius: '12px',
                   fontWeight: 950,
-                  fontSize: '1.15rem',
+                  fontSize: '1.1rem',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '10px',
-                  boxShadow: '0 6px 20px rgba(239, 68, 68, 0.5)'
+                  gap: '8px',
+                  boxShadow: '0 6px 20px rgba(239, 68, 68, 0.45)'
                 }}
               >
-                <Shuffle size={22} />
-                <span>Confirm & Break Table</span>
-              </button>
             </div>
           </div>
         )}
