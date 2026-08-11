@@ -488,6 +488,9 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
                   boxShadow: '0 6px 20px rgba(239, 68, 68, 0.45)'
                 }}
               >
+                <Shuffle size={20} />
+                <span>Confirm & Break Table</span>
+              </button>
             </div>
           </div>
         )}
