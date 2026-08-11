@@ -526,12 +526,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   const generateSeating = () => {
     if (!activeTournament) return;
-    const players = activeTournament.entries.filter(e => e.hasBuyIn).map(e => e.memberId);
+    const players = activeTournament.entries.filter(e => e.hasBuyIn || activeTournament.buyInAmount === 0).map(e => e.memberId);
     if (players.length === 0) return;
 
-    const derekMember = state.members.find(m => m.email.toLowerCase() === 'steerbully777@gmail.com');
+    const derekMember = state.members.find(m => (m.firstName?.toLowerCase() === 'derek' && m.lastName?.toLowerCase() === 'allen') || m.email?.toLowerCase() === 'steerbully777@gmail.com');
     const derekId = derekMember ? derekMember.id : '';
     const isDerekPlaying = derekId && players.includes(derekId);
+
+    const timMember = state.members.find(m => m.firstName?.toLowerCase() === 'tim' && m.lastName?.toLowerCase() === 'hufler');
+    const timId = timMember ? timMember.id : '';
+    const isTimPlaying = timId && players.includes(timId);
 
     let checkedInDealers = players.filter(id => preassignedDealers.includes(id));
     let checkedInNonDealers = players.filter(id => !preassignedDealers.includes(id));
@@ -541,6 +545,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         checkedInDealers.push(derekId);
       }
       checkedInNonDealers = checkedInNonDealers.filter(id => id !== derekId);
+    }
+    if (isTimPlaying) {
+      if (!checkedInDealers.includes(timId)) {
+        checkedInDealers.push(timId);
+      }
+      checkedInNonDealers = checkedInNonDealers.filter(id => id !== timId);
     }
 
     const tableConfigs = getTableConfigurations(players.length);
@@ -598,7 +608,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       const candidateSeating: Record<string, string[]> = {};
       const candidateDealers: Record<string, string> = {};
 
-      const dealersWithoutDerek = shuffledDealers.filter(id => id !== derekId);
+      const dealersWithoutDerekOrTim = shuffledDealers.filter(id => id !== derekId && id !== timId);
       let dealerIdx = 0;
       let nonDealerIdx = 0;
 
@@ -606,12 +616,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const tablePlayers: string[] = [];
         let dealerId = "";
 
-        if (tableName === 'red table' && isDerekPlaying) {
-          dealerId = derekId;
-          tablePlayers.push(dealerId);
-          candidateDealers[tableName] = dealerId;
-        } else if (dealerIdx < dealersWithoutDerek.length) {
-          dealerId = dealersWithoutDerek[dealerIdx++];
+        if (tableName === 'red table') {
+          if (isDerekPlaying) {
+            dealerId = derekId;
+          } else if (isTimPlaying) {
+            dealerId = timId;
+          } else if (dealersWithoutDerekOrTim.length > 0 && dealerIdx < dealersWithoutDerekOrTim.length) {
+            dealerId = dealersWithoutDerekOrTim[dealerIdx++];
+          }
+          if (dealerId) {
+            tablePlayers.push(dealerId);
+            candidateDealers[tableName] = dealerId;
+          }
+        } else if (dealerIdx < dealersWithoutDerekOrTim.length) {
+          dealerId = dealersWithoutDerekOrTim[dealerIdx++];
           tablePlayers.push(dealerId);
           candidateDealers[tableName] = dealerId;
         }

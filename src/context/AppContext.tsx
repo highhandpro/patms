@@ -841,7 +841,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateTournament = async (id: string, updated: Partial<Tournament>) => {
     const finalUpdate: any = { ...updated };
     if (updated.entries && !updated.payoutPercentages) {
-      const buyInCount = updated.entries.filter(e => e.hasBuyIn).length;
+      const existing = state.tournaments.find(tour => tour.id === id);
+      const isFreerollOrToC = (updated.buyInAmount !== undefined ? updated.buyInAmount : existing?.buyInAmount) === 0;
+      const buyInCount = updated.entries.filter(e => e.hasBuyIn || isFreerollOrToC).length;
       finalUpdate.payoutPercentages = getAutoPayoutPercentages(buyInCount);
     }
     await updateDoc(doc(db, 'tournaments', id), finalUpdate);
@@ -947,7 +949,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!t) return;
 
     const updatedEntries = t.entries.filter(e => e.memberId !== memberId);
-    const buyInCount = updatedEntries.filter(e => e.hasBuyIn).length;
+    const buyInCount = updatedEntries.filter(e => e.hasBuyIn || t.buyInAmount === 0).length;
     const updateData: any = { 
       entries: updatedEntries,
       payoutPercentages: getAutoPayoutPercentages(buyInCount)
@@ -980,7 +982,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return e;
     });
 
-    const buyInCount = updatedEntries.filter(e => e.hasBuyIn).length;
+    const buyInCount = updatedEntries.filter(e => e.hasBuyIn || t.buyInAmount === 0).length;
 
     await updateDoc(doc(db, 'tournaments', tournamentId), {
       entries: updatedEntries,
@@ -996,7 +998,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const turningOff = targetEntry ? targetEntry.hasBuyIn : false;
 
     const updatedEntries = t.entries.map(e => e.memberId === memberId ? { ...e, hasBuyIn: !e.hasBuyIn } : e);
-    const buyInCount = updatedEntries.filter(e => e.hasBuyIn).length;
+    const buyInCount = updatedEntries.filter(e => e.hasBuyIn || t.buyInAmount === 0).length;
     const updateData: any = { 
       entries: updatedEntries,
       payoutPercentages: getAutoPayoutPercentages(buyInCount)
