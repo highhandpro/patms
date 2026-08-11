@@ -126,8 +126,8 @@ export const checkTableBalance = (
   const totalActive = activeEntries.length;
   const numActiveTables = tableStats.length;
 
-  // 1. Check Table Break Thresholds (Consolidation)
-  if (numActiveTables === 5 && totalActive <= 37) {
+  // 1. Check Table Break Thresholds (Consolidation at 40, 30, 20, 10)
+  if (numActiveTables === 5 && totalActive <= 40) {
     const breakTableObj = tableStats[tableStats.length - 1]; // purple table
     const remaining = tableStats.slice(0, tableStats.length - 1).map(t => t.name);
     return {
