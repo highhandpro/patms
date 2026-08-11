@@ -218,6 +218,7 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                   <th style={{ textAlign: 'center' }}>Tournaments Played</th>
                   <th style={{ textAlign: 'center' }}>Wins (1st)</th>
                   <th style={{ textAlign: 'center' }}>Top 10s</th>
+                  <th style={{ textAlign: 'center' }}>ITM Rate</th>
                   <th style={{ textAlign: 'center' }}>Bounties</th>
                   <th style={{ textAlign: 'right' }}>Total Earnings</th>
                   <th 
@@ -256,7 +257,7 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                       {(() => {
                         const memberObj = state.members.find(m => m.id === player.memberId);
                         return (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             {memberObj?.logoUrl ? (
                               <img 
                                 src={memberObj.logoUrl} 
@@ -268,7 +269,23 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                                 ♣
                               </div>
                             )}
-                            <span>{player.name}</span>
+                            <span style={{ marginRight: '6px' }}>{player.name}</span>
+                            <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                              {player.badges?.filter(b => b.isUnlocked).map(badge => (
+                                <span 
+                                  key={badge.id}
+                                  title={`${badge.title}: ${badge.description} (${badge.progress})`}
+                                  style={{
+                                    cursor: 'help',
+                                    fontSize: '0.9rem',
+                                    filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.25))',
+                                    display: 'inline-block'
+                                  }}
+                                >
+                                  {badge.icon}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         );
                       })()}
@@ -278,6 +295,9 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                       {player.wins}
                     </td>
                     <td style={{ textAlign: 'center' }}>{player.top10}</td>
+                    <td style={{ textAlign: 'center', fontWeight: 600, color: player.itmRate >= 35 ? 'var(--color-emerald)' : 'inherit' }}>
+                      {player.itmRate}%
+                    </td>
                     <td style={{ textAlign: 'center' }}>{player.bounties}</td>
                     <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--color-emerald)' }}>
                       ${player.earnings}

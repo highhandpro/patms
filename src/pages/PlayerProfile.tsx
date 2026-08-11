@@ -1,8 +1,8 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { PlayerBanner } from '../components/PlayerBanner';
-import { calculateMemberStats } from '../utils/stats';
-import { User, Mail, Phone, Trophy, Award, Hash } from 'lucide-react';
+import { calculateMemberStats, calculatePlayerBadges } from '../utils/stats';
+import { User, Mail, Phone, Trophy, Award, Hash, Sparkles } from 'lucide-react';
 
 interface PlayerProfileProps {
   setActiveTab: (tab: string) => void;
@@ -198,24 +198,84 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({
               </div>
             </div>
 
-            {/* Detailed Performance stats */}
+             {/* Detailed Performance stats */}
             <div className="glass-card">
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '16px' }}>Detailed Performance</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', textAlign: 'center' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', textAlign: 'center' }}>
                 <div style={{ borderRight: '1px solid var(--border-subtle)' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Top 10 Finishes</span>
-                  <strong style={{ display: 'block', fontSize: '1.4rem', color: 'var(--text-primary)', marginTop: '4px' }}>{stats.top10}</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Top 10s</span>
+                  <strong style={{ display: 'block', fontSize: '1.3rem', color: 'var(--text-primary)', marginTop: '4px' }}>{stats.top10}</strong>
                 </div>
                 <div style={{ borderRight: '1px solid var(--border-subtle)' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Bounties Collected</span>
-                  <strong style={{ display: 'block', fontSize: '1.4rem', color: 'var(--text-primary)', marginTop: '4px' }}>{stats.bounties}</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Bounties</span>
+                  <strong style={{ display: 'block', fontSize: '1.3rem', color: 'var(--text-primary)', marginTop: '4px' }}>{stats.bounties}</strong>
                 </div>
-                <div>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Average Finish</span>
-                  <strong style={{ display: 'block', fontSize: '1.4rem', color: 'var(--text-primary)', marginTop: '4px' }}>
+                <div style={{ borderRight: '1px solid var(--border-subtle)' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Avg Finish</span>
+                  <strong style={{ display: 'block', fontSize: '1.3rem', color: 'var(--text-primary)', marginTop: '4px' }}>
                     {stats.avgFinish > 0 ? `#${stats.avgFinish}` : '-'}
                   </strong>
                 </div>
+                <div style={{ borderRight: '1px solid var(--border-subtle)' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ITM Rate</span>
+                  <strong style={{ display: 'block', fontSize: '1.3rem', color: 'var(--color-emerald)', marginTop: '4px' }}>{stats.itmRate}%</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Final Table %</span>
+                  <strong style={{ display: 'block', fontSize: '1.3rem', color: 'var(--color-gold)', marginTop: '4px' }}>{stats.finalTableRate}%</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Achievements & Career Badges Section */}
+            <div className="glass-card">
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={20} style={{ color: 'var(--color-gold)' }} />
+                Career Achievements & Badges
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                Earn special badges based on your performance in official club tournaments:
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {calculatePlayerBadges(stats).map(badge => (
+                  <div 
+                    key={badge.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px',
+                      borderRadius: '10px',
+                      backgroundColor: badge.isUnlocked ? badge.bgColor : 'rgba(255, 255, 255, 0.02)',
+                      border: `1px solid ${badge.isUnlocked ? badge.color + '40' : 'var(--border-subtle)'}`,
+                      opacity: badge.isUnlocked ? 1 : 0.45,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '2rem' }}>{badge.icon}</span>
+                      <div>
+                        <strong style={{ display: 'block', fontSize: '0.95rem', color: badge.isUnlocked ? '#ffffff' : 'var(--text-secondary)' }}>
+                          {badge.title} {badge.isUnlocked && '✓'}
+                        </strong>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{badge.description}</span>
+                      </div>
+                    </div>
+                    {badge.progress && (
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        borderRadius: '12px',
+                        backgroundColor: badge.isUnlocked ? badge.color + '20' : 'rgba(255,255,255,0.05)',
+                        color: badge.isUnlocked ? badge.color : 'var(--text-secondary)',
+                        border: `1px solid ${badge.isUnlocked ? badge.color + '40' : 'rgba(255,255,255,0.1)'}`
+                      }}>
+                        {badge.progress}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 

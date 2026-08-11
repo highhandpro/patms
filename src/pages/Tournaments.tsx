@@ -200,6 +200,45 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
   const [showResumeClockModal, setShowResumeClockModal] = useState<{ title: string; message: string; assignments?: PlayerMoveAssignment[] } | null>(null);
 
+  // TD Quick-Swap Seating Tool State
+  const [selectedSwapSeat, setSelectedSwapSeat] = useState<{ tableName: string; seatIdx: number; playerId: string } | null>(null);
+
+  const handleSeatClick = (tableName: string, seatIdx: number, playerId: string) => {
+    if (isSubAdmin) return;
+    if (!selectedSwapSeat) {
+      setSelectedSwapSeat({ tableName, seatIdx, playerId });
+      return;
+    }
+
+    if (selectedSwapSeat.tableName === tableName && selectedSwapSeat.seatIdx === seatIdx) {
+      setSelectedSwapSeat(null);
+      return;
+    }
+
+    // Perform swap between selectedSwapSeat and current seat
+    const updatedSeating: Record<string, string[]> = { ...seating };
+    const sourceTable = selectedSwapSeat.tableName;
+    const sourceIdx = selectedSwapSeat.seatIdx;
+    const playerA = (updatedSeating[sourceTable] || Array(10).fill(""))[sourceIdx] || "";
+    const playerB = (updatedSeating[tableName] || Array(10).fill(""))[seatIdx] || "";
+
+    const sourceSeats = [...(updatedSeating[sourceTable] || Array(10).fill(""))];
+    const targetSeats = sourceTable === tableName ? sourceSeats : [...(updatedSeating[tableName] || Array(10).fill(""))];
+
+    sourceSeats[sourceIdx] = playerB;
+    targetSeats[seatIdx] = playerA;
+
+    updatedSeating[sourceTable] = sourceSeats;
+    updatedSeating[tableName] = targetSeats;
+
+    setSeating(updatedSeating);
+    localStorage.setItem(`patms_seating_${activeTournament?.id}`, JSON.stringify(updatedSeating));
+    if (activeTournament) {
+      updateTournament(activeTournament.id, { seating: updatedSeating });
+    }
+    setSelectedSwapSeat(null);
+  };
+
   // Payout and Add-ons configuration states
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
   const [modalAddons, setModalAddons] = useState(0);
@@ -3101,7 +3140,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 Seating is generated only for checked-in players. Registered players who have not checked in yet will not be assigned a seat.
               </p>
             </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <button className="btn btn-secondary" onClick={() => setIsDisplayModeOpen(true)}>
                 <Play size={16} />
                 <span>Display Mode</span>
@@ -3114,6 +3153,41 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               )}
             </div>
           </div>
+
+          {/* Quick-Swap Notification Banner */}
+          {selectedSwapSeat && (
+            <div style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              border: '2px solid var(--color-emerald)',
+              borderRadius: '12px',
+              padding: '12px 16px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '16px',
+              animation: 'pulse 2s infinite ease-in-out'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.2rem' }}>🔄</span>
+                <div>
+                  <strong style={{ color: '#6ee7b7', fontSize: '0.95rem', display: 'block' }}>
+                    Seat Selected: {selectedSwapSeat.tableName.toUpperCase()} - Seat #{selectedSwapSeat.seatIdx + 1} ({selectedSwapSeat.playerId ? getMemberName(selectedSwapSeat.playerId) : 'Empty Slot'})
+                  </strong>
+                  <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>
+                    Click any other seat or empty slot across tables to swap or move instantly.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedSwapSeat(null)}
+                className="btn btn-ghost"
+                style={{ fontSize: '0.8rem', padding: '4px 10px', color: '#ffffff', backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: '6px' }}
+              >
+                Cancel Swap
+              </button>
+            </div>
+          )}
 
           {Object.keys(seating).length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
@@ -3171,25 +3245,31 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                     <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px', padding: 0, margin: 0 }}>
                       {players.map((playerId, idx) => {
+                        const isSelectedForSwap = selectedSwapSeat?.tableName === tableName && selectedSwapSeat?.seatIdx === idx;
+
                         if (!playerId) {
                           return (
                             <li 
                               key={`empty-${idx}`} 
+                              onClick={() => handleSeatClick(tableName, idx, '')}
                               style={{ 
                                 display: 'flex', 
                                 justifyContent: 'space-between', 
                                 alignItems: 'center',
                                 fontSize: '0.95rem',
                                 color: 'rgba(0, 0, 0, 0.45)',
-                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                border: `1px dashed ${theme.rowBorder}`,
+                                backgroundColor: isSelectedForSwap ? 'rgba(16, 185, 129, 0.35)' : 'rgba(255, 255, 255, 0.2)',
+                                border: isSelectedForSwap ? '2px solid #10b981' : `1px dashed ${theme.rowBorder}`,
                                 borderRadius: '8px',
-                                padding: '6px 10px'
+                                padding: '6px 10px',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
                               }}
+                              title="Click to select or move player to this empty seat"
                             >
                               <span style={{ fontWeight: 600, color: 'rgba(0, 0, 0, 0.45)' }}>
                                 <span style={{ marginRight: '6px', fontSize: '0.95rem', fontWeight: 900 }}>{idx + 1}:</span>
-                                <span style={{ fontStyle: 'italic' }}>[Empty]</span>
+                                <span style={{ fontStyle: 'italic' }}>[Empty - Click to Swap/Move]</span>
                               </span>
                             </li>
                           );
@@ -3202,6 +3282,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         return (
                           <li 
                             key={playerId} 
+                            onClick={() => handleSeatClick(tableName, idx, playerId)}
                             style={{ 
                               display: 'flex', 
                               justifyContent: 'space-between', 
@@ -3210,11 +3291,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               color: theme.textColor,
                               opacity: isEliminated ? 0.5 : 1,
                               textDecoration: isEliminated ? 'line-through' : 'none',
-                              backgroundColor: isEliminated ? 'rgba(255, 255, 255, 0.22)' : theme.rowBg,
-                              border: `1px solid ${theme.rowBorder}`,
+                              backgroundColor: isSelectedForSwap ? 'rgba(16, 185, 129, 0.4)' : (isEliminated ? 'rgba(255, 255, 255, 0.22)' : theme.rowBg),
+                              border: isSelectedForSwap ? '2px solid #10b981' : `1px solid ${theme.rowBorder}`,
                               borderRadius: '8px',
-                              padding: '6px 10px'
+                              padding: '6px 10px',
+                              cursor: 'pointer',
+                              boxShadow: isSelectedForSwap ? '0 0 12px rgba(16, 185, 129, 0.6)' : 'none',
+                              transition: 'all 0.15s ease'
                             }}
+                            title="Click to select for Quick-Swap"
                           >
                             <span 
                               style={{ 
@@ -3235,7 +3320,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               <span style={{ color: isEliminated ? 'rgba(0, 0, 0, 0.45)' : '#000000', marginRight: '2px', fontWeight: 900, fontSize: '0.95rem', textDecoration: isEliminated ? 'line-through' : 'none' }}>{idx + 1}:</span>
                               <button
                                 type="button"
-                                onClick={() => toggleDealerStatus(playerId, tableName)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleDealerStatus(playerId, tableName);
+                                }}
                                 style={{
                                   background: 'none',
                                   border: 'none',
@@ -3261,6 +3349,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             {!isEliminated && Object.keys(seating).length > 1 && (
                               <select
                                 value={tableName}
+                                onClick={(e) => e.stopPropagation()}
                                 onChange={(e) => movePlayerTable(playerId, tableName, e.target.value)}
                                 disabled={isSubAdmin}
                                 style={{

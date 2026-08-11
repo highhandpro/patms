@@ -7,9 +7,24 @@ export interface PlayerStanding {
   played: number;
   wins: number;
   top10: number;
+  cashes: number;
+  itmRate: number;
+  finalTableRate: number;
   earnings: number;
   bounties: number;
   gamePoints: Record<string, number>;
+  badges?: PlayerBadge[];
+}
+
+export interface PlayerBadge {
+  id: string;
+  title: string;
+  icon: string;
+  description: string;
+  color: string;
+  bgColor: string;
+  isUnlocked: boolean;
+  progress?: string;
 }
 
 // Calculate standings for a specific season or all seasons if seasonId is empty
@@ -30,6 +45,9 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
       played: 0,
       wins: 0,
       top10: 0,
+      cashes: 0,
+      itmRate: 0,
+      finalTableRate: 0,
       earnings: 0,
       bounties: 0,
       gamePoints: {}
@@ -49,6 +67,9 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
           played: 0,
           wins: 0,
           top10: 0,
+          cashes: 0,
+          itmRate: 0,
+          finalTableRate: 0,
           earnings: 0,
           bounties: 0,
           gamePoints: {}
@@ -60,9 +81,29 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
       standing.played += 1;
       if (entry.finishPosition === 1) standing.wins += 1;
       if (entry.finishPosition && entry.finishPosition <= 10) standing.top10 += 1;
+      if (entry.payoutEarned > 0) standing.cashes += 1;
       standing.earnings += entry.payoutEarned + (entry.bountiesCollected * t.bountyAmount);
       standing.bounties += entry.bountiesCollected;
       standing.gamePoints[t.id] = entry.pointsEarned;
+    });
+  });
+
+  // Finalize rates and badges
+  Object.values(standingsMap).forEach(s => {
+    s.itmRate = s.played > 0 ? Math.round((s.cashes / s.played) * 100) : 0;
+    s.finalTableRate = s.played > 0 ? Math.round((s.top10 / s.played) * 100) : 0;
+    s.badges = calculatePlayerBadges({
+      played: s.played,
+      wins: s.wins,
+      top10: s.top10,
+      cashes: s.cashes,
+      itmRate: s.itmRate,
+      finalTableRate: s.finalTableRate,
+      earnings: s.earnings,
+      bounties: s.bounties,
+      points: s.points,
+      avgFinish: 0,
+      recentFinishes: []
     });
   });
 
@@ -77,6 +118,9 @@ export interface MemberStats {
   played: number;
   wins: number;
   top10: number;
+  cashes: number;
+  itmRate: number;
+  finalTableRate: number;
   earnings: number;
   bounties: number;
   points: number;
@@ -90,6 +134,7 @@ export const calculateMemberStats = (state: DatabaseState, memberId: string): Me
   let played = 0;
   let wins = 0;
   let top10 = 0;
+  let cashes = 0;
   let earnings = 0;
   let bounties = 0;
   let points = 0;
@@ -108,6 +153,7 @@ export const calculateMemberStats = (state: DatabaseState, memberId: string): Me
       played += 1;
       if (entry.finishPosition === 1) wins += 1;
       if (entry.finishPosition && entry.finishPosition <= 10) top10 += 1;
+      if (entry.payoutEarned > 0) cashes += 1;
       earnings += entry.payoutEarned + (entry.bountiesCollected * t.bountyAmount);
       bounties += entry.bountiesCollected;
       points = Number((points + entry.pointsEarned).toFixed(1));
@@ -120,17 +166,77 @@ export const calculateMemberStats = (state: DatabaseState, memberId: string): Me
   });
 
   const avgFinish = finishesCount > 0 ? Number((totalFinishPositions / finishesCount).toFixed(1)) : 0;
+  const itmRate = played > 0 ? Math.round((cashes / played) * 100) : 0;
+  const finalTableRate = played > 0 ? Math.round((top10 / played) * 100) : 0;
   
   return {
     played,
     wins,
     top10,
+    cashes,
+    itmRate,
+    finalTableRate,
     earnings,
     bounties,
     points,
     avgFinish,
     recentFinishes: recentFinishes.slice(-5).reverse() // last 5, newest first
   };
+};
+
+export const calculatePlayerBadges = (stats: MemberStats): PlayerBadge[] => {
+  return [
+    {
+      id: 'champion',
+      title: 'Club Champion',
+      icon: '👑',
+      description: 'Won 1st place in an official tournament',
+      color: '#F59E0B',
+      bgColor: 'rgba(245, 158, 11, 0.15)',
+      isUnlocked: stats.wins >= 1,
+      progress: `${stats.wins} Win${stats.wins === 1 ? '' : 's'}`
+    },
+    {
+      id: 'bounty_hunter',
+      title: 'Bounty Hunter',
+      icon: '🎯',
+      description: 'Collected 5 or more career knockouts',
+      color: '#EF4444',
+      bgColor: 'rgba(239, 68, 68, 0.15)',
+      isUnlocked: stats.bounties >= 5,
+      progress: `${stats.bounties} Bounties`
+    },
+    {
+      id: 'money_maker',
+      title: 'Money Maker',
+      icon: '💰',
+      description: 'Achieved an In-The-Money (ITM) rate of 35% or higher',
+      color: '#10B981',
+      bgColor: 'rgba(16, 185, 129, 0.15)',
+      isUnlocked: stats.played >= 3 && stats.itmRate >= 35,
+      progress: `${stats.itmRate}% ITM`
+    },
+    {
+      id: 'final_table_vet',
+      title: 'Final Table Veteran',
+      icon: '🌟',
+      description: 'Reached 5 or more career Final Tables',
+      color: '#8B5CF6',
+      bgColor: 'rgba(139, 92, 246, 0.15)',
+      isUnlocked: stats.top10 >= 5,
+      progress: `${stats.top10} Final Tables`
+    },
+    {
+      id: 'iron_player',
+      title: 'Iron Player',
+      icon: '🛡️',
+      description: 'High tournament attendance and club dedication',
+      color: '#3B82F6',
+      bgColor: 'rgba(59, 130, 246, 0.15)',
+      isUnlocked: stats.played >= 5,
+      progress: `${stats.played} Events`
+    }
+  ];
 };
 
 export const formatDate = (dateStr: string) => {
@@ -174,4 +280,3 @@ export function calculateDollarPayouts(prizePool: number, pcts: number[]): numbe
   }
   return rawAmts;
 }
-
