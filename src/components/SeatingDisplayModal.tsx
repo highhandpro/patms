@@ -172,6 +172,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
 
   return (
     <div 
+      className="seating-display-modal"
       style={{
         position: 'fixed',
         inset: 0,
@@ -186,6 +187,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
     >
       {/* Sidebar: Tournament Stats and Payout Breakdown */}
       <div 
+        className="seating-display-sidebar"
         style={{
           width: '240px',
           backgroundColor: '#0c0c0e',
@@ -293,6 +295,7 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
 
         {/* Columns Layout Grid */}
         <div 
+          className="seating-display-columns-grid"
           style={{ 
             display: 'grid', 
             gridTemplateColumns: `repeat(${activeTables.length || 1}, 1fr)`, 

@@ -1657,22 +1657,27 @@ body.display-mode-active .admin-portal-layout > .sidebar {
   display: none !important;
 }
 
-body.display-mode-active .main-content {
-  margin-left: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  padding: 0 !important;
-}
-
-/* Seating Display Modal - Active Player Name 100% Black Font */
-.seating-display-active-name {
-  color: #000000 !important;
-  font-weight: 900 !important;
-}
-
+/* Seating Display Modal - Force 100% Pure Black Color on all table fonts */
+.seating-display-columns-grid,
+.seating-display-columns-grid h2,
+.seating-display-columns-grid h3,
+.seating-display-columns-grid span,
+.seating-display-columns-grid li,
+.seating-display-columns-grid p,
+.seating-display-columns-grid div,
+.seating-display-active-name,
 .seating-display-active-seat {
   color: #000000 !important;
-  font-weight: 900 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+.seating-display-sidebar h1,
+.seating-display-sidebar h2,
+.seating-display-sidebar h3,
+.seating-display-sidebar span,
+.seating-display-sidebar strong,
+.seating-display-sidebar p {
+  -webkit-text-fill-color: initial !important;
 }
 
 /* Active Players Column Layout */

@@ -894,6 +894,7 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
             seating={seatingData}
             dealers={dealersData}
             members={state.members}
+            activeTournament={tournament}
           />
         );
       })()}
