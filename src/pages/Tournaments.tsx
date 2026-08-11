@@ -277,6 +277,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editHighHand, setEditHighHand] = useState(100);
   const [editFlyerUrl, setEditFlyerUrl] = useState('');
   const [editFlyerType, setEditFlyerType] = useState<'pdf' | 'image' | null>(null);
+  const [editSeatingTargetTime, setEditSeatingTargetTime] = useState('');
 
   // Create Tournament states
   const [tourTime, setTourTime] = useState('11:45 AM');
@@ -292,6 +293,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editUnderConstruction, setEditUnderConstruction] = useState(state.settings?.isUnderConstruction === true);
   const [tourIsBetaTest, setTourIsBetaTest] = useState(false);
   const [editTourIsBetaTest, setEditTourIsBetaTest] = useState(false);
+  const [tourSeatingTargetTime, setTourSeatingTargetTime] = useState('');
 
   useEffect(() => {
     if (state.settings && isCreateTourOpen) {
@@ -995,6 +997,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       tourHighHand,
       tourIsBetaTest
     );
+    if (tourSeatingTargetTime) {
+      updateTournament(newId, { seatingTargetTime: tourSeatingTargetTime });
+    }
     setIsCreateTourOpen(false);
     setSelectedTournamentId(newId);
     
@@ -1003,6 +1008,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setTourFlyerUrl('');
     setTourFlyerType(null);
     setTourIsBetaTest(false);
+    setTourSeatingTargetTime('');
   };
 
   const openEditTourDetails = () => {
@@ -1026,6 +1032,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditFlyerType(activeTournament.flyerType || null);
     setEditTourIsBetaTest(activeTournament.isBetaTest || false);
     setEditUnderConstruction(state.settings?.isUnderConstruction === true);
+    setEditSeatingTargetTime(activeTournament.seatingTargetTime || '');
     setIsEditTourDetailsOpen(true);
   };
 
@@ -1057,7 +1064,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       highHandAmount: editHighHand,
       flyerUrl: editFlyerUrl,
       flyerType: editFlyerType,
-      isBetaTest: editTourIsBetaTest
+      isBetaTest: editTourIsBetaTest,
+      seatingTargetTime: editSeatingTargetTime
     });
     
     setIsEditTourDetailsOpen(false);
@@ -1106,6 +1114,69 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     updateTournament(activeTournament.id, { status: 'active' });
     setSubTab('players');
   };
+
+  // Background effect to handle automatic seating target time check-in lock & draw
+  useEffect(() => {
+    if (!activeTournament || activeTournament.status !== 'draft' || !activeTournament.seatingTargetTime) {
+      return;
+    }
+
+    const checkAutoDraw = () => {
+      const targetTime = new Date(activeTournament.seatingTargetTime!).getTime();
+      const triggerTime = targetTime + 60 * 1000; // target time + 1 minute
+      const now = Date.now();
+
+      if (now >= triggerTime) {
+        // Only run if we don't already have seating generated in database
+        const hasSeating = activeTournament.seating && Object.keys(activeTournament.seating).length > 0;
+        if (hasSeating) {
+          return;
+        }
+
+        // Double-check activeTournament has entries
+        if (activeTournament.entries.length < 2) {
+          console.warn("Auto-draw skipped: less than 2 registered players.");
+          return;
+        }
+
+        console.log("Automatic seating target time reached. Executing auto-draw and lock...");
+        
+        // Generates the seating assignments
+        generateSeating();
+
+        // Lock entries and set status
+        updateTournament(activeTournament.id, {
+          status: 'active',
+          seatingLocked: true
+        });
+
+        // Set subtab to display mode
+        setSubTab('players');
+        setIsDisplayModeOpen(true);
+
+        // Log to audit log
+        logTournamentAction(
+          activeTournament.id,
+          "Auto Seating Draw",
+          "System automatically locked entries, drew seating cards for paid players, and activated Seating Display Mode.",
+          "System"
+        );
+      }
+    };
+
+    // Run check immediately
+    checkAutoDraw();
+
+    const interval = setInterval(checkAutoDraw, 5000);
+    return () => clearInterval(interval);
+  }, [
+    activeTournament?.id,
+    activeTournament?.seatingTargetTime,
+    activeTournament?.status,
+    activeTournament?.entries?.length,
+    activeTournament?.seating,
+    preassignedDealers
+  ]);
 
   const handleFinalize = () => {
     if (!activeTournament) return;
@@ -1391,6 +1462,19 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   className="form-input"
                   style={{ padding: '10px 14px' }}
                 />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 600 }}>Seating Draw Target Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={tourSeatingTargetTime}
+                  onChange={(e) => setTourSeatingTargetTime(e.target.value)}
+                  onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
+                  className="form-input"
+                  style={{ padding: '10px 14px' }}
+                />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Countdown & auto-draw occur at this time + 1 minute.</span>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -1953,6 +2037,18 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       required
                       value={editTourDate}
                       onChange={(e) => setEditTourDate(e.target.value)}
+                      onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
+                      className="form-input"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>Seating Draw Target Date & Time</label>
+                    <input
+                      type="datetime-local"
+                      value={editSeatingTargetTime}
+                      onChange={(e) => setEditSeatingTargetTime(e.target.value)}
                       onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
                       className="form-input"
                       style={{ padding: '8px 12px' }}
@@ -2914,8 +3010,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       {/* Check-in Tab */}
       {subTab === 'checkin' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
+          {activeTournament.seatingLocked && (
+            <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1.5px solid #ef4444', borderRadius: '8px', padding: '12px 16px', color: '#ffffff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              ⚠️ REGISTRATION LOCKED: Seating assignments have been generated. Late entries must be added using the seating chart late entry button.
+            </div>
+          )}
           {activeTournament.status === 'draft' ? (
-            !isSubAdmin && renderFastPlayerLookup("Register a Player", checkinSearchRef)
+            !isSubAdmin && !activeTournament.seatingLocked && renderFastPlayerLookup("Register a Player", checkinSearchRef)
           ) : (
             !isSubAdmin && renderFastPlayerLookup("Register a Player (Late Entry / Registration)", lateSearchRef)
           )}
@@ -2944,14 +3045,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               const renderCheckedInTable = (items: typeof checkedInEntries) => (
                 <div className="table-container">
                   <table className="data-table">
-                    <thead>
+<thead>
                       <tr>
                         <th>Player Name</th>
                         <th>ID</th>
                         <th style={{ textAlign: 'center' }}>Dealer?</th>
                         <th style={{ textAlign: 'center' }}>Buy-in (${activeTournament.buyInAmount})</th>
                         <th style={{ textAlign: 'center' }}>ToC (${activeTournament.dealerAppreciationAmount})</th>
-                        {activeTournament.status === 'draft' && <th style={{ textAlign: 'right' }}>Action</th>}
+                        {activeTournament.status === 'draft' && !activeTournament.seatingLocked && <th style={{ textAlign: 'right' }}>Action</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -3014,7 +3115,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               disabled={isSubAdmin || (activeTournament.status !== 'draft' && activeTournament.status !== 'active')}
                             />
                           </td>
-                          {!isSubAdmin && activeTournament.status === 'draft' && (
+                          {!isSubAdmin && activeTournament.status === 'draft' && !activeTournament.seatingLocked && (
                             <td style={{ textAlign: 'right' }}>
                               <button
                                 onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
@@ -5203,6 +5304,19 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     className="form-input"
                     style={{ padding: '10px 14px' }}
                   />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Seating Draw Target Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    value={editSeatingTargetTime}
+                    onChange={(e) => setEditSeatingTargetTime(e.target.value)}
+                    onClick={(e) => { try { e.currentTarget.showPicker?.(); } catch (err) { console.warn(err); } }}
+                    className="form-input"
+                    style={{ padding: '10px 14px' }}
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Countdown & auto-draw occur at this time + 1 minute.</span>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>

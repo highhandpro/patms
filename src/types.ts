@@ -94,6 +94,8 @@ export interface Tournament {
   foodAmount?: number;
   startingChips?: number;
   auditLogs?: AuditLogEntry[];
+  seatingTargetTime?: string; // ISO datetime string
+  seatingLocked?: boolean;
 }
 
 export interface AuditLogEntry {
