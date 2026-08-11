@@ -69,58 +69,83 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
         </div>
 
         {/* Mobile Hamburger Toggle */}
-        {loggedInMemberId && (
-          <button 
-            className="player-navbar-toggle"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle Navigation Menu"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        )}
+        <button 
+          className="player-navbar-toggle"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle Navigation Menu"
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
 
-        {/* Center: Navigation Links (Only shown when logged in) */}
-        {loggedInMemberId && (
-          <nav className={`player-navbar-nav ${isMenuOpen ? 'menu-open' : ''}`}>
-            <button 
-              className={`nav-link ${activeTab === 'events' || activeTab === 'event-details' ? 'active' : ''}`}
-              onClick={() => handleTabClick('events')}
-            >
-              Events
-            </button>
+        {/* Center: Navigation Links */}
+        <nav className={`player-navbar-nav ${isMenuOpen ? 'menu-open' : ''}`}>
+          {loggedInMemberId ? (
+            <>
+              <button 
+                className={`nav-link ${activeTab === 'events' || activeTab === 'event-details' ? 'active' : ''}`}
+                onClick={() => handleTabClick('events')}
+              >
+                Events
+              </button>
 
-            <button 
-              className={`nav-link ${activeTab === 'results' ? 'active' : ''}`}
-              onClick={() => handleTabClick('results')}
-            >
-              Results
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'rankings' ? 'active' : ''}`}
-              onClick={() => handleTabClick('rankings')}
-            >
-              Rankings
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'about' ? 'active' : ''}`}
-              onClick={() => handleTabClick('about')}
-            >
-              About
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'clubs' ? 'active' : ''}`}
-              onClick={() => handleTabClick('clubs')}
-            >
-              Clubs
-            </button>
-            <button 
-              className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}
-              onClick={() => handleTabClick('profile')}
-            >
-              My Profile
-            </button>
-          </nav>
-        )}
+              <button 
+                className={`nav-link ${activeTab === 'results' ? 'active' : ''}`}
+                onClick={() => handleTabClick('results')}
+              >
+                Results
+              </button>
+              <button 
+                className={`nav-link ${activeTab === 'rankings' ? 'active' : ''}`}
+                onClick={() => handleTabClick('rankings')}
+              >
+                Rankings
+              </button>
+              <button 
+                className={`nav-link ${activeTab === 'about' ? 'active' : ''}`}
+                onClick={() => handleTabClick('about')}
+              >
+                About
+              </button>
+              <button 
+                className={`nav-link ${activeTab === 'clubs' ? 'active' : ''}`}
+                onClick={() => handleTabClick('clubs')}
+              >
+                Clubs
+              </button>
+              <button 
+                className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}
+                onClick={() => handleTabClick('profile')}
+              >
+                My Profile
+              </button>
+              <button 
+                className={`nav-link ${activeTab === 'seating' ? 'active' : ''}`}
+                onClick={() => handleTabClick('seating')}
+                style={{ color: 'var(--color-gold)', fontWeight: 700 }}
+              >
+                🔍 Seating
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                className="nav-link"
+                onClick={() => {
+                  window.location.href = '/';
+                }}
+              >
+                Home
+              </button>
+              <button 
+                className={`nav-link ${activeTab === 'seating' ? 'active' : ''}`}
+                onClick={() => handleTabClick('seating')}
+                style={{ color: 'var(--color-emerald)', fontWeight: 700 }}
+              >
+                🔍 Find My Seat
+              </button>
+            </>
+          )}
+        </nav>
 
         {/* Right: User menu & Trophy Balance */}
         <div className="player-navbar-actions">

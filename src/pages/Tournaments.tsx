@@ -147,7 +147,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     undoElimination,
     finalizeTournament,
     reopenTournament,
-    updateSettings
+    updateSettings,
+    logTournamentAction
   } = useApp();
 
   // Create Form State
@@ -162,7 +163,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting' | 'facebook'>('rsvp');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting' | 'facebook' | 'audit'>('rsvp');
   const [viewCompletedOnly, setViewCompletedOnly] = useState(false);
   const [printType, setPrintType] = useState<'signin' | 'scoresheet'>('signin');
 
@@ -222,6 +223,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     const playerA = (updatedSeating[sourceTable] || Array(10).fill(""))[sourceIdx] || "";
     const playerB = (updatedSeating[tableName] || Array(10).fill(""))[seatIdx] || "";
 
+    const memberA = state.members.find(m => m.id === playerA);
+    const memberB = state.members.find(m => m.id === playerB);
+    const nameA = memberA ? `${memberA.firstName} ${memberA.lastName}` : "Empty Seat";
+    const nameB = memberB ? `${memberB.firstName} ${memberB.lastName}` : "Empty Seat";
+
     const sourceSeats = [...(updatedSeating[sourceTable] || Array(10).fill(""))];
     const targetSeats = sourceTable === tableName ? sourceSeats : [...(updatedSeating[tableName] || Array(10).fill(""))];
 
@@ -235,6 +241,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     localStorage.setItem(`patms_seating_${activeTournament?.id}`, JSON.stringify(updatedSeating));
     if (activeTournament) {
       updateTournament(activeTournament.id, { seating: updatedSeating });
+      logTournamentAction(activeTournament.id, "Seat Swap", `Swapped ${nameA} (${sourceTable} Seat ${sourceIdx + 1}) with ${nameB} (${tableName} Seat ${seatIdx + 1}).`);
     }
     setSelectedSwapSeat(null);
   };
@@ -805,6 +812,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       seating: updated,
       dealers: updatedDealers
     });
+
+    const m = state.members.find(member => member.id === playerId);
+    const name = m ? `${m.firstName} ${m.lastName}` : playerId;
+    logTournamentAction(activeTournament!.id, "Move Player", `Moved ${name} from ${sourceTable} to ${targetTable}.`);
   };
 
   const handleConfirmBalanceMove = (playerId: string, sourceTable: string, targetTable: string) => {
@@ -817,6 +828,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setBalanceRecommendation(null);
 
     const m = state.members.find(member => member.id === playerId);
+    const name = m ? `${m.firstName} ${m.lastName}` : playerId;
+    logTournamentAction(activeTournament.id, "Table Balance Move", `Moved ${name} from ${sourceTable} to ${targetTable} to balance tables.`);
+
     const playerName = m ? `${m.firstName} ${m.lastName}` : 'Player';
     setShowResumeClockModal({
       title: 'Table Balanced',
@@ -851,6 +865,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     updateTournament(activeTournament.id, { seating: updated, dealers: updatedDealers });
     setIsBalanceModalOpen(false);
     setBalanceRecommendation(null);
+
+    if (isFinal) {
+      logTournamentAction(activeTournament.id, "Final Table Redraw", `Players redrawn to the Final Table.`);
+    } else {
+      logTournamentAction(activeTournament.id, "Table Broken", `${breakTable} broken and players distributed to remaining tables.`);
+    }
 
     setShowResumeClockModal({
       title: isFinal ? 'Final Table Seating Set!' : 'Table Broken & Players Moved',
@@ -2404,6 +2424,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             >
               TD Print Out
             </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'audit' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('audit')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'audit' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'audit' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'audit' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              Audit Logs 📋
+            </button>
           </>
         ) : (
           <>
@@ -2462,6 +2496,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               }}
             >
               Results Flyer
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'audit' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('audit')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'audit' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'audit' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'audit' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              Audit Logs 📋
             </button>
           </>
         )}
@@ -4736,6 +4784,89 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           onAddLateEntry={() => setSubTab('checkin')}
         />
       )}
+
+      {subTab === 'audit' && (() => {
+        const logs = activeTournament.auditLogs || [];
+        return (
+          <div className="glass-card animate-slide-up" style={{ padding: '24px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--color-gold)' }}>Tournament Audit Log</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Real-time transparency trail for all TD seat swaps, check-ins, rebalances, and bust-outs.</p>
+              </div>
+              
+              <button 
+                onClick={async () => {
+                  if (confirm("Are you sure you want to clear all audit logs for this tournament? This action cannot be undone.")) {
+                    updateTournament(activeTournament.id, { auditLogs: [] });
+                  }
+                }}
+                className="btn btn-ghost"
+                style={{ padding: '6px 12px', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600 }}
+              >
+                Clear Log
+              </button>
+            </div>
+
+            {logs.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                No audit log entries recorded yet. Activities like checking in players, swapping seats, or eliminating players will generate logs here.
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border-subtle)', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 700 }}>
+                      <th style={{ padding: '12px 8px' }}>Time</th>
+                      <th style={{ padding: '12px 8px' }}>Action</th>
+                      <th style={{ padding: '12px 8px' }}>Performed By</th>
+                      <th style={{ padding: '12px 8px' }}>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...logs].reverse().map((log) => {
+                      let tagBg = 'rgba(255,255,255,0.06)';
+                      let tagColor = 'var(--text-secondary)';
+                      if (log.action.includes("Bust") || log.action.includes("Eliminate")) {
+                        tagBg = 'rgba(239, 68, 68, 0.15)';
+                        tagColor = 'var(--color-danger)';
+                      } else if (log.action.includes("Seat") || log.action.includes("Move") || log.action.includes("Balance")) {
+                        tagBg = 'rgba(16, 185, 129, 0.15)';
+                        tagColor = 'var(--color-emerald)';
+                      } else if (log.action.includes("Check") || log.action.includes("Buy")) {
+                        tagBg = 'rgba(59, 130, 246, 0.15)';
+                        tagColor = '#60a5fa';
+                      } else if (log.action.includes("Finalize") || log.action.includes("Reopen")) {
+                        tagBg = 'rgba(245, 158, 11, 0.15)';
+                        tagColor = 'var(--color-gold)';
+                      }
+
+                      return (
+                        <tr key={log.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: '12px 8px', whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                            {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </td>
+                          <td style={{ padding: '12px 8px' }}>
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700, backgroundColor: tagBg, color: tagColor }}>
+                              {log.action.toUpperCase()}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                            {log.performedBy}
+                          </td>
+                          <td style={{ padding: '12px 8px', color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
+                            {log.details}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {isPayoutModalOpen && (
         <div style={{

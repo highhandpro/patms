@@ -1094,6 +1094,42 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               {formatChipsCompact(totalChips)}
             </span>
           </div>
+
+          {/* Card 7: Bounty Leaders Ticker */}
+          {(() => {
+            const bountyLeaders = tournament.entries
+              .filter(e => e.bountiesCollected && e.bountiesCollected > 0)
+              .map(e => {
+                const mem = members.find(m => m.id === e.memberId);
+                return {
+                  name: mem ? `${mem.firstName} ${mem.lastName}` : `Player #${e.memberId}`,
+                  count: e.bountiesCollected || 0,
+                  isAlive: !e.eliminatedAt
+                };
+              })
+              .sort((a, b) => b.count - a.count)
+              .slice(0, 4);
+
+            if (bountyLeaders.length === 0) return null;
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#0D4014', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', textAlign: 'left' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#F2C166', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '3px' }}>
+                  🎯 Knockouts Leaders
+                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  {bountyLeaders.map((bl, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: '#ffffff' }}>
+                      <span style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>
+                        {bl.isAlive ? '🟢' : '💀'} {bl.name}
+                      </span>
+                      <span style={{ fontWeight: 900, color: 'var(--color-gold)' }}>{bl.count} KOs</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Right Column: Main Clock Display + Places Paid Card underneath */}
@@ -1183,6 +1219,38 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               marginBottom: '8px',
               borderRadius: '2px'
             }} />
+
+            {/* Chip-Up & Break Instructions */}
+            {currentLevel.type === 'break' && (
+              <div style={{
+                margin: '4px 0 12px 0',
+                padding: '14px 18px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(242, 193, 102, 0.08)',
+                border: '1.5px solid rgba(242, 193, 102, 0.3)',
+                color: '#ffffff',
+                textAlign: 'left',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '5px'
+              }}>
+                <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#F2C166', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🪙 CHIP-UP & BREAK INSTRUCTIONS
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>
+                  {(() => {
+                    if (nextLevel && nextLevel.smallBlind) {
+                      if (nextLevel.smallBlind >= 500) {
+                        return "Remove all $100 Black chips from play. Exchange them for $500 Purple or $1000 Yellow chips (5x $100 = 1x $500).";
+                      } else if (nextLevel.smallBlind >= 100) {
+                        return "Remove all $25 Green chips from play. Exchange them for $100 Black chips (4x $25 = 1x $100).";
+                      }
+                    }
+                    return "Break is in progress. Players may step away from the tables. TDs please color up lower denomination chips no longer required.";
+                  })()}
+                </p>
+              </div>
+            )}
 
             {/* Active Players list (Full width under blinds row in balanced 4 columns) */}
             <div style={{ 

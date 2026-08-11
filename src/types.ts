@@ -93,6 +93,15 @@ export interface Tournament {
   finalTableTriggered?: boolean;
   foodAmount?: number;
   startingChips?: number;
+  auditLogs?: AuditLogEntry[];
+}
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string; // ISO date string
+  action: string;    // e.g. "Seat Swap", "Bust Out", "Check-in"
+  details: string;   // Description of what changed
+  performedBy: string; // Name of TD/Admin performing action or "System"
 }
 
 export interface BlindLevel {

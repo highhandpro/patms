@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Member, Tournament, Season, Settings, DatabaseState, TournamentEntry, PendingApproval } from '../types';
+import type { Member, Tournament, Season, Settings, DatabaseState, TournamentEntry, PendingApproval, AuditLogEntry } from '../types';
 import { getAutoPayoutPercentages } from '../utils/stats';
 import { hashPin, isPinHashed } from '../utils/crypto';
 import { db } from '../firebase';
@@ -75,6 +75,7 @@ interface AppContextProps {
     isBetaTest?: boolean
   ) => string;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
+  logTournamentAction: (tournamentId: string, action: string, details: string, performedBy?: string) => void;
   archiveTournament: (id: string) => void;
   deleteTournament: (id: string) => void;
   registerPlayer: (tournamentId: string, memberId: string) => void;
@@ -861,6 +862,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await updateDoc(doc(db, 'tournaments', id), finalUpdate);
   };
 
+  const logTournamentAction = async (tournamentId: string, action: string, details: string, performedBy?: string) => {
+    const existing = state.tournaments.find(t => t.id === tournamentId);
+    if (!existing) return;
+
+    const currentUser = sessionStorage.getItem('patms_admin_email') || 'TD';
+    const logEntry: AuditLogEntry = {
+      id: Math.random().toString(36).substring(2, 11),
+      timestamp: new Date().toISOString(),
+      action,
+      details,
+      performedBy: performedBy || currentUser
+    };
+
+    const updatedLogs = [...(existing.auditLogs || []), logEntry];
+    await updateDoc(doc(db, 'tournaments', tournamentId), { auditLogs: updatedLogs });
+  };
+
   const archiveTournament = async (id: string) => {
     await updateDoc(doc(db, 'tournaments', id), { isArchived: true });
   };
@@ -1000,6 +1018,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       entries: updatedEntries,
       payoutPercentages: getAutoPayoutPercentages(buyInCount)
     });
+
+    const m = state.members.find(member => member.id === memberId);
+    const name = m ? `${m.firstName} ${m.lastName}` : memberId;
+    const isCheckedIn = updatedEntries.find(e => e.memberId === memberId)?.hasBuyIn;
+    logTournamentAction(tournamentId, "Check-in", `${name} checked ${isCheckedIn ? "in" : "out"}.`);
   };
 
   const toggleEntryBuyIn = async (tournamentId: string, memberId: string) => {
@@ -1025,6 +1048,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     await updateDoc(doc(db, 'tournaments', tournamentId), updateData);
+
+    const m = state.members.find(member => member.id === memberId);
+    const name = m ? `${m.firstName} ${m.lastName}` : memberId;
+    logTournamentAction(tournamentId, "Buy-in Edit", `${name} buy-in toggled to ${!turningOff}.`);
   };
 
   const toggleEntryAddon = async (tournamentId: string, memberId: string) => {
@@ -1033,6 +1060,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const updatedEntries = t.entries.map(e => e.memberId === memberId ? { ...e, hasAddon: !e.hasAddon } : e);
     await updateDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries });
+
+    const m = state.members.find(member => member.id === memberId);
+    const name = m ? `${m.firstName} ${m.lastName}` : memberId;
+    const hasAddon = updatedEntries.find(e => e.memberId === memberId)?.hasAddon;
+    logTournamentAction(tournamentId, "Add-on Edit", `${name} add-on toggled to ${hasAddon}.`);
   };
 
   const toggleEntryDealerApp = async (tournamentId: string, memberId: string) => {
@@ -1041,6 +1073,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const updatedEntries = t.entries.map(e => e.memberId === memberId ? { ...e, hasDealerAppreciation: !e.hasDealerAppreciation } : e);
     await updateDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries });
+
+    const m = state.members.find(member => member.id === memberId);
+    const name = m ? `${m.firstName} ${m.lastName}` : memberId;
+    const hasDA = updatedEntries.find(e => e.memberId === memberId)?.hasDealerAppreciation;
+    logTournamentAction(tournamentId, "Dealer App Edit", `${name} dealer appreciation toggled to ${hasDA}.`);
   };
 
   const eliminatePlayer = async (tournamentId: string, memberId: string, bountiesWon: number) => {
@@ -1064,6 +1101,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     await setDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries }, { merge: true });
+
+    const m = state.members.find(member => member.id === memberId);
+    const name = m ? `${m.firstName} ${m.lastName}` : memberId;
+    logTournamentAction(tournamentId, "Bust Out", `${name} eliminated at position #${finishPosition} with ${bountiesWon} bounties.`);
   };
 
   const undoElimination = async (tournamentId: string, memberId: string) => {
@@ -1079,6 +1120,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     await setDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries }, { merge: true });
+
+    const m = state.members.find(member => member.id === memberId);
+    const name = m ? `${m.firstName} ${m.lastName}` : memberId;
+    logTournamentAction(tournamentId, "Undo Elimination", `Reinstated ${name} back into active play.`);
   };
 
   const finalizeTournament = async (tournamentId: string) => {
@@ -1088,6 +1133,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const entriesCount = t.entries.length;
     if (entriesCount === 0) {
       await setDoc(doc(db, 'tournaments', tournamentId), { status: 'completed' }, { merge: true });
+      logTournamentAction(tournamentId, "Finalize", "Completed tournament with 0 players.");
       return;
     }
 
@@ -1160,6 +1206,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       totalDealerAppreciation,
       entries: updatedEntries
     }, { merge: true });
+
+    logTournamentAction(tournamentId, "Finalize", "Tournament successfully finalized & points awarded.");
   };
 
   const reopenTournament = async (tournamentId: string) => {
@@ -1176,6 +1224,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'active',
       entries: resetEntries
     }, { merge: true });
+
+    logTournamentAction(tournamentId, "Reopen", "Tournament reopened back to active state.");
   };
 
   const updateSettings = async (settings: Settings) => {
@@ -1468,6 +1518,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteSeason,
         createTournament,
         updateTournament,
+        logTournamentAction,
         archiveTournament,
         deleteTournament,
         registerPlayer,
