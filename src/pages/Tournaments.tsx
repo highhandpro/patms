@@ -407,6 +407,64 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     activeTournament?.preassignedDealers
   ]);
 
+  // Self-healing check: automatically seat any checked-in, non-eliminated players who are missing from the seating chart
+  useEffect(() => {
+    if (!activeTournament || !activeTournament.entries || !seating || Object.keys(seating).length === 0) return;
+
+    const activeEntries = activeTournament.entries.filter((e: any) => !e.eliminatedAt && (e.hasBuyIn || activeTournament.buyInAmount === 0));
+    const activeIds = activeEntries.map((e: any) => e.memberId);
+    
+    // Find all player IDs currently seated
+    const seatedIds = new Set<string>();
+    Object.values(seating).forEach(seats => {
+      (seats || []).forEach(id => {
+        if (id) seatedIds.add(id);
+      });
+    });
+
+    // Check if there are active players who are not seated
+    const unseated = activeIds.filter(id => !seatedIds.has(id));
+    if (unseated.length > 0) {
+      console.log("Self-healing: Found unseated active players:", unseated);
+      const updatedSeating = { ...seating };
+      let changed = false;
+
+      const TABLE_ORDER = ['red table', 'blue table', 'gold table', 'gray table', 'purple table'];
+      const tableNames = Object.keys(updatedSeating).sort((a, b) => TABLE_ORDER.indexOf(a) - TABLE_ORDER.indexOf(b));
+
+      unseated.forEach(playerId => {
+        // Find a table with < 10 active players
+        for (const tName of tableNames) {
+          const seats = [...(updatedSeating[tName] || Array(10).fill(""))];
+          
+          // Count active players on this table
+          const activeOnTable = seats.slice(0, 10).filter(id => id && !activeTournament.entries.find((e: any) => e.memberId === id)?.eliminatedAt).length;
+          
+          if (activeOnTable < 10) {
+            // Find first empty seat index (where it's empty string, null, or eliminated player)
+            const seatIndex = seats.findIndex(id => !id || id === "" || !!activeTournament.entries.find((e: any) => e.memberId === id)?.eliminatedAt);
+            if (seatIndex !== -1 && seatIndex < 10) {
+              seats[seatIndex] = playerId;
+              updatedSeating[tName] = seats;
+              changed = true;
+              console.log(`Self-healing: Seated player ${playerId} at ${tName} Seat ${seatIndex + 1}`);
+              
+              // Log this recovery action to audit log
+              logTournamentAction(activeTournament.id, "Self-Healing Seating", `Player was automatically recovered and seated at ${tName.toUpperCase()} Seat ${seatIndex + 1}.`);
+              break;
+            }
+          }
+        }
+      });
+
+      if (changed) {
+        setSeating(updatedSeating);
+        localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updatedSeating));
+        updateTournament(activeTournament.id, { seating: updatedSeating });
+      }
+    }
+  }, [activeTournament?.entries, seating]);
+
   // Return to tabs screen when escaping/exiting fullscreen on the Clock tab
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -1237,6 +1295,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const handlePlayerSelect = (m: Member) => {
     if (activeTournament) {
       if (subTab === 'checkin') {
+        const hasSeating = Object.keys(seating).length > 0;
+        if (hasSeating) {
+          // Open late entry modal with this player preselected!
+          setSelectedLateMemberId(m.id);
+          setIsLateEntryOpen(true);
+          setSearchQuery('');
+          setShowDropdown(false);
+          return;
+        }
+
         triggerCheckInFlow(m.id, async (phone) => {
           if (phone) {
             await updateMember(m.id, { phone });
