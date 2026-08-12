@@ -3371,6 +3371,53 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             </div>
           </div>
 
+          {/* Table Balancing Sticky Alert Banner */}
+          {(() => {
+            if (!activeTournament || !seating || Object.keys(seating).length === 0) return null;
+            const rec = checkTableBalance(seating, activeTournament, state.members);
+            if (!rec) return null;
+
+            return (
+              <div style={{
+                backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                border: '1.5px solid var(--color-gold)',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '16px',
+                marginBottom: '4px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <ShieldAlert size={24} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
+                  <div>
+                    <strong style={{ color: '#ffffff', fontSize: '1rem', display: 'block' }}>
+                      ⚠️ Table Balance Action Required
+                    </strong>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '2px', display: 'block' }}>
+                      {rec.message}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
+                  {!isSubAdmin && (
+                    <button 
+                      className="btn btn-primary"
+                      onClick={() => {
+                        setBalanceRecommendation(rec);
+                        setIsBalanceModalOpen(true);
+                      }}
+                      style={{ fontSize: '0.85rem', padding: '8px 16px', backgroundColor: 'var(--color-gold)', borderColor: 'var(--color-gold)', color: '#000000', fontWeight: 800 }}
+                    >
+                      {rec.type === 'rebalance' ? 'Balance Tables' : (rec.isFinalTable ? 'Draw Final Table' : 'Resolve Break')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Quick-Swap Notification Banner */}
           {selectedSwapSeat && (
             <div style={{
