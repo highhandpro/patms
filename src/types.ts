@@ -133,6 +133,7 @@ export interface Settings {
   maxPlayersPerTable: number;
   adminPassword?: string;
   blinds?: BlindLevel[];
+  savedBlinds?: { [name: string]: BlindLevel[] };
   colorPalette?: string;
   isUnderConstruction?: boolean;
   resendApiKey?: string;

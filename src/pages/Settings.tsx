@@ -258,6 +258,63 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const [maxPlayers, setMaxPlayers] = useState(state.settings.maxPlayersPerTable);
   const colorPalette = state.settings.colorPalette || 'default';
   const [underConstruction, setUnderConstruction] = useState(!!state.settings.isUnderConstruction);
+  
+  // Blinds preset states & handlers
+  const [selectedPresetName, setSelectedPresetName] = useState('');
+  const [newPresetName, setNewPresetName] = useState('');
+
+  const handleLoadPreset = (name: string) => {
+    setSelectedPresetName(name);
+    if (!name) return;
+    const preset = state.settings.savedBlinds?.[name];
+    if (preset && preset.length > 0) {
+      setBlindsList(preset);
+    }
+  };
+
+  const handleSavePreset = async () => {
+    const name = newPresetName.trim();
+    if (!name) return;
+
+    const saved = state.settings.savedBlinds || {};
+    const updatedSavedBlinds = {
+      ...saved,
+      [name]: blindsList
+    };
+
+    const updatedSettings = {
+      ...state.settings,
+      savedBlinds: updatedSavedBlinds
+    };
+
+    try {
+      await updateSettings(updatedSettings);
+      setNewPresetName('');
+      setSelectedPresetName(name);
+    } catch (err: any) {
+      alert(`Failed to save preset: ${err.message}`);
+    }
+  };
+
+  const handleDeletePreset = async () => {
+    if (!selectedPresetName) return;
+    if (!window.confirm(`Are you sure you want to delete the preset "${selectedPresetName}"?`)) return;
+
+    const saved = { ...(state.settings.savedBlinds || {}) };
+    delete saved[selectedPresetName];
+
+    const updatedSettings = {
+      ...state.settings,
+      savedBlinds: saved
+    };
+
+    try {
+      await updateSettings(updatedSettings);
+      setSelectedPresetName('');
+    } catch (err: any) {
+      alert(`Failed to delete preset: ${err.message}`);
+    }
+  };
 
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -379,6 +436,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     const updated: SettingsType = {
+      ...state.settings,
       defaultBuyIn: buyIn,
       defaultAddon: addon,
       defaultBounty: bounty,
@@ -558,6 +616,73 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
               Customize the levels, blind amounts, break durations, and chip-up alarms.
             </p>
+
+             {/* Blinds Presets (Save/Load/Delete) */}
+             <div style={{
+               display: 'flex',
+               flexWrap: 'wrap',
+               gap: '12px',
+               alignItems: 'center',
+               backgroundColor: 'rgba(255,255,255,0.02)',
+               border: '1px solid var(--border-subtle)',
+               borderRadius: '8px',
+               padding: '12px',
+               marginTop: '4px',
+               marginBottom: '4px'
+             }}>
+               <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                 Blinds Presets:
+               </span>
+               
+               {/* Load Preset Dropdown */}
+               <select
+                 value={selectedPresetName}
+                 onChange={(e) => handleLoadPreset(e.target.value)}
+                 className="form-input"
+                 style={{ width: '180px', padding: '4px 8px', fontSize: '0.85rem', margin: 0 }}
+               >
+                 <option value="">-- Select Preset --</option>
+                 {Object.keys(state.settings.savedBlinds || {}).map(name => (
+                   <option key={name} value={name}>{name}</option>
+                 ))}
+               </select>
+
+               {/* Action Buttons */}
+               <button
+                 type="button"
+                 onClick={handleDeletePreset}
+                 disabled={!selectedPresetName}
+                 className="btn btn-secondary"
+                 style={{ 
+                   padding: '6px 12px', 
+                   fontSize: '0.85rem', 
+                   color: selectedPresetName ? 'var(--color-danger)' : 'var(--text-secondary)',
+                   borderColor: selectedPresetName ? 'rgba(239, 68, 68, 0.4)' : 'var(--border-subtle)'
+                 }}
+               >
+                 Delete
+               </button>
+
+               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: 'auto' }}>
+                 <input
+                   type="text"
+                   placeholder="New preset name..."
+                   value={newPresetName}
+                   onChange={(e) => setNewPresetName(e.target.value)}
+                   className="form-input"
+                   style={{ width: '160px', padding: '4px 8px', fontSize: '0.85rem', margin: 0 }}
+                 />
+                 <button
+                   type="button"
+                   onClick={handleSavePreset}
+                   disabled={!newPresetName.trim()}
+                   className="btn btn-primary"
+                   style={{ padding: '6px 12px', fontSize: '0.85rem', backgroundColor: 'var(--color-emerald)', borderColor: 'var(--color-emerald)' }}
+                 >
+                   Save Preset
+                 </button>
+               </div>
+             </div>
 
             <div style={{ maxHeight: '350px', overflowY: 'auto', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
