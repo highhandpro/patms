@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import type { Settings as SettingsType, BlindLevel } from '../types';
 import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, X, ArrowUp, ArrowDown, Play, Square } from 'lucide-react';
 import { calculateStandings } from '../utils/stats';
-import { COLOR_PALETTES, applyThemePalette } from '../utils/theme';
+
 import * as XLSX from 'xlsx';
 import { db } from '../firebase';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
@@ -256,7 +256,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const [dealerApp, setDealerApp] = useState(state.settings.defaultDealerAppreciation);
   const [attendancePoints, setAttendancePoints] = useState(state.settings.pointsBaseAttendance);
   const [maxPlayers, setMaxPlayers] = useState(state.settings.maxPlayersPerTable);
-  const [colorPalette, setColorPalette] = useState(state.settings.colorPalette || 'default');
+  const colorPalette = state.settings.colorPalette || 'default';
   const [underConstruction, setUnderConstruction] = useState(!!state.settings.isUnderConstruction);
 
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -395,23 +395,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
-  const handlePaletteSelect = (key: string) => {
-    setColorPalette(key);
-    applyThemePalette(key);
-    
-    const updated: SettingsType = {
-      defaultBuyIn: buyIn,
-      defaultAddon: addon,
-      defaultBounty: bounty,
-      defaultDealerAppreciation: dealerApp,
-      pointsBaseAttendance: attendancePoints,
-      maxPlayersPerTable: maxPlayers,
-      blinds: blindsList,
-      colorPalette: key,
-      isUnderConstruction: underConstruction
-    };
-    updateSettings(updated);
-  };
+
 
   const handleExport = () => {
     const dataStr = exportDatabase();
@@ -792,68 +776,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
         {/* Portability Panel */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
-          {/* PALETTE Chooser Section */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>🎨</span>
-              <span>PALETTE</span>
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
-              Select a brand color palette for the website. Tapping a theme applies it instantly across all players and admin screens.
-            </p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-              {Object.entries(COLOR_PALETTES).map(([key, item]) => {
-                const isActive = colorPalette === key;
-                return (
-                  <div
-                    key={key}
-                    onClick={() => handlePaletteSelect(key)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      border: isActive ? '2px solid var(--border-focus)' : '1.5px solid var(--border-subtle)',
-                      backgroundColor: isActive ? 'var(--bg-card-hover)' : 'transparent',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      boxShadow: isActive ? 'var(--shadow-sm)' : 'none'
-                    }}
-                  >
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {item.name}
-                      </span>
-                      {/* Swatches */}
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        {item.colors.map((color, colorIdx) => (
-                          <span
-                            key={colorIdx}
-                            style={{
-                              width: '14px',
-                              height: '14px',
-                              borderRadius: '50%',
-                              backgroundColor: color,
-                              border: '1px solid rgba(0,0,0,0.1)'
-                            }}
-                            title={colorIdx === 0 ? 'Primary' : colorIdx === 1 ? 'Accent' : 'Background'}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    {isActive && (
-                      <span style={{ color: 'var(--border-focus)', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          
+
           {/* Account & Security Card */}
           {onChangePassword && (
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
