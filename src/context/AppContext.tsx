@@ -574,6 +574,69 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, []);
 
+  // 30-Minute Mock Data Auto-Cleanup
+  useEffect(() => {
+    const cleanupMockData = async () => {
+      const now = new Date();
+      const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+
+      // 1. Clean up mock members (where isMock === true or id starts with 'mock-p-')
+      const mockMembers = state.members.filter(m => {
+        const isMockMember = m.isMock || m.id.startsWith('mock-p-');
+        if (!isMockMember) return false;
+        
+        if (m.joinedDate) {
+          try {
+            const created = new Date(m.joinedDate);
+            return created < thirtyMinutesAgo;
+          } catch {
+            return true;
+          }
+        }
+        return true;
+      });
+
+      for (const member of mockMembers) {
+        console.log(`Auto-cleaning mock member: ${member.id}`);
+        try {
+          await deleteDoc(doc(db, 'members', member.id));
+        } catch (err) {
+          console.error(`Failed to delete mock member ${member.id}:`, err);
+        }
+      }
+
+      // 2. Clean up mock tournaments (where isMock === true or id starts with 'tour-sim-')
+      const mockTournaments = state.tournaments.filter(t => {
+        const isMockTour = t.isMock || t.id.startsWith('tour-sim-');
+        if (!isMockTour) return false;
+
+        if (t.id.startsWith('tour-sim-')) {
+          const parts = t.id.split('-');
+          const tsStr = parts[parts.length - 1];
+          const ts = parseInt(tsStr, 10);
+          if (!isNaN(ts)) {
+            const created = new Date(ts);
+            return created < thirtyMinutesAgo;
+          }
+        }
+        return true;
+      });
+
+      for (const tour of mockTournaments) {
+        console.log(`Auto-cleaning mock tournament: ${tour.id}`);
+        try {
+          await deleteDoc(doc(db, 'tournaments', tour.id));
+        } catch (err) {
+          console.error(`Failed to delete mock tournament ${tour.id}:`, err);
+        }
+      }
+    };
+
+    cleanupMockData();
+    const interval = setInterval(cleanupMockData, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [state.members, state.tournaments]);
+
   // Firestore Auto-Seeder and Migration
   useEffect(() => {
     const checkAndSeed = async () => {

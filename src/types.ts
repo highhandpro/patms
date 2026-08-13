@@ -18,6 +18,7 @@ export interface Member {
   tempPasswordExpires?: string; // ISO string
   isDealer?: boolean;
   drawingTickets?: DrawingTicket[];
+  isMock?: boolean;
 }
 
 export interface DrawingTicket {
@@ -96,6 +97,7 @@ export interface Tournament {
   auditLogs?: AuditLogEntry[];
   seatingTargetTime?: string; // ISO datetime string
   seatingLocked?: boolean;
+  isMock?: boolean;
 }
 
 export interface AuditLogEntry {

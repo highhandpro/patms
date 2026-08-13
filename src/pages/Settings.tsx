@@ -68,7 +68,9 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
           phone: `555-01${i.toString().padStart(2, '0')}`,
           points: 0,
           role: 'player',
-          createdAt: new Date().toISOString()
+          isMock: true,
+          isDeleted: false,
+          joinedDate: new Date().toISOString()
         });
       }
 
@@ -139,7 +141,8 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
         totalPrizePool: 40 * (buyInVal - bountyVal - dealerAppVal),
         maxPlayers: 40,
         roundLength: firstLevelDuration,
-        startingChips: 10000
+        startingChips: 10000,
+        isMock: true
       };
 
       await setDoc(doc(db, 'tournaments', tournamentId), tournamentState);
