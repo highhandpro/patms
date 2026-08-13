@@ -81,13 +81,27 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
       setSimStatus('Creating Simulation Tournament...');
       const tournamentId = `tour-sim-${Date.now()}`;
 
-      // Create entries
+      // Load saved rules config values (or fall back to standard defaults if undefined)
+      const buyInVal = state.settings.defaultBuyIn || 40;
+      const addonVal = state.settings.defaultAddon || 10;
+      const bountyVal = state.settings.defaultBounty || 5;
+      const dealerAppVal = state.settings.defaultDealerAppreciation || 0;
+      const currentBlinds = state.settings.blinds && state.settings.blinds.length > 0
+        ? state.settings.blinds
+        : blindsList;
+      const firstLevelDuration = currentBlinds[0]?.duration || 15;
+
+      // Create entries using custom settings rules
       const entries = [];
       for (let i = 1; i <= 40; i++) {
         entries.push({
           memberId: `mock-p-${i}`,
           hasBuyIn: true,
           hasAddon: false,
+          hasDealerAppreciation: dealerAppVal > 0,
+          payoutEarned: 0,
+          bountiesCollected: 0,
+          pointsEarned: 0,
           createdAt: new Date().toISOString()
         });
       }
@@ -109,21 +123,23 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
         name: '40-Player Simulation Tour',
         date: new Date().toISOString().split('T')[0],
         status: 'active',
-        buyInAmount: 20,
-        addonAmount: 10,
-        dealerAppreciationAmount: 5,
+        buyInAmount: buyInVal,
+        addonAmount: addonVal,
+        bountyAmount: bountyVal,
+        dealerAppreciationAmount: dealerAppVal,
         entries,
         seating: initialSeating,
+        blinds: currentBlinds,
         clockState: {
           currentLevelIndex: 0,
-          timeRemainingSeconds: 900,
+          timeRemainingSeconds: firstLevelDuration * 60,
           isRunning: true,
           lastUpdated: new Date().toISOString()
         },
-        totalPrizePool: 800,
-        maxPlayers: 50,
-        roundLength: 15,
-        startingChips: 8500
+        totalPrizePool: 40 * (buyInVal - bountyVal - dealerAppVal),
+        maxPlayers: 40,
+        roundLength: firstLevelDuration,
+        startingChips: 10000
       };
 
       await setDoc(doc(db, 'tournaments', tournamentId), tournamentState);
