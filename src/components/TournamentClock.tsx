@@ -281,6 +281,25 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     setBubbleInputAmount(tournament.bubbleAmount || 0);
   }, [tournament.bubbleAmount]);
 
+  // Automatically check table balance and open the alert modal when database entries/seating changes
+  useEffect(() => {
+    if (!tournament || !tournament.seating || tournament.status !== 'active') return;
+
+    const rec = checkTableBalance(tournament.seating, tournament, members);
+    if (rec) {
+      if (!isBalanceModalOpen) {
+        playTableBalanceAlertSound();
+        setBalanceRecommendation(rec);
+        setIsBalanceModalOpen(true);
+      }
+    } else {
+      if (isBalanceModalOpen) {
+        setIsBalanceModalOpen(false);
+        setBalanceRecommendation(null);
+      }
+    }
+  }, [tournament.seating, tournament.entries, members]);
+
   // Highlight active players panel briefly when clicking the bottom Bust Out button
   useEffect(() => {
     if (isBustOutOpen) {
