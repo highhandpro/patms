@@ -2785,13 +2785,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               {rsvpEntries.length > 0 ? (
                 <div className="rsvp-columns-grid" style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
-                  gap: '20px',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: '16px',
                   alignItems: 'start'
                 }}>
                   {/* Column 1 */}
                   <div className="table-container" style={{ margin: 0 }}>
-                    <table className="data-table">
+                    <table className="data-table compact-table">
                       <thead>
                         <tr>
                           <th style={{ width: '90px' }}></th>
@@ -2905,7 +2905,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                   {/* Column 2 */}
                   <div className="table-container" style={{ margin: 0 }}>
-                    <table className="data-table">
+                    <table className="data-table compact-table">
                       <thead>
                         <tr>
                           <th style={{ width: '90px' }}></th>
@@ -3019,7 +3019,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
                   {/* Column 3 */}
                   <div className="table-container" style={{ margin: 0 }}>
-                    <table className="data-table">
+                    <table className="data-table compact-table">
                       <thead>
                         <tr>
                           <th style={{ width: '90px' }}></th>
@@ -3178,7 +3178,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
               const renderCheckedInTable = (items: typeof checkedInEntries) => (
                 <div className="table-container">
-                  <table className="data-table">
+                  <table className="data-table compact-table">
 <thead>
                       <tr>
                         <th>Player Name</th>
@@ -3269,10 +3269,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
               return checkedInEntries.length > 0 ? (
                 <div style={{
-                  display: 'flex',
-                  gap: '24px',
-                  width: '100%',
-                  flexWrap: 'wrap'
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                  gap: '16px',
+                  width: '100%'
                 }} className="summary-columns-container">
                   <div style={{ flex: 1 }}>
                     {renderCheckedInTable(leftCol)}
