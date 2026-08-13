@@ -2582,3 +2582,48 @@ label.btn-primary:hover,
   border-color: #095822 !important;
 }
 
+/* Phone Verify Keypad Modal Layout classes */
+.phone-verify-container {
+  width: 95%;
+  max-width: 720px;
+  padding: 24px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  align-items: stretch;
+}
+
+.phone-verify-form-col {
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.phone-verify-keypad-col {
+  flex: 0 0 240px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .phone-verify-container {
+    max-width: 450px;
+    flex-direction: column;
+  }
+  .phone-verify-keypad-col {
+    border-left: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-left: 0 !important;
+    padding-top: 16px;
+    flex: 1 1 auto;
+  }
+}
+
+

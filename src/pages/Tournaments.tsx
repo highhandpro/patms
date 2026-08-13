@@ -264,6 +264,29 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [phonePromptInput, setPhonePromptInput] = useState('');
   const [onPhonePromptComplete, setOnPhonePromptComplete] = useState<((phone?: string) => void) | null>(null);
 
+  const handleKeypadPress = (key: string) => {
+    let raw = phonePromptInput.replace(/\D/g, '');
+    if (key === 'C') {
+      raw = '';
+    } else if (key === '⌫') {
+      raw = raw.substring(0, raw.length - 1);
+    } else {
+      if (raw.length < 10) {
+        raw += key;
+      }
+    }
+
+    let formatted = raw;
+    if (raw.length > 6) {
+      formatted = `(${raw.substring(0, 3)}) ${raw.substring(3, 6)}-${raw.substring(6)}`;
+    } else if (raw.length > 3) {
+      formatted = `(${raw.substring(0, 3)}) ${raw.substring(3)}`;
+    } else if (raw.length > 0) {
+      formatted = `(${raw}`;
+    }
+    setPhonePromptInput(formatted);
+  };
+
   // Edit Tournament Details states
   const [isEditTourDetailsOpen, setIsEditTourDetailsOpen] = useState(false);
   const [editTourName, setEditTourName] = useState('');
@@ -6044,104 +6067,138 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           justifyContent: 'center',
           zIndex: 9999
         }}>
-          <div className="glass-card animate-scale-up" style={{
-            width: '100%',
-            maxWidth: '450px',
-            padding: '24px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          <div className="glass-card animate-scale-up phone-verify-container" style={{
+            alignItems: 'stretch'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                color: 'var(--color-emerald)',
-                padding: '8px',
-                borderRadius: '8px',
-                display: 'inline-flex'
-              }}>
-                <ShieldAlert size={24} />
+            <div className="phone-verify-form-col">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                  color: 'var(--color-emerald)',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  display: 'inline-flex'
+                }}>
+                  <ShieldAlert size={24} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>Verify Phone Number</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                    Confirming check-in for <strong>{phonePromptMember.firstName} {phonePromptMember.lastName}</strong>.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>Verify Phone Number</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-                  Confirming check-in for <strong>{phonePromptMember.firstName} {phonePromptMember.lastName}</strong>.
+
+              <div className="form-group" style={{ margin: 0 }}>
+                <label style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>
+                  Phone Number (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="(XXX) XXX-XXXX"
+                  value={phonePromptInput}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/\D/g, '');
+                    if (val.length > 10) val = val.substring(0, 10);
+                    let formatted = val;
+                    if (val.length > 6) {
+                      formatted = `(${val.substring(0, 3)}) ${val.substring(3, 6)}-${val.substring(6)}`;
+                    } else if (val.length > 3) {
+                      formatted = `(${val.substring(0, 3)}) ${val.substring(3)}`;
+                    } else if (val.length > 0) {
+                      formatted = `(${val}`;
+                    }
+                    setPhonePromptInput(formatted);
+                  }}
+                  className="form-input"
+                  style={{ fontSize: '1.1rem', letterSpacing: '0.5px' }}
+                  autoFocus
+                />
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
+                  Providing a phone number helps notify players about seating and event updates.
                 </p>
               </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: 'auto', paddingTop: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhonePromptMember(null);
+                    setOnPhonePromptComplete(null);
+                  }}
+                  className="btn btn-secondary"
+                  style={{ padding: '8px 16px', fontSize: '0.9rem' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onPhonePromptComplete) {
+                      onPhonePromptComplete("");
+                    }
+                    setPhonePromptMember(null);
+                    setOnPhonePromptComplete(null);
+                  }}
+                  className="btn btn-ghost"
+                  style={{ padding: '8px 16px', fontSize: '0.9rem', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}
+                >
+                  Skip
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onPhonePromptComplete) {
+                      onPhonePromptComplete(phonePromptInput);
+                    }
+                    setPhonePromptMember(null);
+                    setOnPhonePromptComplete(null);
+                  }}
+                  className="btn btn-primary"
+                  style={{ padding: '8px 16px', fontSize: '0.9rem' }}
+                >
+                  Save & Check In
+                </button>
+              </div>
             </div>
 
-            <div className="form-group" style={{ margin: 0 }}>
-              <label style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>
-                Phone Number (Optional)
-              </label>
-              <input
-                type="text"
-                placeholder="(XXX) XXX-XXXX"
-                value={phonePromptInput}
-                onChange={(e) => {
-                  let val = e.target.value.replace(/\D/g, '');
-                  if (val.length > 10) val = val.substring(0, 10);
-                  let formatted = val;
-                  if (val.length > 6) {
-                    formatted = `(${val.substring(0, 3)}) ${val.substring(3, 6)}-${val.substring(6)}`;
-                  } else if (val.length > 3) {
-                    formatted = `(${val.substring(0, 3)}) ${val.substring(3)}`;
-                  } else if (val.length > 0) {
-                    formatted = `(${val}`;
-                  }
-                  setPhonePromptInput(formatted);
-                }}
-                className="form-input"
-                style={{ fontSize: '1.1rem', letterSpacing: '0.5px' }}
-                autoFocus
-              />
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
-                Providing a phone number helps notify players about seating and event updates.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setPhonePromptMember(null);
-                  setOnPhonePromptComplete(null);
-                }}
-                className="btn btn-secondary"
-                style={{ padding: '8px 16px', fontSize: '0.9rem' }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (onPhonePromptComplete) {
-                    onPhonePromptComplete("");
-                  }
-                  setPhonePromptMember(null);
-                  setOnPhonePromptComplete(null);
-                }}
-                className="btn btn-ghost"
-                style={{ padding: '8px 16px', fontSize: '0.9rem', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}
-              >
-                Skip & Check In
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (onPhonePromptComplete) {
-                    onPhonePromptComplete(phonePromptInput);
-                  }
-                  setPhonePromptMember(null);
-                  setOnPhonePromptComplete(null);
-                }}
-                className="btn btn-primary"
-                style={{ padding: '8px 16px', fontSize: '0.9rem' }}
-              >
-                Save & Check In
-              </button>
+            <div className="phone-verify-keypad-col">
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '10px', textAlign: 'center', letterSpacing: '0.5px' }}>
+                QUICK KEYPAD
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '8px'
+              }}>
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map((key) => {
+                  const isSpecial = key === 'C' || key === '⌫';
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => handleKeypadPress(key)}
+                      className="btn"
+                      style={{
+                        height: '42px',
+                        fontSize: '1.1rem',
+                        fontWeight: 600,
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: isSpecial ? 'rgba(255, 255, 255, 0.05)' : 'rgba(16, 185, 129, 0.1)',
+                        borderColor: isSpecial ? 'rgba(255, 255, 255, 0.1)' : 'rgba(16, 185, 129, 0.2)',
+                        color: isSpecial ? 'var(--text-secondary)' : 'var(--color-emerald)',
+                        boxShadow: 'none',
+                        padding: 0
+                      }}
+                    >
+                      {key}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>,
