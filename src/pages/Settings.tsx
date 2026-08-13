@@ -202,7 +202,9 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
 
           // Apply move/break
           if (rec.type === 'rebalance') {
-            const movingPlayerId = rec.sourceActivePlayers![rec.sourceActivePlayers!.length - 1];
+            const activePlayers = rec.sourceActivePlayers || [];
+            const randomIdx = Math.floor(Math.random() * activePlayers.length);
+            const movingPlayerId = activePlayers[randomIdx];
             currentSeating = executePlayerMove(currentSeating, movingPlayerId, rec.sourceTable!, rec.targetTable!);
             setSimStatus(`Balancing: Moved player ${movingPlayerId.replace('mock-p-', '')}`);
           } else if (rec.type === 'break') {
