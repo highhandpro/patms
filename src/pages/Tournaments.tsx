@@ -2819,8 +2819,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         <tr>
                           <th style={{ width: '90px' }}></th>
                           <th>Player Name</th>
-                          <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
-                          <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
+                          <th style={{ textAlign: 'center', width: '60px' }}></th>
+                          <th style={{ textAlign: 'right', width: '80px' }}></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2914,9 +2914,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 <button
                                   onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
                                   className="btn btn-ghost"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                  style={{ padding: '4px 8px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                  title="Remove player"
                                 >
-                                  Remove
+                                  ❌
                                 </button>
                               </td>
                             </tr>
@@ -2933,8 +2934,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         <tr>
                           <th style={{ width: '90px' }}></th>
                           <th>Player Name</th>
-                          <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
-                          <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
+                          <th style={{ textAlign: 'center', width: '60px' }}></th>
+                          <th style={{ textAlign: 'right', width: '80px' }}></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3028,9 +3029,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 <button
                                   onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
                                   className="btn btn-ghost"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                  style={{ padding: '4px 8px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                  title="Remove player"
                                 >
-                                  Remove
+                                  ❌
                                 </button>
                               </td>
                             </tr>
@@ -3047,8 +3049,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         <tr>
                           <th style={{ width: '90px' }}></th>
                           <th>Player Name</th>
-                          <th style={{ textAlign: 'center', width: '60px' }}>Dealer?</th>
-                          <th style={{ textAlign: 'right', width: '80px' }}>Action</th>
+                          <th style={{ textAlign: 'center', width: '60px' }}></th>
+                          <th style={{ textAlign: 'right', width: '80px' }}></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3142,9 +3144,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 <button
                                   onClick={() => unregisterPlayer(activeTournament.id, entry.memberId)}
                                   className="btn btn-ghost"
-                                  style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                  style={{ padding: '4px 8px', fontSize: '0.8rem', color: 'var(--color-danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.02)', minHeight: 'auto' }}
+                                  title="Remove player"
                                 >
-                                  Remove
+                                  ❌
                                 </button>
                               </td>
                             </tr>
