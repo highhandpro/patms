@@ -17,7 +17,7 @@ import { playTableBalanceAlertSound } from '../utils/audioAlerts';
 import { 
   Trophy, Play, RotateCcw, Plus, 
   UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award,
-  Archive, Trash2
+  Archive, Trash2, X, CheckCircle, AlertCircle, RefreshCw
 } from 'lucide-react';
 
 interface TournamentsProps {
@@ -181,6 +181,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [dealers, setDealers] = useState<Record<string, string>>({});
   const [preassignedDealers, setPreassignedDealers] = useState<string[]>([]);
   const [isDisplayModeOpen, setIsDisplayModeOpen] = useState(false);
+  const [isEmailAnnouncementModalOpen, setIsEmailAnnouncementModalOpen] = useState(false);
+  const [announcementSubject, setAnnouncementSubject] = useState('');
+  const [announcementMessage, setAnnouncementMessage] = useState('');
+  const [isSendingAnnouncement, setIsSendingAnnouncement] = useState(false);
+  const [announcementProgressText, setAnnouncementProgressText] = useState('');
+  const [announcementStatus, setAnnouncementStatus] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   // Late Entry state variables
   const [isLateEntryOpen, setIsLateEntryOpen] = useState(false);
@@ -2698,6 +2704,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const rsvpCol2 = rsvpEntries.slice(rsvpSize, rsvpSize * 2);
         const rsvpCol3 = rsvpEntries.slice(rsvpSize * 2);
 
+        const registeredMemberIds = new Set(activeTournament.entries.map(e => e.memberId));
+        const unregisteredActiveMembers = state.members.filter(m => 
+          !m.isDeleted && 
+          !registeredMemberIds.has(m.id) && 
+          m.email && 
+          m.emailAnnouncements !== false
+        );
+        const unregisteredCount = unregisteredActiveMembers.length;
+
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-slide-up">
             <div style={{ display: 'grid', gridTemplateColumns: '6fr 4fr', gap: '20px', alignItems: 'start' }}>
@@ -2711,6 +2726,57 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
                   These players have registered to play. Click **Check In** to confirm their attendance and buy-in investment.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAnnouncementSubject(state.settings.emailTemplates?.announcement?.subject || 'Club Announcement - Penny Ante Poker Club');
+                    setAnnouncementMessage(state.settings.emailTemplates?.announcement?.body || `<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
+  <div style="background-color: #052e16; padding: 24px; border-top-left-radius: 12px; border-top-right-radius: 12px; text-align: center; border-bottom: 3px solid #fbbf24;">
+    <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: -0.02em;">Penny Ante Poker Club</h1>
+  </div>
+  <div style="background-color: #ffffff; padding: 40px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <h2 style="margin-top: 0; font-size: 20px; color: #111827;">Hello {{first_name}},</h2>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+      You haven't registered for the upcoming tournament <strong>{{tournament_name}}</strong> yet!
+    </p>
+    <div style="background-color: #f9fafb; border-left: 4px solid #052e16; padding: 16px; margin: 24px 0; border-radius: 6px;">
+      <p style="font-size: 15px; line-height: 1.6; color: #1f2937; margin: 0; font-weight: 500;">
+        <strong>Date:</strong> {{tournament_date}}<br>
+        <strong>Time:</strong> {{tournament_time}}<br>
+        <strong>Location:</strong> {{tournament_location}}<br>
+        <strong>Details:</strong> {{tournament_starting_stack}} chips, {{tournament_round_length}} levels. Buyin: {{tournament_buyin}}, Addon: {{tournament_addon}}.
+      </p>
+    </div>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+      Sign up now to reserve your seat at the tables:
+    </p>
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="https://pennyantepoker.com" style="display: inline-block; background-color: #052e16; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 12px 32px; border-radius: 8px; border-bottom: 3px solid #042512; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); transition: background-color 0.2s;">Register Now</a>
+    </div>
+    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
+    <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
+  </div>
+</div>`);
+                    setAnnouncementStatus(null);
+                    setAnnouncementProgressText('');
+                    setIsEmailAnnouncementModalOpen(true);
+                  }}
+                  className="btn btn-secondary"
+                  disabled={unregisteredCount === 0}
+                  style={{
+                    marginTop: '12px',
+                    width: '100%',
+                    justifyContent: 'center',
+                    padding: '8px 12px',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    borderColor: unregisteredCount === 0 ? 'var(--border-subtle)' : 'rgba(16, 185, 129, 0.4)',
+                    color: unregisteredCount === 0 ? 'var(--text-secondary)' : 'var(--color-emerald)',
+                    backgroundColor: unregisteredCount === 0 ? 'transparent' : 'rgba(16, 185, 129, 0.03)'
+                  }}
+                >
+                  Email Invitation to Unregistered ({unregisteredCount})
+                </button>
               </div>
             </div>
 
@@ -5359,6 +5425,273 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         onCancel={() => setIsLateEntryOpen(false)}
         onSubmit={submitLateEntry}
       />
+
+      {/* Email Announcement/Invitation Modal */}
+      {isEmailAnnouncementModalOpen && activeTournament && (() => {
+        const registeredMemberIds = new Set(activeTournament.entries.map(e => e.memberId));
+        const unregisteredActiveMembers = state.members.filter(m => 
+          !m.isDeleted && 
+          !registeredMemberIds.has(m.id) && 
+          m.email && 
+          m.emailAnnouncements !== false
+        ).sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`));
+
+        const handleSendAnnouncements = async (e: React.FormEvent) => {
+          e.preventDefault();
+          setIsSendingAnnouncement(true);
+          setAnnouncementStatus(null);
+
+          const apiKey = state.settings.resendApiKey;
+          const sender = state.settings.emailSender || 'Penny Ante Poker Club <onboarding@resend.dev>';
+          const proxy = state.settings.emailCorsProxy || '';
+
+          if (!apiKey) {
+            alert("Resend API Key is missing. Please configure it in Settings > Email Manager first.");
+            setIsSendingAnnouncement(false);
+            return;
+          }
+
+          let successCount = 0;
+          let failedCount = 0;
+
+          const getCompiledPreview = (rawContent: string, member: any) => {
+            const formatLongDate = (dateStr: string) => {
+              if (!dateStr) return '';
+              const date = new Date(dateStr + 'T00:00:00');
+              return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            };
+
+            let result = rawContent
+              .replace(/\{\{\s*first_name\s*\}\}/g, member.firstName)
+              .replace(/\{\{\s*last_name\s*\}\}/g, member.lastName);
+
+            if (activeTournament) {
+              result = result
+                .replace(/\{\{\s*tournament_name\s*\}\}/g, activeTournament.name)
+                .replace(/\{\{\s*tournament_date\s*\}\}/g, formatLongDate(activeTournament.date))
+                .replace(/\{\{\s*tournament_time\s*\}\}/g, activeTournament.time || 'N/A')
+                .replace(/\{\{\s*tournament_location\s*\}\}/g, activeTournament.location || 'N/A')
+                .replace(/\{\{\s*tournament_buyin\s*\}\}/g, `$${activeTournament.buyInAmount}`)
+                .replace(/\{\{\s*tournament_addon\s*\}\}/g, `$${activeTournament.addonAmount}`)
+                .replace(/\{\{\s*tournament_bounty\s*\}\}/g, `$${activeTournament.bountyAmount}`)
+                .replace(/\{\{\s*tournament_starting_stack\s*\}\}/g, activeTournament.startingStack || 'N/A')
+                .replace(/\{\{\s*tournament_round_length\s*\}\}/g, activeTournament.roundLength ? `${activeTournament.roundLength} mins` : 'N/A')
+                .replace(/\{\{\s*tournament_rebuys\s*\}\}/g, activeTournament.rebuys || 'N/A')
+                .replace(/\{\{\s*tournament_late_entry\s*\}\}/g, activeTournament.lateEntry || 'N/A')
+                .replace(/\{\{\s*tournament_flyer_url\s*\}\}/g, activeTournament.flyerUrl || '');
+            }
+            return result;
+          };
+
+          try {
+            const endpoint = proxy 
+              ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
+              : 'https://api.resend.com/emails';
+
+            for (let i = 0; i < unregisteredActiveMembers.length; i++) {
+              const member = unregisteredActiveMembers[i];
+              const finalSubject = getCompiledPreview(announcementSubject, member);
+              const finalBody = getCompiledPreview(announcementMessage, member);
+
+              setAnnouncementProgressText(`Sending email ${i + 1} of ${unregisteredActiveMembers.length} to ${member.firstName} ${member.lastName}...`);
+
+              const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${apiKey}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  from: sender,
+                  to: [member.email.trim()],
+                  subject: finalSubject,
+                  html: finalBody
+                })
+              });
+
+              if (response.ok) {
+                successCount++;
+              } else {
+                failedCount++;
+                console.error(`Failed to send email to ${member.email}: status ${response.status}`);
+              }
+
+              await new Promise(resolve => setTimeout(resolve, 250));
+            }
+
+            setAnnouncementStatus({
+              type: 'success',
+              text: `Finished! Successfully sent ${successCount} emails (${failedCount} failed).`
+            });
+            setTimeout(() => {
+              setIsEmailAnnouncementModalOpen(false);
+            }, 3000);
+          } catch (err: any) {
+            console.error("Failed to send reminder emails:", err);
+            setAnnouncementStatus({
+              type: 'error',
+              text: err.message || "Failed to send emails. Please try again."
+            });
+          } finally {
+            setIsSendingAnnouncement(false);
+            setAnnouncementProgressText('');
+          }
+        };
+
+        return (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px',
+            zIndex: 1000002
+          }}>
+            <div className="glass-card animate-slide-up" style={{ 
+              width: '100%', 
+              maxWidth: '700px', 
+              backgroundColor: 'var(--bg-card)', 
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--color-emerald)' }}>
+                  📢 Email Invitation to Unregistered Members
+                </h3>
+                <button 
+                  type="button" 
+                  disabled={isSendingAnnouncement}
+                  onClick={() => setIsEmailAnnouncementModalOpen(false)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    The following <strong>{unregisteredActiveMembers.length} active members</strong> will receive a personalized invitation to register for <strong>{activeTournament.name}</strong>:
+                  </p>
+                  <div style={{
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '8px',
+                    padding: '10px 12px',
+                    maxHeight: '100px',
+                    overflowY: 'auto',
+                    fontSize: '0.8rem',
+                    color: 'var(--text-primary)',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '6px 12px'
+                  }}>
+                    {unregisteredActiveMembers.map(m => (
+                      <span key={m.id} style={{ display: 'inline-block', backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>
+                        {m.firstName} {m.lastName}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <form onSubmit={handleSendAnnouncements} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Subject Line</label>
+                    <input
+                      type="text"
+                      required
+                      disabled={isSendingAnnouncement}
+                      value={announcementSubject}
+                      onChange={(e) => setAnnouncementSubject(e.target.value)}
+                      className="form-input"
+                      placeholder="Club Announcement - Penny Ante Poker Club"
+                      style={{ padding: '8px 12px' }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Message HTML Body</label>
+                    <textarea
+                      required
+                      disabled={isSendingAnnouncement}
+                      value={announcementMessage}
+                      onChange={(e) => setAnnouncementMessage(e.target.value)}
+                      className="form-input"
+                      rows={10}
+                      placeholder="HTML code..."
+                      style={{ padding: '8px 12px', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.8rem' }}
+                    />
+                    <small style={{ display: 'block', marginTop: '4px', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+                      Tip: Use <code>{`{{first_name}}`}</code>, <code>{`{{last_name}}`}</code>, and <code>{`{{tournament_name}}`}</code> as placeholders.
+                    </small>
+                  </div>
+
+                  {announcementProgressText && (
+                    <div style={{ fontSize: '0.85rem', color: 'var(--color-emerald)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <RefreshCw size={16} className="animate-spin" />
+                      <span>{announcementProgressText}</span>
+                    </div>
+                  )}
+
+                  {announcementStatus && (
+                    <div style={{
+                      backgroundColor: announcementStatus.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                      border: `1px solid ${announcementStatus.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)'}`,
+                      color: announcementStatus.type === 'success' ? 'var(--color-emerald)' : 'var(--color-rose)',
+                      borderRadius: '8px',
+                      padding: '10px 12px',
+                      fontSize: '0.85rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontWeight: 600
+                    }}>
+                      {announcementStatus.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                      <span>{announcementStatus.text}</span>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary" 
+                      disabled={isSendingAnnouncement}
+                      style={{ backgroundColor: 'var(--color-emerald)', color: '#ffffff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      {isSendingAnnouncement ? (
+                        <>
+                          <RefreshCw size={16} className="animate-spin" />
+                          Sending Emails...
+                        </>
+                      ) : (
+                        'Send Invitation Emails'
+                      )}
+                    </button>
+                    <button 
+                      type="button" 
+                      disabled={isSendingAnnouncement}
+                      onClick={() => setIsEmailAnnouncementModalOpen(false)} 
+                      className="btn btn-secondary"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Edit Tournament Details Modal */}
       {isEditTourDetailsOpen && activeTournament && (

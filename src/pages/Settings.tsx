@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { Settings as SettingsType, BlindLevel } from '../types';
-import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, X, ArrowUp, ArrowDown, Play, Square } from 'lucide-react';
 import { calculateStandings } from '../utils/stats';
 import { COLOR_PALETTES, applyThemePalette } from '../utils/theme';
 import * as XLSX from 'xlsx';
+import { db } from '../firebase';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { checkTableBalance, executePlayerMove, executeTableBreak, calculateFinalTableRedraw } from '../utils/tableBalancing';
 
 
 const DEFAULT_BLINDS: BlindLevel[] = [
@@ -40,6 +43,211 @@ interface SettingsProps {
 
 export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdmin }) => {
   const { state, activeSeason, updateSettings, exportDatabase, importDatabase, resetDatabaseToDefault } = useApp();
+
+  // Simulation states
+  const [simRunning, setSimRunning] = useState(false);
+  const [simStatus, setSimStatus] = useState('');
+  const simStopRef = React.useRef(false);
+
+  const startSimulation = async () => {
+    if (simRunning) return;
+    simStopRef.current = false;
+    setSimRunning(true);
+    setSimStatus('Initializing 40 mock players...');
+
+    try {
+      // 1. Create 40 mock players in members collection if they don't exist
+      for (let i = 1; i <= 40; i++) {
+        if (simStopRef.current) break;
+        const memberId = `mock-p-${i}`;
+        await setDoc(doc(db, 'members', memberId), {
+          id: memberId,
+          firstName: 'Mock',
+          lastName: `Player ${i}`,
+          email: `mock${i}@example.com`,
+          phone: `555-01${i.toString().padStart(2, '0')}`,
+          points: 0,
+          role: 'player',
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      if (simStopRef.current) {
+        setSimRunning(false);
+        setSimStatus('Simulation stopped.');
+        return;
+      }
+
+      setSimStatus('Creating Simulation Tournament...');
+      const tournamentId = `tour-sim-${Date.now()}`;
+
+      // Create entries
+      const entries = [];
+      for (let i = 1; i <= 40; i++) {
+        entries.push({
+          memberId: `mock-p-${i}`,
+          hasBuyIn: true,
+          hasAddon: false,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      // Shuffle initial seating
+      const playerIds = Array.from({ length: 40 }, (_, i) => `mock-p-${i + 1}`);
+      const shuffled = [...playerIds].sort(() => Math.random() - 0.5);
+
+      const initialSeating = {
+        'table 1': shuffled.slice(0, 10),
+        'table 2': shuffled.slice(10, 20),
+        'table 3': shuffled.slice(20, 30),
+        'table 4': shuffled.slice(30, 40)
+      };
+
+      const tournamentState = {
+        id: tournamentId,
+        seasonId: activeSeason?.id || 'season-4',
+        name: '40-Player Simulation Tour',
+        date: new Date().toISOString().split('T')[0],
+        status: 'active',
+        buyInAmount: 20,
+        addonAmount: 10,
+        dealerAppreciationAmount: 5,
+        entries,
+        seating: initialSeating,
+        clockState: {
+          currentLevelIndex: 0,
+          timeRemainingSeconds: 900,
+          isRunning: true,
+          lastUpdated: new Date().toISOString()
+        },
+        totalPrizePool: 800,
+        maxPlayers: 50,
+        roundLength: 15,
+        startingChips: 8500
+      };
+
+      await setDoc(doc(db, 'tournaments', tournamentId), tournamentState);
+      setSimStatus('Tournament created! Select "40-Player Simulation Tour" on clock. Sim starts in 10s...');
+
+      // Let's run a background task loop in JS
+      let activeIds = [...shuffled];
+      let currentSeating: Record<string, string[]> = { ...initialSeating };
+      let currentTournamentState: any = { ...tournamentState };
+
+      // Sleep helper
+      const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+      for (let s = 10; s > 0; s--) {
+        if (simStopRef.current) break;
+        setSimStatus(`Tournament created! Select "40-Player Simulation Tour" on clock. Sim starts in ${s}s...`);
+        await sleep(1000);
+      }
+
+      while (activeIds.length > 1) {
+        if (simStopRef.current) break;
+
+        setSimStatus(`Game running: ${activeIds.length} players alive. Simulating next bust out...`);
+        await sleep(2500);
+
+        if (simStopRef.current) break;
+
+        // Bust a random player
+        const randomIdx = Math.floor(Math.random() * activeIds.length);
+        const bustedId = activeIds[randomIdx];
+        activeIds.splice(randomIdx, 1);
+
+        const finishPos = activeIds.length + 1;
+        setSimStatus(`Busted Mock Player ${bustedId.replace('mock-p-', '')} at #${finishPos}`);
+
+        // Update entries
+        const updatedEntries = currentTournamentState.entries.map((e: any) => {
+          if (e.memberId === bustedId) {
+            return { ...e, eliminatedAt: new Date().toISOString(), finishPosition: finishPos };
+          }
+          return e;
+        });
+        currentTournamentState.entries = updatedEntries;
+
+        await updateDoc(doc(db, 'tournaments', tournamentId), { entries: updatedEntries });
+
+        // Check balancing
+        const rec = checkTableBalance(currentSeating, currentTournamentState);
+        if (rec) {
+          setSimStatus(`Alert: ${rec.message}`);
+          
+          // Pause clock
+          currentTournamentState.clockState.isRunning = false;
+          currentTournamentState.clockState.lastUpdated = new Date().toISOString();
+          await updateDoc(doc(db, 'tournaments', tournamentId), { clockState: currentTournamentState.clockState });
+
+          await sleep(4000); // Sleep so they see the balancing popup
+
+          if (simStopRef.current) break;
+
+          // Apply move/break
+          if (rec.type === 'rebalance') {
+            const movingPlayerId = rec.sourceActivePlayers![rec.sourceActivePlayers!.length - 1];
+            currentSeating = executePlayerMove(currentSeating, movingPlayerId, rec.sourceTable!, rec.targetTable!);
+            setSimStatus(`Balancing: Moved player ${movingPlayerId.replace('mock-p-', '')}`);
+          } else if (rec.type === 'break') {
+            if (rec.isFinalTable) {
+              const redraw = calculateFinalTableRedraw(currentSeating, currentTournamentState);
+              currentSeating = redraw.finalSeating;
+              setSimStatus('Consolidating to Final Table! Redrawing all seats.');
+            } else {
+              currentSeating = executeTableBreak(currentSeating, rec.breakTable!, currentTournamentState);
+              setSimStatus(`Table break: Table ${rec.breakTable!.replace('table ', '')} broken`);
+            }
+          }
+
+          currentTournamentState.seating = currentSeating;
+          await updateDoc(doc(db, 'tournaments', tournamentId), { seating: currentSeating });
+
+          await sleep(4000); // Wait for seat verification
+
+          if (simStopRef.current) break;
+
+          // Resume clock
+          currentTournamentState.clockState.isRunning = true;
+          currentTournamentState.clockState.lastUpdated = new Date().toISOString();
+          await updateDoc(doc(db, 'tournaments', tournamentId), { clockState: currentTournamentState.clockState });
+        }
+      }
+
+      // Declare winner
+      if (activeIds.length === 1 && !simStopRef.current) {
+        const winnerId = activeIds[0];
+        setSimStatus(`Winner: Mock Player ${winnerId.replace('mock-p-', '')}! 🎉`);
+        
+        const finalEntries = currentTournamentState.entries.map((e: any) => {
+          if (e.memberId === winnerId) {
+            return { ...e, finishPosition: 1 };
+          }
+          return e;
+        });
+
+        currentTournamentState.clockState.isRunning = false;
+        currentTournamentState.clockState.lastUpdated = new Date().toISOString();
+
+        await updateDoc(doc(db, 'tournaments', tournamentId), {
+          entries: finalEntries,
+          clockState: currentTournamentState.clockState
+        });
+      }
+
+      setSimRunning(false);
+    } catch (err: any) {
+      console.error(err);
+      setSimStatus(`Error: ${err.message}`);
+      setSimRunning(false);
+    }
+  };
+
+  const stopSimulation = () => {
+    simStopRef.current = true;
+    setSimRunning(false);
+    setSimStatus('Simulation stopped manually.');
+  };
 
   // Settings states
   const [buyIn, setBuyIn] = useState(state.settings.defaultBuyIn);
@@ -486,7 +694,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
 
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label>Default Buy-in ($)</label>
                   <input
@@ -509,9 +717,6 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                     className="form-input"
                   />
                 </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label>Default Add-on ($)</label>
                   <input
@@ -520,17 +725,6 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                     required
                     value={addon}
                     onChange={(e) => setAddon(Number(e.target.value))}
-                    className="form-input"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Default Dealer Appreciation ($)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    required
-                    value={dealerApp}
-                    onChange={(e) => setDealerApp(Number(e.target.value))}
                     className="form-input"
                   />
                 </div>
@@ -738,6 +932,51 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                 </div>
               )}
 
+            </div>
+          </div>
+
+          {/* Tournament Simulation Card */}
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Tournament Simulation</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              Simulate a live 40-player tournament in real-time. This creates a mock tournament, automatically registers and buys in 40 players, structures seating across 4 tables, and runs a fast-paced game (with table balancing and breaks) down to 1 winner.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
+              {!simRunning ? (
+                <button 
+                  onClick={startSimulation} 
+                  className="btn btn-primary" 
+                  style={{ width: '100%', justifyContent: 'flex-start', background: 'var(--color-emerald)', borderColor: 'var(--color-emerald)', color: 'white' }}
+                >
+                  <Play size={18} />
+                  <span>Start 40-Player Simulation</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={stopSimulation} 
+                  className="btn btn-danger" 
+                  style={{ width: '100%', justifyContent: 'flex-start' }}
+                >
+                  <Square size={18} />
+                  <span>Stop Simulation</span>
+                </button>
+              )}
+
+              {simStatus && (
+                <div style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  fontSize: '0.85rem',
+                  color: 'var(--text-primary)',
+                  fontWeight: 500,
+                  fontFamily: 'monospace'
+                }}>
+                  {simStatus}
+                </div>
+              )}
             </div>
           </div>
 

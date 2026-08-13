@@ -2532,3 +2532,35 @@ select option {
   }
 }
 
+/* Fix label buttons (like Upload Logo / Upload Player Card) text and border color readability inside glass cards */
+label.btn-secondary,
+.glass-card label.btn-secondary,
+.form-group label.btn-secondary {
+  color: #0B6B2A !important;
+  border-color: #0B6B2A !important;
+  background-color: #FFFFFF !important;
+}
+
+label.btn-secondary:hover,
+.glass-card label.btn-secondary:hover,
+.form-group label.btn-secondary:hover {
+  color: #095822 !important;
+  border-color: #095822 !important;
+  background-color: #F5F7F5 !important;
+}
+
+label.btn-primary,
+.glass-card label.btn-primary,
+.form-group label.btn-primary {
+  color: #FFFFFF !important;
+  background-color: #0B6B2A !important;
+  border-color: #0B6B2A !important;
+}
+
+label.btn-primary:hover,
+.glass-card label.btn-primary:hover,
+.form-group label.btn-primary:hover {
+  background-color: #095822 !important;
+  border-color: #095822 !important;
+}
+
