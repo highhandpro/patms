@@ -630,6 +630,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     });
   };
 
+  const playerHasWon = (memberId: string) => {
+    return state.tournaments.some(t => 
+      t.status === 'completed' && 
+      t.entries.some(e => e.memberId === memberId && e.finishPosition === 1)
+    );
+  };
+
   const toggleCheckedInDealer = (playerId: string) => {
     if (!activeTournament) return;
 
@@ -2885,7 +2892,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     disabled={isSubAdmin}
                                     title="Mark Player as Late"
                                   />
-                                  <span>{m.firstName} {m.lastName}</span>
+                                  <span>
+                                    {m.firstName} {m.lastName}
+                                    {playerHasWon(entry.memberId) && (
+                                      <span style={{ marginLeft: '4px' }} title="Tournament Winner">👑</span>
+                                    )}
+                                  </span>
                                 </div>
                               </td>
                               <td style={{ textAlign: 'center' }}>
@@ -2907,7 +2919,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   }}
                                   title="Toggle Player Dealer status"
                                 >
-                                  👑
+                                  ♣️
                                 </button>
                               </td>
                               <td style={{ textAlign: 'right', paddingRight: '8px' }}>
@@ -3000,7 +3012,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     disabled={isSubAdmin}
                                     title="Mark Player as Late"
                                   />
-                                  <span>{m.firstName} {m.lastName}</span>
+                                  <span>
+                                    {m.firstName} {m.lastName}
+                                    {playerHasWon(entry.memberId) && (
+                                      <span style={{ marginLeft: '4px' }} title="Tournament Winner">👑</span>
+                                    )}
+                                  </span>
                                 </div>
                               </td>
                               <td style={{ textAlign: 'center' }}>
@@ -3022,7 +3039,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   }}
                                   title="Toggle Player Dealer status"
                                 >
-                                  👑
+                                  ♣️
                                 </button>
                               </td>
                               <td style={{ textAlign: 'right', paddingRight: '8px' }}>
@@ -3115,7 +3132,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     disabled={isSubAdmin}
                                     title="Mark Player as Late"
                                   />
-                                  <span>{m.firstName} {m.lastName}</span>
+                                  <span>
+                                    {m.firstName} {m.lastName}
+                                    {playerHasWon(entry.memberId) && (
+                                      <span style={{ marginLeft: '4px' }} title="Tournament Winner">👑</span>
+                                    )}
+                                  </span>
                                 </div>
                               </td>
                               <td style={{ textAlign: 'center' }}>
@@ -3137,7 +3159,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                   }}
                                   title="Toggle Player Dealer status"
                                 >
-                                  👑
+                                  ♣️
                                 </button>
                               </td>
                               <td style={{ textAlign: 'right', paddingRight: '8px' }}>
@@ -3229,8 +3251,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             title="Double-click to toggle Dealer status"
                           >
                             <span>
-                              {preassignedDealers.includes(entry.memberId) ? '👑 ' : ''}
+                              {preassignedDealers.includes(entry.memberId) ? '♣️ ' : ''}
                               {m.firstName} {m.lastName}
+                              {playerHasWon(entry.memberId) && (
+                                <span style={{ marginLeft: '4px' }} title="Tournament Winner">👑</span>
+                              )}
                             </span>
                           </td>
                           <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
@@ -3253,7 +3278,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               title="Toggle Player Dealer status"
                               disabled={isSubAdmin}
                             >
-                              👑
+                              ♣️
                             </button>
                           </td>
                           <td style={{ textAlign: 'center' }}>
@@ -3696,9 +3721,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                 title="Toggle Dealer status"
                                 disabled={isSubAdmin}
                               >
-                                👑
+                                ♣️
                               </button>
                               {getMemberName(playerId)}
+                              {playerHasWon(playerId) && (
+                                <span style={{ marginLeft: '4px' }} title="Tournament Winner">👑</span>
+                              )}
                             </span>
 
                             {/* Seating manual movement */}
