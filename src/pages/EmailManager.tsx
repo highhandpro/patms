@@ -20,7 +20,7 @@ export const EmailManager: React.FC = () => {
   // No local settings state needed - email is handled by the backend proxy
   
   // Templates state
-  const [selectedTemplate, setSelectedTemplate] = useState<'loginPin' | 'resetPin' | 'announcement'>('loginPin');
+  const [selectedTemplate, setSelectedTemplate] = useState<'loginPin' | 'resetPin' | 'announcement' | 'gameTomorrow'>('loginPin');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   
@@ -91,6 +91,32 @@ export const EmailManager: React.FC = () => {
       <span style="display: inline-block; background-color: #f3f4f6; color: #b91c1c; font-size: 36px; font-weight: 800; letter-spacing: 6px; padding: 16px 32px; border-radius: 8px; border: 1px solid #e5e7eb; font-family: 'JetBrains Mono', monospace;">{{code}}</span>
     </div>
     <p style="font-size: 14px; color: #9ca3af; line-height: 1.6;">If you did not request a PIN reset, please verify your account security or contact Tim Hufler. This code will expire in 15 minutes.</p>
+    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
+    <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
+  </div>
+</div>`);
+      } else if (selectedTemplate === 'gameTomorrow') {
+        setSubject('Game Tomorrow! - Penny Ante Poker Club');
+        setBody(`<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
+  <div style="background-color: #052e16; padding: 24px; border-top-left-radius: 12px; border-top-right-radius: 12px; text-align: center; border-bottom: 3px solid #fbbf24;">
+    <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: -0.02em;">Penny Ante Poker Club</h1>
+  </div>
+  <div style="background-color: #ffffff; padding: 40px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <h2 style="margin-top: 0; font-size: 20px; color: #111827;">Hello {{first_name}},</h2>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+      We have an exciting announcement for members of the Penny Ante Poker Club!
+    </p>
+    <div style="background-color: #f9fafb; border-left: 4px solid #052e16; padding: 16px; margin: 24px 0; border-radius: 6px;">
+      <p style="font-size: 15px; line-height: 1.6; color: #1f2937; margin: 0; font-weight: 500;">
+        Write your main announcement content here. You can customize this layout completely using HTML.
+      </p>
+    </div>
+    <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+      Check the standings, schedule, and live tournament results directly on our portal:
+    </p>
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="https://pennyantepoker.com" style="display: inline-block; background-color: #052e16; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 12px 32px; border-radius: 8px; border-bottom: 3px solid #042512; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); transition: background-color 0.2s;">Visit the Poker Portal</a>
+    </div>
     <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
     <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">&copy; 2026 Penny Ante Poker Club. All rights reserved.</p>
   </div>
@@ -593,11 +619,11 @@ export const EmailManager: React.FC = () => {
       </div>
 
       {/* Broadcast Announcement Control Dashboard */}
-      {selectedTemplate === 'announcement' && (
+      {(selectedTemplate === 'announcement' || selectedTemplate === 'gameTomorrow') && (
         <div className="glass-card" style={{ padding: '24px', marginBottom: '32px', border: '1px solid var(--border-subtle)' }}>
           <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)' }}>
             <Send size={18} style={{ color: 'var(--color-emerald)' }} />
-            <span>Broadcast Announcement to Club</span>
+            <span>Broadcast {selectedTemplate === 'gameTomorrow' ? 'Game Tomorrow Notice' : 'Announcement'} to Club</span>
           </h3>
           
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-subtle)', borderRadius: '12px' }}>
@@ -633,7 +659,7 @@ export const EmailManager: React.FC = () => {
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, minHeight: '40px' }}
                 >
                   <Send size={16} />
-                  <span>Send Announcement to {optedInMembers.length} Members</span>
+                  <span>Send {selectedTemplate === 'gameTomorrow' ? 'Notice' : 'Announcement'} to {optedInMembers.length} Members</span>
                 </button>
               ) : (
                 <button
@@ -668,7 +694,7 @@ export const EmailManager: React.FC = () => {
             <div className="animate-slide-up" style={{ marginTop: '20px', padding: '16px', border: '1px solid rgba(16,185,129,0.2)', backgroundColor: 'rgba(16,185,129,0.02)', borderRadius: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Broadcasting announcement... {broadcastProgress.sent} / {broadcastProgress.total} emails processed
+                  Broadcasting email... {broadcastProgress.sent} / {broadcastProgress.total} emails processed
                 </span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-emerald)' }}>
                   {Math.round((broadcastProgress.sent / broadcastProgress.total) * 100)}% Complete
@@ -792,10 +818,26 @@ export const EmailManager: React.FC = () => {
             >
               Club Announcement
             </button>
+            <button
+              onClick={() => setSelectedTemplate('gameTomorrow')}
+              style={{
+                background: 'none',
+                border: 'none',
+                borderBottom: selectedTemplate === 'gameTomorrow' ? '2.5px solid var(--color-emerald)' : '2.5px solid transparent',
+                color: selectedTemplate === 'gameTomorrow' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                fontWeight: selectedTemplate === 'gameTomorrow' ? 700 : 500,
+                padding: '10px 20px',
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              Game Tomorrow
+            </button>
           </div>
 
-          {/* Tournament Selector (Only for announcements) */}
-          {selectedTemplate === 'announcement' && (
+          {/* Tournament Selector (Only for announcements/notices) */}
+          {(selectedTemplate === 'announcement' || selectedTemplate === 'gameTomorrow') && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '20px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
                 Select Tournament to Announce (Optional - Populates details below)
@@ -847,7 +889,7 @@ export const EmailManager: React.FC = () => {
               >
                 + First Name
               </button>
-              {selectedTemplate === 'announcement' ? (
+              {selectedTemplate === 'announcement' || selectedTemplate === 'gameTomorrow' ? (
                 <>
                   <button 
                     type="button"
