@@ -141,6 +141,10 @@ export interface Settings {
   resendApiKey?: string;
   emailSender?: string;
   emailCorsProxy?: string;
+  emailJsServiceId?: string;
+  emailJsTemplateId?: string;
+  emailJsAnnouncementTemplateId?: string;
+  emailJsPublicKey?: string;
   emailTemplates?: {
     [key: string]: {
       subject: string;

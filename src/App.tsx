@@ -160,36 +160,14 @@ function App() {
       .replace(/\{\{\s*first_name\s*\}\}/g, firstName)
       .replace(/\{\{\s*code\s*\}\}/g, code);
 
-    const apiKey = state.settings.resendApiKey;
-    const sender = state.settings.emailSender || 'Penny Ante Poker Club <onboarding@resend.dev>';
-    const proxy = state.settings.emailCorsProxy || '';
-
-    // If Resend API key is missing, mock send in console
-    if (!apiKey) {
-      console.warn('Resend API key is missing. Falling back to console log:');
-      console.log("[MOCK RESEND EMAIL LOG]", {
-        to: toEmail,
-        from: sender,
-        subject: finalSubject,
-        body: finalBody
-      });
-      return;
-    }
-
     try {
-      const endpoint = proxy 
-        ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
-        : 'https://api.resend.com/emails';
-
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: sender,
-          to: [toEmail],
+          to: toEmail,
           subject: finalSubject,
           html: finalBody
         })
@@ -199,9 +177,9 @@ function App() {
         const errorText = await response.text();
         throw new Error(errorText || `HTTP error ${response.status}`);
       }
-      console.log('Email sent successfully via Resend API.');
+      console.log('PIN Email sent successfully via backend proxy API.');
     } catch (err: any) {
-      console.error('Resend dispatch failed:', err);
+      console.error('Backend PIN email dispatch failed:', err);
     }
   };
 

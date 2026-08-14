@@ -7,22 +7,17 @@ import {
   Save, 
   Smartphone, 
   Monitor, 
-  Eye, 
   Key, 
   Sparkles, 
   CheckCircle, 
-  AlertCircle, 
-  HelpCircle,
-  EyeOff
+  AlertCircle,
+  Eye
 } from 'lucide-react';
 
 export const EmailManager: React.FC = () => {
   const { state, updateSettings } = useApp();
   
-  // Settings values
-  const [resendApiKey, setResendApiKey] = useState(state.settings.resendApiKey || '');
-  const [emailSender, setEmailSender] = useState(state.settings.emailSender || 'Penny Ante Poker Club <onboarding@resend.dev>');
-  const [emailCorsProxy, setEmailCorsProxy] = useState(state.settings.emailCorsProxy || '');
+  // No local settings state needed - email is handled by the backend proxy
   
   // Templates state
   const [selectedTemplate, setSelectedTemplate] = useState<'loginPin' | 'resetPin' | 'announcement'>('loginPin');
@@ -30,7 +25,6 @@ export const EmailManager: React.FC = () => {
   const [body, setBody] = useState('');
   
   // UI states
-  const [showApiKey, setShowApiKey] = useState(false);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [testRecipient, setTestRecipient] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -306,9 +300,6 @@ export const EmailManager: React.FC = () => {
 
     const newSettings = {
       ...state.settings,
-      resendApiKey: resendApiKey.trim(),
-      emailSender: emailSender.trim(),
-      emailCorsProxy: emailCorsProxy.trim(),
       emailTemplates: updatedTemplates
     };
 
@@ -334,31 +325,14 @@ export const EmailManager: React.FC = () => {
     const finalSubject = getCompiledPreview(subject);
     const finalBody = getCompiledPreview(body);
 
-    const sender = emailSender.trim();
-    const apiKey = resendApiKey.trim();
-    const proxy = emailCorsProxy.trim();
-    const useLocalApi = !apiKey;
-
     try {
-      const endpoint = useLocalApi 
-        ? '/api/send-email'
-        : (proxy 
-            ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
-            : 'https://api.resend.com/emails');
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-      if (!useLocalApi) {
-        headers['Authorization'] = `Bearer ${apiKey}`;
-      }
-
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/send-email', {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
-          from: sender,
-          to: [testRecipient.trim()],
+          to: testRecipient.trim(),
           subject: finalSubject,
           html: finalBody
         })
@@ -366,7 +340,12 @@ export const EmailManager: React.FC = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(errorText || `HTTP status ${response.status}`);
+        let errorMsg = errorText;
+        try {
+          const parsed = JSON.parse(errorText);
+          errorMsg = parsed.error || errorText;
+        } catch (e) {}
+        throw new Error(errorMsg || `HTTP status ${response.status}`);
       }
 
       setTestResult({
@@ -378,7 +357,7 @@ export const EmailManager: React.FC = () => {
       console.error("Test email dispatch failed:", err);
       setTestResult({
         success: false,
-        message: `Dispatch failed: ${err.message || err}. (Note: If this is a CORS issue, check proxy or API Key configuration).`
+        message: `Dispatch failed: ${err.message || err}`
       });
     } finally {
       setIsSendingTest(false);
@@ -405,7 +384,7 @@ export const EmailManager: React.FC = () => {
       return;
     }
 
-    const confirmMsg = `Are you sure you want to broadcast this announcement to all ${optedInMembers.length} opted-in members? This will send personalized emails one-by-one using your Resend integration.`;
+    const confirmMsg = `Are you sure you want to broadcast this announcement to all ${optedInMembers.length} opted-in members? This will send personalized emails one-by-one using your backend email integration.`;
     if (!window.confirm(confirmMsg)) {
       return;
     }
@@ -421,17 +400,6 @@ export const EmailManager: React.FC = () => {
       status: 'sending'
     })));
     setShowLogs(true);
-
-    const apiKey = resendApiKey.trim();
-    const sender = emailSender.trim();
-    const proxy = emailCorsProxy.trim();
-    const useLocalApi = !apiKey;
-
-    if (!useLocalApi && !apiKey) {
-      alert("Resend API Key is required to broadcast. Please configure it above.");
-      setIsBroadcasting(false);
-      return;
-    }
 
     let successCount = 0;
     let failedCount = 0;
@@ -459,25 +427,13 @@ export const EmailManager: React.FC = () => {
       const personalizedBody = getCompiledPreview(body, member);
 
       try {
-        const endpoint = useLocalApi 
-          ? '/api/send-email'
-          : (proxy 
-              ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
-              : 'https://api.resend.com/emails');
-
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
-        };
-        if (!useLocalApi) {
-          headers['Authorization'] = `Bearer ${apiKey}`;
-        }
-
-        const response = await fetch(endpoint, {
+        const response = await fetch('/api/send-email', {
           method: 'POST',
-          headers,
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
-            from: sender,
-            to: [member.email.trim()],
+            to: member.email.trim(),
             subject: personalizedSubject,
             html: personalizedBody
           })
@@ -485,7 +441,12 @@ export const EmailManager: React.FC = () => {
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(errorText || `HTTP status ${response.status}`);
+          let errorMsg = errorText;
+          try {
+            const parsed = JSON.parse(errorText);
+            errorMsg = parsed.error || errorText;
+          } catch (e) {}
+          throw new Error(errorMsg || `HTTP status ${response.status}`);
         }
 
         successCount++;
@@ -532,7 +493,7 @@ export const EmailManager: React.FC = () => {
         }
         .email-config-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
           gap: 20px;
         }
         .email-recipients-grid {
@@ -606,75 +567,27 @@ export const EmailManager: React.FC = () => {
 
       {/* Settings Panel Grid */}
       <div className="glass-card" style={{ padding: '24px', marginBottom: '32px', border: '1px solid var(--border-subtle)' }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', color: 'var(--text-primary)' }}>
+        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)' }}>
           <Key size={18} style={{ color: 'var(--color-gold)' }} />
-          <span>Resend & Delivery Configuration</span>
+          <span>Email Delivery Configuration</span>
         </h3>
         
-        <div className="email-config-grid">
-          {/* API Key */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>Resend API Key</span>
-              <span title="Generate an API key in your Resend Dashboard (resend.com)" style={{ cursor: 'help', display: 'inline-flex' }}>
-                <HelpCircle size={14} className="text-muted" />
-              </span>
-            </label>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <input 
-                type={showApiKey ? "text" : "password"}
-                value={resendApiKey}
-                onChange={(e) => setResendApiKey(e.target.value)}
-                placeholder="re_xxxxxxxxxxxxxxxxx"
-                className="form-input"
-                style={{ paddingRight: '40px', width: '100%', borderRadius: '8px' }}
-              />
-              <button 
-                type="button"
-                onClick={() => setShowApiKey(!showApiKey)}
-                style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}
-              >
-                {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5, margin: '0 0 16px 0' }}>
+          Email delivery is securely processed on the backend (`/api/send-email`). The application automatically routes outgoing messages using the credentials configured in your environment.
+        </p>
 
-          {/* Sender */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>Sender Address ("From")</span>
-              <span title="Must be onboarding@resend.dev or a domain you've verified on Resend" style={{ cursor: 'help', display: 'inline-flex' }}>
-                <HelpCircle size={14} className="text-muted" />
-              </span>
-            </label>
-            <input 
-              type="text"
-              value={emailSender}
-              onChange={(e) => setEmailSender(e.target.value)}
-              placeholder="Penny Ante Poker <onboarding@resend.dev>"
-              className="form-input"
-              style={{ width: '100%', borderRadius: '8px' }}
-            />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ padding: '12px 18px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-subtle)', flex: '1 1 220px' }}>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>Active Account</span>
+            <span style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '4px' }}>
+              {import.meta.env.VITE_GMAIL_USER || 'pennyantepokerclub@gmail.com'}
+            </span>
           </div>
-
-          {/* CORS Proxy */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>CORS Proxy URL (Optional)</span>
-              <span title="Since Resend blocks browser CORS, you can route requests through a proxy like: https://cors-anywhere.herokuapp.com/" style={{ cursor: 'help', display: 'inline-flex' }}>
-                <HelpCircle size={14} className="text-muted" />
-              </span>
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <input 
-                type="text"
-                value={emailCorsProxy}
-                onChange={(e) => setEmailCorsProxy(e.target.value)}
-                placeholder="https://cors-anywhere.herokuapp.com/"
-                className="form-input"
-                style={{ width: '100%', borderRadius: '8px' }}
-              />
-            </div>
+          <div style={{ padding: '12px 18px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-subtle)', flex: '1 1 220px' }}>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>Delivery Method</span>
+            <span style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-emerald)', marginTop: '4px' }}>
+              Direct SMTP / Resend API (Managed)
+            </span>
           </div>
         </div>
       </div>
@@ -1351,7 +1264,7 @@ export const EmailManager: React.FC = () => {
               <div style={{ display: 'flex', marginBottom: '8px' }}>
                 <span style={{ color: '#64748b', width: '60px', fontWeight: 600 }}>From:</span>
                 <span style={{ color: '#334155', fontFamily: 'monospace' }}>
-                  {emailSender || 'Penny Ante Poker <onboarding@resend.dev>'}
+                  {import.meta.env.VITE_GMAIL_USER || 'pennyantepokerclub@gmail.com'}
                 </span>
               </div>
               <div style={{ display: 'flex', marginBottom: '8px' }}>
