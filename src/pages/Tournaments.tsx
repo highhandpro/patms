@@ -2759,8 +2759,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    setAnnouncementSubject(state.settings.emailTemplates?.announcement?.subject || 'Club Announcement - Penny Ante Poker Club');
-                    setAnnouncementMessage(state.settings.emailTemplates?.announcement?.body || `<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
+                    setAnnouncementSubject(state.settings.emailTemplates?.invitation?.subject || 'Tournament Invitation - Penny Ante Poker Club');
+                    setAnnouncementMessage(state.settings.emailTemplates?.invitation?.body || `<div style="font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; padding: 40px 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; color: #1f2937;">
   <div style="background-color: #052e16; padding: 24px; border-top-left-radius: 12px; border-top-right-radius: 12px; text-align: center; border-bottom: 3px solid #fbbf24;">
     <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: -0.02em;">Penny Ante Poker Club</h1>
   </div>
@@ -5495,16 +5495,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           setIsSendingAnnouncement(true);
           setAnnouncementStatus(null);
 
-          const apiKey = state.settings.resendApiKey;
-          const sender = state.settings.emailSender || 'Penny Ante Poker Club <onboarding@resend.dev>';
-          const proxy = state.settings.emailCorsProxy || '';
-
-          if (!apiKey) {
-            alert("Resend API Key is missing. Please configure it in Settings > Email Manager first.");
-            setIsSendingAnnouncement(false);
-            return;
-          }
-
           let successCount = 0;
           let failedCount = 0;
 
@@ -5538,10 +5528,6 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           };
 
           try {
-            const endpoint = proxy 
-              ? `${proxy.endsWith('/') ? proxy : proxy + '/' }https://api.resend.com/emails`
-              : 'https://api.resend.com/emails';
-
             for (let i = 0; i < unregisteredActiveMembers.length; i++) {
               const member = unregisteredActiveMembers[i];
               const finalSubject = getCompiledPreview(announcementSubject, member);
@@ -5549,15 +5535,13 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
               setAnnouncementProgressText(`Sending email ${i + 1} of ${unregisteredActiveMembers.length} to ${member.firstName} ${member.lastName}...`);
 
-              const response = await fetch(endpoint, {
+              const response = await fetch('/api/send-email', {
                 method: 'POST',
                 headers: {
-                  'Authorization': `Bearer ${apiKey}`,
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                  from: sender,
-                  to: [member.email.trim()],
+                  to: member.email.trim(),
                   subject: finalSubject,
                   html: finalBody
                 })
