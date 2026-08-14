@@ -269,7 +269,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
             Penny Ante Poker Club
           </p>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '2px' }}>
-            v2.3 (Gmail SMTP + Clean Dashboard)
+            v2.4 (Gmail SMTP + Dash Labels)
           </p>
         </div>
       </div>

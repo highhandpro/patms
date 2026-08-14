@@ -93,7 +93,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span style={{ textTransform: 'capitalize', color: activeTournaments[0].status === 'active' ? 'var(--text-emerald)' : 'var(--color-warning)' }}>
                 {activeTournaments[0].status}
               </span>{' '}
-              state with {activeTournaments[0].entries.length} players checked in.
+              state with {activeTournaments[0].entries.length} players registered.
             </p>
           </div>
           <button 
