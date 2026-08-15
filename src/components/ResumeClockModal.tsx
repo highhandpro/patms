@@ -67,18 +67,36 @@ export const ResumeClockModal: React.FC<ResumeClockModalProps> = ({
         bottom: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: '#041408',
-        backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 65%)',
-        color: '#ffffff',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(8px)',
         zIndex: 2147483647,
         display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 44px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
         boxSizing: 'border-box',
-        overflow: 'hidden',
         animation: 'fadeIn 0.2s ease-out'
       }}
     >
+      <div
+        className="glass-card animate-slide-up"
+        style={{
+          width: '100%',
+          maxWidth: '800px',
+          maxHeight: '90vh',
+          backgroundColor: '#041408',
+          backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 65%)',
+          border: '1.5px solid rgba(16, 185, 129, 0.25)',
+          borderRadius: '24px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
+          color: '#ffffff',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '30px 40px',
+          boxSizing: 'border-box',
+          overflowY: 'auto'
+        }}
+      >
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
@@ -296,6 +314,7 @@ export const ResumeClockModal: React.FC<ResumeClockModalProps> = ({
           Keep Clock Paused
         </button>
       </div>
+     </div>
     </div>,
     portalTarget
   );
