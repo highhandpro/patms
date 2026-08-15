@@ -318,7 +318,8 @@ export const executePlayerMove = (
   seating: Record<string, string[]>,
   playerId: string,
   sourceTable: string,
-  targetTable: string
+  targetTable: string,
+  activeTournament?: any
 ): Record<string, string[]> => {
   const updatedSeating: Record<string, string[]> = {};
 
@@ -340,7 +341,22 @@ export const executePlayerMove = (
     updatedSeating[targetTable] = Array(10).fill("");
   }
 
-  const emptyIndex = updatedSeating[targetTable].findIndex(id => !id || id === "");
+  let activeSet = new Set<string>();
+  if (activeTournament && activeTournament.entries) {
+    const activeEntries = activeTournament.entries.filter((e: any) => !e.eliminatedAt);
+    activeSet = new Set<string>(activeEntries.map((e: any) => e.memberId));
+  }
+
+  let emptyIndex = -1;
+  const targetSeats = updatedSeating[targetTable];
+  for (let i = 0; i < 10; i++) {
+    const occupant = targetSeats[i];
+    if (!occupant || occupant === "" || (activeTournament && !activeSet.has(occupant))) {
+      emptyIndex = i;
+      break;
+    }
+  }
+
   if (emptyIndex !== -1 && emptyIndex < 10) {
     updatedSeating[targetTable][emptyIndex] = playerId;
   }

@@ -120,7 +120,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
 
   const handleConfirmBalanceMove = (playerId: string, sourceTable: string, targetTable: string) => {
     if (!tournament.seating) return;
-    const updated = executePlayerMove(tournament.seating, playerId, sourceTable, targetTable);
+    const updated = executePlayerMove(tournament.seating, playerId, sourceTable, targetTable, tournament);
     updateTournament(tournament.id, { seating: updated });
     setIsBalanceModalOpen(false);
     setBalanceRecommendation(null);
@@ -310,7 +310,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         setBalanceRecommendation(null);
       }
     }
-  }, [tournament.seating, tournament.entries, members, isRunning, currentLevelIndex, timeRemaining, updateTournament]);
+  }, [tournament.seating, tournament.entries, members, isRunning, currentLevelIndex, timeRemaining, updateTournament, isBalanceModalOpen]);
 
   // Highlight active players panel briefly when clicking the bottom Bust Out button
   useEffect(() => {

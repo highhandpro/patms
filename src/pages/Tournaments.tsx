@@ -932,7 +932,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
   const handleConfirmBalanceMove = (playerId: string, sourceTable: string, targetTable: string) => {
     if (!activeTournament) return;
-    const updated = executePlayerMove(seating, playerId, sourceTable, targetTable);
+    const updated = executePlayerMove(seating, playerId, sourceTable, targetTable, activeTournament);
     setSeating(updated);
     localStorage.setItem(`patms_seating_${activeTournament.id}`, JSON.stringify(updated));
     updateTournament(activeTournament.id, { seating: updated });
