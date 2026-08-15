@@ -141,8 +141,22 @@ export const TableBalanceAlertModal: React.FC<TableBalanceAlertModalProps> = ({
       {/* Rebalance Flow (Full Screen Large TV Scaling) */}
       {isRebalance && recommendation.sourceTable && recommendation.targetTable && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 0 }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', maxWidth: '960px', width: '100%', margin: '0 auto', gap: '34px' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', maxWidth: '960px', width: '100%', margin: '0 auto', gap: '20px' }}>
             
+            {/* Big Capitalized Selected Player Name */}
+            <div style={{
+              fontSize: '4.5rem',
+              fontWeight: 900,
+              color: '#ffffff',
+              textAlign: 'center',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              marginBottom: '10px',
+              fontFamily: "'Outfit', sans-serif"
+            }}>
+              {selectedPlayerId ? getMemberName(selectedPlayerId).toUpperCase() : 'SELECT PLAYER'}
+            </div>
+
             {/* Table From -> To Banner */}
             <div
               style={{
