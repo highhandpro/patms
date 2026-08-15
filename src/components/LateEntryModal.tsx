@@ -142,15 +142,42 @@ export const LateEntryModal: React.FC<LateEntryModalProps> = ({
             style={{ padding: '10px 14px' }}
           >
             <option value="" disabled>-- Select a Table --</option>
-            {Object.keys(seating).map(tableName => {
-              const currentSize = seating[tableName]?.filter(id => id !== "").length ?? 0;
-              const isFull = currentSize >= 10;
-              return (
-                <option key={tableName} value={tableName} disabled={isFull}>
-                  {tableName.toUpperCase()} ({currentSize}/10 seated) {isFull ? ' (FULL)' : ''}
-                </option>
-              );
-            })}
+            {(() => {
+              const activeEntries = activeTournament.entries?.filter((e: any) => !e.eliminatedAt) || [];
+              const activeSet = new Set<string>(activeEntries.map((e: any) => e.memberId));
+              
+              const tableStats = Object.keys(seating).map(tableName => {
+                const seats = seating[tableName] || [];
+                const activeCount = seats.filter(id => id && activeSet.has(id)).length;
+                const seatedCount = seats.filter(id => id !== "").length;
+                return { tableName, activeCount, seatedCount };
+              });
+
+              const minActiveCount = tableStats.length > 0 ? Math.min(...tableStats.map(t => t.activeCount)) : 0;
+              const allowedTables = tableStats.filter(t => t.activeCount === minActiveCount && t.seatedCount < 10);
+
+              return Object.keys(seating).map(tableName => {
+                const stats = tableStats.find(t => t.tableName === tableName);
+                if (!stats) return null;
+                const isFull = stats.seatedCount >= 10;
+                
+                // Restrict to tables with the minimum active count to keep tables balanced
+                const isAllowed = isFull ? false : (allowedTables.length > 0 ? stats.activeCount === minActiveCount : true);
+                
+                let suffix = '';
+                if (isFull) {
+                  suffix = ' (FULL)';
+                } else if (!isAllowed) {
+                  suffix = ' (DISABLED FOR BALANCE)';
+                }
+
+                return (
+                  <option key={tableName} value={tableName} disabled={!isAllowed}>
+                    {tableName.toUpperCase()} ({stats.activeCount} active, {stats.seatedCount}/10 seated){suffix}
+                  </option>
+                );
+              });
+            })()}
             {Object.keys(seating).length < 5 && (
               <option value="create_new">
                 + Create New Table

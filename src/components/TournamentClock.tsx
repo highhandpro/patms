@@ -288,6 +288,18 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     const rec = checkTableBalance(tournament.seating, tournament, members);
     if (rec) {
       if (!isBalanceModalOpen) {
+        // Automatically pause the clock if it is currently running
+        if (isRunning) {
+          setIsRunning(false);
+          updateTournament(tournament.id, {
+            clockState: {
+              currentLevelIndex,
+              timeRemainingSeconds: timeRemaining,
+              isRunning: false,
+              lastUpdated: new Date().toISOString()
+            }
+          });
+        }
         playTableBalanceAlertSound();
         setBalanceRecommendation(rec);
         setIsBalanceModalOpen(true);
@@ -298,7 +310,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         setBalanceRecommendation(null);
       }
     }
-  }, [tournament.seating, tournament.entries, members]);
+  }, [tournament.seating, tournament.entries, members, isRunning, currentLevelIndex, timeRemaining, updateTournament]);
 
   // Highlight active players panel briefly when clicking the bottom Bust Out button
   useEffect(() => {
