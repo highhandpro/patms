@@ -1306,188 +1306,62 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                   ACTIVE PLAYERS ({activePlayers.length} ALIVE)
                 </span>
               </div>
-              {(() => {
-                const activeSet = new Set<string>(activePlayers.map(p => p.memberId));
-                const TABLE_ORDER = ['red table', 'blue table', 'gold table', 'gray table', 'purple table'];
-                const TABLE_THEME_BADGES: Record<string, { bg: string; color: string; border: string }> = {
-                  'red table': { bg: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1.5px solid rgba(239, 68, 68, 0.35)' },
-                  'blue table': { bg: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1.5px solid rgba(59, 130, 246, 0.35)' },
-                  'gold table': { bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--color-gold)', border: '1.5px solid rgba(245, 158, 11, 0.35)' },
-                  'gray table': { bg: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', border: '1.5px solid rgba(148, 163, 184, 0.35)' },
-                  'purple table': { bg: 'rgba(168, 85, 247, 0.15)', color: '#a855f7', border: '1.5px solid rgba(168, 85, 247, 0.35)' }
-                };
-
-                const clockActiveTables = Object.keys(tournament.seating || {})
-                  .filter(tName => {
-                    const seats = tournament.seating?.[tName] || [];
-                    return seats.some(id => id && activeSet.has(id));
-                  })
-                  .sort((a, b) => TABLE_ORDER.indexOf(a) - TABLE_ORDER.indexOf(b));
-
-                if (clockActiveTables.length > 0) {
+              <div style={{ 
+                display: 'grid',
+                gridTemplateColumns: activePlayers.length <= 10 ? 'repeat(2, 1fr)' : activePlayers.length <= 20 ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
+                gridTemplateRows: `repeat(${Math.max(1, Math.ceil(sortedActivePlayers.length / (activePlayers.length <= 10 ? 2 : activePlayers.length <= 20 ? 3 : 4)))}, auto)`,
+                gridAutoFlow: 'column',
+                columnGap: '16px',
+                rowGap: '6px',
+                width: '100%'
+              }}>
+                {sortedActivePlayers.map(p => {
+                  const mem = members.find(m => m.id === p.memberId);
+                  const name = mem ? `${mem.firstName} ${mem.lastName}` : 'Unknown';
                   return (
-                    <div style={{ 
-                      display: 'grid',
-                      gridTemplateColumns: `repeat(${clockActiveTables.length}, 1fr)`,
-                      gap: '12px',
-                      width: '100%',
-                      alignItems: 'stretch'
-                    }}>
-                      {clockActiveTables.map(tName => {
-                        const seats = tournament.seating?.[tName] || [];
-                        const activeOnTable = seats
-                          .filter(id => id && activeSet.has(id))
-                          .map(id => {
-                            const mem = members.find(m => m.id === id);
-                            const name = mem ? `${mem.firstName} ${mem.lastName}` : 'Unknown';
-                            return { id, name };
-                          })
-                          .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-
-                        const theme = TABLE_THEME_BADGES[tName.toLowerCase()] || { bg: 'rgba(255,255,255,0.05)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.15)' };
-
-                        return (
-                          <div key={tName} style={{
-                            backgroundColor: 'rgba(0,0,0,0.2)',
-                            border: theme.border,
-                            borderRadius: '10px',
-                            padding: '10px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '8px'
-                          }}>
-                            {/* Table Header with Count */}
-                            <div style={{
-                              backgroundColor: theme.bg,
-                              padding: '6px 10px',
-                              borderRadius: '6px',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center'
-                            }}>
-                              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: theme.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                {tName}
-                              </span>
-                              <span style={{
-                                fontSize: '0.8rem',
-                                color: theme.color,
-                                fontWeight: 800,
-                                backgroundColor: 'rgba(0,0,0,0.25)',
-                                padding: '1px 6px',
-                                borderRadius: '6px',
-                                border: `1px solid ${theme.color}40`
-                              }}>
-                                {activeOnTable.length}
-                              </span>
-                            </div>
-
-                            {/* Active Players (Alphabetical, Seat Numbers Removed) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                              {activeOnTable.map(p => (
-                                <div
-                                  key={p.id}
-                                  onClick={() => {
-                                    const entry = tournament.entries.find(e => e.memberId === p.id);
-                                    const existingBounties = entry?.bountiesCollected || 0;
-                                    setEliminatingPlayerId(p.id);
-                                    setBountiesWon(existingBounties);
-                                  }}
-                                  onMouseEnter={e => {
-                                    e.currentTarget.style.backgroundColor = '#7f1d1d';
-                                    e.currentTarget.style.borderColor = '#ef4444';
-                                  }}
-                                  onMouseLeave={e => {
-                                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
-                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                                  }}
-                                  style={{
-                                    cursor: 'pointer',
-                                    fontSize: '1.05rem',
-                                    fontWeight: 700,
-                                    color: '#ffffff',
-                                    padding: '4px 8px',
-                                    borderRadius: '6px',
-                                    backgroundColor: 'rgba(255,255,255,0.02)',
-                                    border: '1px solid rgba(255,255,255,0.05)',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    transition: 'all 0.15s ease-in-out',
-                                    display: 'block'
-                                  }}
-                                  title={`Click to bust out ${p.name}`}
-                                >
-                                  {p.name}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div 
+                      key={p.memberId}
+                      onClick={() => {
+                        const existingBounties = p.bountiesCollected || 0;
+                        setEliminatingPlayerId(p.memberId);
+                        setBountiesWon(existingBounties);
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.backgroundColor = '#7f1d1d';
+                        e.currentTarget.style.borderColor = '#ef4444';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                      }}
+                      style={{ 
+                        cursor: 'pointer', 
+                        fontSize: '1.05rem', 
+                        fontWeight: 700, 
+                        color: '#ffffff',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        backgroundColor: 'rgba(255,255,255,0.03)',
+                        textAlign: 'left',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        transition: 'all 0.15s ease-in-out',
+                        display: 'block'
+                      }}
+                      title={`Click to bust out ${name}`}
+                    >
+                      {name}
                     </div>
                   );
-                }
-
-                // Fallback if seating is not generated yet
-                return (
-                  <div style={{ 
-                    display: 'grid',
-                    gridTemplateColumns: activePlayers.length <= 15 ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
-                    gridTemplateRows: `repeat(${Math.max(1, Math.ceil(sortedActivePlayers.length / (activePlayers.length <= 15 ? 3 : 4)))}, auto)`,
-                    gridAutoFlow: 'column',
-                    columnGap: '16px',
-                    rowGap: '3px',
-                    width: '100%'
-                  }}>
-                    {sortedActivePlayers.map(p => {
-                      const mem = members.find(m => m.id === p.memberId);
-                      const name = mem ? `${mem.firstName} ${mem.lastName}` : 'Unknown';
-                      return (
-                        <div 
-                          key={p.memberId}
-                          onClick={() => {
-                            const existingBounties = p.bountiesCollected || 0;
-                            setEliminatingPlayerId(p.memberId);
-                            setBountiesWon(existingBounties);
-                          }}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.backgroundColor = '#7f1d1d';
-                            e.currentTarget.style.borderColor = '#ef4444';
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)';
-                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                          }}
-                          style={{ 
-                            cursor: 'pointer', 
-                            fontSize: '1.15rem', 
-                            fontWeight: 800, 
-                            color: '#ffffff',
-                            padding: '2px 10px',
-                            borderRadius: '6px',
-                            backgroundColor: 'rgba(255,255,255,0.04)',
-                            textAlign: 'left',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            transition: 'all 0.15s ease-in-out',
-                            display: 'block'
-                          }}
-                          title={`Click to bust out ${name}`}
-                        >
-                          {name}
-                        </div>
-                      );
-                    })}
-                    {activePlayers.length === 0 && (
-                      <div style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '12px' }}>
-                        No active players remaining.
-                      </div>
-                    )}
+                })}
+                {activePlayers.length === 0 && (
+                  <div style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '12px', gridColumn: 'span 4' }}>
+                    No active players remaining.
                   </div>
-                );
-              })()}
+                )}
+              </div>
             </div>
 
             {/* If 10 or fewer players are active, render the payouts stack here inside Card A, in 3 columns */}
