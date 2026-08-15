@@ -137,7 +137,7 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
       padding: '20px',
       zIndex: 1000001
     }}>
-      <div className="glass-card animate-slide-up" style={{ 
+      <div className="glass-card animate-slide-up elimination-modal-card" style={{ 
         width: '100%', 
         maxWidth: isMultiPlayer ? '750px' : '400px', 
         backgroundColor: '#FFFFFF', 
@@ -171,7 +171,7 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
             style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-emerald)' }}
             onClick={(e) => e.stopPropagation()}
           />
-          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>
+          <span className="checkbox-label" style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>
             Bust out multiple players (same hand)
           </span>
         </div>
@@ -379,8 +379,8 @@ export const EliminationModal: React.FC<EliminationModalProps> = ({
                 gap: '8px',
                 textAlign: 'left'
               }}>
-                <span>⚠️</span>
-                <span>
+                <span className="warning-text">⚠️</span>
+                <span className="warning-text">
                   This player already has <strong>{initialBounties}</strong> bounty/bounties recorded. Please update and confirm the total number of bounties they collected.
                 </span>
               </div>

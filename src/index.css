@@ -2321,6 +2321,23 @@ select option {
   color: #ffffff !important;
 }
 
+#tournament-clock-container .elimination-modal-card h3,
+#tournament-clock-container .elimination-modal-card h4,
+#tournament-clock-container .elimination-modal-card p,
+#tournament-clock-container .elimination-modal-card span,
+#tournament-clock-container .elimination-modal-card strong,
+#tournament-clock-container .elimination-modal-card label {
+  color: #1A202C !important;
+}
+
+#tournament-clock-container .elimination-modal-card span.checkbox-label {
+  color: #374151 !important;
+}
+
+#tournament-clock-container .elimination-modal-card span.warning-text {
+  color: #b45309 !important;
+}
+
 @media (max-width: 1280px) and (orientation: portrait) {
   #tournament-clock-container {
     padding: 12px !important;

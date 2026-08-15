@@ -269,7 +269,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
             Penny Ante Poker Club
           </p>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '2px' }}>
-            v2.14 (Gmail SMTP + Multi-Player Elimination)
+            v2.15 (Gmail SMTP + Modal Text Colors Fix)
           </p>
         </div>
       </div>
