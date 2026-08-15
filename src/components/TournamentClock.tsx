@@ -47,7 +47,7 @@ const DEFAULT_BLINDS: BlindLevel[] = [
 ];
 
 export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
-  const { tournament, members, eliminatePlayer, updateTournament, onTriggerFinalTableRedraw } = props;
+  const { tournament, members, updateTournament, onTriggerFinalTableRedraw } = props;
   const { state } = useApp();
   const rawBlinds = state.settings.blinds && state.settings.blinds.length > 0 ? state.settings.blinds : DEFAULT_BLINDS;
 
@@ -2272,67 +2272,107 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           bountiesWon={bountiesWon}
           setBountiesWon={setBountiesWon}
           onCancel={() => setEliminatingPlayerId(null)}
-          onConfirm={(bounties) => {
-            const finalBounties = bounties !== undefined ? bounties : bountiesWon;
-            eliminatePlayer(tournament.id, eliminatingPlayerId, finalBounties);
+          onConfirm={(bounties, additional) => {
+            if (!tournament.seating) return;
 
-            // Check table balance
-            if (tournament.seating) {
-              const updatedEntries = tournament.entries.map((e: any) =>
-                e.memberId === eliminatingPlayerId ? { ...e, eliminatedAt: new Date().toISOString() } : e
-              );
-              const simulatedTournament = { ...tournament, entries: updatedEntries };
-              const rec = checkTableBalance(tournament.seating, simulatedTournament, members);
-              if (rec) {
-                // Automatically pause the clock when table balancing or breaking is required
-                if (isRunning || tournament.clockState?.isRunning) {
-                  setIsRunning(false);
-                  updateTournament(tournament.id, {
-                    clockState: {
-                      currentLevelIndex,
-                      timeRemainingSeconds: timeRemaining,
-                      isRunning: false,
-                      lastUpdated: new Date().toISOString()
-                    }
-                  });
+            // Compile the list of all eliminations in order:
+            // if additional is provided and has items, it contains ALL players being eliminated (including primary)
+            // in the exact correct order (shortest stack first).
+            // If not, it's just the primary player.
+            const eliminationList = (additional && additional.length > 0)
+              ? additional
+              : [{ memberId: eliminatingPlayerId, bounties }];
+
+            // Compute the updated entries array sequentially:
+            let updatedEntries = [...tournament.entries];
+            const timestamp = new Date().toISOString();
+            const totalEntries = tournament.entries.filter((e: any) => e.hasBuyIn).length;
+            let currentLogs = tournament.auditLogs ? [...tournament.auditLogs] : [];
+
+            eliminationList.forEach((elim) => {
+              const currentEliminatedCount = updatedEntries.filter((e: any) => e.eliminatedAt).length;
+              const finishPosition = totalEntries - currentEliminatedCount;
+
+              updatedEntries = updatedEntries.map((e: any) => {
+                if (e.memberId === elim.memberId) {
+                  return {
+                    ...e,
+                    eliminatedAt: timestamp,
+                    finishPosition,
+                    bountiesCollected: elim.bounties
+                  };
                 }
-                playTableBalanceAlertSound();
+                return e;
+              });
 
-                if (rec.isFinalTable) {
-                  const finalRedraw = calculateFinalTableRedraw(tournament.seating, simulatedTournament, members);
-                  const updatedSeating = finalRedraw.finalSeating;
-                  let updatedDealers = tournament.dealers ? { ...tournament.dealers } : {};
-                  if (finalRedraw.dealerId) {
-                    updatedDealers = { 'red table': finalRedraw.dealerId };
-                    localStorage.setItem(`patms_dealers_${tournament.id}`, JSON.stringify(updatedDealers));
+              // Log to audit log
+              const m = members.find(member => member.id === elim.memberId);
+              const name = m ? `${m.firstName} ${m.lastName}` : elim.memberId;
+              const performedBy = sessionStorage.getItem('patms_user_email') || 'TD';
+              const logEntry = {
+                id: Math.random().toString(36).substr(2, 9),
+                timestamp: new Date().toISOString(),
+                action: "Bust Out",
+                details: `${name} eliminated at position #${finishPosition} with ${elim.bounties} bounties.`,
+                performedBy
+              };
+              currentLogs = [logEntry, ...currentLogs];
+            });
+
+            // Save the single batched entries and auditLogs to Firestore:
+            updateTournament(tournament.id, { 
+              entries: updatedEntries,
+              auditLogs: currentLogs
+            });
+
+            // Check table balance on the final simulated state:
+            const simulatedTournament = { ...tournament, entries: updatedEntries };
+            const rec = checkTableBalance(tournament.seating, simulatedTournament, members);
+
+            if (rec) {
+              // Automatically pause the clock when table balancing or breaking is required
+              if (isRunning || tournament.clockState?.isRunning) {
+                setIsRunning(false);
+                updateTournament(tournament.id, {
+                  clockState: {
+                    currentLevelIndex,
+                    timeRemainingSeconds: timeRemaining,
+                    isRunning: false,
+                    lastUpdated: new Date().toISOString()
                   }
-                  localStorage.setItem(`patms_seating_${tournament.id}`, JSON.stringify(updatedSeating));
-                  
-                  updateTournament(tournament.id, {
-                    seating: updatedSeating,
-                    dealers: updatedDealers
-                  });
+                });
+              }
+              playTableBalanceAlertSound();
 
-                  // Log to audit log
-                  const logTournamentActionLocal = (action: string, details: string) => {
-                    const logs = tournament.auditLogs || [];
-                    const performedBy = sessionStorage.getItem('patms_user_email') || 'TD';
-                    const newLog = {
+              if (rec.isFinalTable) {
+                const finalRedraw = calculateFinalTableRedraw(tournament.seating, simulatedTournament, members);
+                const updatedSeating = finalRedraw.finalSeating;
+                let updatedDealers = tournament.dealers ? { ...tournament.dealers } : {};
+                if (finalRedraw.dealerId) {
+                  updatedDealers = { 'red table': finalRedraw.dealerId };
+                  localStorage.setItem(`patms_dealers_${tournament.id}`, JSON.stringify(updatedDealers));
+                }
+                localStorage.setItem(`patms_seating_${tournament.id}`, JSON.stringify(updatedSeating));
+                
+                updateTournament(tournament.id, {
+                  seating: updatedSeating,
+                  dealers: updatedDealers,
+                  auditLogs: [
+                    {
                       id: Math.random().toString(36).substr(2, 9),
                       timestamp: new Date().toISOString(),
-                      action,
-                      details,
-                      performedBy
-                    };
-                    updateTournament(tournament.id, { auditLogs: [newLog, ...logs] });
-                  };
-                  logTournamentActionLocal("Final Table Redraw", "Players automatically redrawn to the Final Table with Dealer in Seat #1.");
+                      action: "Final Table Redraw",
+                      details: "Players automatically redrawn to the Final Table with Dealer in Seat #1.",
+                      performedBy: sessionStorage.getItem('patms_user_email') || 'TD'
+                    },
+                    ...currentLogs
+                  ]
+                });
 
-                  onTriggerFinalTableRedraw?.();
-                } else {
-                  setBalanceRecommendation(rec);
-                  setIsBalanceModalOpen(true);
-                }
+                onTriggerFinalTableRedraw?.();
+              } else {
+                setBalanceRecommendation(rec);
+                setIsBalanceModalOpen(true);
               }
             }
 
@@ -2349,6 +2389,22 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
           }}
           isAbsolute={true}
           initialBounties={tournament.entries.find(e => e.memberId === eliminatingPlayerId)?.bountiesCollected || 0}
+          activePlayersList={tournament.entries.filter(e => !e.eliminatedAt)}
+          members={members}
+          primaryPlayerId={eliminatingPlayerId}
+          onPauseClock={() => {
+            if (isRunning || tournament.clockState?.isRunning) {
+              setIsRunning(false);
+              updateTournament(tournament.id, {
+                clockState: {
+                  currentLevelIndex,
+                  timeRemainingSeconds: timeRemaining,
+                  isRunning: false,
+                  lastUpdated: new Date().toISOString()
+                }
+              });
+            }
+          }}
         />
       )}
 
