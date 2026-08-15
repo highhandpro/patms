@@ -880,6 +880,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isBetaTest?: boolean
   ) => {
     const id = `tour-${Date.now()}`;
+    
+    // Auto-register 36 random active players if this is a beta test
+    const entries: TournamentEntry[] = [];
+    if (isBetaTest) {
+      const activeMembers = state.members.filter(m => !m.isDeleted);
+      const shuffled = [...activeMembers].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, Math.min(36, shuffled.length));
+      selected.forEach(m => {
+        entries.push({
+          memberId: m.id,
+          hasBuyIn: false,
+          hasAddon: false,
+          hasDealerAppreciation: false,
+          payoutEarned: 0,
+          bountiesCollected: 0,
+          pointsEarned: 0,
+          createdAt: new Date().toISOString()
+        });
+      });
+    }
+
     const newTour: Tournament = {
       id,
       seasonId: activeSeason?.id || 'unassigned',
@@ -890,7 +911,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addonAmount: addon,
       bountyAmount: bounty,
       dealerAppreciationAmount: dealerApp,
-      entries: [],
+      entries,
       totalPrizePool: 0,
       totalBountyPool: 0,
       totalDealerAppreciation: 0,
