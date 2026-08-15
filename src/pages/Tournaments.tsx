@@ -750,7 +750,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       const candidateSeating: Record<string, string[]> = {};
       const candidateDealers: Record<string, string> = {};
 
-      const dealersWithoutDerekOrTim = shuffledDealers.filter(id => id !== derekId && id !== timId);
+      // Determine who is pre-assigned to Red Table
+      let assignedRedTableDealer = "";
+      if (isDerekPlaying) {
+        assignedRedTableDealer = derekId;
+      } else if (isTimPlaying) {
+        assignedRedTableDealer = timId;
+      }
+
+      // extraDealers contains all other dealers not pre-assigned to Red Table
+      const extraDealers = shuffledDealers.filter(id => id !== assignedRedTableDealer);
       let dealerIdx = 0;
       let nonDealerIdx = 0;
 
@@ -763,15 +772,15 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             dealerId = derekId;
           } else if (isTimPlaying) {
             dealerId = timId;
-          } else if (dealersWithoutDerekOrTim.length > 0 && dealerIdx < dealersWithoutDerekOrTim.length) {
-            dealerId = dealersWithoutDerekOrTim[dealerIdx++];
+          } else if (extraDealers.length > 0 && dealerIdx < extraDealers.length) {
+            dealerId = extraDealers[dealerIdx++];
           }
           if (dealerId) {
             tablePlayers.push(dealerId);
             candidateDealers[tableName] = dealerId;
           }
-        } else if (dealerIdx < dealersWithoutDerekOrTim.length) {
-          dealerId = dealersWithoutDerekOrTim[dealerIdx++];
+        } else if (dealerIdx < extraDealers.length) {
+          dealerId = extraDealers[dealerIdx++];
           tablePlayers.push(dealerId);
           candidateDealers[tableName] = dealerId;
         }
@@ -780,8 +789,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         while (tablePlayers.length + remainingTablePlayers.length < size) {
           if (nonDealerIdx < shuffledNonDealers.length) {
             remainingTablePlayers.push(shuffledNonDealers[nonDealerIdx++]);
-          } else if (dealerIdx < dealersWithoutDerekOrTim.length) {
-            remainingTablePlayers.push(dealersWithoutDerekOrTim[dealerIdx++]);
+          } else if (dealerIdx < extraDealers.length) {
+            remainingTablePlayers.push(extraDealers[dealerIdx++]);
           } else {
             break;
           }
