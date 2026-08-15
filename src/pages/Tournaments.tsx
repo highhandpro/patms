@@ -750,47 +750,54 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       const candidateSeating: Record<string, string[]> = {};
       const candidateDealers: Record<string, string> = {};
 
-      // Determine who is pre-assigned to Red Table
-      let assignedRedTableDealer = "";
-      if (isDerekPlaying) {
-        assignedRedTableDealer = derekId;
-      } else if (isTimPlaying) {
-        assignedRedTableDealer = timId;
-      }
+      // 1. Assign table dealers
+      const assignedDealersSet = new Set<string>();
+      const extraDealers = shuffledDealers.filter(id => id !== derekId && id !== timId);
+      let extraDealerIdx = 0;
 
-      // extraDealers contains all other dealers not pre-assigned to Red Table
-      const extraDealers = shuffledDealers.filter(id => id !== assignedRedTableDealer);
-      let dealerIdx = 0;
-      let nonDealerIdx = 0;
-
-      Object.entries(tableConfigs).forEach(([tableName, size]) => {
-        const tablePlayers: string[] = [];
+      Object.entries(tableConfigs).forEach(([tableName]) => {
         let dealerId = "";
 
         if (tableName === 'red table') {
           if (isDerekPlaying) {
             dealerId = derekId;
-          } else if (isTimPlaying) {
+          } else if (extraDealers.length > 0 && extraDealerIdx < extraDealers.length) {
+            dealerId = extraDealers[extraDealerIdx++];
+          }
+        } else if (tableName === 'blue table') {
+          if (isTimPlaying) {
             dealerId = timId;
-          } else if (extraDealers.length > 0 && dealerIdx < extraDealers.length) {
-            dealerId = extraDealers[dealerIdx++];
+          } else if (extraDealers.length > 0 && extraDealerIdx < extraDealers.length) {
+            dealerId = extraDealers[extraDealerIdx++];
           }
-          if (dealerId) {
-            tablePlayers.push(dealerId);
-            candidateDealers[tableName] = dealerId;
-          }
-        } else if (dealerIdx < extraDealers.length) {
-          dealerId = extraDealers[dealerIdx++];
-          tablePlayers.push(dealerId);
+        } else if (extraDealers.length > 0 && extraDealerIdx < extraDealers.length) {
+          dealerId = extraDealers[extraDealerIdx++];
+        }
+
+        if (dealerId) {
+          assignedDealersSet.add(dealerId);
           candidateDealers[tableName] = dealerId;
+        }
+      });
+
+      // 2. Prepare remaining player pool (non-dealers + unassigned dealers)
+      const unassignedDealers = shuffledDealers.filter(id => !assignedDealersSet.has(id));
+      const playerPool = [...shuffledNonDealers, ...unassignedDealers];
+      let playerPoolIdx = 0;
+
+      // 3. Fill tables with players from the pool
+      Object.entries(tableConfigs).forEach(([tableName, size]) => {
+        const dealerId = candidateDealers[tableName] || "";
+        const tablePlayers: string[] = [];
+        
+        if (dealerId) {
+          tablePlayers.push(dealerId);
         }
 
         const remainingTablePlayers: string[] = [];
         while (tablePlayers.length + remainingTablePlayers.length < size) {
-          if (nonDealerIdx < shuffledNonDealers.length) {
-            remainingTablePlayers.push(shuffledNonDealers[nonDealerIdx++]);
-          } else if (dealerIdx < extraDealers.length) {
-            remainingTablePlayers.push(extraDealers[dealerIdx++]);
+          if (playerPoolIdx < playerPool.length) {
+            remainingTablePlayers.push(playerPool[playerPoolIdx++]);
           } else {
             break;
           }
