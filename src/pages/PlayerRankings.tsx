@@ -79,7 +79,6 @@ export const PlayerRankings: React.FC = () => {
                     <th style={{ textAlign: 'center' }}>Tournaments Played</th>
                     <th style={{ textAlign: 'center' }}>Wins (1st)</th>
                     <th style={{ textAlign: 'center' }}>Top 10s</th>
-                    <th style={{ textAlign: 'center' }}>ITM Rate</th>
                     <th style={{ textAlign: 'center' }}>Bounties</th>
                     <th style={{ textAlign: 'right' }}>Total Earnings</th>
                     <th style={{ textAlign: 'right', color: 'var(--color-gold)' }}>Season Points</th>
@@ -93,7 +92,6 @@ export const PlayerRankings: React.FC = () => {
                 <tbody>
                   {standings.map((player, idx) => {
                     const rank = idx + 1;
-                    const itmRate = player.played > 0 ? Math.round((player.cashes / player.played) * 100) : 0;
                     return (
                       <tr key={player.memberId}>
                         <td style={{ fontWeight: 700, fontSize: '1.05rem' }}>
@@ -141,9 +139,6 @@ export const PlayerRankings: React.FC = () => {
                           {player.wins}
                         </td>
                         <td style={{ textAlign: 'center' }}>{player.top10}</td>
-                        <td style={{ textAlign: 'center', fontWeight: 600, color: itmRate >= 35 ? 'var(--color-emerald)' : 'inherit' }}>
-                          {itmRate}%
-                        </td>
                         <td style={{ textAlign: 'center' }}>{player.bounties}</td>
                         <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--color-emerald)' }}>
                           ${player.earnings}

@@ -111,7 +111,6 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
       "Tournaments Played", 
       "Wins (1st)", 
       "Top 10s", 
-      "ITM Rate", 
       "Bounties", 
       "Total Earnings", 
       "Season Points",
@@ -120,14 +119,12 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
 
     const rows = sortedStandings.map((standing, index) => {
       const rank = index + 1;
-      const itmRate = standing.played > 0 ? Math.round((standing.cashes / standing.played) * 100) : 0;
       return [
         rank,
         standing.name,
         standing.played,
         standing.wins,
         standing.top10,
-        `${itmRate}%`,
         standing.bounties,
         standing.earnings,
         standing.points,
@@ -295,7 +292,6 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                   <th style={{ textAlign: 'center' }}>Tournaments Played</th>
                   <th style={{ textAlign: 'center' }}>Wins (1st)</th>
                   <th style={{ textAlign: 'center' }}>Top 10s</th>
-                  <th style={{ textAlign: 'center' }}>ITM Rate</th>
                   <th style={{ textAlign: 'center' }}>Bounties</th>
                   <th style={{ textAlign: 'right' }}>Total Earnings</th>
                   <th 
@@ -372,9 +368,6 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
                       {player.wins}
                     </td>
                     <td style={{ textAlign: 'center' }}>{player.top10}</td>
-                    <td style={{ textAlign: 'center', fontWeight: 600, color: player.itmRate >= 35 ? 'var(--color-emerald)' : 'inherit' }}>
-                      {player.itmRate}%
-                    </td>
                     <td style={{ textAlign: 'center' }}>{player.bounties}</td>
                     <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--color-emerald)' }}>
                       ${player.earnings}
