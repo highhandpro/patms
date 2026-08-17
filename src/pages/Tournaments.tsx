@@ -723,6 +723,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     const timId = timMember ? timMember.id : '';
     const isTimPlaying = timId && players.includes(timId);
 
+    const ronMember = state.members.find(m => m.firstName?.toLowerCase() === 'ron' && m.lastName?.toLowerCase() === 'hawkins');
+    const ronId = ronMember ? ronMember.id : '';
+    const isRonPlaying = ronId && players.includes(ronId);
+
     let checkedInDealers = players.filter(id => preassignedDealers.includes(id));
     let checkedInNonDealers = players.filter(id => !preassignedDealers.includes(id));
 
@@ -737,6 +741,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         checkedInDealers.push(timId);
       }
       checkedInNonDealers = checkedInNonDealers.filter(id => id !== timId);
+    }
+    if (isRonPlaying) {
+      if (!checkedInDealers.includes(ronId)) {
+        checkedInDealers.push(ronId);
+      }
+      checkedInNonDealers = checkedInNonDealers.filter(id => id !== ronId);
     }
 
     const tableConfigs = getTableConfigurations(players.length);
@@ -796,31 +806,29 @@ export const Tournaments: React.FC<TournamentsProps> = ({
 
       // 1. Assign table dealers
       const assignedDealersSet = new Set<string>();
-      const extraDealers = shuffledDealers.filter(id => id !== derekId && id !== timId);
-      let extraDealerIdx = 0;
+      
+      // Derek Allen always red table if playing
+      if (isDerekPlaying) {
+        candidateDealers['red table'] = derekId;
+        assignedDealersSet.add(derekId);
+      }
+
+      // Remaining senior dealers (Tim, then Ron) in priority order if active
+      const remainingSeniors = [timId, ronId].filter(id => id && players.includes(id) && !assignedDealersSet.has(id));
+      const otherDealers = shuffledDealers.filter(id => id !== derekId && id !== timId && id !== ronId);
+      const dealerPool = [...remainingSeniors, ...otherDealers];
+      let dealerPoolIdx = 0;
 
       Object.entries(tableConfigs).forEach(([tableName]) => {
-        let dealerId = "";
-
-        if (tableName === 'red table') {
-          if (isDerekPlaying) {
-            dealerId = derekId;
-          } else if (extraDealers.length > 0 && extraDealerIdx < extraDealers.length) {
-            dealerId = extraDealers[extraDealerIdx++];
-          }
-        } else if (tableName === 'blue table') {
-          if (isTimPlaying) {
-            dealerId = timId;
-          } else if (extraDealers.length > 0 && extraDealerIdx < extraDealers.length) {
-            dealerId = extraDealers[extraDealerIdx++];
-          }
-        } else if (extraDealers.length > 0 && extraDealerIdx < extraDealers.length) {
-          dealerId = extraDealers[extraDealerIdx++];
+        // Red table already has Derek if he is playing
+        if (tableName === 'red table' && isDerekPlaying) {
+          return;
         }
 
-        if (dealerId) {
-          assignedDealersSet.add(dealerId);
-          candidateDealers[tableName] = dealerId;
+        if (dealerPoolIdx < dealerPool.length) {
+          const dId = dealerPool[dealerPoolIdx++];
+          candidateDealers[tableName] = dId;
+          assignedDealersSet.add(dId);
         }
       });
 
@@ -896,8 +904,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     localStorage.setItem(`patms_dealers_${activeTournament.id}`, JSON.stringify(bestDealers));
 
     let updatedPreassigned = [...preassignedDealers];
+    let preassignedChanged = false;
     if (isDerekPlaying && !updatedPreassigned.includes(derekId)) {
       updatedPreassigned.push(derekId);
+      preassignedChanged = true;
+    }
+    if (isTimPlaying && !updatedPreassigned.includes(timId)) {
+      updatedPreassigned.push(timId);
+      preassignedChanged = true;
+    }
+    if (isRonPlaying && !updatedPreassigned.includes(ronId)) {
+      updatedPreassigned.push(ronId);
+      preassignedChanged = true;
+    }
+    if (preassignedChanged) {
       setPreassignedDealers(updatedPreassigned);
       localStorage.setItem(`patms_preassigned_dealers_${activeTournament.id}`, JSON.stringify(updatedPreassigned));
     }

@@ -45,11 +45,13 @@ export const calculateFinalTableRedraw = (
 
   const preassignedDealers: string[] = activeTournament?.preassignedDealers || [];
 
-  // Find member IDs for Derek Allen and Tim Hufler
+  // Find member IDs for Derek Allen, Tim Hufler, and Ron Hawkins
   const derekMember = members.find(m => m.firstName?.toLowerCase() === 'derek' && m.lastName?.toLowerCase() === 'allen');
   const derekId = derekMember?.id;
   const timMember = members.find(m => m.firstName?.toLowerCase() === 'tim' && m.lastName?.toLowerCase() === 'hufler');
   const timId = timMember?.id;
+  const ronMember = members.find(m => m.firstName?.toLowerCase() === 'ron' && m.lastName?.toLowerCase() === 'hawkins');
+  const ronId = ronMember?.id;
 
   // 1. Pick dealer for Seat 1
   let dealerId = '';
@@ -57,13 +59,15 @@ export const calculateFinalTableRedraw = (
     dealerId = derekId;
   } else if (timId && activeSet.has(timId)) {
     dealerId = timId;
+  } else if (ronId && activeSet.has(ronId)) {
+    dealerId = ronId;
   } else {
-    // 3rd priority: other active preassigned dealer
+    // 4th priority: other active preassigned dealer
     const otherActiveDealers = preassignedDealers.filter((id: string) => activeSet.has(id));
     if (otherActiveDealers.length > 0) {
       dealerId = otherActiveDealers[0];
     } else if (activeIds.length > 0) {
-      // 4th priority: any active player
+      // 5th priority: any active player
       dealerId = activeIds[0];
     }
   }
