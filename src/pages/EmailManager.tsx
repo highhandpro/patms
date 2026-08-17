@@ -895,7 +895,7 @@ export const EmailManager: React.FC = () => {
               >
                 <option value="">-- No specific tournament (Uses generic sample values) --</option>
                 {state.tournaments
-                  .slice()
+                  .filter(t => !t.isTDOnly && !t.isBetaTest && !t.isArchived)
                   .sort((a, b) => b.date.localeCompare(a.date))
                   .map(t => (
                     <option key={t.id} value={t.id}>

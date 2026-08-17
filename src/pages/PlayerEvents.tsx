@@ -17,7 +17,7 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
 
   // Filter for upcoming (active or draft) tournaments (exclude Beta games for players)
   const upcomingTournaments = state.tournaments
-    .filter(t => t.status !== 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isArchived)
+    .filter(t => t.status !== 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isArchived && !t.isTDOnly)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const handleSeeDetails = (id: string) => {

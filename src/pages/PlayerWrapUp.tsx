@@ -21,7 +21,7 @@ export const PlayerWrapUp: React.FC<PlayerWrapUpProps> = ({
 
   // 1. Get the most recently completed tournament (exclude Beta games)
   const completedTournaments = state.tournaments
-    .filter(t => t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isArchived)
+    .filter(t => t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isArchived && !t.isTDOnly)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Newest first
 
   const lastTournament = completedTournaments[0] || null;
@@ -44,7 +44,7 @@ export const PlayerWrapUp: React.FC<PlayerWrapUpProps> = ({
 
   // 3. Get next upcoming tournament (exclude Beta games)
   const upcomingTournaments = state.tournaments
-    .filter(t => t.status !== 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isArchived)
+    .filter(t => t.status !== 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isArchived && !t.isTDOnly)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Closest date first
 
   const nextTournament = upcomingTournaments[0] || null;

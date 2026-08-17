@@ -53,6 +53,7 @@ export interface Tournament {
   status: 'draft' | 'active' | 'completed';
   isArchived?: boolean;
   isBetaTest?: boolean;
+  isTDOnly?: boolean;
   
   // Financial Rules
   buyInAmount: number;

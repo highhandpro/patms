@@ -72,7 +72,8 @@ interface AppContextProps {
     flyerUrl?: string,
     flyerType?: 'pdf' | 'image' | null,
     highHandAmount?: number,
-    isBetaTest?: boolean
+    isBetaTest?: boolean,
+    isTDOnly?: boolean
   ) => string;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
   logTournamentAction: (tournamentId: string, action: string, details: string, performedBy?: string) => void;
@@ -877,7 +878,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     flyerUrl?: string,
     flyerType?: 'pdf' | 'image' | null,
     highHandAmount?: number,
-    isBetaTest?: boolean
+    isBetaTest?: boolean,
+    isTDOnly?: boolean
   ) => {
     const id = `tour-${Date.now()}`;
     
@@ -928,7 +930,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       highHandAmount: highHandAmount || 0,
       flyerUrl: flyerUrl || '',
       flyerType: flyerType || null,
-      isBetaTest: isBetaTest || false
+      isBetaTest: isBetaTest || false,
+      isTDOnly: isTDOnly || false
     };
 
     setDoc(doc(db, 'tournaments', id), newTour);

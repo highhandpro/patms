@@ -322,6 +322,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editUnderConstruction, setEditUnderConstruction] = useState(state.settings?.isUnderConstruction === true);
   const [tourIsBetaTest, setTourIsBetaTest] = useState(false);
   const [editTourIsBetaTest, setEditTourIsBetaTest] = useState(false);
+  const [tourIsTDOnly, setTourIsTDOnly] = useState(false);
+  const [editTourIsTDOnly, setEditTourIsTDOnly] = useState(false);
   const [tourSeatingTargetTime, setTourSeatingTargetTime] = useState('');
 
   useEffect(() => {
@@ -1105,7 +1107,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       tourFlyerUrl,
       tourFlyerType,
       tourHighHand,
-      tourIsBetaTest
+      tourIsBetaTest,
+      tourIsTDOnly
     );
     if (tourSeatingTargetTime) {
       updateTournament(newId, { seatingTargetTime: tourSeatingTargetTime });
@@ -1118,6 +1121,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setTourFlyerUrl('');
     setTourFlyerType(null);
     setTourIsBetaTest(false);
+    setTourIsTDOnly(false);
     setTourSeatingTargetTime('');
   };
 
@@ -1141,6 +1145,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditFlyerUrl(activeTournament.flyerUrl || '');
     setEditFlyerType(activeTournament.flyerType || null);
     setEditTourIsBetaTest(activeTournament.isBetaTest || false);
+    setEditTourIsTDOnly(activeTournament.isTDOnly || false);
     setEditUnderConstruction(state.settings?.isUnderConstruction === true);
     setEditSeatingTargetTime(activeTournament.seatingTargetTime || '');
     setIsEditTourDetailsOpen(true);
@@ -1175,6 +1180,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       flyerUrl: editFlyerUrl,
       flyerType: editFlyerType,
       isBetaTest: editTourIsBetaTest,
+      isTDOnly: editTourIsTDOnly,
       seatingTargetTime: editSeatingTargetTime
     });
     
@@ -1844,6 +1850,40 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </span>
                 </label>
               </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'flex-start',
+                backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginTop: '12px',
+                color: '#ffffff'
+              }}>
+                <input
+                  type="checkbox"
+                  id="tourIsTDOnly"
+                  checked={tourIsTDOnly}
+                  onChange={(e) => setTourIsTDOnly(e.target.checked)}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    marginTop: '3px',
+                    cursor: 'pointer',
+                    accentColor: 'var(--color-gold)'
+                  }}
+                />
+                <label htmlFor="tourIsTDOnly" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🛡️</span> TD Only (Send No Emails)
+                  </span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    When enabled, this tournament is hidden from the public Player Portal and all email notifications are disabled.
+                  </span>
+                </label>
+              </div>
             </div>
 
             {/* Column 3: Payout Structure & Actions */}
@@ -2323,6 +2363,40 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       </span>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         When enabled, email notifications are disabled and the game is classified under BETA GAMES (only visible to admins).
+                      </span>
+                    </label>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'flex-start',
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    border: '1px solid rgba(59, 130, 246, 0.2)',
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    marginTop: '12px',
+                    color: '#ffffff'
+                  }}>
+                    <input
+                      type="checkbox"
+                      id="editTourIsTDOnly"
+                      checked={editTourIsTDOnly}
+                      onChange={(e) => setEditTourIsTDOnly(e.target.checked)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        marginTop: '3px',
+                        cursor: 'pointer',
+                        accentColor: 'var(--color-gold)'
+                      }}
+                    />
+                    <label htmlFor="editTourIsTDOnly" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>🛡️</span> TD Only (Send No Emails)
+                      </span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        When enabled, this tournament is hidden from the public Player Portal and all email notifications are disabled.
                       </span>
                     </label>
                   </div>
@@ -2808,7 +2882,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     setIsEmailAnnouncementModalOpen(true);
                   }}
                   className="btn btn-secondary"
-                  disabled={unregisteredCount === 0}
+                  disabled={unregisteredCount === 0 || activeTournament.isBetaTest || activeTournament.isTDOnly}
                   style={{
                     marginTop: '12px',
                     width: '100%',
@@ -2816,12 +2890,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     padding: '8px 12px',
                     fontSize: '0.85rem',
                     fontWeight: 600,
-                    borderColor: unregisteredCount === 0 ? 'var(--border-subtle)' : 'rgba(16, 185, 129, 0.4)',
-                    color: unregisteredCount === 0 ? 'var(--text-secondary)' : 'var(--color-emerald)',
-                    backgroundColor: unregisteredCount === 0 ? 'transparent' : 'rgba(16, 185, 129, 0.03)'
+                    borderColor: unregisteredCount === 0 || activeTournament.isBetaTest || activeTournament.isTDOnly ? 'var(--border-subtle)' : 'rgba(16, 185, 129, 0.4)',
+                    color: unregisteredCount === 0 || activeTournament.isBetaTest || activeTournament.isTDOnly ? 'var(--text-secondary)' : 'var(--color-emerald)',
+                    backgroundColor: unregisteredCount === 0 || activeTournament.isBetaTest || activeTournament.isTDOnly ? 'transparent' : 'rgba(16, 185, 129, 0.03)'
                   }}
                 >
-                  Email Invitation to Unregistered ({unregisteredCount})
+                  {activeTournament.isBetaTest || activeTournament.isTDOnly ? "Emails Disabled for BETA/TD-Only" : `Email Invitation to Unregistered (${unregisteredCount})`}
                 </button>
               </div>
             </div>

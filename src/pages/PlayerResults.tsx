@@ -8,7 +8,7 @@ export const PlayerResults: React.FC = () => {
   
   // Find completed tournaments (exclude Beta games for players)
   const completedTournaments = state.tournaments
-    .filter(t => t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isArchived)
+    .filter(t => t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isArchived && !t.isTDOnly)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Newest completed first
 
   // Set default selected tournament: tour-310 if exists, otherwise the first completed
