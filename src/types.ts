@@ -70,6 +70,9 @@ export interface Tournament {
   totalDealerAppreciation: number;
   payoutPercentages?: number[]; // Percentages for 1st to 10th place
   hasCustomPayouts?: boolean;    // Whether user manually configured custom percentages
+  payoutMode?: 'percent' | 'dollar';
+  payoutAmounts?: number[];
+  bountyPointValue?: number;
   overridePrizePool?: number;    // Manual prize pool input at the end
   totalAddons?: number;          // Centralized total addons count
   time?: string;
@@ -141,6 +144,7 @@ export interface Settings {
   colorPalette?: string;
   isUnderConstruction?: boolean;
   requireOnlineForAttendancePoints?: boolean;
+  defaultBountyPointValue?: number;
   resendApiKey?: string;
   emailSender?: string;
   emailCorsProxy?: string;

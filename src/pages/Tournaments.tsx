@@ -256,6 +256,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
   const [modalAddons, setModalAddons] = useState(0);
   const [modalPayoutPcts, setModalPayoutPcts] = useState<number[]>([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
+  const [modalPayoutAmounts, setModalPayoutAmounts] = useState<number[]>(Array(10).fill(0));
+  const [payoutMode, setPayoutMode] = useState<'percent' | 'dollar'>('percent');
   const [modalHighHand, setModalHighHand] = useState(0);
   const [modalBubble, setModalBubble] = useState(0);
 
@@ -325,6 +327,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [tourIsTDOnly, setTourIsTDOnly] = useState(false);
   const [editTourIsTDOnly, setEditTourIsTDOnly] = useState(false);
   const [lateRegisteredOnline, setLateRegisteredOnline] = useState(false);
+  const [tourBountyPointValue, setTourBountyPointValue] = useState(state.settings.defaultBountyPointValue || 3);
+  const [editBountyPointValue, setEditBountyPointValue] = useState(3);
   const [tourSeatingTargetTime, setTourSeatingTargetTime] = useState('');
 
   useEffect(() => {
@@ -347,15 +351,49 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   useEffect(() => {
     if (activeTournament) {
       setModalAddons(activeTournament.totalAddons || 0);
+      setPayoutMode(activeTournament.payoutMode || 'percent');
       if (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0) {
         setModalPayoutPcts(activeTournament.payoutPercentages);
       } else {
         setModalPayoutPcts([50, 30, 20, 0, 0, 0, 0, 0, 0, 0]);
       }
+      if (activeTournament.payoutAmounts && activeTournament.payoutAmounts.length > 0) {
+        setModalPayoutAmounts(activeTournament.payoutAmounts);
+      } else {
+        const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
+        const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
+        const rawCalculatedPrizePool = (buyInCount * netBuyIn) + ((activeTournament.totalAddons || 0) * activeTournament.addonAmount);
+        const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - (activeTournament.highHandAmount || 0) - (activeTournament.bubbleAmount || 0));
+        const pcts = activeTournament.payoutPercentages || [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
+        setModalPayoutAmounts(calculateDollarPayouts(calculatedPrizePool, pcts));
+      }
       setModalHighHand(activeTournament.highHandAmount || 0);
       setModalBubble(activeTournament.bubbleAmount || 0);
     }
   }, [activeTournament, isPayoutModalOpen]);
+
+  const handleSwitchPayoutMode = (targetMode: 'percent' | 'dollar') => {
+    if (targetMode === payoutMode) return;
+    if (!activeTournament) return;
+    const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
+    const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
+    const rawCalculatedPrizePool = (buyInCount * netBuyIn) + (modalAddons * activeTournament.addonAmount);
+    const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - modalHighHand - modalBubble);
+
+    if (targetMode === 'dollar') {
+      const dollars = calculateDollarPayouts(calculatedPrizePool, modalPayoutPcts);
+      setModalPayoutAmounts(dollars);
+    } else {
+      if (calculatedPrizePool > 0) {
+        const pcts = modalPayoutAmounts.map(amt => {
+          if (amt <= 0) return 0;
+          return Math.round((amt / calculatedPrizePool) * 1000) / 10;
+        });
+        setModalPayoutPcts(pcts);
+      }
+    }
+    setPayoutMode(targetMode);
+  };
 
   useEffect(() => {
     if (activeTournament) {
@@ -1111,7 +1149,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       tourFlyerType,
       tourHighHand,
       tourIsBetaTest,
-      tourIsTDOnly
+      tourIsTDOnly,
+      tourBountyPointValue
     );
     if (tourSeatingTargetTime) {
       updateTournament(newId, { seatingTargetTime: tourSeatingTargetTime });
@@ -1149,6 +1188,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditFlyerType(activeTournament.flyerType || null);
     setEditTourIsBetaTest(activeTournament.isBetaTest || false);
     setEditTourIsTDOnly(activeTournament.isTDOnly || false);
+    setEditBountyPointValue(activeTournament.bountyPointValue || 3);
     setEditUnderConstruction(state.settings?.isUnderConstruction === true);
     setEditSeatingTargetTime(activeTournament.seatingTargetTime || '');
     setIsEditTourDetailsOpen(true);
@@ -1184,7 +1224,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       flyerType: editFlyerType,
       isBetaTest: editTourIsBetaTest,
       isTDOnly: editTourIsTDOnly,
-      seatingTargetTime: editSeatingTargetTime
+      seatingTargetTime: editSeatingTargetTime,
+      bountyPointValue: editBountyPointValue
     });
     
     setIsEditTourDetailsOpen(false);
@@ -1888,6 +1929,33 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </span>
                 </label>
               </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
+                <span style={{ fontSize: '0.9rem', color: '#ffffff', fontWeight: 600 }}>🎯 Bounty Points Value</span>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}>
+                    <input
+                      type="radio"
+                      name="tour-bounty-points"
+                      value={3}
+                      checked={tourBountyPointValue === 3}
+                      onChange={() => setTourBountyPointValue(3)}
+                      style={{ width: '16px', height: '16px', accentColor: 'var(--color-gold)' }}
+                    />
+                    <span>3 points per bounty</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}>
+                    <input
+                      type="radio"
+                      name="tour-bounty-points"
+                      value={6}
+                      checked={tourBountyPointValue === 6}
+                      onChange={() => setTourBountyPointValue(6)}
+                      style={{ width: '16px', height: '16px', accentColor: 'var(--color-gold)' }}
+                    />
+                    <span>6 points per bounty</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             {/* Column 3: Payout Structure & Actions */}
@@ -2403,6 +2471,34 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         When enabled, this tournament is hidden from the public Player Portal and all email notifications are disabled.
                       </span>
                     </label>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
+                    <span style={{ fontSize: '0.9rem', color: '#ffffff', fontWeight: 600 }}>🎯 Bounty Points Value</span>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}>
+                        <input
+                          type="radio"
+                          name="edit-bounty-points"
+                          value={3}
+                          checked={editBountyPointValue === 3}
+                          onChange={() => setEditBountyPointValue(3)}
+                          style={{ width: '16px', height: '16px', accentColor: 'var(--color-gold)' }}
+                        />
+                        <span>3 points per bounty</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}>
+                        <input
+                          type="radio"
+                          name="edit-bounty-points"
+                          value={6}
+                          checked={editBountyPointValue === 6}
+                          onChange={() => setEditBountyPointValue(6)}
+                          style={{ width: '16px', height: '16px', accentColor: 'var(--color-gold)' }}
+                        />
+                        <span>6 points per bounty</span>
+                      </label>
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '12px' }}>
@@ -4217,7 +4313,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   const playerAttendancePoints = (!requireOnline || isQualifiedForAttendance)
                     ? attendancePoints
                     : 0;
-                  const pointsEarned = (basePositionPoints * multiplier) + (entry.bountiesCollected * 3) + playerAttendancePoints;
+                  const pointsEarned = (basePositionPoints * multiplier) + (entry.bountiesCollected * (activeTournament.bountyPointValue || 3)) + playerAttendancePoints;
                   const moneyReceived = payoutEarned + (entry.bountiesCollected * activeTournament.bountyAmount);
 
                   return (
@@ -5421,9 +5517,16 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               const finalPayoutPcts = [...modalPayoutPcts];
               finalPayoutPcts[8] = 0; // 9th is Bubble
               finalPayoutPcts[9] = 0; // 10th is High Hand
+
+              const finalPayoutAmts = [...modalPayoutAmounts];
+              finalPayoutAmts[8] = 0;
+              finalPayoutAmts[9] = 0;
+
               updateTournament(activeTournament.id, {
                 totalAddons: modalAddons,
                 payoutPercentages: finalPayoutPcts,
+                payoutAmounts: finalPayoutAmts,
+                payoutMode: payoutMode,
                 hasCustomPayouts: true,
                 highHandAmount: modalHighHand,
                 bubbleAmount: modalBubble
@@ -5471,6 +5574,42 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <label style={{ fontWeight: 600, fontSize: '0.9rem', margin: 0 }}>Payout Structure (1st - 10th Place)</label>
+                  <div style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: '6px', overflow: 'hidden', padding: '2px', backgroundColor: 'rgba(0,0,0,0.15)' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchPayoutMode('percent')}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        backgroundColor: payoutMode === 'percent' ? 'var(--color-gold)' : 'transparent',
+                        color: payoutMode === 'percent' ? '#000000' : 'var(--text-secondary)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      % Percent
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchPayoutMode('dollar')}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        backgroundColor: payoutMode === 'dollar' ? 'var(--color-gold)' : 'transparent',
+                        color: payoutMode === 'dollar' ? '#000000' : 'var(--text-secondary)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      $ Dollar
+                    </button>
+                  </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '160px', overflowY: 'auto', paddingRight: '4px' }}>
                   {[1, 6, 2, 7, 3, 8, 4, 9, 5, 10].map(place => {
@@ -5508,33 +5647,68 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         </div>
                       );
                     }
+                    const isPercent = payoutMode === 'percent';
                     return (
                       <div key={place} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '0.8rem', width: '65px', textAlign: 'right' }}>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`}:</span>
+                        {!isPercent && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>$</span>}
                         <input
                           type="number"
                           min={0}
-                          max={100}
+                          max={isPercent ? 100 : 999999}
                           required
-                          value={modalPayoutPcts[place - 1]}
+                          value={isPercent ? modalPayoutPcts[place - 1] : modalPayoutAmounts[place - 1]}
                           onChange={(e) => {
-                            const next = [...modalPayoutPcts];
-                            next[place - 1] = Number(e.target.value);
-                            setModalPayoutPcts(next);
+                            if (isPercent) {
+                              const next = [...modalPayoutPcts];
+                              next[place - 1] = Number(e.target.value);
+                              setModalPayoutPcts(next);
+                            } else {
+                              const next = [...modalPayoutAmounts];
+                              next[place - 1] = Number(e.target.value);
+                              setModalPayoutAmounts(next);
+                            }
                           }}
                           className="form-input"
                           style={{ padding: '4px 8px', fontSize: '0.85rem', flex: 1 }}
                         />
-                        <span style={{ fontSize: '0.8rem' }}>%</span>
+                        {isPercent && <span style={{ fontSize: '0.8rem' }}>%</span>}
                       </div>
                     );
                   })}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'right' }}>
-                  Total: <strong style={{ color: modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0) === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
-                    {modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0)}%
-                  </strong> (should be 100%)
-                </div>
+                {(() => {
+                  const buyInCount = activeTournament.entries.filter(e => e.hasBuyIn).length;
+                  const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
+                  const rawCalculatedPrizePool = (buyInCount * netBuyIn) + (modalAddons * activeTournament.addonAmount);
+                  const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - modalHighHand - modalBubble);
+                  const enteredTotalDollars = modalPayoutAmounts.slice(0, 8).reduce((a,b)=>a+b,0);
+                  const enteredTotalPercent = modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0);
+                  return (
+                    <>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'right' }}>
+                        {payoutMode === 'percent' ? (
+                          <>
+                            Total: <strong style={{ color: enteredTotalPercent === 100 ? 'var(--color-emerald)' : 'var(--text-secondary)' }}>
+                              {enteredTotalPercent}%
+                            </strong> (should be 100%)
+                          </>
+                        ) : (
+                          <>
+                            Total Payouts: <strong style={{ color: enteredTotalDollars === calculatedPrizePool ? 'var(--color-emerald)' : 'var(--color-gold)' }}>
+                              ${enteredTotalDollars.toLocaleString()}
+                            </strong> (Prize Pool: ${calculatedPrizePool.toLocaleString()})
+                          </>
+                        )}
+                      </div>
+                      {payoutMode === 'dollar' && enteredTotalDollars !== calculatedPrizePool && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-gold)', marginTop: '4px', textAlign: 'right', fontWeight: 600 }}>
+                          ⚠️ Warning: Payout total (${enteredTotalDollars.toLocaleString()}) does not match the net prize pool (${calculatedPrizePool.toLocaleString()}).
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Dynamic Live Payout Preview Table */}
@@ -5544,15 +5718,21 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   const netBuyIn = activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount;
                   const rawCalculatedPrizePool = (buyInCount * netBuyIn) + (modalAddons * activeTournament.addonAmount);
                   const calculatedPrizePool = Math.max(0, rawCalculatedPrizePool - modalHighHand - modalBubble);
-                  const dollarAmounts = calculateDollarPayouts(calculatedPrizePool, modalPayoutPcts.slice(0, 8));
-                  const previewRows = modalPayoutPcts.slice(0, 8).map((pct, idx) => {
-                    if (pct <= 0) return null;
+                  const dollarAmounts = payoutMode === 'dollar'
+                    ? modalPayoutAmounts
+                    : calculateDollarPayouts(calculatedPrizePool, modalPayoutPcts.slice(0, 8));
+
+                  const previewRows = (payoutMode === 'dollar' ? modalPayoutAmounts : modalPayoutPcts).slice(0, 8).map((val, idx) => {
+                    if (val <= 0) return null;
                     const place = idx + 1;
                     const amt = dollarAmounts[idx];
+                    const pct = payoutMode === 'dollar'
+                      ? (calculatedPrizePool > 0 ? Math.round((amt / calculatedPrizePool) * 1000) / 10 : 0)
+                      : modalPayoutPcts[idx];
                     return (
                       <div key={place} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         <span>{place === 1 ? '1st' : place === 2 ? '2nd' : place === 3 ? '3rd' : `${place}th`} Place:</span>
-                        <strong style={{ color: 'var(--text-primary)' }}>${amt} ({pct}%)</strong>
+                        <strong style={{ color: 'var(--text-primary)' }}>${amt.toLocaleString()} ({pct}%)</strong>
                       </div>
                     );
                   }).filter(Boolean);
@@ -5588,7 +5768,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0) !== 100}
+                  disabled={payoutMode === 'percent' && modalPayoutPcts.slice(0, 8).reduce((a,b)=>a+b,0) !== 100}
                 >
                   Save Configuration
                 </button>
@@ -6200,6 +6380,34 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
                     </span>
                   </label>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
+                  <span style={{ fontSize: '0.9rem', color: '#ffffff', fontWeight: 600 }}>🎯 Bounty Points Value</span>
+                  <div style={{ display: 'flex', gap: '20px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}>
+                      <input
+                        type="radio"
+                        name="edit-bounty-points-active"
+                        value={3}
+                        checked={editBountyPointValue === 3}
+                        onChange={() => setEditBountyPointValue(3)}
+                        style={{ width: '16px', height: '16px', accentColor: 'var(--color-gold)' }}
+                      />
+                      <span>3 points per bounty</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#ffffff', fontSize: '0.85rem', fontWeight: 600 }}>
+                      <input
+                        type="radio"
+                        name="edit-bounty-points-active"
+                        value={6}
+                        checked={editBountyPointValue === 6}
+                        onChange={() => setEditBountyPointValue(6)}
+                        style={{ width: '16px', height: '16px', accentColor: 'var(--color-gold)' }}
+                      />
+                      <span>6 points per bounty</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 

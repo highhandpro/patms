@@ -860,11 +860,20 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
     ? tournament.payoutPercentages
     : getAutoPayoutPercentages(buyInCount);
 
-  const dollarAmounts = calculateDollarPayouts(prizePoolAfterBubble, pctSource);
+  const dollarAmounts = (tournament.payoutMode === 'dollar' && tournament.payoutAmounts && tournament.payoutAmounts.length > 0)
+    ? tournament.payoutAmounts
+    : calculateDollarPayouts(prizePoolAfterBubble, pctSource);
 
-  const payoutsList = pctSource
-    .map((pct: number, idx: number) => ({ place: idx + 1, pct, amount: dollarAmounts[idx] }))
-    .filter((p: { place: number; pct: number; amount: number }) => p.pct > 0);
+  const payoutsList = (tournament.payoutMode === 'dollar' && tournament.payoutAmounts && tournament.payoutAmounts.length > 0)
+    ? tournament.payoutAmounts
+        .map((amount: number, idx: number) => {
+          const pct = prizePoolAfterBubble > 0 ? Math.round((amount / prizePoolAfterBubble) * 100) : 0;
+          return { place: idx + 1, pct, amount };
+        })
+        .filter((p: { place: number; pct: number; amount: number }) => p.amount > 0)
+    : pctSource
+        .map((pct: number, idx: number) => ({ place: idx + 1, pct, amount: dollarAmounts[idx] }))
+        .filter((p: { place: number; pct: number; amount: number }) => p.pct > 0);
 
   const getPlayerAtPlace = (place: number) => {
     // 1. Check if a player has this finishPosition assigned
@@ -2453,7 +2462,9 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
         const pctList = (tournament.payoutPercentages && tournament.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0)
           ? tournament.payoutPercentages
           : getAutoPayoutPercentages(buyInCount);
-        const payouts = calculateDollarPayouts(calculatedPrizePool, pctList);
+        const payouts = (tournament.payoutMode === 'dollar' && tournament.payoutAmounts && tournament.payoutAmounts.length > 0)
+          ? tournament.payoutAmounts
+          : calculateDollarPayouts(calculatedPrizePool, pctList);
         const placesPaidCount = pctList.filter(pct => pct > 0).length;
         const bubblePosition = placesPaidCount + 1;
 

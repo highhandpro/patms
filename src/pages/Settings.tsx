@@ -282,6 +282,9 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const [requireOnlineForAttendancePoints, setRequireOnlineForAttendancePoints] = useState(
     state.settings.requireOnlineForAttendancePoints !== false
   );
+  const [defaultBountyPointValue, setDefaultBountyPointValue] = useState(
+    state.settings.defaultBountyPointValue || 3
+  );
   
   // Blinds preset states & handlers
   const [selectedPresetName, setSelectedPresetName] = useState('');
@@ -470,7 +473,8 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
       blinds: blindsList,
       colorPalette: colorPalette,
       isUnderConstruction: underConstruction,
-      requireOnlineForAttendancePoints: requireOnlineForAttendancePoints
+      requireOnlineForAttendancePoints: requireOnlineForAttendancePoints,
+      defaultBountyPointValue: defaultBountyPointValue
     };
 
     updateSettings(updated);
@@ -576,6 +580,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
             setMaxPlayers(parsed.settings.maxPlayersPerTable);
             setUnderConstruction(!!parsed.settings.isUnderConstruction);
             setRequireOnlineForAttendancePoints(parsed.settings.requireOnlineForAttendancePoints !== false);
+            setDefaultBountyPointValue(parsed.settings.defaultBountyPointValue || 3);
           }
         } else {
           setImportStatus('error');
@@ -921,6 +926,37 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 400, lineHeight: 1.4 }}>
                       When enabled, players must register online in the Player Portal to qualify for the baseline attendance points. Players registered manually on-site by the TD will receive 0 attendance points.
                     </span>
+                  </label>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', marginTop: '8px' }}>
+                <span style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 600 }}>🎯 Default Bounty Points Value</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 400, lineHeight: 1.4, marginBottom: '8px' }}>
+                  Select how many standings points players earn for each bounty collected by default in new tournaments.
+                </span>
+                <div style={{ display: 'flex', gap: '24px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600 }}>
+                    <input
+                      type="radio"
+                      name="default-bounty-points"
+                      value={3}
+                      checked={defaultBountyPointValue === 3}
+                      onChange={() => setDefaultBountyPointValue(3)}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--color-gold)' }}
+                    />
+                    <span>3 points per bounty</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600 }}>
+                    <input
+                      type="radio"
+                      name="default-bounty-points"
+                      value={6}
+                      checked={defaultBountyPointValue === 6}
+                      onChange={() => setDefaultBountyPointValue(6)}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--color-gold)' }}
+                    />
+                    <span>6 points per bounty</span>
                   </label>
                 </div>
               </div>

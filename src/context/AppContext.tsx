@@ -73,7 +73,8 @@ interface AppContextProps {
     flyerType?: 'pdf' | 'image' | null,
     highHandAmount?: number,
     isBetaTest?: boolean,
-    isTDOnly?: boolean
+    isTDOnly?: boolean,
+    bountyPointValue?: number
   ) => string;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
   logTournamentAction: (tournamentId: string, action: string, details: string, performedBy?: string) => void;
@@ -114,6 +115,7 @@ const DEFAULT_SETTINGS = {
   adminPassword: 'pennyante',
   isUnderConstruction: false,
   requireOnlineForAttendancePoints: true,
+  defaultBountyPointValue: 3,
   resendApiKey: '',
   emailSender: 'Penny Ante Poker Club <onboarding@resend.dev>',
   emailCorsProxy: '',
@@ -880,7 +882,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     flyerType?: 'pdf' | 'image' | null,
     highHandAmount?: number,
     isBetaTest?: boolean,
-    isTDOnly?: boolean
+    isTDOnly?: boolean,
+    bountyPointValue?: number
   ) => {
     const id = `tour-${Date.now()}`;
     
@@ -932,7 +935,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       flyerUrl: flyerUrl || '',
       flyerType: flyerType || null,
       isBetaTest: isBetaTest || false,
-      isTDOnly: isTDOnly || false
+      isTDOnly: isTDOnly || false,
+      bountyPointValue: bountyPointValue || state.settings.defaultBountyPointValue || 3,
+      payoutMode: 'percent',
+      payoutAmounts: Array(10).fill(0)
     };
 
     setDoc(doc(db, 'tournaments', id), newTour);
@@ -1259,8 +1265,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const pctList = (t.payoutPercentages && t.payoutPercentages.reduce((a: number, b: number) => a + b, 0) > 0)
       ? t.payoutPercentages
       : [50, 30, 20, 0, 0, 0, 0, 0, 0, 0];
-    const payouts = pctList.map((pct: number) => Math.round(prizePoolAfterDeductions * (pct / 100)));
-    const placesPaidCount = pctList.filter((pct: number) => pct > 0).length;
+    const payouts = (t.payoutMode === 'dollar' && t.payoutAmounts && t.payoutAmounts.length > 0)
+      ? t.payoutAmounts
+      : pctList.map((pct: number) => Math.round(prizePoolAfterDeductions * (pct / 100)));
+    const placesPaidCount = (t.payoutMode === 'dollar' && t.payoutAmounts && t.payoutAmounts.length > 0)
+      ? t.payoutAmounts.filter((amt: number) => amt > 0).length
+      : pctList.filter((pct: number) => pct > 0).length;
     const bubblePosition = placesPaidCount + 1;
 
     const N = buyInCount;
@@ -1287,7 +1297,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? state.settings.pointsBaseAttendance
         : 0;
 
-      const pointsEarned = (basePositionPoints * multiplier) + (e.bountiesCollected * 3) + attendancePoints;
+      const pointsEarned = (basePositionPoints * multiplier) + (e.bountiesCollected * (t.bountyPointValue || 3)) + attendancePoints;
 
       return {
         ...e,
