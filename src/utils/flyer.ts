@@ -19,6 +19,12 @@ export const getEmbeddableFlyerUrl = (url: string, explicitType?: 'pdf' | 'image
     }
     
     if (id) {
+      if (explicitType === 'image') {
+        return {
+          url: `https://drive.google.com/uc?export=download&id=${id}`,
+          type: 'image'
+        };
+      }
       return {
         url: `https://drive.google.com/file/d/${id}/preview`,
         type: 'iframe'
