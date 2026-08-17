@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { calculateStandings, formatDate } from '../utils/stats';
-import { Plus, Award, Calendar, AlertCircle, X } from 'lucide-react';
+import { Plus, Award, Calendar, AlertCircle, X, FileImage } from 'lucide-react';
+import { SeasonStandingsFlyer } from '../components/SeasonStandingsFlyer';
 
 interface StandingsProps {
   isChiefAdmin?: boolean;
@@ -30,6 +31,7 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
 
   // Drawing Simulator States
   const [isDrawingModalOpen, setIsDrawingModalOpen] = useState(false);
+  const [isFlyerOpen, setIsFlyerOpen] = useState(false);
   const [isDrawingInProgress, setIsDrawingInProgress] = useState(false);
   const [drawingWinner, setDrawingWinner] = useState<{ playerName: string; ticket: any } | null>(null);
   const [currentDisplayPlayer, setCurrentDisplayPlayer] = useState<string>('');
@@ -131,6 +133,19 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => setIsFlyerOpen(true)}
+            disabled={!activeSeason}
+            style={{ 
+              borderColor: 'rgba(251, 191, 36, 0.3)', 
+              color: 'var(--color-gold)',
+              gap: '8px'
+            }}
+          >
+            <FileImage size={18} />
+            <span>Standings Flyer</span>
+          </button>
           {isChiefAdmin && (
             <button className="btn btn-secondary" onClick={() => setIsDrawingModalOpen(true)} style={{ backgroundColor: 'var(--color-emerald)', color: '#052e16' }}>
               <Award size={18} />
@@ -611,6 +626,17 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
             })()}
           </div>
         </div>
+      )}
+
+      {activeSeason && (
+        <SeasonStandingsFlyer
+          isOpen={isFlyerOpen}
+          onClose={() => setIsFlyerOpen(false)}
+          season={activeSeason}
+          standings={standings}
+          members={state.members}
+          tournaments={state.tournaments}
+        />
       )}
 
     </div>
