@@ -1038,7 +1038,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   };
 
   const exportTournamentResultsCSV = (tournament: any) => {
-    const headers = ["Rank", "Player Name", "Player ID", "Buy-in", "Add-on", "ToC Appreciation", "Bounties Collected", "Cash Payout", "Points Earned"];
+    const headers = ["Rank", "Player Name", "Player ID", "RSVP Status", "Buy-in", "Add-on", "ToC Appreciation", "Bounties Collected", "Cash Payout", "Points Earned"];
     const rows = [...tournament.entries]
       .sort((a, b) => (a.finishPosition || 99) - (b.finishPosition || 99))
       .map(entry => {
@@ -1047,6 +1047,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           entry.finishPosition || "",
           name,
           entry.memberId,
+          entry.registeredOnline !== false ? "Online" : "On-site",
           "Yes",
           entry.hasAddon ? "Yes" : "No",
           entry.hasDealerAppreciation ? "Yes" : "No",
