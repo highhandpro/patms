@@ -31,7 +31,7 @@ export interface PlayerBadge {
 export const calculateStandings = (state: DatabaseState, seasonId?: string): PlayerStanding[] => {
   const activeMembers = state.members.filter(m => !m.isDeleted);
   const targetTournaments = state.tournaments.filter(t => 
-    t.status === 'completed' && (!seasonId || t.seasonId === seasonId) && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isTDOnly
+    t.status === 'completed' && (!seasonId || t.seasonId === seasonId) && !t.name.toLowerCase().includes('beta') && !t.isBetaTest
   );
 
   const standingsMap: Record<string, PlayerStanding> = {};
@@ -89,7 +89,7 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
 
   // Calculate career/all-tournament earnings for all entries in standingsMap
   const allCompletedTournaments = state.tournaments.filter(t =>
-    t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isTDOnly
+    t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest
   );
 
   allCompletedTournaments.forEach(t => {
@@ -142,7 +142,7 @@ export interface MemberStats {
 }
 
 export const calculateMemberStats = (state: DatabaseState, memberId: string): MemberStats => {
-  const completedTournaments = state.tournaments.filter(t => t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isTDOnly);
+  const completedTournaments = state.tournaments.filter(t => t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest);
   
   let played = 0;
   let wins = 0;
