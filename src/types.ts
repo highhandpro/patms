@@ -43,6 +43,7 @@ export interface TournamentEntry {
   rebuys?: number;
   createdAt?: string;       // ISO timestamp for waitlist sorting
   isLate?: boolean;
+  registeredOnline?: boolean;
 }
 
 export interface Tournament {
@@ -139,6 +140,7 @@ export interface Settings {
   savedBlinds?: { [name: string]: BlindLevel[] };
   colorPalette?: string;
   isUnderConstruction?: boolean;
+  requireOnlineForAttendancePoints?: boolean;
   resendApiKey?: string;
   emailSender?: string;
   emailCorsProxy?: string;

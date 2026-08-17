@@ -279,6 +279,9 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
   const [maxPlayers, setMaxPlayers] = useState(state.settings.maxPlayersPerTable);
   const colorPalette = state.settings.colorPalette || 'default';
   const [underConstruction, setUnderConstruction] = useState(!!state.settings.isUnderConstruction);
+  const [requireOnlineForAttendancePoints, setRequireOnlineForAttendancePoints] = useState(
+    state.settings.requireOnlineForAttendancePoints !== false
+  );
   
   // Blinds preset states & handlers
   const [selectedPresetName, setSelectedPresetName] = useState('');
@@ -466,7 +469,8 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
       maxPlayersPerTable: maxPlayers,
       blinds: blindsList,
       colorPalette: colorPalette,
-      isUnderConstruction: underConstruction
+      isUnderConstruction: underConstruction,
+      requireOnlineForAttendancePoints: requireOnlineForAttendancePoints
     };
 
     updateSettings(updated);
@@ -571,6 +575,7 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
             setAttendancePoints(parsed.settings.pointsBaseAttendance);
             setMaxPlayers(parsed.settings.maxPlayersPerTable);
             setUnderConstruction(!!parsed.settings.isUnderConstruction);
+            setRequireOnlineForAttendancePoints(parsed.settings.requireOnlineForAttendancePoints !== false);
           }
         } else {
           setImportStatus('error');
@@ -886,20 +891,38 @@ export const Settings: React.FC<SettingsProps> = ({ onChangePassword, isChiefAdm
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '12px', margin: '20px 0', cursor: 'pointer' }}>
-                <input
-                  id="under-construction"
-                  type="checkbox"
-                  checked={underConstruction}
-                  onChange={(e) => setUnderConstruction(e.target.checked)}
-                  style={{ width: '20px', height: '20px', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}
-                />
-                <label htmlFor="under-construction" style={{ cursor: 'pointer', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '4px', margin: 0 }}>
-                  <span style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>🚧 Enable "Under Construction" Mode</span>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 400, lineHeight: 1.4 }}>
-                    When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
-                  </span>
-                </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', margin: '20px 0' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+                  <input
+                    id="under-construction"
+                    type="checkbox"
+                    checked={underConstruction}
+                    onChange={(e) => setUnderConstruction(e.target.checked)}
+                    style={{ width: '20px', height: '20px', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}
+                  />
+                  <label htmlFor="under-construction" style={{ cursor: 'pointer', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '4px', margin: 0 }}>
+                    <span style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>🚧 Enable "Under Construction" Mode</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 400, lineHeight: 1.4 }}>
+                      When enabled, normal players will see an "Under Construction" splash page. Admin access remains active.
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+                  <input
+                    id="require-online-attendance"
+                    type="checkbox"
+                    checked={requireOnlineForAttendancePoints}
+                    onChange={(e) => setRequireOnlineForAttendancePoints(e.target.checked)}
+                    style={{ width: '20px', height: '20px', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}
+                  />
+                  <label htmlFor="require-online-attendance" style={{ cursor: 'pointer', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '4px', margin: 0 }}>
+                    <span style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>🌐 Require Online Registration for Attendance Points</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 400, lineHeight: 1.4 }}>
+                      When enabled, players must register online in the Player Portal to qualify for the baseline attendance points. Players registered manually on-site by the TD will receive 0 attendance points.
+                    </span>
+                  </label>
+                </div>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '12px' }}>

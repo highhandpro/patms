@@ -113,6 +113,7 @@ const DEFAULT_SETTINGS = {
   maxPlayersPerTable: 8,
   adminPassword: 'pennyante',
   isUnderConstruction: false,
+  requireOnlineForAttendancePoints: true,
   resendApiKey: '',
   emailSender: 'Penny Ante Poker Club <onboarding@resend.dev>',
   emailCorsProxy: '',
@@ -987,7 +988,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       payoutEarned: 0,
       bountiesCollected: 0,
       pointsEarned: 0,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      registeredOnline: false
     };
 
     await setDoc(doc(db, 'tournaments', tournamentId), {
@@ -1053,7 +1055,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         payoutEarned: 0,
         bountiesCollected: 0,
         pointsEarned: 0,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        registeredOnline: true
       };
       await setDoc(doc(db, 'tournaments', tournamentId), {
         entries: [...t.entries, newEntry]
@@ -1261,7 +1264,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const bubblePosition = placesPaidCount + 1;
 
     const N = buyInCount;
-    const attendancePoints = state.settings.pointsBaseAttendance;
 
     updatedEntries = updatedEntries.map(e => {
       const pos = e.finishPosition || N;
@@ -1277,6 +1279,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else if (pos >= 2 && pos <= 10) {
         multiplier = 2;
       }
+
+      // Default to true for historical entries (where registeredOnline is undefined)
+      const isQualifiedForAttendance = e.registeredOnline !== false;
+      const requireOnline = state.settings.requireOnlineForAttendancePoints === true;
+      const attendancePoints = (!requireOnline || isQualifiedForAttendance)
+        ? state.settings.pointsBaseAttendance
+        : 0;
+
       const pointsEarned = (basePositionPoints * multiplier) + (e.bountiesCollected * 3) + attendancePoints;
 
       return {

@@ -324,6 +324,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editTourIsBetaTest, setEditTourIsBetaTest] = useState(false);
   const [tourIsTDOnly, setTourIsTDOnly] = useState(false);
   const [editTourIsTDOnly, setEditTourIsTDOnly] = useState(false);
+  const [lateRegisteredOnline, setLateRegisteredOnline] = useState(false);
   const [tourSeatingTargetTime, setTourSeatingTargetTime] = useState('');
 
   useEffect(() => {
@@ -1049,7 +1050,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         payoutEarned: 0,
         bountiesCollected: 0,
         pointsEarned: 0,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        registeredOnline: lateRegisteredOnline
       };
 
       const updatedEntries = [...activeTournament.entries, newEntry];
@@ -1075,6 +1077,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       setSelectedLateMemberId('');
       setSelectedLateTable('');
       setLateSearchQuery('');
+      setLateRegisteredOnline(false);
     });
   };
 
@@ -1385,7 +1388,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               pointsEarned: 0,
               payoutEarned: 0,
               seatingSeatNumber: 0,
-              seatingTableNumber: 0
+              seatingTableNumber: 0,
+              registeredOnline: false
             };
             updatedEntries = [...activeTournament.entries, newEntry];
           }
@@ -3102,6 +3106,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     disabled={isSubAdmin}
                                     title="Mark Player as Late"
                                   />
+                                  <span 
+                                    style={{ 
+                                      opacity: entry.registeredOnline !== false ? 1 : 0.2,
+                                      fontSize: '1rem',
+                                      cursor: 'default',
+                                      marginRight: '4px'
+                                    }}
+                                    title={entry.registeredOnline !== false ? "Registered Online" : "Registered On-site"}
+                                  >
+                                    🌐
+                                  </span>
                                   <span>
                                     {m.firstName} {m.lastName}
                                     {playerHasWon(entry.memberId) && (
@@ -3222,6 +3237,17 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                                     disabled={isSubAdmin}
                                     title="Mark Player as Late"
                                   />
+                                  <span 
+                                    style={{ 
+                                      opacity: entry.registeredOnline !== false ? 1 : 0.2,
+                                      fontSize: '1rem',
+                                      cursor: 'default',
+                                      marginRight: '4px'
+                                    }}
+                                    title={entry.registeredOnline !== false ? "Registered Online" : "Registered On-site"}
+                                  >
+                                    🌐
+                                  </span>
                                   <span>
                                     {m.firstName} {m.lastName}
                                     {playerHasWon(entry.memberId) && (
@@ -3340,12 +3366,35 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                             onDoubleClick={() => toggleCheckedInDealer(entry.memberId)}
                             title="Double-click to toggle Dealer status"
                           >
-                            <span>
-                              {preassignedDealers.includes(entry.memberId) ? '♣️ ' : ''}
-                              {m.firstName} {m.lastName}
-                              {playerHasWon(entry.memberId) && (
-                                <span style={{ marginLeft: '4px' }} title="Tournament Winner">👑</span>
-                              )}
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span 
+                                onClick={async (e) => {
+                                  if (isSubAdmin) return;
+                                  e.stopPropagation();
+                                  const updatedEntries = activeTournament.entries.map(ent =>
+                                    ent.memberId === entry.memberId 
+                                      ? { ...ent, registeredOnline: ent.registeredOnline === false } 
+                                      : ent
+                                  );
+                                  await updateTournament(activeTournament.id, { entries: updatedEntries });
+                                }}
+                                style={{ 
+                                  cursor: isSubAdmin ? 'not-allowed' : 'pointer', 
+                                  opacity: entry.registeredOnline !== false ? 1 : 0.2,
+                                  fontSize: '1rem',
+                                  userSelect: 'none'
+                                }}
+                                title={entry.registeredOnline !== false ? "Registered Online (Qualifies for Attendance Points) - Click to toggle" : "Registered On-site (Does NOT qualify for Attendance Points) - Click to toggle"}
+                              >
+                                🌐
+                              </span>
+                              <span>
+                                {preassignedDealers.includes(entry.memberId) ? '♣️ ' : ''}
+                                {m.firstName} {m.lastName}
+                                {playerHasWon(entry.memberId) && (
+                                  <span style={{ marginLeft: '4px' }} title="Tournament Winner">👑</span>
+                                )}
+                              </span>
                             </span>
                           </td>
                           <td style={{ color: 'var(--text-secondary)' }}>{m.id}</td>
@@ -4163,7 +4212,12 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   } else if (pos >= 2 && pos <= 10) {
                     multiplier = 2;
                   }
-                  const pointsEarned = (basePositionPoints * multiplier) + (entry.bountiesCollected * 3) + attendancePoints;
+                  const isQualifiedForAttendance = entry.registeredOnline !== false;
+                  const requireOnline = state.settings.requireOnlineForAttendancePoints === true;
+                  const playerAttendancePoints = (!requireOnline || isQualifiedForAttendance)
+                    ? attendancePoints
+                    : 0;
+                  const pointsEarned = (basePositionPoints * multiplier) + (entry.bountiesCollected * 3) + playerAttendancePoints;
                   const moneyReceived = payoutEarned + (entry.bountiesCollected * activeTournament.bountyAmount);
 
                   return (
@@ -4687,7 +4741,21 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                           <td style={{ fontWeight: 700 }}>
                             {entry.finishPosition}
                           </td>
-                          <td style={{ fontWeight: 600 }}>{name}</td>
+                          <td style={{ fontWeight: 600 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span 
+                                style={{ 
+                                  opacity: entry.registeredOnline !== false ? 1 : 0.2,
+                                  fontSize: '1rem',
+                                  cursor: 'default'
+                                }}
+                                title={entry.registeredOnline !== false ? "Registered Online" : "Registered On-site"}
+                              >
+                                🌐
+                              </span>
+                              <span>{name}</span>
+                            </div>
+                          </td>
                           <td style={{ textAlign: 'center' }}>✓</td>
                           <td style={{ textAlign: 'center' }}>{entry.hasAddon ? '✓' : '-'}</td>
                           <td style={{ textAlign: 'center' }}>{entry.hasDealerAppreciation ? '✓' : '-'}</td>
@@ -5568,6 +5636,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         getMemberName={getMemberName}
         onCancel={() => setIsLateEntryOpen(false)}
         onSubmit={submitLateEntry}
+        lateRegisteredOnline={lateRegisteredOnline}
+        setLateRegisteredOnline={setLateRegisteredOnline}
       />
 
       {/* Email Announcement/Invitation Modal */}

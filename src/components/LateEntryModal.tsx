@@ -17,6 +17,8 @@ interface LateEntryModalProps {
   getMemberName: (id: string) => string;
   onCancel: () => void;
   onSubmit: () => void;
+  lateRegisteredOnline: boolean;
+  setLateRegisteredOnline: (b: boolean) => void;
 }
 
 export const LateEntryModal: React.FC<LateEntryModalProps> = ({
@@ -34,7 +36,9 @@ export const LateEntryModal: React.FC<LateEntryModalProps> = ({
   setShowLateDropdown,
   getMemberName,
   onCancel,
-  onSubmit
+  onSubmit,
+  lateRegisteredOnline,
+  setLateRegisteredOnline
 }) => {
   if (!isOpen || !activeTournament) return null;
 
@@ -184,6 +188,20 @@ export const LateEntryModal: React.FC<LateEntryModalProps> = ({
               </option>
             )}
           </select>
+        </div>
+
+        {/* Online Registration Checkbox */}
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '4px', cursor: 'pointer' }} onClick={() => setLateRegisteredOnline(!lateRegisteredOnline)}>
+          <input
+            type="checkbox"
+            checked={lateRegisteredOnline}
+            onChange={(e) => setLateRegisteredOnline(e.target.checked)}
+            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--color-gold)' }}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+            🌐 Registered Online (Qualifies for Attendance Points)
+          </span>
         </div>
 
         {/* Actions */}
