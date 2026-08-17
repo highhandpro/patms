@@ -19,8 +19,6 @@ import { PlayerClubs } from './pages/PlayerClubs';
 import { PlayerProfile } from './pages/PlayerProfile';
 import { PlayerLanding } from './pages/PlayerLanding';
 import { PlayerUpdateInfo } from './pages/PlayerUpdateInfo';
-import { PlayerSeatingChecker } from './pages/PlayerSeatingChecker';
-
 import { useApp } from './context/AppContext';
 import type { Member } from './types';
 import { auth } from './firebase';
@@ -54,9 +52,7 @@ function App() {
     if (path === '/update-info' || hash === '#/update-info' || hash === '#update-info') {
       return 'update-info';
     }
-    if (path === '/seating' || hash === '#/seating' || hash === '#seating') {
-      return 'seating';
-    }
+
     return 'events';
   });
 
@@ -213,8 +209,7 @@ function App() {
       const hash = window.location.hash;
       if (path === '/update-info' || hash === '#/update-info' || hash === '#update-info') {
         setActivePlayerTab('update-info');
-      } else if (path === '/seating' || hash === '#/seating' || hash === '#seating') {
-        setActivePlayerTab('seating');
+
       }
     };
     window.addEventListener('popstate', handleLocationChange);
@@ -234,8 +229,7 @@ function App() {
     }
     if (activePlayerTab === 'update-info') {
       link.setAttribute('href', 'https://www.pennyantepoker.com/update-info');
-    } else if (activePlayerTab === 'seating') {
-      link.setAttribute('href', 'https://www.pennyantepoker.com/seating');
+
     } else {
       link.setAttribute('href', 'https://www.pennyantepoker.com/');
     }
@@ -916,9 +910,7 @@ function App() {
     if (activePlayerTab === 'update-info') {
       return <PlayerUpdateInfo setActiveTab={setActivePlayerTab} />;
     }
-    if (activePlayerTab === 'seating') {
-      return <PlayerSeatingChecker />;
-    }
+
 
     if (!loggedInMemberId) {
       return (
@@ -928,7 +920,6 @@ function App() {
             setLoginError(null);
             setIsLoginModalOpen(true);
           }} 
-          onOpenSeating={() => setActivePlayerTab('seating')}
           setPortalMode={handleSwitchPortalMode} 
         />
       );

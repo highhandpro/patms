@@ -2,11 +2,10 @@ import React from 'react';
 
 interface PlayerLandingProps {
   onOpenLogin: () => void;
-  onOpenSeating: () => void;
   setPortalMode: (mode: 'player' | 'admin') => void;
 }
 
-export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, onOpenSeating, setPortalMode }) => {
+export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, setPortalMode }) => {
   return (
     <div 
       className="animate-fade-in"
@@ -132,26 +131,7 @@ export const PlayerLanding: React.FC<PlayerLandingProps> = ({ onOpenLogin, onOpe
             Login & Register
           </button>
 
-          <button 
-            onClick={onOpenSeating}
-            className="btn btn-secondary"
-            style={{
-              width: '100%',
-              padding: '12px 24px',
-              fontSize: '0.95rem',
-              fontWeight: 700,
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              border: '1.5px solid rgba(16, 185, 129, 0.35)',
-              color: 'var(--color-emerald)'
-            }}
-          >
-            🔍 Find My Seat
-          </button>
+
           
           <button 
             onClick={() => setPortalMode('admin')}

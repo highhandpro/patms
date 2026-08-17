@@ -118,13 +118,7 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
               >
                 My Profile
               </button>
-              <button 
-                className={`nav-link ${activeTab === 'seating' ? 'active' : ''}`}
-                onClick={() => handleTabClick('seating')}
-                style={{ color: 'var(--color-gold)', fontWeight: 700 }}
-              >
-                🔍 Seating
-              </button>
+
             </>
           ) : (
             <>
@@ -136,13 +130,7 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
               >
                 Home
               </button>
-              <button 
-                className={`nav-link ${activeTab === 'seating' ? 'active' : ''}`}
-                onClick={() => handleTabClick('seating')}
-                style={{ color: 'var(--color-emerald)', fontWeight: 700 }}
-              >
-                🔍 Find My Seat
-              </button>
+
             </>
           )}
         </nav>
