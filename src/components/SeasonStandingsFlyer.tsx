@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Download, Copy, Check, FileImage, X } from 'lucide-react';
 import type { Season, Member, Tournament } from '../types';
-import { formatDate } from '../utils/stats';
 import type { PlayerStanding } from '../utils/stats';
 
 interface SeasonStandingsFlyerProps {
@@ -149,13 +148,7 @@ export const SeasonStandingsFlyer: React.FC<SeasonStandingsFlyerProps> = ({
     ctx.textAlign = 'center';
     ctx.fillStyle = '#fbbf24';
     ctx.font = '900 36px "Outfit", "Segoe UI", sans-serif';
-    ctx.fillText(`${season.name.toUpperCase()} LEADERBOARD`, 540, 245);
-    
-    // Subtitle
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '700 15px "Outfit", "Segoe UI", sans-serif';
-    const dateStr = `DURATION: ${formatDate(season.startDate).toUpperCase()} TO ${formatDate(season.endDate).toUpperCase()}`;
-    ctx.fillText(dateStr, 540, 280);
+    ctx.fillText(`${season.name.toUpperCase()} LEADERBOARD`, 540, 260);
     ctx.restore();
 
     // 5. Calculate Stats
