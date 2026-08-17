@@ -4196,8 +4196,31 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                               }}
                             >
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden' }}>
-                                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
                                   <span style={{ color: 'var(--color-danger)', marginRight: '6px' }}>{getOrdinal(place)}:</span>
+                                  <span 
+                                    onClick={async (e) => {
+                                      if (isSubAdmin) return;
+                                      e.stopPropagation();
+                                      const updatedEntries = activeTournament.entries.map(ent =>
+                                        ent.memberId === entry.memberId 
+                                          ? { ...ent, registeredOnline: ent.registeredOnline === false } 
+                                          : ent
+                                      );
+                                      await updateTournament(activeTournament.id, { entries: updatedEntries });
+                                    }}
+                                    style={{ 
+                                      cursor: isSubAdmin ? 'not-allowed' : 'pointer', 
+                                      opacity: entry.registeredOnline !== false ? 1 : 0.2,
+                                      fontSize: '0.95rem',
+                                      marginRight: '6px',
+                                      userSelect: 'none',
+                                      display: 'inline-block'
+                                    }}
+                                    title={entry.registeredOnline !== false ? "Registered Online (Qualifies for Attendance Points) - Click to toggle" : "Registered On-site (Does NOT qualify for Attendance Points) - Click to toggle"}
+                                  >
+                                    🌐
+                                  </span>
                                   {name}
                                 </span>
                                 
