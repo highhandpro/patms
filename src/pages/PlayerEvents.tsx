@@ -130,17 +130,30 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
                         <img 
                           src={flyerInfo.url} 
                           alt={`${tournament.name} Flyer`} 
-                          style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            display: 'block', 
+                            objectFit: 'contain',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0
+                          }}
                         />
                       ) : (
                         <iframe 
                           src={flyerInfo.url} 
                           width="100%" 
-                          height="420px" 
+                          height="100%" 
                           style={{
                             borderRadius: '12px',
                             border: 'none',
-                            display: 'block'
+                            display: 'block',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%'
                           }}
                           allow="autoplay"
                         />
