@@ -61,17 +61,28 @@ export const GameResultsFacebook: React.FC<GameResultsFacebookProps> = ({ tourna
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set high-resolution dimensions (1080x1080)
+    // Filter and sort entries first to get player count
+    const sortedEntries = [...tournament.entries]
+      .filter(e => e.finishPosition !== undefined && e.finishPosition > 0)
+      .sort((a, b) => (a.finishPosition || 99) - (b.finishPosition || 99));
+
+    const totalPlayersCount = sortedEntries.length;
+    const rowsCount = Math.max(8, Math.ceil(totalPlayersCount / 3));
+    const rowHeight = 42;
+    const startY = 625;
+    const computedHeight = startY + (rowsCount * rowHeight) + 40;
+
+    // Set high-resolution dimensions (1080xcomputedHeight)
     canvas.width = 1080;
-    canvas.height = 1080;
+    canvas.height = computedHeight;
 
     // 1. Draw Background
     // Radial Gradient
-    const gradient = ctx.createRadialGradient(540, 540, 100, 540, 540, 700);
+    const gradient = ctx.createRadialGradient(540, computedHeight / 2, 100, 540, computedHeight / 2, Math.max(700, computedHeight * 0.7));
     gradient.addColorStop(0, '#1b4332'); // deep green felt center
     gradient.addColorStop(1, '#081c15'); // extremely dark green edges
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 1080, 1080);
+    ctx.fillRect(0, 0, 1080, computedHeight);
 
     // Felt texture pattern
     if (bgImageRef.current) {
@@ -82,7 +93,7 @@ export const GameResultsFacebook: React.FC<GameResultsFacebookProps> = ({ tourna
       const pattern = ctx.createPattern(bgImageRef.current, 'repeat');
       if (pattern) {
         ctx.fillStyle = pattern;
-        ctx.fillRect(0, 0, 1080, 1080);
+        ctx.fillRect(0, 0, 1080, computedHeight);
       }
       ctx.restore();
     }
@@ -92,12 +103,12 @@ export const GameResultsFacebook: React.FC<GameResultsFacebookProps> = ({ tourna
     // Outer border
     ctx.strokeStyle = '#fbbf24';
     ctx.lineWidth = 4;
-    ctx.strokeRect(24, 24, 1080 - 48, 1080 - 48);
+    ctx.strokeRect(24, 24, 1080 - 48, computedHeight - 48);
 
     // Inner thin border
     ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
     ctx.lineWidth = 1.5;
-    ctx.strokeRect(32, 32, 1080 - 64, 1080 - 64);
+    ctx.strokeRect(32, 32, 1080 - 64, computedHeight - 64);
     ctx.restore();
 
     // 3. Draw Header (Logo & Brand Text)
@@ -209,21 +220,14 @@ export const GameResultsFacebook: React.FC<GameResultsFacebookProps> = ({ tourna
     ctx.fillText('FINAL STANDINGS', 540, 595);
     ctx.restore();
 
-    // 8. Standings Grid (3 columns x 8 rows)
-    const sortedEntries = [...tournament.entries]
-      .filter(e => e.finishPosition !== undefined && e.finishPosition > 0)
-      .sort((a, b) => (a.finishPosition || 99) - (b.finishPosition || 99))
-      .slice(0, 24); // top 24 players
-
+    // 8. Standings Grid (3 columns x rowsCount rows)
     ctx.save();
     const colWidth = 270;
-    const rowHeight = 42;
     const colGap = 25;
-    const startY = 625;
 
     sortedEntries.forEach((entry, index) => {
-      const colIdx = Math.floor(index / 8);
-      const rowIdx = index % 8;
+      const colIdx = Math.floor(index / rowsCount);
+      const rowIdx = index % rowsCount;
 
       const x = 540 + (colIdx - 1) * (colWidth + colGap) - colWidth / 2;
       const y = startY + rowIdx * rowHeight;
@@ -394,8 +398,7 @@ export const GameResultsFacebook: React.FC<GameResultsFacebookProps> = ({ tourna
           style={{ 
             width: '100%', 
             height: 'auto', 
-            display: 'block',
-            aspectRatio: '1/1'
+            display: 'block'
           }} 
         />
       </div>
