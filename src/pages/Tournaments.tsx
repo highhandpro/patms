@@ -4246,7 +4246,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
           ? activeTournament.payoutPercentages
           : getAutoPayoutPercentages(buyInCount);
-        const payouts = calculateDollarPayouts(payoutPrizePool, pctList);
+        const payouts = (activeTournament.payoutMode === 'dollar' && activeTournament.payoutAmounts && activeTournament.payoutAmounts.length > 0)
+          ? activeTournament.payoutAmounts
+          : calculateDollarPayouts(payoutPrizePool, pctList);
 
         // Generate all positions from 1 to N
         const allPositions = Array.from({ length: N }, (_, idx) => {
@@ -4584,7 +4586,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
                       ? activeTournament.payoutPercentages
                       : getAutoPayoutPercentages(buyInCount);
-                    const payouts = calculateDollarPayouts(calculatedPrizePool, pctList);
+                    const payouts = (activeTournament.payoutMode === 'dollar' && activeTournament.payoutAmounts && activeTournament.payoutAmounts.length > 0)
+                      ? activeTournament.payoutAmounts
+                      : calculateDollarPayouts(calculatedPrizePool, pctList);
 
                     const winners = activeTournament.entries
                       .map(e => {
@@ -4735,7 +4739,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
                         ? activeTournament.payoutPercentages
                         : getAutoPayoutPercentages(activeTournament.entries.filter(e => e.hasBuyIn).length);
-                      const previewDollarPayouts = calculateDollarPayouts(finalPool, pctList);
+                      const previewDollarPayouts = (activeTournament.payoutMode === 'dollar' && activeTournament.payoutAmounts && activeTournament.payoutAmounts.length > 0)
+                        ? activeTournament.payoutAmounts
+                        : calculateDollarPayouts(finalPool, pctList);
                       
                       const activeAndElims = [...activeTournament.entries].sort((a,b) => {
                         const aPos = a.eliminatedAt ? (a.finishPosition || 999) : 1;
@@ -4743,8 +4749,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                         return aPos - bPos;
                       });
 
-                      const previewRows = pctList.map((pct, idx) => {
-                        if (pct <= 0) return null;
+                      const payoutSource = (activeTournament.payoutMode === 'dollar' && activeTournament.payoutAmounts && activeTournament.payoutAmounts.length > 0)
+                        ? activeTournament.payoutAmounts
+                        : pctList;
+
+                      const previewRows = payoutSource.map((val, idx) => {
+                        const isPercent = activeTournament.payoutMode !== 'dollar';
+                        const pct = isPercent ? val : (finalPool > 0 ? Math.round((previewDollarPayouts[idx] / finalPool) * 1000) / 10 : 0);
+                        if (val <= 0) return null;
                         const place = idx + 1;
                         const amt = previewDollarPayouts[idx];
                         const entry = activeAndElims[idx];
@@ -5218,11 +5230,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
         const pctList = (activeTournament.payoutPercentages && activeTournament.payoutPercentages.reduce((a,b)=>a+b, 0) > 0)
           ? activeTournament.payoutPercentages
           : getAutoPayoutPercentages(buyInCount);
-        const dollarPayouts = calculateDollarPayouts(currentPrizePool, pctList);
+        const dollarPayouts = (activeTournament.payoutMode === 'dollar' && activeTournament.payoutAmounts && activeTournament.payoutAmounts.length > 0)
+          ? activeTournament.payoutAmounts
+          : calculateDollarPayouts(currentPrizePool, pctList);
 
-        const payouts = pctList
-          .map((pct, idx) => ({ place: idx + 1, pct, amount: dollarPayouts[idx] }))
-          .filter(p => p.pct > 0);
+        const payouts = (activeTournament.payoutMode === 'dollar' && activeTournament.payoutAmounts && activeTournament.payoutAmounts.length > 0)
+          ? activeTournament.payoutAmounts
+              .map((amount, idx) => {
+                const pct = currentPrizePool > 0 ? Math.round((amount / currentPrizePool) * 1000) / 10 : 0;
+                return { place: idx + 1, pct, amount };
+              })
+              .filter(p => p.amount > 0)
+          : pctList
+              .map((pct, idx) => ({ place: idx + 1, pct, amount: dollarPayouts[idx] }))
+              .filter(p => p.pct > 0);
 
         return (
           <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}>
