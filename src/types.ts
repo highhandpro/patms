@@ -24,7 +24,7 @@ export interface Member {
 export interface DrawingTicket {
   id: string;          // Unique ID
   seasonId: string;    // Season associated with
-  reason: 'setup' | 'teardown' | 'dealing' | 'other';
+  reason: 'setup' | 'teardown' | 'dealing' | 'it-services' | 'other';
   note?: string;
   createdAt: string;   // ISO Date string
 }

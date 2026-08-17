@@ -1438,10 +1438,12 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                                     borderRadius: '4px',
                                     backgroundColor: t.reason === 'setup' ? 'rgba(59,130,246,0.15)' : 
                                                      t.reason === 'teardown' ? 'rgba(139,92,246,0.15)' : 
-                                                     t.reason === 'dealing' ? 'rgba(16,185,129,0.15)' : 'rgba(107,114,128,0.15)',
+                                                     t.reason === 'dealing' ? 'rgba(16,185,129,0.15)' : 
+                                                     t.reason === 'it-services' ? 'rgba(6,182,212,0.15)' : 'rgba(107,114,128,0.15)',
                                     color: t.reason === 'setup' ? '#60a5fa' : 
                                            t.reason === 'teardown' ? '#a78bfa' : 
-                                           t.reason === 'dealing' ? '#34d399' : '#9ca3af'
+                                           t.reason === 'dealing' ? '#34d399' : 
+                                           t.reason === 'it-services' ? '#22d3ee' : '#9ca3af'
                                   }}>
                                     {t.reason}
                                   </span>
@@ -1489,6 +1491,7 @@ export const Members: React.FC<MembersProps> = ({ isAddMemberOpen, setIsAddMembe
                             <option value="setup">Setup</option>
                             <option value="teardown">Teardown</option>
                             <option value="dealing">Dealing</option>
+                            <option value="it-services">IT Services</option>
                             <option value="other">Other / Bonus</option>
                           </select>
                           <input 
