@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { calculateStandings, formatDate } from '../utils/stats';
-import { Plus, Award, Calendar, AlertCircle, X, FileImage } from 'lucide-react';
+import { Plus, Award, Calendar, AlertCircle, X, FileImage, FileSpreadsheet } from 'lucide-react';
 import { SeasonStandingsFlyer } from '../components/SeasonStandingsFlyer';
 
 interface StandingsProps {
@@ -101,6 +101,55 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
         .reduce((sum, t) => sum + t.totalDealerAppreciation, 0)
     : 0;
 
+  const exportStandingsToCSV = () => {
+    if (!activeSeason || standings.length === 0) return;
+
+    const gameHeaders = completedTournaments.map(t => abbreviateTournamentName(t.name));
+    const headers = [
+      "Rank", 
+      "Player Name", 
+      "Tournaments Played", 
+      "Wins (1st)", 
+      "Top 10s", 
+      "ITM Rate", 
+      "Bounties", 
+      "Total Earnings", 
+      "Season Points",
+      ...gameHeaders
+    ];
+
+    const rows = sortedStandings.map((standing, index) => {
+      const rank = index + 1;
+      const itmRate = standing.played > 0 ? Math.round((standing.cashes / standing.played) * 100) : 0;
+      return [
+        rank,
+        standing.name,
+        standing.played,
+        standing.wins,
+        standing.top10,
+        `${itmRate}%`,
+        standing.bounties,
+        standing.earnings,
+        standing.points,
+        ...completedTournaments.map(t => standing.gamePoints[t.id] !== undefined ? standing.gamePoints[t.id] : 0)
+      ];
+    });
+
+    const csvContent = [
+      headers.join(","), 
+      ...rows.map(r => r.map(val => `"${val}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `standings_${activeSeason.name.toLowerCase().replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleAddSeason = (e: React.FormEvent) => {
     e.preventDefault();
     if (!seasonName.trim() || !startDate || !endDate) return;
@@ -145,6 +194,19 @@ export const Standings: React.FC<StandingsProps> = ({ isChiefAdmin }) => {
           >
             <FileImage size={18} />
             <span>Standings Flyer</span>
+          </button>
+          <button 
+            className="btn btn-secondary" 
+            onClick={exportStandingsToCSV}
+            disabled={!activeSeason || standings.length === 0}
+            style={{ 
+              borderColor: 'rgba(16, 185, 129, 0.3)', 
+              color: 'var(--color-emerald)',
+              gap: '8px'
+            }}
+          >
+            <FileSpreadsheet size={18} />
+            <span>Export to Excel</span>
           </button>
           {isChiefAdmin && (
             <button className="btn btn-secondary" onClick={() => setIsDrawingModalOpen(true)} style={{ backgroundColor: 'var(--color-emerald)', color: '#052e16' }}>
