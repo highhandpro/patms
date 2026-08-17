@@ -82,9 +82,22 @@ export const calculateStandings = (state: DatabaseState, seasonId?: string): Pla
       if (entry.finishPosition === 1) standing.wins += 1;
       if (entry.finishPosition && entry.finishPosition <= 10) standing.top10 += 1;
       if (entry.payoutEarned > 0) standing.cashes += 1;
-      standing.earnings += entry.payoutEarned + (entry.bountiesCollected * t.bountyAmount);
       standing.bounties += entry.bountiesCollected;
       standing.gamePoints[t.id] = entry.pointsEarned;
+    });
+  });
+
+  // Calculate career/all-tournament earnings for all entries in standingsMap
+  const allCompletedTournaments = state.tournaments.filter(t =>
+    t.status === 'completed' && !t.name.toLowerCase().includes('beta') && !t.isBetaTest && !t.isTDOnly
+  );
+
+  allCompletedTournaments.forEach(t => {
+    t.entries.forEach(entry => {
+      const standing = standingsMap[entry.memberId];
+      if (standing) {
+        standing.earnings += (entry.payoutEarned || 0) + ((entry.bountiesCollected || 0) * (t.bountyAmount || 0));
+      }
     });
   });
 
