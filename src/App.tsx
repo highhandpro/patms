@@ -930,8 +930,12 @@ function App() {
       case 'events':
         return (
           <PlayerEvents 
-            setActiveTab={setActivePlayerTab} 
-            setSelectedTournamentId={setSelectedTournamentId} 
+            loggedInMemberId={loggedInMemberId}
+            onOpenLogin={() => {
+              setIsGuestMode(false);
+              setLoginError(null);
+              setIsLoginModalOpen(true);
+            }}
           />
         );
       case 'event-details':
@@ -958,7 +962,16 @@ function App() {
           />
         );
       default:
-        return <PlayerEvents setActiveTab={setActivePlayerTab} setSelectedTournamentId={setSelectedTournamentId} />;
+        return (
+          <PlayerEvents 
+            loggedInMemberId={loggedInMemberId}
+            onOpenLogin={() => {
+              setIsGuestMode(false);
+              setLoginError(null);
+              setIsLoginModalOpen(true);
+            }}
+          />
+        );
     }
   };
 
