@@ -1188,21 +1188,7 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             textAlign: 'center',
             minHeight: 0
           }}>
-            {tournament.seatingTargetTime && (!tournament.seating || Object.keys(tournament.seating).length === 0) && (
-              <div style={{
-                backgroundColor: 'rgba(242, 193, 102, 0.1)',
-                border: '1.5px solid var(--color-gold)',
-                borderRadius: '8px',
-                padding: '10px 16px',
-                marginBottom: '10px',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '1rem',
-                textAlign: 'center'
-              }}>
-                📢 Seating Draw Target Time: {new Date(tournament.seatingTargetTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} (Auto-Lock & Draw occurs 1 minute past target)
-              </div>
-            )}
+
             {/* Big countdown timer in custom heavy Outfit font */}
             <div 
               onClick={handleTogglePlay}
