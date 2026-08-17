@@ -328,6 +328,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editTourIsTDOnly, setEditTourIsTDOnly] = useState(false);
   const [lateRegisteredOnline, setLateRegisteredOnline] = useState(false);
   const [tourBountyPointValue, setTourBountyPointValue] = useState(state.settings.defaultBountyPointValue || 3);
+  const [tourSeasonId, setTourSeasonId] = useState('');
+  const [editTourSeasonId, setEditTourSeasonId] = useState('');
   const [editBountyPointValue, setEditBountyPointValue] = useState(3);
   const [tourSeatingTargetTime, setTourSeatingTargetTime] = useState('');
 
@@ -338,6 +340,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       setBounty(state.settings.defaultBounty || 20);
       setDealerApp(5);
       setTourUnderConstruction(state.settings.isUnderConstruction === true);
+      setTourSeasonId(state.seasons.find(s => s.isActive)?.id || 'unassigned');
     }
   }, [state.settings, isCreateTourOpen]);
 
@@ -1150,7 +1153,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       tourHighHand,
       tourIsBetaTest,
       tourIsTDOnly,
-      tourBountyPointValue
+      tourBountyPointValue,
+      tourSeasonId
     );
     if (tourSeatingTargetTime) {
       updateTournament(newId, { seatingTargetTime: tourSeatingTargetTime });
@@ -1189,6 +1193,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditTourIsBetaTest(activeTournament.isBetaTest || false);
     setEditTourIsTDOnly(activeTournament.isTDOnly || false);
     setEditBountyPointValue(activeTournament.bountyPointValue || 3);
+    setEditTourSeasonId(activeTournament.seasonId || 'unassigned');
     setEditUnderConstruction(state.settings?.isUnderConstruction === true);
     setEditSeatingTargetTime(activeTournament.seatingTargetTime || '');
     setIsEditTourDetailsOpen(true);
@@ -1225,7 +1230,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       isBetaTest: editTourIsBetaTest,
       isTDOnly: editTourIsTDOnly,
       seatingTargetTime: editSeatingTargetTime,
-      bountyPointValue: editBountyPointValue
+      bountyPointValue: editBountyPointValue,
+      seasonId: editTourSeasonId
     });
     
     setIsEditTourDetailsOpen(false);
@@ -1595,6 +1601,23 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   className="form-input"
                   style={{ padding: '10px 14px' }}
                 />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontWeight: 600 }}>Season</label>
+                <select
+                  value={tourSeasonId}
+                  onChange={(e) => setTourSeasonId(e.target.value)}
+                  className="form-input"
+                  style={{ padding: '10px 14px', cursor: 'pointer' }}
+                >
+                  <option value="unassigned">Unassigned</option>
+                  {state.seasons.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} {s.isActive ? '(Active)' : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
@@ -2260,6 +2283,23 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       className="form-input"
                       style={{ padding: '8px 12px' }}
                     />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>Season</label>
+                    <select
+                      value={editTourSeasonId}
+                      onChange={(e) => setEditTourSeasonId(e.target.value)}
+                      className="form-input"
+                      style={{ padding: '8px 12px', cursor: 'pointer' }}
+                    >
+                      <option value="unassigned">Unassigned</option>
+                      {state.seasons.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} {s.isActive ? '(Active)' : ''}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -6136,6 +6176,23 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     className="form-input"
                     style={{ padding: '10px 14px' }}
                   />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontWeight: 600 }}>Season</label>
+                  <select
+                    value={editTourSeasonId}
+                    onChange={(e) => setEditTourSeasonId(e.target.value)}
+                    className="form-input"
+                    style={{ padding: '10px 14px', cursor: 'pointer' }}
+                  >
+                    <option value="unassigned">Unassigned</option>
+                    {state.seasons.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} {s.isActive ? '(Active)' : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>

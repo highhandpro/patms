@@ -74,7 +74,8 @@ interface AppContextProps {
     highHandAmount?: number,
     isBetaTest?: boolean,
     isTDOnly?: boolean,
-    bountyPointValue?: number
+    bountyPointValue?: number,
+    seasonId?: string
   ) => string;
   updateTournament: (id: string, updated: Partial<Tournament>) => void;
   logTournamentAction: (tournamentId: string, action: string, details: string, performedBy?: string) => void;
@@ -883,7 +884,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     highHandAmount?: number,
     isBetaTest?: boolean,
     isTDOnly?: boolean,
-    bountyPointValue?: number
+    bountyPointValue?: number,
+    seasonId?: string
   ) => {
     const id = `tour-${Date.now()}`;
     
@@ -909,7 +911,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const newTour: Tournament = {
       id,
-      seasonId: activeSeason?.id || 'unassigned',
+      seasonId: seasonId || activeSeason?.id || 'unassigned',
       date,
       name,
       status: 'draft',
