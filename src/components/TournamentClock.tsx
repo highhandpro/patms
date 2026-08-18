@@ -644,13 +644,6 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
   // Stats Calculations
   const checkedInPlayers = tournament.entries.filter(e => e.hasBuyIn);
   const activePlayers = checkedInPlayers.filter(e => !e.eliminatedAt);
-  const sortedActivePlayers = [...activePlayers].sort((a, b) => {
-    const memA = members.find(m => m.id === a.memberId);
-    const memB = members.find(m => m.id === b.memberId);
-    const nameA = memA ? `${memA.firstName} ${memA.lastName}`.trim() : '';
-    const nameB = memB ? `${memB.firstName} ${memB.lastName}`.trim() : '';
-    return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
-  });
 
   // Automatically pause the clock when the tournament ends (1 or 0 active players left)
   useEffect(() => {
@@ -1253,14 +1246,6 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               )}
             </div>
 
-            {/* Divider Line between Blinds and Active Players */}
-            <div style={{
-              width: '100%',
-              height: '3px',
-              background: 'linear-gradient(90deg, rgba(242, 193, 102, 0.2) 0%, rgba(242, 193, 102, 0.95) 50%, rgba(242, 193, 102, 0.2) 100%)',
-              marginBottom: '8px',
-              borderRadius: '2px'
-            }} />
 
             {/* Chip-Up & Break Instructions */}
             {currentLevel.type === 'break' && (
@@ -1294,82 +1279,6 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               </div>
             )}
 
-            {/* Active Players list (Full width under blinds row in balanced 4 columns) */}
-            <div style={{ 
-              backgroundColor: 'rgba(5, 16, 32, 0.95)', 
-              border: isBustOutOpen ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.15)', 
-              boxShadow: isBustOutOpen ? '0 0 20px rgba(239, 68, 68, 0.4)' : 'none',
-              borderRadius: '12px', 
-              padding: '6px 14px 10px 14px', 
-              width: '100%', 
-              textAlign: 'left', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '4px',
-              transition: 'all 0.3s ease-in-out'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '3px' }}>
-                <span style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--color-gold)', letterSpacing: '0.05em' }}>
-                  ACTIVE PLAYERS ({activePlayers.length} ALIVE)
-                </span>
-              </div>
-              <div style={{ 
-                display: 'grid',
-                gridTemplateColumns: activePlayers.length <= 10 ? 'repeat(2, 1fr)' : activePlayers.length <= 20 ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
-                gridTemplateRows: `repeat(${Math.max(1, Math.ceil(sortedActivePlayers.length / (activePlayers.length <= 10 ? 2 : activePlayers.length <= 20 ? 3 : 4)))}, auto)`,
-                gridAutoFlow: 'column',
-                columnGap: '16px',
-                rowGap: '6px',
-                width: '100%'
-              }}>
-                {sortedActivePlayers.map(p => {
-                  const mem = members.find(m => m.id === p.memberId);
-                  const name = mem ? `${mem.firstName} ${mem.lastName}` : 'Unknown';
-                  return (
-                    <div 
-                      key={p.memberId}
-                      onClick={() => {
-                        const existingBounties = p.bountiesCollected || 0;
-                        setEliminatingPlayerId(p.memberId);
-                        setBountiesWon(existingBounties);
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.backgroundColor = '#7f1d1d';
-                        e.currentTarget.style.borderColor = '#ef4444';
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
-                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
-                      }}
-                      style={{ 
-                        cursor: 'pointer', 
-                        fontSize: '1.05rem', 
-                        fontWeight: 700, 
-                        color: '#ffffff',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        backgroundColor: 'rgba(255,255,255,0.03)',
-                        textAlign: 'left',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        transition: 'all 0.15s ease-in-out',
-                        display: 'block'
-                      }}
-                      title={`Click to bust out ${name}`}
-                    >
-                      {name}
-                    </div>
-                  );
-                })}
-                {activePlayers.length === 0 && (
-                  <div style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '12px', gridColumn: 'span 4' }}>
-                    No active players remaining.
-                  </div>
-                )}
-              </div>
-            </div>
 
             {/* If 10 or fewer players are active, render the payouts stack here inside Card A, in 3 columns */}
             {activePlayers.length <= 10 && (
