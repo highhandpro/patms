@@ -269,7 +269,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
             Penny Ante Poker Club
           </p>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '2px' }}>
-            v2.37 (Remove Results tab from Player Portal Navbar)
+            v2.38 (Remove Left Sidebar Panel from Seating Display Mode)
           </p>
         </div>
       </div>

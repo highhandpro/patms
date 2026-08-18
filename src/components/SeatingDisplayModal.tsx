@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Crown, Award } from 'lucide-react';
+import { X, Crown } from 'lucide-react';
 import type { Member } from '../types';
 
 interface SeatingDisplayModalProps {
   isOpen: boolean;
   onClose: () => void;
-  tournamentName: string;
-  tournamentDate: string;
+  tournamentName?: string;
+  tournamentDate?: string;
   seating: Record<string, string[]>;
   dealers: Record<string, string>;
   members: Member[];
@@ -18,8 +18,6 @@ interface SeatingDisplayModalProps {
 export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
   isOpen,
   onClose,
-  tournamentName,
-  tournamentDate,
   seating,
   dealers: _dealers,
   members,
@@ -149,28 +147,6 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
     return players.filter(p => p && typeof p === 'string' && p.trim() !== "").length > 0;
   });
 
-  // Calculate live prize pool statistics
-  const buyInCount = activeTournament ? activeTournament.entries.filter((e: any) => e.hasBuyIn).length : 0;
-  const addonsNum = activeTournament ? (activeTournament.totalAddons !== undefined ? activeTournament.totalAddons : activeTournament.entries.filter((e: any) => e.hasAddon).length) : 0;
-  
-  const netBuyIn = activeTournament ? activeTournament.buyInAmount - activeTournament.bountyAmount - activeTournament.dealerAppreciationAmount : 0;
-  const rawCalculatedPrizePool = activeTournament ? (buyInCount * netBuyIn) + (addonsNum * activeTournament.addonAmount) : 0;
-  const calculatedPrizePool = activeTournament 
-    ? (activeTournament.status === 'completed' 
-        ? activeTournament.totalPrizePool 
-        : Math.max(0, rawCalculatedPrizePool - (activeTournament.highHandAmount || 0)))
-    : 0;
-
-  const remainingCount = activeTournament ? activeTournament.entries.filter((e: any) => !e.eliminatedAt).length : 0;
-
-  const payoutRows = activeTournament 
-    ? (activeTournament.payoutPercentages || []).map((pct: number, idx: number) => {
-        if (pct <= 0) return null;
-        const amt = Math.round(calculatedPrizePool * (pct / 100));
-        return { place: idx + 1, amount: amt, percent: pct };
-      }).filter(Boolean)
-    : [];
-
   const portalTarget = typeof document !== 'undefined' ? (document.fullscreenElement || document.body) : null;
   if (!portalTarget) return null;
 
@@ -194,66 +170,6 @@ export const SeatingDisplayModal: React.FC<SeatingDisplayModalProps> = ({
         overflow: 'hidden'
       }}
     >
-      {/* Sidebar: Tournament Stats and Payout Breakdown */}
-      <div 
-        className="seating-display-sidebar"
-        style={{
-          width: '240px',
-          backgroundColor: '#0c0c0e',
-          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-          padding: '20px 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px',
-          overflowY: 'auto'
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--color-gold)', margin: 0, letterSpacing: '-0.02em', textTransform: 'uppercase' }}>
-            {tournamentName}
-          </h1>
-          <p style={{ fontSize: '0.85rem', color: '#a0aec0', marginTop: '4px', margin: 0 }}>
-            {tournamentDate}
-          </p>
-        </div>
-
-        {/* Stats */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.85rem', color: '#a0aec0' }}>Total Prize Pool</span>
-            <strong style={{ fontSize: '1.3rem', color: 'var(--color-emerald)' }}>${calculatedPrizePool}</strong>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.85rem', color: '#a0aec0' }}>Players Remaining</span>
-            <strong style={{ fontSize: '1.15rem', color: '#ffffff' }}>{remainingCount} / {buyInCount}</strong>
-          </div>
-        </div>
-
-        {/* Prize Breakdown */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <h3 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a0aec0', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Award size={14} style={{ color: 'var(--color-gold)' }} />
-            Prize Breakdown
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {payoutRows.map((row: any) => (
-              <div key={row.place} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', padding: '6px 0', borderBottom: '1px dashed rgba(255,255,255,0.04)' }}>
-                <span>{row.place === 1 ? '1st' : row.place === 2 ? '2nd' : row.place === 3 ? '3rd' : `${row.place}th`} Place:</span>
-                <strong style={{ color: '#ffffff' }}>${row.amount}</strong>
-              </div>
-            ))}
-            {payoutRows.length === 0 && (
-              <span style={{ fontSize: '0.85rem', color: '#a0aec0', fontStyle: 'italic' }}>No payouts configured</span>
-            )}
-            {activeTournament && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', padding: '8px 0 6px 0', borderTop: '1px dashed rgba(255,255,255,0.1)', marginTop: '4px' }}>
-                <span style={{ color: '#a0aec0' }}>High Hand:</span>
-                <strong style={{ color: 'var(--color-gold)' }}>${activeTournament.highHandAmount || 0}</strong>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* Main Area */}
       <div 
