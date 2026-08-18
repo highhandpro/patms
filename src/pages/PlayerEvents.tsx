@@ -608,8 +608,9 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
                         marginTop: '12px'
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px', marginBottom: '12px' }}>
-                          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#1f2937' }}>
-                            {tournament.dinnerItemName || 'Dinner'} - Reservation List
+                          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#1f2937', display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+                            <span>{tournament.dinnerItemName || 'Dinner'} - Reservation List</span>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 500, color: '#9ca3af' }}>($25 per person)</span>
                           </h3>
                           <span style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: 700 }}>
                             {(tournament.dinnerReservations || []).length} RSVP'd
