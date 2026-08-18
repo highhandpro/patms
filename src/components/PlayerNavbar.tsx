@@ -89,12 +89,6 @@ export const PlayerNavbar: React.FC<PlayerNavbarProps> = ({
               </button>
 
               <button 
-                className={`nav-link ${activeTab === 'results' ? 'active' : ''}`}
-                onClick={() => handleTabClick('results')}
-              >
-                Results
-              </button>
-              <button 
                 className={`nav-link ${activeTab === 'rankings' ? 'active' : ''}`}
                 onClick={() => handleTabClick('rankings')}
               >
