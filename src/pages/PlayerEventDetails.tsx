@@ -45,7 +45,11 @@ export const PlayerEventDetails: React.FC<PlayerEventDetailsProps> = ({
     }
   }, [loggedInMemberId, state.members]);
 
-  const tournament = state.tournaments.find(t => t.id === tournamentId);
+  const rawTournament = state.tournaments.find(t => t.id === tournamentId);
+  const tournament = rawTournament ? {
+    ...rawTournament,
+    entries: rawTournament.entries.filter(e => state.members.some(m => m.id === e.memberId))
+  } : undefined;
   const isBeta = tournament ? (tournament.name.toLowerCase().includes('beta') || tournament.isBetaTest) : false;
 
   if (!tournament || isBeta) {

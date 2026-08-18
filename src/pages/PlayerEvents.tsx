@@ -59,7 +59,11 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
               <p style={{ margin: 0, color: 'var(--text-secondary)' }}>No upcoming tournaments scheduled at this time. Check back later!</p>
             </div>
           ) : (
-            upcomingTournaments.map((tournament) => {
+            upcomingTournaments.map((rawTournament) => {
+              // Sanitize entries to exclude any ghost entries that do not have matching members
+              const validEntries = rawTournament.entries.filter(e => state.members.some(m => m.id === e.memberId));
+              const tournament = { ...rawTournament, entries: validEntries };
+
               const totalSeats = tournament.maxPlayers || 24;
               const regCount = tournament.entries.length;
               const seatsAvailable = Math.max(0, totalSeats - regCount);
