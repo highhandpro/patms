@@ -165,7 +165,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting' | 'facebook' | 'audit' | 'dinner'>('rsvp');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting' | 'facebook' | 'audit' | 'dinner' | 'bustout'>('rsvp');
   const [viewCompletedOnly, setViewCompletedOnly] = useState(false);
   const [printType, setPrintType] = useState<'signin' | 'scoresheet'>('signin');
 
@@ -2910,6 +2910,20 @@ export const Tournaments: React.FC<TournamentsProps> = ({
               }}
             >
               Audit Logs 📋
+            </button>
+            <button 
+              className={`btn btn-ghost ${subTab === 'bustout' ? 'active-subtab' : ''}`}
+              onClick={() => setSubTab('bustout')}
+              style={{
+                borderRadius: '8px 8px 0 0',
+                borderBottom: subTab === 'bustout' ? '3px solid var(--color-emerald)' : 'none',
+                color: subTab === 'bustout' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                fontWeight: subTab === 'bustout' ? 600 : 400,
+                padding: '8px 12px',
+                fontSize: '0.85rem'
+              }}
+            >
+              Bust-Out 🪦
             </button>
           </>
         ) : (
@@ -5777,6 +5791,150 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     })}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {subTab === 'bustout' && (() => {
+        const aliveEntries = activeTournament.entries.filter((e: any) => !e.eliminatedAt);
+        const alivePlayers = aliveEntries.map((e: any) => {
+          const m = state.members.find(member => member.id === e.memberId);
+          return {
+            id: e.memberId,
+            name: m ? `${m.firstName} ${m.lastName}` : 'Unknown Player',
+            entry: e
+          };
+        }).sort((a, b) => a.name.localeCompare(b.name));
+
+        const bustedEntries = activeTournament.entries
+          .filter((e: any) => e.eliminatedAt)
+          .sort((a: any, b: any) => new Date(b.eliminatedAt).getTime() - new Date(a.eliminatedAt).getTime());
+        
+        const bustedPlayers = bustedEntries.map((e: any) => {
+          const m = state.members.find(member => member.id === e.memberId);
+          return {
+            id: e.memberId,
+            name: m ? `${m.firstName} ${m.lastName}` : 'Unknown Player',
+            eliminatedAt: e.eliminatedAt
+          };
+        });
+
+        return (
+          <div className="glass-card animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '28px', padding: '24px' }}>
+            {/* Header */}
+            <div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--color-gold)' }}>Quick Bust-Out Panel</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                Tap any player below to register their elimination and bounties. Optimized for tablet use.
+              </p>
+            </div>
+
+            {/* Grid of Alive Players */}
+            <div>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
+                Active Players ({alivePlayers.length})
+              </h4>
+              {alivePlayers.length === 0 ? (
+                <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', textAlign: 'center', margin: '20px 0' }}>
+                  No active players remaining.
+                </p>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                  gap: '12px'
+                }}>
+                  {alivePlayers.map(p => (
+                    <button 
+                      key={p.id}
+                      onClick={() => {
+                        const existingBounties = p.entry.bountiesCollected || 0;
+                        setEliminatingPlayerId(p.id);
+                        setBountiesWon(existingBounties);
+                      }}
+                      style={{
+                        padding: '16px 20px',
+                        backgroundColor: 'var(--bg-card, rgba(255,255,255,0.02))',
+                        border: '1.5px solid var(--border-subtle)',
+                        borderRadius: '12px',
+                        color: 'var(--text-primary)',
+                        fontSize: '1.05rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '60px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
+                      className="interactive-card"
+                      onMouseOver={e => {
+                        e.currentTarget.style.borderColor = 'var(--color-gold)';
+                        e.currentTarget.style.backgroundColor = 'rgba(251, 191, 36, 0.05)';
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                        e.currentTarget.style.backgroundColor = 'var(--bg-card, rgba(255,255,255,0.02))';
+                      }}
+                    >
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recently Busted Players Section */}
+            {bustedPlayers.length > 0 && (
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '20px' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
+                  Recently Busted ({bustedPlayers.length})
+                </h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {bustedPlayers.map(p => (
+                    <div 
+                      key={p.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '8px 14px',
+                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                        border: '1px solid rgba(239, 68, 68, 0.15)',
+                        borderRadius: '8px',
+                        fontSize: '0.85rem',
+                        color: 'var(--text-primary)'
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>{p.name}</span>
+                      <button 
+                        onClick={() => {
+                          if (confirm(`Undo elimination for ${p.name}?`)) {
+                            undoElimination(activeTournament.id, p.id);
+                          }
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--color-gold)',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          textTransform: 'uppercase',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          backgroundColor: 'rgba(251, 191, 36, 0.1)'
+                        }}
+                      >
+                        Undo
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

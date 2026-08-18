@@ -269,7 +269,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
             Penny Ante Poker Club
           </p>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '2px' }}>
-            v2.38 (Remove Left Sidebar Panel from Seating Display Mode)
+            v2.39 (Admin Quick Bust-Out subTab for Tablets)
           </p>
         </div>
       </div>
