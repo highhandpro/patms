@@ -1179,7 +1179,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
             padding: '14px 20px 14px 20px', 
             flex: 1, 
             textAlign: 'center',
-            minHeight: 0
+            minHeight: 0,
+            justifyContent: 'center'
           }}>
 
             {/* Big countdown timer in custom heavy Outfit font */}
@@ -1189,16 +1190,16 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
-                fontSize: '21.5rem', 
+                fontSize: '28rem', 
                 fontWeight: 950, 
                 color: '#ffffff', 
                 fontFamily: '"Outfit", -apple-system, sans-serif', 
                 letterSpacing: '-0.02em',
                 cursor: 'pointer',
                 userSelect: 'none',
-                lineHeight: 0.86,
-                paddingTop: '20px',
-                paddingBottom: '20px',
+                lineHeight: 0.82,
+                paddingTop: '10px',
+                paddingBottom: '10px',
                 margin: '0'
               }}
             >
@@ -1211,23 +1212,24 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               justifyContent: 'space-between', 
               alignItems: 'center', 
               borderTop: '2px solid rgba(255,255,255,0.15)', 
-              paddingTop: '10px', 
+              paddingTop: '20px', 
+              marginTop: '10px',
               marginBottom: '8px',
               flexWrap: 'wrap',
               gap: '12px'
             }}>
               {/* Current Blinds */}
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
-                <span style={{ fontSize: '1.4rem', color: '#ffffff', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '1.8rem', color: '#ffffff', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.05em' }}>
                   CURRENT BLINDS
                 </span>
-                <span style={{ fontSize: '6.2rem', fontWeight: 950, color: '#ffffff', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
+                <span style={{ fontSize: '7.5rem', fontWeight: 950, color: '#ffffff', fontFamily: '"Outfit", -apple-system, sans-serif', lineHeight: 1, letterSpacing: '-0.01em' }}>
                   {currentLevel.type === 'round' 
                     ? `${currentLevel.smallBlind?.toLocaleString()} / ${currentLevel.bigBlind?.toLocaleString()}` 
                     : 'BREAK TIME'}
                 </span>
                 {currentLevel.chipUp && (
-                  <span style={{ fontSize: '1.25rem', color: 'var(--color-danger)', fontWeight: 900, textTransform: 'uppercase', marginLeft: '6px' }}>
+                  <span style={{ fontSize: '1.5rem', color: 'var(--color-danger)', fontWeight: 900, textTransform: 'uppercase', marginLeft: '6px' }}>
                     ⚠️ CHIP UP
                   </span>
                 )}
@@ -1236,8 +1238,8 @@ export const TournamentClock: React.FC<TournamentClockProps> = (props) => {
               {/* Next Level */}
               {nextLevel && (
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', color: '#ffffff' }}>
-                  <span style={{ fontWeight: 800, fontSize: '1.45rem' }}>NEXT LEVEL:</span>
-                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: '3.6rem', fontFamily: '"Outfit", sans-serif', lineHeight: 1 }}>
+                  <span style={{ fontWeight: 800, fontSize: '1.8rem' }}>NEXT LEVEL:</span>
+                  <span style={{ fontWeight: 950, color: '#ffffff', fontSize: '4.5rem', fontFamily: '"Outfit", sans-serif', lineHeight: 1 }}>
                     {nextLevel.type === 'round' 
                       ? `${nextLevel.smallBlind?.toLocaleString()} / ${nextLevel.bigBlind?.toLocaleString()}` 
                       : 'BREAK TIME'}
