@@ -21,7 +21,7 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
   loggedInMemberId,
   onOpenLogin
 }) => {
-  const { state, registerPlayer, unregisterPlayer } = useApp();
+  const { state, registerPlayer, unregisterPlayer, registerDinnerPlayer, unregisterDinnerPlayer } = useApp();
 
   // Filter for upcoming tournaments (exclude Beta/TD-only/Archived games)
   const upcomingTournaments = state.tournaments
@@ -377,6 +377,79 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
                       )}
                     </div>
 
+                    {/* Dinner RSVP Toggle Bar */}
+                    {tournament.hasDinnerRSVP && (
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '16px 20px',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        border: '1.5px solid rgba(59, 130, 246, 0.2)',
+                        borderRadius: '12px',
+                        gap: '12px',
+                        flexWrap: 'wrap',
+                        marginTop: '12px'
+                      }}>
+                        {!loggedInMemberId ? (
+                          <>
+                            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                              Reserve your spot for the {tournament.dinnerItemName || 'Dinner'}.
+                            </span>
+                            <button 
+                              onClick={onOpenLogin} 
+                              className="btn btn-primary" 
+                              style={{ backgroundColor: 'var(--color-primary-blue, #0284c7)', color: '#ffffff', padding: '10px 20px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', border: 'none' }}
+                            >
+                              Diner RSVP
+                            </button>
+                          </>
+                        ) : tournament.dinnerReservations?.includes(loggedInMemberId) ? (
+                          <>
+                            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-emerald)' }}>
+                              ✓ You are RSVP'd for the {tournament.dinnerItemName || 'Dinner'}!
+                            </span>
+                            <button 
+                              onClick={() => {
+                                if (loggedInMemberId) {
+                                  unregisterDinnerPlayer(tournament.id, loggedInMemberId);
+                                }
+                              }} 
+                              className="btn btn-danger"
+                              style={{ padding: '10px 20px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                              CANCEL DINER RSVP
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                              You are not signed up for the {tournament.dinnerItemName || 'Dinner'}.
+                            </span>
+                            <button 
+                              onClick={() => {
+                                if (loggedInMemberId) {
+                                  registerDinnerPlayer(tournament.id, loggedInMemberId);
+                                }
+                              }} 
+                              className="btn btn-primary" 
+                              style={{ 
+                                backgroundColor: 'var(--color-primary-blue, #0284c7)', 
+                                color: '#ffffff',
+                                padding: '10px 20px', 
+                                borderRadius: '8px', 
+                                fontWeight: 700, 
+                                cursor: 'pointer',
+                                border: 'none'
+                              }}
+                            >
+                              Diner RSVP
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+
                     {/* Registered Players white box */}
                     <div style={{
                       backgroundColor: '#ffffff',
@@ -521,6 +594,115 @@ export const PlayerEvents: React.FC<PlayerEventsProps> = ({
                             );
                           })}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Dinner Reservation List Box */}
+                    {tournament.hasDinnerRSVP && (
+                      <div style={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        color: '#1f2937',
+                        marginTop: '12px'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px', marginBottom: '12px' }}>
+                          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#1f2937' }}>
+                            {tournament.dinnerItemName || 'Dinner'} - Reservation List
+                          </h3>
+                          <span style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: 700 }}>
+                            {(tournament.dinnerReservations || []).length} RSVP'd
+                          </span>
+                        </div>
+
+                        {(!tournament.dinnerReservations || tournament.dinnerReservations.length === 0) ? (
+                          <div style={{ padding: '12px 0', textAlign: 'center', color: '#9ca3af' }}>
+                            <p style={{ margin: 0, fontSize: '0.9rem' }}>No reservations yet.</p>
+                          </div>
+                        ) : (
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '8px 16px'
+                          }}>
+                            {/* Sort members alphabetically */}
+                            {(() => {
+                              const reservedMembers = (tournament.dinnerReservations || [])
+                                .map(id => {
+                                  const m = state.members.find(member => member.id === id);
+                                  return {
+                                    id,
+                                    name: m ? `${m.firstName} ${m.lastName}` : 'Unknown Player',
+                                    logoUrl: m?.logoUrl
+                                  };
+                                })
+                                .sort((a, b) => a.name.localeCompare(b.name));
+
+                              const half = Math.ceil(reservedMembers.length / 2);
+                              const col1 = reservedMembers.slice(0, half);
+                              const col2 = reservedMembers.slice(half);
+
+                              return (
+                                <>
+                                  {/* Column 1 */}
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    {col1.map((p, idx) => (
+                                      <div key={p.id} style={{
+                                        backgroundColor: '#f9fafb',
+                                        border: '1px solid #e5e7eb',
+                                        borderRadius: '6px',
+                                        padding: '6px 8px',
+                                        fontSize: '0.8rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        color: '#374151'
+                                      }}>
+                                        <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem', width: '16px' }}>{idx + 1}</span>
+                                        {p.logoUrl && (
+                                          <img 
+                                            src={p.logoUrl} 
+                                            alt="Logo" 
+                                            style={{ width: '14px', height: '14px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #e5e7eb', flexShrink: 0 }} 
+                                          />
+                                        )}
+                                        <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* Column 2 */}
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    {col2.map((p, idx) => (
+                                      <div key={p.id} style={{
+                                        backgroundColor: '#f9fafb',
+                                        border: '1px solid #e5e7eb',
+                                        borderRadius: '6px',
+                                        padding: '6px 8px',
+                                        fontSize: '0.8rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        color: '#374151'
+                                      }}>
+                                        <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem', width: '16px' }}>{half + idx + 1}</span>
+                                        {p.logoUrl && (
+                                          <img 
+                                            src={p.logoUrl} 
+                                            alt="Logo" 
+                                            style={{ width: '14px', height: '14px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #e5e7eb', flexShrink: 0 }} 
+                                          />
+                                        )}
+                                        <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

@@ -98,6 +98,9 @@ export interface Tournament {
   };
   finalTableTriggered?: boolean;
   foodAmount?: number;
+  hasDinnerRSVP?: boolean;
+  dinnerItemName?: string;
+  dinnerReservations?: string[];
   startingChips?: number;
   auditLogs?: AuditLogEntry[];
   seatingTargetTime?: string; // ISO datetime string

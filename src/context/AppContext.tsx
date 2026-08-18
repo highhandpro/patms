@@ -84,6 +84,8 @@ interface AppContextProps {
   registerPlayer: (tournamentId: string, memberId: string) => void;
   publicRegisterPlayer: (tournamentId: string, player: { firstName: string; lastName: string; phone: string; email: string; memberId?: string; isDealer?: boolean }) => void;
   unregisterPlayer: (tournamentId: string, memberId: string) => void;
+  registerDinnerPlayer: (tournamentId: string, memberId: string) => Promise<void>;
+  unregisterDinnerPlayer: (tournamentId: string, memberId: string) => Promise<void>;
   togglePlayerCheckIn: (tournamentId: string, memberId: string) => void;
   toggleEntryBuyIn: (tournamentId: string, memberId: string) => void;
   toggleEntryAddon: (tournamentId: string, memberId: string) => void;
@@ -1094,6 +1096,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await updateDoc(doc(db, 'tournaments', tournamentId), updateData);
   };
 
+  const registerDinnerPlayer = async (tournamentId: string, memberId: string) => {
+    const t = state.tournaments.find(tour => tour.id === tournamentId);
+    if (!t) return;
+    const currentReservations = t.dinnerReservations || [];
+    if (currentReservations.includes(memberId)) return;
+    const updatedReservations = [...currentReservations, memberId];
+    await updateDoc(doc(db, 'tournaments', tournamentId), {
+      dinnerReservations: updatedReservations
+    });
+  };
+
+  const unregisterDinnerPlayer = async (tournamentId: string, memberId: string) => {
+    const t = state.tournaments.find(tour => tour.id === tournamentId);
+    if (!t) return;
+    const currentReservations = t.dinnerReservations || [];
+    const updatedReservations = currentReservations.filter(id => id !== memberId);
+    await updateDoc(doc(db, 'tournaments', tournamentId), {
+      dinnerReservations: updatedReservations
+    });
+  };
+
   const togglePlayerCheckIn = async (tournamentId: string, memberId: string) => {
     const t = state.tournaments.find(tour => tour.id === tournamentId);
     if (!t) return;
@@ -1633,6 +1656,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         registerPlayer,
         publicRegisterPlayer,
         unregisterPlayer,
+        registerDinnerPlayer,
+        unregisterDinnerPlayer,
         togglePlayerCheckIn,
         toggleEntryBuyIn,
         toggleEntryAddon,

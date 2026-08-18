@@ -269,7 +269,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onSwi
             Penny Ante Poker Club
           </p>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '2px' }}>
-            v2.34 (Gmail SMTP + Custom Payouts & Dealer Seniority Rule)
+            v2.35 (Tournament Dinner RSVP + Member & Admin Dashboards)
           </p>
         </div>
       </div>

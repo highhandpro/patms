@@ -17,7 +17,7 @@ import { playTableBalanceAlertSound } from '../utils/audioAlerts';
 import { 
   Trophy, Play, RotateCcw, Plus, 
   UserMinus, ChevronLeft, Unlock, Calendar, ShieldAlert, Award,
-  Archive, Trash2, X, CheckCircle, AlertCircle, RefreshCw
+  Archive, Trash2, X, CheckCircle, AlertCircle, RefreshCw, Download
 } from 'lucide-react';
 
 interface TournamentsProps {
@@ -148,7 +148,9 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     finalizeTournament,
     reopenTournament,
     updateSettings,
-    logTournamentAction
+    logTournamentAction,
+    registerDinnerPlayer,
+    unregisterDinnerPlayer
   } = useApp();
 
   // Create Form State
@@ -163,7 +165,7 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   // draft: 'checkin' | 'seating'
   // active: 'seating' | 'players'
   // completed: 'results'
-  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting' | 'facebook' | 'audit'>('rsvp');
+  const [subTab, setSubTab] = useState<'checkin' | 'seating' | 'players' | 'results' | 'rsvp' | 'summary' | 'print' | 'clock' | 'accounting' | 'facebook' | 'audit' | 'dinner'>('rsvp');
   const [viewCompletedOnly, setViewCompletedOnly] = useState(false);
   const [printType, setPrintType] = useState<'signin' | 'scoresheet'>('signin');
 
@@ -308,6 +310,10 @@ export const Tournaments: React.FC<TournamentsProps> = ({
   const [editHighHand, setEditHighHand] = useState(100);
   const [editFlyerUrl, setEditFlyerUrl] = useState('');
   const [editFlyerType, setEditFlyerType] = useState<'pdf' | 'image' | null>(null);
+  const [tourHasDinnerRSVP, setTourHasDinnerRSVP] = useState(false);
+  const [tourDinnerItemName, setTourDinnerItemName] = useState('Prime Rib Dinner');
+  const [editHasDinnerRSVP, setEditHasDinnerRSVP] = useState(false);
+  const [editDinnerItemName, setEditDinnerItemName] = useState('Prime Rib Dinner');
 
 
   // Create Tournament states
@@ -1178,6 +1184,14 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       tourSeasonId
     );
 
+    if (tourHasDinnerRSVP) {
+      await updateTournament(newId, {
+        hasDinnerRSVP: true,
+        dinnerItemName: tourDinnerItemName,
+        dinnerReservations: []
+      });
+    }
+
     setIsCreateTourOpen(false);
     setSelectedTournamentId(newId);
     
@@ -1187,6 +1201,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setTourFlyerType(null);
     setTourIsBetaTest(false);
     setTourIsTDOnly(false);
+    setTourHasDinnerRSVP(false);
+    setTourDinnerItemName('Prime Rib Dinner');
 
   };
 
@@ -1214,6 +1230,8 @@ export const Tournaments: React.FC<TournamentsProps> = ({
     setEditBountyPointValue(activeTournament.bountyPointValue || 3);
     setEditTourSeasonId(activeTournament.seasonId || 'unassigned');
     setEditUnderConstruction(state.settings?.isUnderConstruction === true);
+    setEditHasDinnerRSVP(activeTournament.hasDinnerRSVP || false);
+    setEditDinnerItemName(activeTournament.dinnerItemName || 'Prime Rib Dinner');
 
     setIsEditTourDetailsOpen(true);
   };
@@ -1248,9 +1266,11 @@ export const Tournaments: React.FC<TournamentsProps> = ({
       flyerType: editFlyerType,
       isBetaTest: editTourIsBetaTest,
       isTDOnly: editTourIsTDOnly,
-
       bountyPointValue: editBountyPointValue,
-      seasonId: editTourSeasonId
+      seasonId: editTourSeasonId,
+      hasDinnerRSVP: editHasDinnerRSVP,
+      dinnerItemName: editDinnerItemName,
+      dinnerReservations: activeTournament.dinnerReservations || []
     });
     
     setIsEditTourDetailsOpen(false);
@@ -1926,6 +1946,41 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                   </label>
                 </div>
               </div>
+
+              {/* Dinner RSVP Toggle */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
+                <span style={{ fontSize: '0.9rem', color: '#ffffff', fontWeight: 600 }}>🍽️ Dinner Reservation</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input
+                    type="checkbox"
+                    id="tourHasDinnerRSVP"
+                    checked={tourHasDinnerRSVP}
+                    onChange={(e) => setTourHasDinnerRSVP(e.target.checked)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'pointer',
+                      accentColor: 'var(--color-gold)'
+                    }}
+                  />
+                  <label htmlFor="tourHasDinnerRSVP" style={{ fontSize: '0.85rem', color: '#ffffff', cursor: 'pointer', userSelect: 'none' }}>
+                    Enable Dinner RSVP for this game
+                  </label>
+                </div>
+                {tourHasDinnerRSVP && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Dinner Item Name</label>
+                    <input
+                      type="text"
+                      value={tourDinnerItemName}
+                      onChange={(e) => setTourDinnerItemName(e.target.value)}
+                      placeholder="e.g. Prime Rib Dinner"
+                      className="form-input"
+                      style={{ padding: '8px 12px', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Column 3: Payout Structure & Actions */}
@@ -2478,6 +2533,41 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                     </div>
                   </div>
 
+                  {/* Dinner RSVP Toggle */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
+                    <span style={{ fontSize: '0.9rem', color: '#ffffff', fontWeight: 600 }}>🍽️ Dinner Reservation</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <input
+                        type="checkbox"
+                        id="editHasDinnerRSVPFirst"
+                        checked={editHasDinnerRSVP}
+                        onChange={(e) => setEditHasDinnerRSVP(e.target.checked)}
+                        style={{
+                          width: '18px',
+                          height: '18px',
+                          cursor: 'pointer',
+                          accentColor: 'var(--color-gold)'
+                        }}
+                      />
+                      <label htmlFor="editHasDinnerRSVPFirst" style={{ fontSize: '0.85rem', color: '#ffffff', cursor: 'pointer', userSelect: 'none' }}>
+                        Enable Dinner RSVP for this game
+                      </label>
+                    </div>
+                    {editHasDinnerRSVP && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                        <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Dinner Item Name</label>
+                        <input
+                          type="text"
+                          value={editDinnerItemName}
+                          onChange={(e) => setEditDinnerItemName(e.target.value)}
+                          placeholder="e.g. Prime Rib Dinner"
+                          className="form-input"
+                          style={{ padding: '8px 12px', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto', paddingTop: '12px' }}>
                     <button
                       type="button"
@@ -2683,6 +2773,22 @@ export const Tournaments: React.FC<TournamentsProps> = ({
             >
               PAID
             </button>
+            {activeTournament.hasDinnerRSVP && (
+              <button 
+                className={`btn btn-ghost ${subTab === 'dinner' ? 'active-subtab' : ''}`}
+                onClick={() => setSubTab('dinner')}
+                style={{
+                  borderRadius: '8px 8px 0 0',
+                  borderBottom: subTab === 'dinner' ? '3px solid var(--color-emerald)' : 'none',
+                  color: subTab === 'dinner' ? 'var(--color-emerald)' : 'var(--text-secondary)',
+                  fontWeight: subTab === 'dinner' ? 600 : 400,
+                  padding: '8px 12px',
+                  fontSize: '0.85rem'
+                }}
+              >
+                DINNER ({(activeTournament.dinnerReservations || []).length})
+              </button>
+            )}
             <button 
               className={`btn btn-ghost ${subTab === 'seating' ? 'active-subtab' : ''}`}
               onClick={() => setSubTab('seating')}
@@ -3674,6 +3780,181 @@ export const Tournaments: React.FC<TournamentsProps> = ({
           )}
         </div>
       )}
+
+      {/* Dinner Reservation management Tab */}
+      {subTab === 'dinner' && (() => {
+        const reservedMemberIds = activeTournament.dinnerReservations || [];
+        const reservedMembers = reservedMemberIds
+          .map(id => state.members.find(m => m.id === id))
+          .filter(Boolean) as Member[];
+        
+        // Sort alphabetically
+        reservedMembers.sort((a, b) => a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName));
+
+        // Get list of members who are NOT signed up for dinner, to populate the "Add Player" dropdown
+        const nonReservedMembers = state.members
+          .filter(m => !m.isDeleted && !reservedMemberIds.includes(m.id))
+          .sort((a, b) => a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName));
+
+        const exportDinnerToCSV = () => {
+          const headers = ["No.", "Member ID", "Player Name", "Phone", "Email"];
+          const rows = reservedMembers.map((m, idx) => [
+            idx + 1,
+            m.id,
+            `${m.firstName} ${m.lastName}`,
+            m.phone || '',
+            m.email || ''
+          ]);
+
+          const csvContent = [
+            headers.join(","),
+            ...rows.map(r => r.map(val => `"${val}"`).join(","))
+          ].join("\n");
+
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.setAttribute("href", url);
+          link.setAttribute("download", `${activeTournament.name} - ${activeTournament.dinnerItemName || 'Dinner'} Reservations.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        };
+
+        return (
+          <div className="glass-card animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--color-gold)' }}>
+                  {activeTournament.dinnerItemName || 'Dinner'} Reservations
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                  Manage headcounts and reservations for the tournament dinner.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button onClick={exportDinnerToCSV} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Download size={16} />
+                  <span>Export List</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Add Form */}
+            {!isSubAdmin && (
+              <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.01)', border: '1px dashed var(--border-subtle)', borderRadius: '12px', padding: '16px' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0 0 12px 0', textTransform: 'uppercase' }}>Add Player to Dinner List</h4>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <select 
+                    id="admin-add-dinner-select"
+                    defaultValue=""
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.9rem',
+                      flex: 1,
+                      minWidth: '200px'
+                    }}
+                  >
+                    <option value="" disabled>Select a player...</option>
+                    {nonReservedMembers.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.firstName} {m.lastName} (#{m.id})
+                      </option>
+                    ))}
+                  </select>
+                  <button 
+                    onClick={() => {
+                      const selectEl = document.getElementById('admin-add-dinner-select') as HTMLSelectElement;
+                      const val = selectEl?.value;
+                      if (val) {
+                        registerDinnerPlayer(activeTournament.id, val);
+                        selectEl.value = "";
+                      }
+                    }}
+                    className="btn btn-primary"
+                    style={{ padding: '8px 20px', borderRadius: '8px' }}
+                  >
+                    Add Reservation
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Headcount Card */}
+            <div style={{ backgroundColor: 'rgba(251, 191, 36, 0.02)', border: '1px solid rgba(251, 191, 36, 0.15)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px', width: 'fit-content' }}>
+              <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-gold)' }}>Total Reservations headcount:</span>
+              <span className="badge badge-primary" style={{ fontSize: '1.2rem', padding: '6px 14px', backgroundColor: 'var(--color-emerald)', color: '#052e16', borderRadius: '8px', fontWeight: 800 }}>
+                {reservedMembers.length}
+              </span>
+            </div>
+
+            {/* Reservations Table */}
+            {reservedMembers.length === 0 ? (
+              <p style={{ fontStyle: 'italic', color: 'var(--text-secondary)', textAlign: 'center', margin: '20px 0' }}>
+                No reservations registered yet for this dinner.
+              </p>
+            ) : (
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '60px' }}>No.</th>
+                      <th>Player Name</th>
+                      <th>Phone</th>
+                      <th>Email</th>
+                      {!isSubAdmin && <th style={{ width: '80px', textAlign: 'center' }}>Action</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reservedMembers.map((m, idx) => (
+                      <tr key={m.id}>
+                        <td>{idx + 1}</td>
+                        <td style={{ fontWeight: 600 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {m.logoUrl ? (
+                              <img 
+                                src={m.logoUrl} 
+                                alt="Logo" 
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} 
+                              />
+                            ) : (
+                              <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                ♣
+                              </div>
+                            )}
+                            <span>{m.firstName} {m.lastName}</span>
+                          </div>
+                        </td>
+                        <td>{m.phone || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>None</span>}</td>
+                        <td>{m.email || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>None</span>}</td>
+                        {!isSubAdmin && (
+                          <td style={{ textAlign: 'center' }}>
+                            <button 
+                              onClick={() => {
+                                if (confirm(`Remove reservation for ${m.firstName} ${m.lastName}?`)) {
+                                  unregisterDinnerPlayer(activeTournament.id, m.id);
+                                }
+                              }}
+                              style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', padding: '4px' }}
+                              title="Remove Reservation"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Seating Tab (Draft & Active) */}
       {subTab === 'seating' && (
@@ -6435,6 +6716,41 @@ export const Tournaments: React.FC<TournamentsProps> = ({
                       <span>6 points per bounty</span>
                     </label>
                   </div>
+                </div>
+
+                {/* Dinner RSVP Toggle */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
+                  <span style={{ fontSize: '0.9rem', color: '#ffffff', fontWeight: 600 }}>🍽️ Dinner Reservation</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      type="checkbox"
+                      id="editHasDinnerRSVPSecond"
+                      checked={editHasDinnerRSVP}
+                      onChange={(e) => setEditHasDinnerRSVP(e.target.checked)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        cursor: 'pointer',
+                        accentColor: 'var(--color-gold)'
+                      }}
+                    />
+                    <label htmlFor="editHasDinnerRSVPSecond" style={{ fontSize: '0.85rem', color: '#ffffff', cursor: 'pointer', userSelect: 'none' }}>
+                      Enable Dinner RSVP for this game
+                    </label>
+                  </div>
+                  {editHasDinnerRSVP && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Dinner Item Name</label>
+                      <input
+                        type="text"
+                        value={editDinnerItemName}
+                        onChange={(e) => setEditDinnerItemName(e.target.value)}
+                        placeholder="e.g. Prime Rib Dinner"
+                        className="form-input"
+                        style={{ padding: '10px 14px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
